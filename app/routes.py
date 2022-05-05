@@ -15,3 +15,27 @@ def validate_task(task_id):
     if not task:
         return jsonify({"message" : f"Could not find '{task_id}'"}), 404
     return task
+
+@tasks_bp.route('', methods=['POST'])
+def create_task():
+    request_body = request.get_json()
+
+    new_task = Task (
+        description = request_body['description'],
+        title = request_body['title']
+    )
+    db.session.add(new_task)
+    db.session.commit()
+    
+    response = {
+        "task" : 
+            {
+                "is_complete" : False,
+                "description" : new_task.description,
+                "title" : new_task.title,
+                "id" : new_task.task_id
+            }
+        }
+
+    return response, 201
+
