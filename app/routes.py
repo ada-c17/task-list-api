@@ -3,8 +3,10 @@ from .models.task import Task
 from app import db
 
 task_bp = Blueprint("task_bp",__name__, url_prefix="/tasks" )
+
 # Create: POST 
-def create_task():
+@task_bp.route("", methods=["POST"])
+def create_one_task():
     pass 
     # request body: {"title": "A Brand New Task", "description": "Test Description"}
     # task Must contain title and description, else return: 
@@ -18,9 +20,12 @@ def create_task():
 #         } }, 201
 
 # Read: GET
+@task_bp.route("", methods=["GET"])
 def get_all_tasks():
     pass
-def get_one_task(): # need this?
+
+@task_bp.route("/<task_id>", methods=["GET"])
+def get_one_task(task_id):
     pass
 
 # example response body, status:
@@ -31,7 +36,8 @@ def get_one_task(): # need this?
 # 
 
 # Update: PUT
-def update_task():
+@task_bp.route("/<task_id>", methods=["PUT"])
+def update_one_task(task_id):
     pass
 # request body:
 #        { "title": "Updated Task Title",
@@ -46,7 +52,8 @@ def update_task():
 
 
 # Delete: DELETE
-def delete_task():
+@task_bp.route("/<task_id>", methods=["DELETE"])
+def delete_one_task(task_id):
     pass
 # response body: {"details": 'Task 1 "Go on my daily walk 🏞" successfully deleted'}
 # 404 if not found
