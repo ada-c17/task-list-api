@@ -61,8 +61,7 @@ As a client, I want to be able to make a `POST` request to `/tasks` with the fol
 ```json
 {
   "title": "A Brand New Task",
-  "description": "Test Description",
-  "completed_at": null
+  "description": "Test Description"
 }
 ```
 
@@ -198,8 +197,7 @@ As a client, I want to be able to make a `POST` request to `/tasks` with the fol
 
 ```json
 {
-  "description": "Test Description",
-  "completed_at": null
+  "description": "Test Description"
 }
 ```
 
