@@ -61,8 +61,7 @@ As a client, I want to be able to make a `POST` request to `/tasks` with the fol
 ```json
 {
   "title": "A Brand New Task",
-  "description": "Test Description",
-  "completed_at": null
+  "description": "Test Description"
 }
 ```
 
@@ -198,8 +197,7 @@ As a client, I want to be able to make a `POST` request to `/tasks` with the fol
 
 ```json
 {
-  "description": "Test Description",
-  "completed_at": null
+  "description": "Test Description"
 }
 ```
 
@@ -218,18 +216,6 @@ so that I know I did not create a Task that is saved in the database.
 #### Missing `description`
 
 If the HTTP request is missing `description`, we should also get this response:
-
-`400 Bad Request`
-
-```json
-{
-  "details": "Invalid data"
-}
-```
-
-#### Missing `completed_at`
-
-If the HTTP request is missing `completed_at`, we should also get this response:
 
 `400 Bad Request`
 
