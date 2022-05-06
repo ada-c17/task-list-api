@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Blueprint, jsonify, request, abort, make_response
 import sqlalchemy
 from app.models.task import Task
@@ -14,12 +15,13 @@ def create_one_task():
     try:
         title = request_body["title"]
         description = request_body["description"]
+        #completed_at = request_body["completed_at"] if request_body["completed_at"] is not None else None
     except KeyError:
         return {"details": "Invalid data"}, 400
 
     new_task = Task(title=title,
                 description=description,
-                completed_at=None)
+                completed_at=request_body["completed_at"] if "completed_at" in request_body else None)
 
     db.session.add(new_task)
     db.session.commit()
@@ -86,8 +88,25 @@ def delete_one_task(task_id):
     return jsonify(rsp), 200
 
 
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def mark_task_complete(task_id):
+    task = validate_task(task_id)
+    task.completed_at = datetime.now()
 
+    db.session.commit()
 
+    rsp = {"task" : task.get_dict()}
+    return jsonify(rsp), 200
+
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def mark_task_incomplete(task_id):
+    task = validate_task(task_id)
+    task.completed_at = None
+
+    db.session.commit()
+    
+    rsp = {"task" : task.get_dict()}
+    return jsonify(rsp), 200
 
 
 def validate_task(task_id):
