@@ -18,8 +18,6 @@ class Task(db.Model):
 
     @classmethod
     def create_task(cls, request_body):
-        # if not request_body['title'] or not request_body['description']:
-        #     return make_response({"details": "Invalid data"}, 400)
         try: 
             new_task = cls(
                 title=request_body['title'],
