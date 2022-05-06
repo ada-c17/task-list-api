@@ -63,11 +63,21 @@ def create_new_task():
 
 @task_bp.route("", methods=["GET"])
 def get_all_tasks():
+    sort_param = request.args.get("sort")
     tasks = Task.query.all()
-
     all_tasks = [task.self_to_dict() for task in tasks]
+    if not sort_param:
+        return return_database_info_list(all_tasks)
+    if sort_param == "asc":
+        sorted_tasks_asc = sorted(all_tasks, key = lambda i : i["title"])
+        return return_database_info_list(sorted_tasks_asc)
+    if sort_param == "desc":
+        sorted_tasks_desc = sorted(all_tasks, key = lambda i : i["title"], reverse=True)
+        return return_database_info_list(sorted_tasks_desc)
+
     
-    return return_database_info_list(all_tasks)
+    
+    
 
 @task_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
