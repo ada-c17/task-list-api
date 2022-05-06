@@ -30,10 +30,12 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
     return {
-        "id": new_task.task_id,
-        "title": new_task.title,
-        "description": new_task.description,
-        "is_complete": False
+        "task": {
+            "id": new_task.task_id,
+            "title": new_task.title,
+            "description": new_task.description,
+            "is_complete": False
+        }
     }, 201
 
 @task_bp.route("", methods=["GET"])
@@ -89,4 +91,4 @@ def delete_task(task_id):
     db.session.delete(task)
     db.session.commit()
 
-    return make_response({"details": f"Task {task_id} \ '{task.description}' \ successfully deleted"})
+    return {"details": f"Task {task_id} \"{task.title}\" successfully deleted"}
