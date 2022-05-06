@@ -6,9 +6,10 @@ task_bp = Blueprint("task_bp",__name__, url_prefix="/tasks" )
 
 # Helper Functions:
 
-# This converts completed_at attribute to T/F for 'is_completed' variable in response body
-# completed_at = db.Column(db.DateTime, default=None)
 def complete_or_not(task):
+    '''
+    Converts 'completed_at' task attribute to Boolean for 'is_completed' variable in response body
+    '''
     if task.completed_at is not None:
         return True
     else:
