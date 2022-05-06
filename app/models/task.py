@@ -1,4 +1,3 @@
-from email.policy import default
 from app import db
 
 #  title, description, and completed_at.

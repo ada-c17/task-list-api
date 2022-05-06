@@ -6,7 +6,7 @@ task_bp = Blueprint("task_bp",__name__, url_prefix="/tasks" )
 
 # Helper Functions:
 
-# This converts completed_at attribute to T/F for 'is_completed' in response body
+# This converts completed_at attribute to T/F for 'is_completed' variable in response body
 # completed_at = db.Column(db.DateTime, default=None)
 def complete_or_not(task):
     if task.completed_at is not None:
@@ -23,7 +23,6 @@ def validate_task(task_id):
     
 # Create: POST requests
 # Sample request body: {"title": "A Brand New Task", "description": "Test Description"}
-
 @task_bp.route("", methods=["POST"])
 def create_one_task():
     request_body = request.get_json()
@@ -64,24 +63,32 @@ def get_all_tasks():
 def get_one_task(task_id):
     task = validate_task(task_id)
     is_complete = complete_or_not(task)
-    return {
-            "id": task.task_id,
+    response = { "task":
+            {"id": task.task_id,
             "title": task.title,
             "description": task.description,
-            "is_complete": is_complete
-        } 
-
-# example response body, status:
-#            { "id": 1,
-#             "title": "Go on my daily walk 🏞",
-#             "description": "Notice something new every day",
-#             "is_complete": False }, 200
-# 
+            "is_complete": is_complete}
+        }
+    return jsonify(response), 200
 
 # Update: PUT
 @task_bp.route("/<task_id>", methods=["PUT"])
 def update_one_task(task_id):
-    pass
+    task = validate_task(task_id)
+    is_complete = complete_or_not(task)
+
+    request_body = request.get_json()
+    task.title = request_body['title']
+    task.description = request_body['description']
+    db.session.commit()
+    response = {"task":
+    {   "id": task.task_id,
+        "title": task.title ,
+        "description": task.description,
+        "is_complete": is_complete } 
+        }
+    return jsonify(response), 200
+
 # request body:
 #        { "title": "Updated Task Title",
 #         "description": "Updated Test Description"}
@@ -97,6 +104,9 @@ def update_one_task(task_id):
 # Delete: DELETE
 @task_bp.route("/<task_id>", methods=["DELETE"])
 def delete_one_task(task_id):
-    pass
-# response body: {"details": 'Task 1 "Go on my daily walk 🏞" successfully deleted'}
-# 404 if not found
+    task = validate_task(task_id)
+    db.session.delete(task)
+    db.session.commit()
+    response = {'details': f'Task {task.task_id} "{task.title}" successfully deleted'}
+    return jsonify(response), 200
+
