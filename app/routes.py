@@ -6,7 +6,7 @@ import requests
 import os
 
 SLACK_PATH = "https://slack.com/api/chat.postMessage"
-KEY = os.environ.get("SLACK_API_KEY")
+SLACK_KEY = os.environ.get("SLACK_API_KEY")
 
 tasks_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 
@@ -31,7 +31,7 @@ def get_all_tasks():
     if "sort" in params:
         if params["sort"] == "asc":
             tasks = Task.query.order_by(Task.title.asc()).all()
-        if params["sort"] == "desc":
+        elif params["sort"] == "desc":
             tasks = Task.query.order_by(Task.title.desc()).all()
     else:
         tasks = Task.query.all()
@@ -136,7 +136,7 @@ def update_task_mark_complete(task_id):
         task.completed_at = datetime.date.today()
         db.session.commit()
         headers = {
-            "Authorization": f"Bearer {KEY}"
+            "Authorization": f"Bearer {SLACK_KEY}"
         }
         query_params = {
             "format": "json",
@@ -173,3 +173,6 @@ def update_task_mark_incomplete(task_id):
     }
 
     return jsonify(response), 200
+
+#-------------------GOOOOOOOAAAAAALLLLSSS--------------------
+goals_bp = Blueprint("goal_bp", __name__, url_prefix="/goals")
