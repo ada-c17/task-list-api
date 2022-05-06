@@ -1,8 +1,8 @@
-from asyncio import all_tasks
-from xxlimited import new
 from flask import Blueprint, jsonify, abort, make_response, request
 from app import db
 from app.models.task import Task
+import datetime as dt
+from datetime import date
 
 task_bp = Blueprint("Tasks", __name__, url_prefix="/tasks")
 
@@ -75,9 +75,6 @@ def get_all_tasks():
         sorted_tasks_desc = sorted(all_tasks, key = lambda i : i["title"], reverse=True)
         return return_database_info_list(sorted_tasks_desc)
 
-    
-    
-    
 
 @task_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
@@ -91,6 +88,24 @@ def update_task_by_id(task_id):
 
     request_body = request.get_json()
     update_task_safely(task, request_body)
+
+    db.session.commit()
+
+    return return_database_info_task(task.self_to_dict())
+
+@task_bp.route("/<task_id>/<completion_status>", methods=["PATCH"])
+def complete_task_by_id(task_id, completion_status):
+    task = get_task_by_id(task_id)
+
+    if completion_status == "mark_complete":
+        completion_info = {
+            "completed_at" : dt.date.today()
+        }
+    elif completion_status == "mark_incomplete":
+        completion_info = {
+            "completed_at" : None
+        }
+    update_task_safely(task, completion_info)
 
     db.session.commit()
 
