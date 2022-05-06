@@ -3,6 +3,12 @@ from app.models.task import Task
 from app import db 
 from sqlalchemy import desc, asc
 from datetime import datetime 
+import requests
+import os  
+from pprint import pprint 
+
+PATH = "https://slack.com/api/chat.postMessage?channel=task-notifications&text="
+
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
 @tasks_bp.route("", methods=["POST"])
@@ -63,6 +69,11 @@ def mark_complete(task_id):
 
     task.completed_at = datetime.utcnow()
     db.session.commit()
+    
+    headers = { "Authorization": "Bearer " + os.environ.get(
+            "SLACK_API_TOKEN") }
+    
+    requests.post(PATH + f"Someone just completed the task {task.title}", headers=headers)
 
     return {
         "task": {
