@@ -1,7 +1,6 @@
-from flask import Blueprint, jsonify, make_response, request
+from flask import Blueprint, jsonify, make_response, request, abort
 from app import db
 from app.models.task import Task
-from os import abort
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix = "/tasks")
 
@@ -50,24 +49,23 @@ def get_tasks():
     return jsonify(task_response)
 
 # Validate task id helper function
-def validate_task_id(task_id):
+def validate_task(task_id):
     try:
         task_id = int(task_id)
-    except ValueError:
-        response = {"msg": f"Invalid id: {task_id}"}
-        abort(make_response(jsonify(response), 400))
-    chosen_task = Task.query.get(task_id)
-    
-    if chosen_task is None:
-        response = {"msg": f"Could not find task id: {task_id}"}
-        abort(make_response(jsonify(response), 404))
+    except:
+        abort(make_response({"message":f"Task id '{task_id}' is invalid"}, 400))
 
-    return chosen_task
+    task = Task.query.get(task_id)
+
+    if not task:
+        abort(make_response({"message":f"Task id '{task_id}' not found"}, 404))
+
+    return task
 
 # Get one task
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
-    chosen_task = validate_task_id(task_id)
+    chosen_task = validate_task(task_id)
     is_complete = False
 
     if chosen_task.completed_at:
@@ -79,4 +77,4 @@ def get_one_task(task_id):
         "description": chosen_task.description,
         "is_complete": is_complete
         }
-    return jsonify({"task":response}), 200
+    return jsonify({"task": response}), 200
