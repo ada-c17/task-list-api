@@ -2,8 +2,23 @@ from flask import Blueprint, jsonify, abort, make_response, request
 from app.models.task import Task
 from app import db
 from datetime import datetime
+import requests
+import os
 
 tasks_bp = Blueprint('tasks', __name__, url_prefix='/tasks')
+slack_path = 'https://slack.com/api/chat.postMessage'
+
+def send_slack_notification(task):
+    headers = {'Authorization': f'Bearer {os.environ.get("SLACK_API_KEY")}'}
+    
+    query_param = {
+        'channel': 'task-notifications',
+        'text': f'Someone just completed {task}!'
+        # 'format': 'json', do we need this line?
+    }
+
+    return requests.post(slack_path, params=query_param, headers=headers)
+    
 
 def validate_task(task_id):
     #this portion makes sure the input type is valid
@@ -121,7 +136,7 @@ def mark_complete(task_id):
     task.completed_at = datetime.utcnow()
 
     db.session.commit()
-
+    send_slack_notification(task.title)
     return task_response(task)
 
 @tasks_bp.route('/<task_id>/mark_incomplete', methods=['PATCH'])
