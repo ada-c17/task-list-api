@@ -1,8 +1,13 @@
-import re
+import requests
+#from requests_oauthlib import OAuth1
+import os
+from dotenv import load_dotenv
 from app import db
 from flask import Blueprint, jsonify, abort, make_response, request
 from datetime import date
 from app.models.task import Task
+
+load_dotenv()
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -27,6 +32,21 @@ def check_complete_request_body(request):
                     for element in Task.expected_elements):
                         return request_body
     abort(make_response({"details": "Invalid data"}, 400))
+
+def slack_complete(task):
+    url = "https://slack.com/api/chat.postMessage"
+    slack_message = f"{task.title} was completed! \U0001F4AF"
+
+    query_params = {
+        "channel": "task-completion",
+        "text": slack_message
+    }
+    auth_token = os.environ.get("SLACKBOT_API_TOKEN")
+    headers = {
+        "Authorization": f"Bearer {auth_token}"
+    }
+    response = requests.post(url, params=query_params, headers=headers)
+    return response
 
 
 @tasks_bp.route("", methods=["GET"])
@@ -107,6 +127,10 @@ def mark_task_complete(id):
     db.session.commit()
 
     confirmation_msg = {"task": task.make_response_dict()}
+
+    slack_response = slack_complete(task)
+
+    confirmation_msg["slack-response"] = slack_response.json()
 
     return make_response(jsonify(confirmation_msg), 200)
 
