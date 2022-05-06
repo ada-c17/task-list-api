@@ -1,5 +1,6 @@
 from os import abort
 from flask import Blueprint, jsonify, request, make_response, abort
+from sqlalchemy import desc, asc
 from app import db
 from app.models.task import Task
 
@@ -10,7 +11,14 @@ def get_all_tasks():
     if not request.args:
         all_tasks = [task.to_json() for task in Task.query.all()]
     else:
-        all_tasks = [task.to_json() for task in Task.query.filter_by(**request.args)]
+        params = dict(request.args)
+        sort_style = params.pop('sort', None)
+        if sort_style and len(params) > 0:
+            all_tasks = [task.to_json() for task in Task.query.filter_by(**params).order_by(getattr(Task.title,sort_style)())]
+        elif len(params) > 0:
+            all_tasks = [task.to_json() for task in Task.query.filter_by(**params)]
+        elif sort_style:
+            all_tasks = [task.to_json() for task in Task.query.order_by(getattr(Task.title,sort_style)())]
 
     return jsonify(all_tasks), 200
 
