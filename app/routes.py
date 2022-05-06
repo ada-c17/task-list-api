@@ -16,6 +16,19 @@ def validate_task(task_id):
 
     return task
 
+def format_response(task):
+    response = {
+    "task" : 
+        {
+            "is_complete" : False,
+            "description" : task.description,
+            "title" : task.title,
+            "id" : task.task_id
+        }
+    }
+    return response
+
+
 @tasks_bp.route('', methods=['POST'])
 def create_task():
     request_body = request.get_json()
@@ -32,17 +45,7 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
     
-    response = {
-        "task" : 
-            {
-                "is_complete" : False,
-                "description" : new_task.description,
-                "title" : new_task.title,
-                "id" : new_task.task_id
-            }
-        }
-
-    return response, 201
+    return format_response(new_task), 201
 
 @tasks_bp.route('', methods=['GET'])
 def get_tasks():
@@ -66,15 +69,7 @@ def get_one_task(task_id):
     task = validate_task(task_id)
 
     if isinstance(task, Task):
-        return {
-        "task" : 
-            {
-                "is_complete" : False,
-                "description" : task.description,
-                "title" : task.title,
-                "id" : task.task_id
-            }
-        }, 200
+        return format_response(task), 200
 
     return task
 
@@ -88,15 +83,7 @@ def update_task(task_id):
         task.description = request_body["description"]
         db.session.commit()
 
-        return {
-        "task" : 
-            {
-                "is_complete" : False,
-                "description" : task.description,
-                "title" : task.title,
-                "id" : task.task_id
-            }
-        }, 200
+        return format_response(task), 200
 
     return task
 
