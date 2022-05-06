@@ -7,14 +7,15 @@ tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 @tasks_bp.route("", methods=["POST"])
 def create_one_task():
     request_body = request.get_json()
-    new_task = Task(
-        title=request_body["title"],
-        description=request_body["description"]
-    )
 
     try:
+        new_task = Task(
+            title=request_body["title"],
+            description=request_body["description"])
         new_task.title = request_body["title"]
         new_task.description = request_body["description"]
+        
+    
     
     except KeyError:
         return {
@@ -28,7 +29,7 @@ def create_one_task():
         "id": new_task.task_id,
                 "title": new_task.title,
                 "description": new_task.description,
-                "is_complete": new_task.completed_at}
+                "is_complete": bool(new_task.completed_at)}
     })
     return response, 201
 
@@ -54,7 +55,7 @@ def get_all_tasks():
                 "id": task.task_id,
                 "title": task.title,
                 "description": task.description,
-                "is_complete": task.completed_at
+                "is_complete": bool(task.completed_at)
             }
         )
     return jsonify(tasks_response)
@@ -63,26 +64,25 @@ def get_task_or_abort(task_id):
     try:
         task_id = int(task_id)
     except ValueError:
-        response = {"message": f"Invalid id: {task_id}"}
+        response = {"details": f"Invalid id: {task_id}"}
         abort(make_response(jsonify(response),400))
     chosen_task = Task.query.get(task_id)
 
     if chosen_task is None:
-        response = {"message": f"Could not find planet with id #{task_id}"}
+        response = {"details": f"Could not find task with id #{task_id}"}
         abort(make_response(jsonify(response),404))
     return chosen_task
 
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     chosen_task = get_task_or_abort(task_id)
-    response = {
+    response = jsonify({"task": {
         "id": chosen_task.task_id,
-        "title": chosen_task.title,
-        "description": chosen_task.description,
-        "is_complete": chosen_task.completed_at
-    }
-
-    return jsonify(response),200
+                "title": chosen_task.title,
+                "description": chosen_task.description,
+                "is_complete": bool(chosen_task.completed_at)}
+    })
+    return response, 200
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def replace_task(task_id):
@@ -92,11 +92,10 @@ def replace_task(task_id):
     try:
         chosen_task.title = request_body["title"]
         chosen_task.description = request_body["description"]
-        #chosen_task.cpmleted_at = request_body["is_complete"]
     
     except KeyError:
         return {
-            "message": "title, description are required"
+            "details": "title, description are required"
         } , 400
 
     db.session.commit()
@@ -104,13 +103,10 @@ def replace_task(task_id):
         "id": chosen_task.task_id,
                 "title": chosen_task.title,
                 "description": chosen_task.description,
-                "is_complete": chosen_task.completed_at}
+                "is_complete": bool(chosen_task.completed_at)}
     })
     return response, 200
 
-    # return {
-    #     "message": f"task #{chosen_task.task_id} successfully replaced"
-    # }, 200
 
 @tasks_bp.route("/<task_id>", methods = ["DELETE"])
 def delete_task(task_id):
