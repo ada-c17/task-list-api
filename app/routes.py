@@ -48,7 +48,7 @@ def get_one_task(task_id):
         'id': task.task_id,
         'title': task.title,
         'description': task.description,
-        "is_complete": False
+        'is_complete': False
     }}
     return jsonify(rsp), 200
 
@@ -59,3 +59,25 @@ def delete_one_task(task_id):
     db.session.commit()
 
     return jsonify({'details': f'Task {task.task_id} \"{task.title}\" successfully deleted'}), 200
+
+@tasks_bp.route('/<task_id>', methods=['PUT', 'PATCH'])
+def update_one_task(task_id):
+    task = Task.query.get(task_id)
+    request_body = request.get_json()
+
+    try:
+        task.title = request_body['title']
+        task.description = request_body['description']
+    except KeyError:
+        return jsonify({'details': 'Invalid data'}), 400
+    
+    db.session.commit()
+
+    rsp = {"task": {
+        'id': task.task_id,
+        'title': task.title,
+        'description': task.description,
+        'is_complete': False
+    }}
+
+    return jsonify(rsp), 200
