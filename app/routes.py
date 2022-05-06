@@ -1,4 +1,3 @@
-import json
 from flask import Blueprint, jsonify, request, abort, make_response
 from app.models.task import Task
 from app import db
@@ -24,6 +23,7 @@ def validate_task(task_id):
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
     tasks = Task.query.all()
+
     response = []
     for task in tasks:
         response.append({
@@ -32,6 +32,14 @@ def get_all_tasks():
             "description": task.description,
             "is_complete": False # bool(task.completed_at)
         })
+
+    params = request.args
+    if "sort" in params:
+        if params["sort"] == "asc":
+            response.sort(key=lambda x: x["title"])
+        elif params["sort"] == "desc":
+            response.sort(reverse=True, key=lambda x: x["title"])
+    
     return jsonify(response), 200
 
 
