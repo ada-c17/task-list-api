@@ -10,13 +10,13 @@ def validate_task(task_id):
     try:
         task_id = int(task_id)
     except ValueError:
-        response = {"message": f"{task_id} is not valid input."}
+        response = {"details": f"{task_id} is not valid input."}
         abort(make_response(jsonify(response), 400))
     
     task = Task.query.get(task_id)
 
     if not task:
-        response = {"message": f"Task: {task_id} does not exist."}
+        response = {"details": f"Task {task_id} does not exist."}
         abort(make_response(jsonify(response), 404))
     
     return task
@@ -54,10 +54,12 @@ def get_one_task(task_id):
 @tasks_bp.route("", methods=["POST"])
 def create_one_task():
     request_body = request.get_json()
-
-    new_task = Task(title=request_body["title"], 
-                    description=request_body["description"]
-                    )
+    try:
+        new_task = Task(title=request_body["title"],
+        description=request_body["description"])
+    except:
+        response = {"details": "Invalid data"}
+        abort(make_response(jsonify(response), 400))
     db.session.add(new_task)
     db.session.commit()
 
