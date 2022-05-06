@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request, abort, make_response
 from app.models.task import Task
+from app.models.goal import Goal
 from app import db
 import datetime
 import requests
@@ -176,3 +177,74 @@ def update_task_mark_incomplete(task_id):
 
 #-------------------GOOOOOOOAAAAAALLLLSSS--------------------
 goals_bp = Blueprint("goal_bp", __name__, url_prefix="/goals")
+
+def validate_goal(goal_id):
+    try:
+        goal_id = int(goal_id)
+    except ValueError:
+        response = {"details": f"{goal_id} is not valid input."}
+        abort(make_response(jsonify(response), 400))
+    
+    goal = Goal.query.get(goal_id)
+
+    if not goal:
+        response = {"details": f"Goal {goal_id} does not exist."}
+        abort(make_response(jsonify(response), 404))
+    
+    return goal
+
+@goals_bp.route("", methods=["POST"])
+def create_one_goal():
+    request_body = request.get_json()
+    # could refactor to try and except if no valid title input
+    new_goal = Goal(title=request_body["title"])
+    db.session.add(new_goal)
+    db.session.commit()
+
+    response = {
+        "goal": {
+            "id": new_goal.goal_id,
+            "title": new_goal.title
+        }
+    }
+    return jsonify(response), 201
+
+@goals_bp.route("", methods=["GET"])
+def get_all_goals():
+    goals = Goal.query.all()
+    
+    response = []
+    for goal in goals:
+        response.append({
+            "id": goal.goal_id,
+            "title": goal.title
+        })
+    return jsonify(response), 200
+
+@goals_bp.route("/<goal_id>", methods=["GET"])
+def get_one_goal(goal_id):
+    goal = validate_goal(goal_id)
+
+    response = {
+        "goal": {
+            "id": goal.goal_id,
+            "title": goal.title
+        }
+    }
+    return jsonify(response), 200
+
+@goals_bp.route("/<goal_id>", methods=["PUT"])
+def update_one_route(goal_id):
+    goal = validate_goal(goal_id)
+    request_body = request.get_json()
+
+    goal.title = request_body["title"]
+    db.session.commit()
+
+    response = {
+        "goal": {
+            "id": goal.goal_id,
+            "title": goal.title
+        }
+    }
+    return jsonify(response), 200
