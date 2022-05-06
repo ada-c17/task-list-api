@@ -165,8 +165,8 @@ def check_goal_request_body():
 
 @goals_bp.route("", methods = ["POST"])
 def post_one_goal():
-    response_body = check_goal_request_body()
-    new_goal = Goal(title= response_body["title"] )
+    request_body = check_goal_request_body()
+    new_goal = Goal(title= request_body["title"] )
 
     db.session.add(new_goal)
     db.session.commit()
@@ -187,6 +187,20 @@ def get_all_goals():
             "title": goal.title
         })
     return jsonify(goals_response)
+
+@goals_bp.route("/<goal_id>", methods = ["PUT"])
+def update_one_goal(goal_id):
+    goal = validate_goal(goal_id)
+    request_body = check_goal_request_body()
+    
+    goal.title = request_body["title"]
+
+    db.session.commit()
+
+    return jsonify({"goal": {
+        "id": goal.goal_id,
+        "title": goal.title
+    }})
 
 @goals_bp.route("/<goal_id>", methods = ["GET"])
 def get_one_goal(goal_id):
