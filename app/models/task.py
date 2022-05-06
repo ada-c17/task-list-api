@@ -18,10 +18,16 @@ class Task(db.Model):
 
     @classmethod
     def create_task(cls, request_body):
-        try: 
-            new_task = cls(
+        try:
+            try:
+                new_task = cls(
                 title=request_body['title'],
-                description=request_body['description']
+                description=request_body['description'],
+                completed_at=request_body['completed_at'])
+            except: 
+                new_task = cls(
+                title=request_body['title'],
+                description=request_body['description'],
             )
             return new_task
         except:
