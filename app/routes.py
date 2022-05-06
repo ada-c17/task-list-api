@@ -48,6 +48,16 @@ def update_one_task_by_id(task_id):
 
     return {"task": task.to_dict()}
 
+# delete one task by id
+@tasks_bp.route("/<task_id>", methods=["DELETE"])
+def delete_task_by_id(task_id):
+    task = validate_task(task_id)
+
+    db.session.delete(task)
+    db.session.commit()
+
+    return make_response({"details": f'Task {task_id} "{task.title}" successfully deleted'})
+
 # check for valid task using id
 def validate_task(task_id):
     try:
