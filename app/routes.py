@@ -5,7 +5,6 @@ from app import db
 task_bp = Blueprint("task_bp",__name__, url_prefix="/tasks" )
 
 # Helper Functions:
-
 def complete_or_not(task):
     '''
     Converts 'completed_at' task attribute to Boolean for 'is_completed' variable in response body
@@ -46,7 +45,11 @@ def create_one_task():
         }
     return jsonify(response), 201
 
+
 # Read: GET
+# Endpoint with params: "/tasks?sort=asc" and "/tasks?sort=desc"
+#Params: key:sort with values: asc, desc
+
 @task_bp.route("", methods=["GET"])
 def get_all_tasks():
     tasks = Task.query.all()
@@ -58,6 +61,15 @@ def get_all_tasks():
             "title": task.title,
             "description": task.description,
             "is_complete": is_complete})
+
+    def get_title(task_list):            # https://www.programiz.com/python-programming/methods/list/sort
+        return task_list.get('title')
+    
+    param_value = request.args.get('sort')    # query_param_value = request.args.get(query_param_key)
+    if param_value == 'asc':
+        task_list.sort(key=get_title)
+    if param_value == 'desc':
+        task_list.sort(key=get_title, reverse=True)
     return jsonify(task_list), 200
 
 @task_bp.route("/<task_id>", methods=["GET"])
@@ -71,6 +83,7 @@ def get_one_task(task_id):
             "is_complete": is_complete}
         }
     return jsonify(response), 200
+
 
 # Update: PUT
 @task_bp.route("/<task_id>", methods=["PUT"])
