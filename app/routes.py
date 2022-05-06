@@ -1,4 +1,3 @@
-from attr import validate
 from flask import Blueprint, request,jsonify, make_response
 from app.models.task import Task
 from app import db 
