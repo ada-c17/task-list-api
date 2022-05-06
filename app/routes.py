@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify, abort, make_response, request
+from sqlalchemy import null
 from app.models.task import Task
 from app import db
+from datetime import datetime
 
 tasks_bp = Blueprint('tasks_bp', __name__, url_prefix='/tasks')
 
@@ -25,6 +27,12 @@ def create_one_task():
     except KeyError:
         return jsonify({'details': 'Invalid data'}), 400
 
+    is_complete = False
+
+    if 'completed_at' in request_body:
+        new_task.completed_at = request_body['completed_at']
+        is_complete = True
+
     db.session.add(new_task)
     db.session.commit()
 
@@ -32,7 +40,7 @@ def create_one_task():
             'id': new_task.task_id,
             'title': new_task.title,
             'description': new_task.description,
-            'is_complete': False
+            'is_complete': is_complete
         }}
 
     return jsonify(rsp), 201
@@ -48,12 +56,16 @@ def get_all_tasks():
         tasks = Task.query.all()
     tasks_response = []
 
+    is_complete = False
+    
     for task in tasks:
+        if task.completed_at:
+            is_complete = True
         tasks_response.append({
                 'id': task.task_id,
                 'title': task.title,
                 'description': task.description,
-                'is_complete': False
+                'is_complete': is_complete
             })
     
     return jsonify(tasks_response), 200
@@ -61,11 +73,16 @@ def get_all_tasks():
 @tasks_bp.route('/<task_id>', methods=['GET'])
 def get_one_task(task_id):
     task = validate_task_id(task_id)
+    is_complete = False
+
+    if task.completed_at:
+        is_complete = True
+
     rsp = {"task": {
         'id': task.task_id,
         'title': task.title,
         'description': task.description,
-        'is_complete': False
+        'is_complete': is_complete
     }}
     return jsonify(rsp), 200
 
@@ -81,6 +98,7 @@ def delete_one_task(task_id):
 def update_one_task(task_id):
     task = validate_task_id(task_id)
     request_body = request.get_json()
+    is_complete = False
 
     try:
         task.title = request_body['title']
@@ -88,13 +106,56 @@ def update_one_task(task_id):
     except KeyError:
         return jsonify({'details': 'Invalid data'}), 400
     
+
+    if 'completed_at' in request_body:
+        task.completed_at = request_body['completed_at']
+        is_complete = True
+
     db.session.commit()
 
     rsp = {"task": {
         'id': task.task_id,
         'title': task.title,
         'description': task.description,
-        'is_complete': False
+        'is_complete': is_complete
     }}
 
+    return jsonify(rsp), 200
+
+@tasks_bp.route('<task_id>/mark_complete', methods=['PATCH'])
+def mark_task_complete(task_id):
+    daytime_completed = datetime.now()
+    task = validate_task_id(task_id)
+
+    task.completed_at = daytime_completed
+
+    db.session.commit()
+
+    rsp = {
+        'task': {
+            'id': task.task_id,
+            'title': task.title,
+            'description': task.description,
+            'is_complete': True
+        }
+    }
+    
+    return jsonify(rsp), 200
+
+@tasks_bp.route('<task_id>/mark_incomplete', methods=['PATCH'])
+def mark_task_incomplete(task_id):
+    task = validate_task_id(task_id)
+    task.completed_at = None
+
+    db.session.commit()
+
+    rsp = {
+        'task': {
+            'id': task.task_id,
+            'title': task.title,
+            'description': task.description,
+            'is_complete': False
+        }
+    }
+    
     return jsonify(rsp), 200
