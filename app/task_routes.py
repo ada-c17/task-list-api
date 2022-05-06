@@ -1,7 +1,7 @@
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, make_response, request
-from .helpers import call_slack, validate_task
+from .helpers import call_slack, validate
 from datetime import date
 
 
@@ -43,7 +43,7 @@ def read_all_tasks():
 
 @ tasks_bp.route("/<task_id>", methods=["GET"])
 def read_one_task(task_id):
-    task = validate_task(task_id)
+    task = validate(task_id, Task, "task")
     return make_response({"task": task.to_json()}, 200)
 
 # PUT ROUTES
@@ -51,7 +51,7 @@ def read_one_task(task_id):
 
 @ tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_one_task(task_id):
-    task = validate_task(task_id)
+    task = validate(task_id, Task, "task")
     request_body = request.get_json()
 
     task.update(request_body)
@@ -65,7 +65,7 @@ def update_one_task(task_id):
 
 @ tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_one_task(task_id):
-    task = validate_task(task_id)
+    task = validate(task_id, Task, "task")
     db.session.delete(task)
     db.session.commit()
 
@@ -76,7 +76,7 @@ def delete_one_task(task_id):
 
 @ tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_task_complete(task_id):
-    task = validate_task(task_id)
+    task = validate(task_id, Task, "task")
     task.completed_at = date.today()
 
     db.session.commit()
@@ -86,7 +86,7 @@ def mark_task_complete(task_id):
 
 @ tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_task_incomplete(task_id):
-    task = validate_task(task_id)
+    task = validate(task_id, Task, "task")
     task.completed_at = None
 
     db.session.commit()

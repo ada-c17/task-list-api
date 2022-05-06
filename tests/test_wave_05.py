@@ -1,7 +1,6 @@
 import pytest
 
 
-# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_goals_no_saved_goals(client):
     # Act
     response = client.get("/goals")
@@ -12,7 +11,6 @@ def test_get_goals_no_saved_goals(client):
     assert response_body == []
 
 
-# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_goals_one_saved_goal(client, one_goal):
     # Act
     response = client.get("/goals")
@@ -29,7 +27,6 @@ def test_get_goals_one_saved_goal(client, one_goal):
     ]
 
 
-# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_goal(client, one_goal):
     # Act
     response = client.get("/goals/1")
@@ -46,7 +43,6 @@ def test_get_goal(client, one_goal):
     }
 
 
-# @pytest.mark.skip(reason="test to be completed by student")
 def test_get_goal_not_found(client):
     # Act
     response = client.get("/goals/1")
@@ -56,7 +52,6 @@ def test_get_goal_not_found(client):
     assert response_body == {"message": f"goal 1 not found"}
 
 
-# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_goal(client):
     # Act
     response = client.post("/goals", json={
@@ -75,7 +70,6 @@ def test_create_goal(client):
     }
 
 
-# @pytest.mark.skip(reason="test to be completed by student")
 def test_update_goal(client, one_goal):
 
     # Act
@@ -95,7 +89,6 @@ def test_update_goal(client, one_goal):
     assert "goal" in response_body
 
 
-# @pytest.mark.skip(reason="test to be completed by student")
 def test_update_goal_not_found(client):
     # Act
     response = client.put("/goals/1", json={
@@ -108,7 +101,6 @@ def test_update_goal_not_found(client):
     assert response_body == {"message": f"goal 1 not found"}
 
 
-# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_delete_goal(client, one_goal):
     # Act
     response = client.delete("/goals/1")
@@ -128,7 +120,6 @@ def test_delete_goal(client, one_goal):
     assert response_body == {"message": f"goal 1 not found"}
 
 
-# @pytest.mark.skip(reason="test to be completed by student")
 def test_delete_goal_not_found(client):
     # Act
     response = client.delete("/goals/1")
@@ -139,7 +130,6 @@ def test_delete_goal_not_found(client):
     assert response_body == {"message": f"goal 1 not found"}
 
 
-# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_goal_missing_title(client):
     # Act
     response = client.post("/goals", json={})

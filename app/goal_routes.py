@@ -2,7 +2,7 @@ from app import db
 from app.models.goal import Goal
 from app.models.task import Task
 from flask import Blueprint, jsonify, make_response, request
-from .helpers import validate_goal, validate_task
+from .helpers import validate
 
 
 goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
@@ -25,12 +25,12 @@ def add_goal():
 
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
 def assign_tasks_to_goal(goal_id):
-    goal = validate_goal(goal_id)
+    goal = validate(goal_id, Goal, "goal")
     request_body = request.get_json()
     if "task_ids" not in request_body:
         return make_response("Invalid Request", 400)
     for id in request_body["task_ids"]:
-        task = validate_task(id)
+        task = validate(id, Task, "task")
         goal.tasks.append(task)
 
     db.session.commit()
@@ -58,13 +58,13 @@ def read_all_goals():
 
 @goals_bp.route("/<goal_id>", methods=["GET"])
 def read_one_goal(goal_id):
-    goal = validate_goal(goal_id)
+    goal = validate(goal_id, Goal, "goal")
     return make_response({"goal": goal.to_json()}, 200)
 
 
 @goals_bp.route("/<goal_id>/tasks", methods=["GET"])
 def get_tasks_by_goal(goal_id):
-    goal = validate_goal(goal_id)
+    goal = validate(goal_id, Goal, "goal")
     tasks = Task.query.filter_by(goal=goal)
     tasks_response = [task.to_json() for task in tasks]
     return make_response({"id": goal.goal_id, "title": goal.title, "tasks": tasks_response}, 200)
@@ -74,7 +74,7 @@ def get_tasks_by_goal(goal_id):
 
 @goals_bp.route("/<goal_id>", methods=["PUT"])
 def update_one_goal(goal_id):
-    goal = validate_goal(goal_id)
+    goal = validate(goal_id, Goal, "goal")
     request_body = request.get_json()
 
     goal.update(request_body)
@@ -88,7 +88,7 @@ def update_one_goal(goal_id):
 
 @goals_bp.route("/<goal_id>", methods=["DELETE"])
 def delete_one_goal(goal_id):
-    goal = validate_goal(goal_id)
+    goal = validate(goal_id, Goal, "goal")
     db.session.delete(goal)
     db.session.commit()
 
