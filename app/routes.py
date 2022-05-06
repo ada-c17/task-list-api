@@ -35,6 +35,19 @@ def get_one_task_by_id(task_id):
 
     return {"task": task.to_dict()}
 
+# update one task by id
+@tasks_bp.route("/<task_id>", methods=["PUT"])
+def update_one_task_by_id(task_id):
+    task = validate_task(task_id)
+    request_body = request.get_json()
+
+    task.title = request_body["title"]
+    task.description = request_body["description"]
+
+    db.session.commit()
+
+    return {"task": task.to_dict()}
+
 # check for valid task using id
 def validate_task(task_id):
     try:
