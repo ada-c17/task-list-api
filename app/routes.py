@@ -25,3 +25,42 @@ def create_one_task():
             "is_complete": False
         }
     }, 201 
+
+@tasks_bp.route("", methods=["GET"])
+def get_all_tasks():
+    tasks = Task.query.all()
+    tasks_response = []
+    for task in tasks:
+        tasks_response.append(
+            {
+                "id": task.task_id,
+                "title": task.title,
+                "description": task.description,
+                "is_complete": False
+            }
+        )
+    return jsonify(tasks_response), 200
+
+
+@tasks_bp.route("/<task_id>", methods=["GET"])
+def handle_book(task_id):
+    try: 
+        task_id = int(task_id)
+    except ValueError:
+        response = {
+            "message" : f"Invalid id: {task_id}"}
+        return jsonify(response), 400
+    one_task = Task.query.get(task_id)
+
+    if one_task is None:
+        response = {"message": f" Could not find a planet with id {task_id}"}
+        return jsonify(response), 404
+    
+    response = { "task": {
+                "id" : one_task.task_id,
+                "title": one_task.title,
+                "description": one_task.description,
+                "is_complete": False
+                }
+            }
+    return jsonify(response), 200
