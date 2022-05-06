@@ -30,8 +30,18 @@ def check_complete_request_body(request):
 
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
+    query_params = request.args
+    if "sort" in query_params:
+        if query_params["sort"] == "asc":
+            task_list = Task.query.order_by(Task.title.asc()).all()
+        elif query_params["sort"] == "desc":
+            task_list = Task.query.order_by(Task.title.desc()).all()
+        #care here -- if something not asc or desc in query_params["sort"]
+        #task_list will not exist
+    else: 
+        task_list = Task.query.all()
+
     task_response = []
-    task_list = Task.query.all()
 
     for task in task_list:
         task_response.append(task.make_response_dict())
