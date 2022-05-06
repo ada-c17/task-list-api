@@ -12,13 +12,13 @@ class Task(db.Model):
             is_complete = False
 
             return {"id" : self.task_id,
-                    "task" : self.title,
+                    "title" : self.title,
                     "description" : self.description,
                     "is_complete" : is_complete}
 
 
     @classmethod
-    def create_task(cls, request_body):
+    def from_json(cls, request_body):
         new_task = cls(
             title=request_body['title'],
             description=request_body['description']
