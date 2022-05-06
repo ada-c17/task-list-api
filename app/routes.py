@@ -4,30 +4,29 @@ from app import db
 
 task_bp = Blueprint("task_bp",__name__, url_prefix="/tasks" )
 
-# Helper Functions
+# Helper Functions:
+
+# This converts completed_at attribute to T/F for 'is_completed' in response body
+# completed_at = db.Column(db.DateTime, default=None)
 def complete_or_not(task):
     if task.completed_at is not None:
         return True
     else:
         return False
 
-# completed_at = db.Column(db.DateTime, default=None)
-
-# def validate_task(title):
-#     try:
-#         type(title) is str
-#     except:
-#         abort(make_response({"details": "Invalid data"}, 400))
-#     task = Task.query.get(task_id)
     
+# Create: POST requests
+# Sample request body: {"title": "A Brand New Task", "description": "Test Description"}
 
-
-# Create: POST 
 @task_bp.route("", methods=["POST"])
 def create_one_task():
     request_body = request.get_json()
-    new_task = Task(title=request_body['title'], description=request_body['description'])
-    is_complete = complete_or_not(new_task) # use helper function to obain T/F
+    try:
+        new_task = Task(title=request_body['title'], description=request_body['description'])
+    except:
+        abort(make_response({"details": "Invalid data"}, 400))
+
+    is_complete = complete_or_not(new_task) # use of helper function to obtain T/F
     db.session.add(new_task)
     db.session.commit()
 
@@ -40,17 +39,6 @@ def create_one_task():
         } 
         }
     return jsonify(response), 201
-
-    # request body: {"title": "A Brand New Task", "description": "Test Description"}
-    # task Must contain title and description, else return: 
-    # {"details": "Invalid data"}, 400
-    # successful response body: {
-#         "task": {
-#             "id": 1,
-#             "title": "A Brand New Task",
-#             "description": "Test Description",
-#             "is_complete": False
-#         } }, 201
 
 # Read: GET
 @task_bp.route("", methods=["GET"])
