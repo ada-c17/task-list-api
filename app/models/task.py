@@ -1,5 +1,5 @@
 from app import db
-from flask import jsonify, abort, make_response
+from flask import abort, make_response
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
