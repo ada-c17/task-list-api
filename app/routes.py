@@ -47,8 +47,11 @@ def get_single_task(task_id):
 @tasks_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
-    new_task = Task(title=request_body["title"],
-                    description=request_body["description"])
+    try:
+        new_task = Task(title=request_body["title"],
+                        description=request_body["description"])
+    except KeyError:
+        return make_response({"details": "Invalid data"}, 400)
 
     db.session.add(new_task)
     db.session.commit()
@@ -76,3 +79,13 @@ def update_task(task_id):
                                    "title": found_task.title,
                                    "description": found_task.description,
                                    "is_complete": bool(found_task.completed_at)}}), 200)
+
+
+@tasks_bp.route("/<task_id>", methods=["DELETE"])
+def delete_task(task_id):
+    found_task = validate_task_id(task_id)
+
+    db.session.delete(found_task)
+    db.session.commit()
+
+    return make_response(jsonify({"details": f'Task {found_task.task_id} "{found_task.title}" successfully deleted'}))
