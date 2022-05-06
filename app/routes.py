@@ -90,7 +90,7 @@ def mark_task_complete(task_id):
     headers = {
         "Authorization" : f"Bearer {os.environ.get('SLACK_API_HEADER')}"
     }
-    response = requests.get(url=slack_api_url, params=params, headers=headers)
+    requests.get(url=slack_api_url, params=params, headers=headers)
     
     return make_response(jsonify({"task" : task.to_json()}))
 
