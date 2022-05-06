@@ -8,7 +8,11 @@ tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 @tasks_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
-    new_task = Task(title=request_body["title"], description=request_body["description"])
+
+    try:
+        new_task = Task(title=request_body["title"], description=request_body["description"])
+    except:
+        abort(make_response({"details": "Invalid data"}, 400))
 
     db.session.add(new_task)
     db.session.commit()
