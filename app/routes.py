@@ -21,8 +21,11 @@ def validate_task(task_id):
 @task_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
-    new_task = Task(title=request_body["title"], 
-                    description=request_body["description"])
+    try:
+        new_task = Task(title=request_body["title"], 
+                        description=request_body["description"])
+    except KeyError:
+        return {"details": "Invalid data"}, 400
 
     db.session.add(new_task)
     db.session.commit()
@@ -50,17 +53,40 @@ def get_all_tasks():
 def get_one_task(task_id):
     task = validate_task(task_id)
 
-    return {
-        "id": task.task_id,
-        "title": task.title,
-        "description": task.description,
-        "is_complete": False
+    return { 
+        "task": {
+            "id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": False
+        }
     }
 
-@task_bp.route("", methods=["PUT"])
-def update_task():
-    pass
+@task_bp.route("/<task_id>", methods=["PUT"])
+def update_task(task_id):
+    task = validate_task(task_id)
+    request_body = request.get_json()
 
-@task_bp.route("", methods=["DELETE"])
-def delete_task():
-    pass
+    task.title = request_body["title"]
+    task.description = request_body["description"]
+    # task.completed_at = request_body["is_complete"]
+    
+    db.session.commit()
+    
+    return { 
+        "task": {
+            "id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": False
+        }
+    }
+
+@task_bp.route("/<task_id>", methods=["DELETE"])
+def delete_task(task_id):
+    task = validate_task(task_id)
+
+    db.session.delete(task)
+    db.session.commit()
+
+    return make_response({"details": f"Task {task_id} \ '{task.description}' \ successfully deleted"})
