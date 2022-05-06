@@ -64,7 +64,7 @@ def test_get_task_not_found(client):
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
-    assert response_body == {'details': f'Task id not found.'}
+    assert response_body == {'details': 'Task id not found.'}
 
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
@@ -136,7 +136,7 @@ def test_update_task_not_found(client):
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
-    assert response_body == {'details': f'Task id not found.'}
+    assert response_body == {'details': 'Task id not found.'}
     
 
 
