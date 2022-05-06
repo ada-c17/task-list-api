@@ -2,7 +2,10 @@ from flask import Blueprint, jsonify, request, abort, make_response
 from app.models.task import Task
 from app import db
 import datetime
+import requests
 
+PATH = "https://slack.com/api/chat.postMessage"
+SLACK_API_KEY = "xoxb-3491039968947-3488241064821-nC28KPl42UZ3B4XPMKax4yXn"
 
 tasks_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 
@@ -38,6 +41,7 @@ def get_all_tasks():
     if "sort" in params:
         if params["sort"] == "asc":
             response.sort(key=lambda x: x["title"])
+            #response.order_by(Task.title)
         elif params["sort"] == "desc":
             response.sort(reverse=True, key=lambda x: x["title"])
     
@@ -69,6 +73,8 @@ def create_one_task():
             new_task = Task(title=request_body["title"],
                 description=request_body["description"],
                 completed_at=request_body["completed_at"])
+                # When testing in Postman, make sure to add in format:
+                # "2022-05-06"
         else:
             new_task = Task(title=request_body["title"],
                 description=request_body["description"])
@@ -126,8 +132,22 @@ def delete_one_task(task_id):
 def update_task_mark_complete(task_id):
     task = validate_task(task_id)
 
-    task.completed_at = datetime.date.today()
-    db.session.commit()
+    # task.completed_at = datetime.date.today()
+    # db.session.commit()
+
+    if not task.completed_at:
+        task.completed_at = datetime.date.today()
+        db.session.commit()
+        headers = {
+            "Authorization": f"Bearer {SLACK_API_KEY}"
+        }
+        query_params = {
+            "format": "json",
+            "channel": "task-notifications",
+            "text": f"Someone just completed the task {task.title}"
+        }
+        requests.get(PATH, headers=headers, params=query_params)
+
 
     response = {
         "task": {
