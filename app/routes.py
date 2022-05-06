@@ -13,6 +13,8 @@ def get_all_tasks():
 	title_query = request.args.get("title")
 	description_query = request.args.get("description")
 	is_complete_query = request.args.get("completed_at")
+	sort_query = request.args.get("sort")
+	# figure out getattr()
 
 	if title_query:
 		tasks = Task.query.filter_by(length_of_year=title_query)
@@ -20,6 +22,10 @@ def get_all_tasks():
 		tasks = Task.query.filter_by(description=description_query)
 	elif is_complete_query:
 		tasks = Task.query.filter_by(completed_at=is_complete_query)
+	elif sort_query == "asc":
+		tasks = Task.query.order_by(Task.title.asc())
+	elif sort_query == "desc":
+		tasks = Task.query.order_by(Task.title.desc())
 	else:
 		tasks = Task.query.all()
 
