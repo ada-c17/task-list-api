@@ -157,3 +157,4 @@ print("These are the actions you can take:")
 print_single_row_of_stars()
 list_options()
 run_cli()
+
