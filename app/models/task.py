@@ -1,4 +1,6 @@
 from app import db
+from flask import abort, make_response
+from dateutil.parser import parse
 
 
 class Task(db.Model):
@@ -30,10 +32,17 @@ class Task(db.Model):
         if "goal_id" in request_body:
             self.goal_id = request_body["goal_id"]
 
+        if "completed_at" in request_body:
+            if not parse(request_body["completed_at"]):
+                return abort(make_response({"message": f"Value for completed_at invalid"}, 400))
+            self.completed_at = request_body["completed_at"]
+
     @classmethod
     def create(cls, request_body):
         if "completed_at" not in request_body:
             request_body["completed_at"] = None
+        elif "completed_at" in request_body and not parse(request_body["completed_at"]):
+            return abort(make_response({"message": f"Value for completed_at invalid"}, 400))
         new_task = cls(title=request_body["title"],
                        description=request_body["description"],
                        completed_at=request_body["completed_at"])

@@ -2,7 +2,7 @@ from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, make_response, request
 from .helpers import call_slack, validate
-from datetime import date
+from datetime import datetime
 
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
@@ -84,7 +84,7 @@ def delete_one_task(task_id):
 @ tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_task_complete(task_id):
     task = validate(task_id, Task, "task")
-    task.completed_at = date.today()
+    task.completed_at = datetime.now()
 
     db.session.commit()
     call_slack(f"Someone just completed the task {task.title}")
