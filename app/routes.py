@@ -1,4 +1,4 @@
-from flask import Blueprint, request,jsonify, make_response
+from flask import Blueprint, request,jsonify, make_response, abort
 from app.models.task import Task
 from app import db 
 
@@ -10,7 +10,6 @@ def create_task():
 
     if "description" not in request_body or "title" not in request_body:
         return {"details": "Invalid data"}, 400
-
 
     new_task = Task(title=request_body["title"], description=request_body["description"])
 
@@ -36,14 +35,18 @@ def validate_task(task_id):
     try:
         task_id = int(task_id)
     except ValueError:
-        response = {"message": f"Could not retrieve task with id {task_id}"} 
-        return response, 404
+        # response = {"message": f"Could not retrieve task with id {task_id}"} 
+        abort(make_response({"message":f"Task {task_id} invalid"}, 400))
+
+        # return abort(make_response(jsonify(response), 404))
     
     task = Task.query.get(task_id)
+    if not task:
+            abort(make_response({"message":f"Task {task_id} not found"}, 404))
 
-    if task is None:
-        response = {"message": f"Invalid ID: {task_id}"}
-        return response, 400 
+    # if task is None:
+    #     response = {"message": f"Invalid ID: {task_id}"}
+    #     return response, 400 
     
     return task 
 
@@ -82,14 +85,18 @@ def get_all_tasks():
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
     task = validate_task(task_id)
-    request_body = request.get_json()
 
+    request_body = request.get_json()
+    print(task)
     # updated_task = None
     if "title" and "description" in request_body:
         # updated_task.title = request_body["title"]
         # updated_task.description = request_body["description"]
         task.title = request_body["title"]
         task.description = request_body["description"]
+    else: 
+        return {"details": "Invalid data"}, 400
+
     
     db.session.commit()
 
