@@ -20,6 +20,11 @@ def validate_task(task_id):
 def create_task():
     request_body = request.get_json()
 
+    if "description" not in request_body or "title" not in request_body:
+        return {
+            "details" : "Invalid data"
+        }, 400
+
     new_task = Task (
         description = request_body['description'],
         title = request_body['title']
@@ -81,7 +86,6 @@ def update_task(task_id):
     if isinstance(task, Task):
         task.title = request_body["title"]
         task.description = request_body["description"]
-
         db.session.commit()
 
         return {
@@ -94,4 +98,15 @@ def update_task(task_id):
             }
         }, 200
 
+    return task
+
+@tasks_bp.route('/<task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    task = validate_task(task_id)
+    if isinstance(task, Task):
+        db.session.delete(task)
+        db.session.commit()
+        return {
+            "details" : f'Task {task_id} "{task.title}" successfully deleted'
+        }
     return task
