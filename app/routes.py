@@ -2,7 +2,7 @@ from flask import Blueprint, request,jsonify, make_response, abort
 from app.models.task import Task
 from app import db 
 from sqlalchemy import desc, asc
-
+from datetime import datetime 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
 @tasks_bp.route("", methods=["POST"])
@@ -12,7 +12,10 @@ def create_task():
     if "description" not in request_body or "title" not in request_body:
         return {"details": "Invalid data"}, 400
 
-    new_task = Task(title=request_body["title"], description=request_body["description"])
+    if "completed_at" in request_body:
+        new_task = Task(title=request_body["title"], description=request_body["description"], completed_at=request_body["completed_at"])
+    else:
+        new_task = Task(title=request_body["title"], description=request_body["description"])
 
     db.session.add(new_task)
     db.session.commit()
@@ -22,15 +25,17 @@ def create_task():
             "id": new_task.task_id,
             "title": new_task.title,
             "description": new_task.description,
-            "is_complete": False
+            "is_complete": is_complete(new_task)
         }
     }, 201
+
 
 def is_complete(task):
     if not task.completed_at:
         return False 
     else:
         return True 
+
 
 def validate_task(task_id):
     try:
@@ -51,6 +56,41 @@ def validate_task(task_id):
     
     return task 
 
+
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def mark_complete(task_id):
+    task = validate_task(task_id)
+
+    task.completed_at = datetime.utcnow()
+    db.session.commit()
+
+    return {
+        "task": {
+            "id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": is_complete(task)
+        }
+    }, 200
+
+
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def mark_incomplete(task_id):
+    task = validate_task(task_id)
+
+    task.completed_at = None
+    db.session.commit()
+
+    return {
+        "task": {
+            "id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": is_complete(task)
+        }
+    }, 200
+
+
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_task(task_id):
     task = validate_task(task_id)
@@ -63,6 +103,7 @@ def get_task(task_id):
                 "is_complete": is_complete(task)
             }
     })), 200
+
 
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
@@ -118,6 +159,7 @@ def update_task(task_id):
             "is_complete": is_complete(task)
         }
     }, 200
+
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
