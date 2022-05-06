@@ -26,7 +26,7 @@ def upgrade():
     sa.Column('task_id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(), nullable=True),
     sa.Column('description', sa.String(), nullable=True),
-    sa.Column('completed_at', sa.DateTime(), nullable=True),
+    sa.Column('completed_at', sa.DateTime(), nullable=True, server_default='f'),
     sa.PrimaryKeyConstraint('task_id')
     )
     # ### end Alembic commands ###
