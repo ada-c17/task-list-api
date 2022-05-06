@@ -12,7 +12,16 @@ class Task(db.Model):
         new_task = cls(
             title=req_body["title"],
             description=req_body["description"],
-            completed_at = (req_body["completed_at"] 
-                            if req_body["completed_at"] else None)
+            completed_at = req_body.get("completed_at")
         )
         return new_task
+
+    def to_json(self):
+        return {
+            "task":{
+            "id": self.task_id,
+            "title": self.title,
+            "description": self.description,
+            "is_complete": True if self.completed_at else False
+            }
+        }

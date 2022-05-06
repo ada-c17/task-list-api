@@ -4,17 +4,16 @@ from app.models.task import Task
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
-@tasks_bp.route("", method=["POST"])
+@tasks_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
 
-    if request_body["title"] and request_body["description"]:
+    if request_body.get("title") and request_body.get("description"):
         new_task = Task.create(request_body)
     else:
-        abort(make_response({"message": f"Task data is not valid"}, 400))
+        abort(make_response({"details": "Invalid data"}, 400))
     
     db.session.add(new_task)
     db.session.commit()
 
-    return make_response(jsonify(f"New task {new_task.title} "\
-        "successfully created"), 201)
+    return make_response(jsonify(new_task.to_json()), 201)
