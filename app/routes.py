@@ -14,6 +14,12 @@ def complete_or_not(task):
     else:
         return False
 
+def validate_task(task_id):
+    task = Task.query.get(task_id)
+    if not task:
+        abort(make_response({"message":f"task {task_id} not found"}, 404))
+    return task
+
     
 # Create: POST requests
 # Sample request body: {"title": "A Brand New Task", "description": "Test Description"}
@@ -53,11 +59,17 @@ def get_all_tasks():
             "description": task.description,
             "is_complete": is_complete})
     return jsonify(task_list), 200
-    pass
 
 @task_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
-    pass
+    task = validate_task(task_id)
+    is_complete = complete_or_not(task)
+    return {
+            "id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": is_complete
+        } 
 
 # example response body, status:
 #            { "id": 1,
