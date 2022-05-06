@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request, abort, make_response
 from app.models.task import Task
 from app import db
+from sqlalchemy import desc, asc
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -36,15 +37,11 @@ def create_one_task():
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
     params = request.args
-    if "title" in params:
-        title_name = params["title"]
-        tasks = Task.query.filter_by(title=title_name)
-    elif "description" in params:
-        description_name = params["description"]
-        tasks = Task.query.filter_by(description=description_name)
-    elif "completed_at" in params:
-        completed_at_time = params["completed_at"]
-        tasks = Task.query.filter_by(completed_at=completed_at_time)
+    if "sort" in params :
+        if params["sort"] == "desc":
+            tasks = Task.query.order_by(desc(Task.title)).all()
+        else:
+            tasks = Task.query.order_by(asc(Task.title)).all()
     else:
         tasks = Task.query.all()
 
@@ -58,7 +55,7 @@ def get_all_tasks():
                 "is_complete": bool(task.completed_at)
             }
         )
-    return jsonify(tasks_response)
+    return jsonify(tasks_response), 200
 
 def get_task_or_abort(task_id):
     try:
