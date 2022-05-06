@@ -63,6 +63,7 @@ def test_get_task_not_found(client):
     #raise Exception("Complete test with assertion about response body")
     # *****************************************************************
     assert len(response_body) == 1
+    assert response_body == {"message": "task 1 not found"}
     # *****************************************************************
 
 # Test 5
@@ -134,6 +135,7 @@ def test_update_task_not_found(client):
     #raise Exception("Complete test with assertion about response body")
     # *****************************************************************
     assert len(response_body) == 1
+    assert response_body == {"message": "task 1 not found"}
     # *****************************************************************
 
 # Test 8
