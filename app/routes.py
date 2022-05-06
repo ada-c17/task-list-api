@@ -41,6 +41,12 @@ def check_is_complete(task):
 @tasks_bp.route("", methods=["POST"])
 def handle_tasks():
     request_body = request.get_json()
+
+    if "title" not in request_body or \
+        "description" not in request_body:
+        return jsonify({'details': 'Invalid data'}), 400
+
+
     new_task = Task(title=request_body["title"],
                     description=request_body["description"])
 
@@ -88,3 +94,20 @@ def update_task(task_id):
     }
 
     return make_response(body)
+
+
+@tasks_bp.route("/<task_id>", methods=["DELETE"])
+def delete_task(task_id):
+    task = validate_task(task_id)
+
+    db.session.delete(task)
+    db.session.commit()
+    
+    body = {
+        "details": f'Task {task.task_id} "{task.title}" successfully deleted'
+    }
+
+    return make_response(jsonify(body))
+
+
+
