@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request, abort, make_response
+import sqlalchemy
 from app.models.task import Task
 from app import db
 
@@ -29,7 +30,14 @@ def create_one_task():
 
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
+    sort_query = request.args.get("sort")
     tasks = Task.query.all()
+    
+    if sort_query == "desc":
+        tasks = Task.query.order_by(sqlalchemy.desc(Task.title))
+    elif sort_query == "asc":
+        tasks = Task.query.order_by(sqlalchemy.asc(Task.title))
+
     tasks_response = []
     for task in tasks:
         tasks_response.append(task.get_dict())
