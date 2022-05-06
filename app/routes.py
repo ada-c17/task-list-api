@@ -16,6 +16,9 @@ def handle_tasks():
                 )
         except:
             abort(make_response({"details":"Invalid data"}, 400))
+        
+        if "completed_at" in request_body:
+            task.completed_at = request_body["completed_at"]
 
         db.session.add(task)
         db.session.commit()
