@@ -27,7 +27,7 @@ def create_one_task():
     }, 201 
 
 @tasks_bp.route("", methods=["GET"])
-def get_all_tasks():
+def read_all_tasks():
     tasks = Task.query.all()
     tasks_response = []
     for task in tasks:
@@ -43,7 +43,7 @@ def get_all_tasks():
 
 
 @tasks_bp.route("/<task_id>", methods=["GET"])
-def handle_book(task_id):
+def read_one_task(task_id):
     try: 
         task_id = int(task_id)
     except ValueError:
@@ -60,6 +60,43 @@ def handle_book(task_id):
                 "id" : one_task.task_id,
                 "title": one_task.title,
                 "description": one_task.description,
+                "is_complete": False
+                }
+            }
+    return jsonify(response), 200
+
+
+@tasks_bp.route("/<task_id>", methods=["PUT"])
+def replace_one_task(task_id):
+    try: 
+        task_id = int(task_id)
+    except ValueError:
+        response = {"message":f"Invalid id {task_id}"}
+        return jsonify(response), 400
+    
+    chosen_task = Task.query.get(task_id)
+
+    if chosen_task is None:
+        response = {"message": f"Could not find task with id {task_id}"}
+        return jsonify(response), 404
+    request_body = request.get_json()
+
+    try:
+        chosen_task.title = request_body["title"]
+        chosen_task.description = request_body["description"]
+        
+    
+    except KeyError:
+        return {
+            "message": "title, description, and completed_at are required"
+        } , 400
+
+    db.session.commit()
+
+    return { "task": {
+                "id" : chosen_task.task_id,
+                "title": chosen_task.title,
+                "description": chosen_task.description,
                 "is_complete": False
                 }
             }
