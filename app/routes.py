@@ -16,3 +16,14 @@ def create_task():
     response_body = {"task": new_task.to_dict()}
 
     return make_response(jsonify(response_body), 201)
+
+# retrieve all tasks
+@tasks_bp.route("", methods=["GET"])
+def get_all_tasks():
+    tasks_response = []
+    tasks = Task.query.all()
+
+    for task in tasks:
+        tasks_response.append(task.to_dict())
+    
+    return jsonify(tasks_response)
