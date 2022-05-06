@@ -15,7 +15,6 @@ def create_one_task():
     try:
         title = request_body["title"]
         description = request_body["description"]
-        #completed_at = request_body["completed_at"] if request_body["completed_at"] is not None else None
     except KeyError:
         return {"details": "Invalid data"}, 400
 
