@@ -39,10 +39,19 @@ def create_task():
 
     return make_response(jsonify({"task": response}), 201)
 
+
 @tasks_bp.route("", methods=["GET"])
 def read_all_tasks():
-    tasks = Task.query.all()
-
+    query_params = request.args
+    if 'sort' in query_params: 
+        sort_order_query = request.args.get("sort")
+        if sort_order_query == "asc":
+            tasks = Task.query.order_by(Task.title.asc())
+        elif sort_order_query == "desc":
+            tasks = Task.query.order_by(Task.title.desc())
+    else:
+        tasks = Task.query.all()
+    
     tasks_response = []
     for task in tasks:
         tasks_response.append(
@@ -98,4 +107,5 @@ def delete_one_task(task_id):
     response = (f'Task {task.id} "{task.title}" successfully deleted' )
 
     return make_response(jsonify({"details": response})) 
+
 
