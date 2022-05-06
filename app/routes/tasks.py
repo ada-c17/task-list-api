@@ -130,8 +130,8 @@ def mark_task_complete(id):
 
     slack_response = slack_complete(task)
 
-    confirmation_msg["slack-response"] = slack_response.json()
-
+    #confirmation_msg["slack-response"] = slack_response.json()
+    #for troubleshooting response from Slack API through postman
     return make_response(jsonify(confirmation_msg), 200)
 
 @tasks_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
