@@ -1,5 +1,3 @@
-from asyncio import tasks
-import imp
 from flask import Blueprint, jsonify, abort, make_response, request
 from app.models.task import Task
 from app import db
@@ -41,7 +39,13 @@ def create_one_task():
 
 @tasks_bp.route('', methods=['GET'])
 def get_all_tasks():
-    tasks = Task.query.all()
+    params = request.args.get('sort')
+    if params == 'desc':
+        tasks = Task.query.order_by(Task.title.desc()).all()
+    elif params == 'asc':
+        tasks = Task.query.order_by(Task.title.asc()).all()
+    else:
+        tasks = Task.query.all()
     tasks_response = []
 
     for task in tasks:
