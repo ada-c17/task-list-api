@@ -3,6 +3,6 @@ from app import db
 
 class Task(db.Model):
     task_id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String)
+    title = db.Column(db.String, nullable=True)
     description = db.Column(db.String)
-    completed_at = db.Column(db.DateTime, nullable=True)
+    completed_at = db.Column(db.DateTime)
