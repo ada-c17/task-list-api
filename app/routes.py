@@ -1,8 +1,8 @@
 from asyncio import tasks
 from app import db
 from app.models.task import Task
-from flask import Blueprint, jsonify, make_response, request, abort
-from .helpers import validate
+from flask import Blueprint, jsonify, make_response, request
+from .helpers import call_slack, validate
 from datetime import date
 
 
@@ -81,6 +81,7 @@ def mark_task_complete(task_id):
     task.completed_at = date.today()
 
     db.session.commit()
+    call_slack(f"Someone just completed the task {task.title}")
     return make_response({"task": task.to_json()}, 200)
 
 
