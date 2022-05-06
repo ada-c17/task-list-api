@@ -40,6 +40,16 @@ def one_task(app):
     db.session.add(new_task)
     db.session.commit()
 
+#test
+@pytest.fixture
+def two_task(app):
+    new_task = Task(
+        title="Go on my daily walk 🏞", description="Notice something new every day", completed_at=None)
+    new_task2 = Task(
+        title="Go on my daily walk 🏞", description="Notice something new every day", completed_at=None)
+    db.session.add(new_task)
+    db.session.add(new_task2)
+    db.session.commit()
 
 # This fixture gets called in every test that
 # references "three_tasks"

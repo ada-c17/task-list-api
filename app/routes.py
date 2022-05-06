@@ -15,11 +15,25 @@ def completed_or_not(response):
 
 @task_bp.route("", methods=["POST"])
 def create_tasks():
+    #database_records = Task.query.all()
     response_body = request.get_json()
     
-    new_task = Task(title=response_body["title"], description=response_body["description"])
+    # try:
+    #     if response_body["title"] in database_records:
+    #         print("duplicated")
+    # except ValueError:
+    #     return {"msg": f"Duplicated title in the database records"}
+        
+    try:   
+        new_task = Task(title=response_body["title"], description=response_body["description"])
+    except KeyError:
+        return {
+            "details": "Invalid data" #both title and description are required field
+        }, 400 
     db.session.add(new_task)
     db.session.commit()
+    #else:
+    #    raise ValueError(f"Task {new_title} already exists.")
     
     completed_status = completed_or_not(response_body)
     return {
@@ -57,6 +71,7 @@ def task_validation(taskID):
     
     if valid_task is None:
         rsp = {"msg": f"Given task #{taskID} is not found."}
+        #raise ValueError({"msg": f"Given task #{taskID} is not found."})
         abort(make_response(jsonify(rsp), 404))
 
     return valid_task
@@ -74,4 +89,40 @@ def get_one_task(taskID):
         "is_complete": completed_status
     }}
     return jsonify(rsp), 200
+
+@task_bp.route("/<taskID>", methods=["PUT"])
+def update_task(taskID):
+    task = task_validation(taskID)
+    response_body = request.get_json()
+    completed_status = completed_or_not(response_body)
+    
+    #update this task_id's title and description. *Forgot assign task_id*
+    task.title = response_body["title"]
+    task.description = response_body["description"]
+    
+    #required in our test, but response_body can be optional
+    rsp = {
+        "task": {
+        "id": task.task_id,
+        "title": task.title,
+        "description": task.description,
+        "is_complete": completed_status
+    }}
+    
+    #update in the db
+    db.session.commit()
+    
+    return jsonify(rsp), 200
+    
+    
+@task_bp.route("/<taskID>", methods=["DELETE"])
+def delete_task(taskID):
+    valid_task = task_validation(taskID)
+    valid_task = Task.query.get(taskID)
+    
+    db.session.delete(valid_task)
+    db.session.commit()
+    
+    return {"details": f'Task {valid_task.task_id} \"{valid_task.title}\" successfully deleted'
+    }, 200
     
