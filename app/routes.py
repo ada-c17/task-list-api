@@ -59,3 +59,32 @@ def handle_tasks():
     }
 
     return make_response(jsonify(body), 201)
+
+@tasks_bp.route("/<task_id>", methods=["PUT"])
+def update_task(task_id):
+    
+    task = validate_task(task_id)
+    request_body = request.get_json()
+
+    if "title" not in request_body or \
+        "description" not in request_body:
+        return jsonify({'msg': 'Request must include title and description.'}), 400
+
+
+    task.title = request_body["title"]
+    task.description = request_body["description"]
+
+    db.session.commit() # To make sure the changes go all the way to postgres
+
+    is_complete = check_is_complete(task)
+
+    body = {
+        "task": {
+            "id": task.task_id,
+            "title": task.title ,
+            "description": task.description,
+            "is_complete": is_complete
+        }
+    }
+
+    return make_response(body)
