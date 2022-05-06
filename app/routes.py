@@ -69,15 +69,18 @@ def create_task():
         'description' not in request_body:
         return jsonify({'details': 'Invalid data'}), 400
     
-    new_task = Task(title=request_body['title'], 
+    if 'completed_at' in request_body:
+        new_task = Task(title=request_body['title'], 
+                        description=request_body['description'],
+                        completed_at=datetime.utcnow())
+    else:
+        new_task = Task(title=request_body['title'], 
                     description=request_body['description'])
     
     db.session.add(new_task)
     db.session.commit()
-    
-    response_body = task_response(new_task)
 
-    return response_body, 201
+    return task_response(new_task), 201
 
 @tasks_bp.route('/<task_id>', methods=['PUT'])
 def update_task(task_id):
@@ -90,6 +93,9 @@ def update_task(task_id):
 
     task.title = request_body['title']
     task.description = request_body['description']
+
+    if 'completed_at' in request_body:
+        task.completed_at = datetime.utcnow()
 
     db.session.commit()
 
