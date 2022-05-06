@@ -43,11 +43,18 @@ def assign_tasks_to_goal(goal_id):
 @ goals_bp.route("", methods=["GET"])
 def read_all_goals():
     sort_order = request.args.get("sort")
+    sort_by = request.args.get("sortby")
 
-    if sort_order == "asc":
-        goals = Goal.query.order_by(Goal.title.asc())
+    if sort_order == "asc" or not sort_order:
+        if sort_by == "title" or not sort_by:
+            goals = Goal.query.order_by(Goal.title.asc())
+        elif sort_by == "id":
+            goals = Goal.query.order_by(Goal.goal_id.asc())
     elif sort_order == "desc":
-        goals = Goal.query.order_by(Goal.title.desc())
+        if sort_by == "title" or not sort_by:
+            goals = Goal.query.order_by(Goal.title.desc())
+        elif sort_by == "id":
+            goals = Goal.query.order_by(Goal.goal_id.desc())
     else:
         goals = Goal.query.all()
 

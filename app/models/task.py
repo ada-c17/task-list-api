@@ -15,20 +15,20 @@ class Task(db.Model):
             "id": self.task_id,
             "title": self.title,
             "description": self.description,
-            "is_complete": True if self.completed_at else False,
+            "is_complete": True if self.completed_at else False
         }
 
         if self.goal_id:
             task_dict["goal_id"] = self.goal_id
-
-        # if self.goal:
-        #     task_dict["goal"] = self.goal.title
 
         return task_dict
 
     def update(self, request_body):
         self.title = request_body["title"]
         self.description = request_body["description"]
+
+        if "goal_id" in request_body:
+            self.goal_id = request_body["goal_id"]
 
     @classmethod
     def create(cls, request_body):

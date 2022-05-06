@@ -28,11 +28,18 @@ def add_task():
 @ tasks_bp.route("", methods=["GET"])
 def read_all_tasks():
     sort_order = request.args.get("sort")
+    sort_by = request.args.get("sortby")
 
-    if sort_order == "asc":
-        tasks = Task.query.order_by(Task.title.asc())
+    if sort_order == "asc" or not sort_order:
+        if sort_by == "title" or not sort_by:
+            tasks = Task.query.order_by(Task.title.asc())
+        elif sort_by == "id":
+            tasks = Task.query.order_by(Task.task_id.asc())
     elif sort_order == "desc":
-        tasks = Task.query.order_by(Task.title.desc())
+        if sort_by == "title" or not sort_by:
+            tasks = Task.query.order_by(Task.title.desc())
+        elif sort_by == "id":
+            tasks = Task.query.order_by(Task.task_id.desc())
     else:
         tasks = Task.query.all()
 

@@ -17,18 +17,6 @@ def validate(id, model, name):
     return record
 
 
-# def validate_goal(goal_id):
-#     try:
-#         goal_id = int(goal_id)
-#     except:
-#         return abort(make_response({"message": f"goal {goal_id} invalid"}, 400))
-
-#     goal = Goal.query.get(goal_id)
-#     if not goal:
-#         return abort(make_response({"message": f"goal {goal_id} not found"}, 404))
-#     return goal
-
-
 def call_slack(msg):
     PATH = "https://slack.com/api/chat.postMessage"
 
