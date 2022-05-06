@@ -15,5 +15,10 @@ def create_task():
     db.session.commit()
 
     return {
-        'id' : new_task.task_id
-    }, 201
+        "task": {
+        "id": new_task.task_id,
+        "title": "A Brand New Task",
+        "description": "Test Description",
+        "is_complete": False
+    }
+},201
