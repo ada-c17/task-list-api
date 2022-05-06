@@ -6,6 +6,21 @@ from app import db
 
 tasks_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 
+def validate_task(task_id):
+    try:
+        task_id = int(task_id)
+    except ValueError:
+        response = {"message": f"{task_id} is not valid input."}
+        abort(make_response(jsonify(response), 400))
+    
+    task = Task.query.get(task_id)
+
+    if not task:
+        response = {"message": f"Task: {task_id} does not exist."}
+        abort(make_response(jsonify(response), 404))
+    
+    return task
+
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
     tasks = Task.query.all()
@@ -22,7 +37,7 @@ def get_all_tasks():
 
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
-    task = Task.query.get(task_id)
+    task = validate_task(task_id)
 
     response = {
         "task": {
@@ -59,7 +74,7 @@ def create_one_task():
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
-    task = Task.query.get(task_id)
+    task = validate_task(task_id)
     request_body = request.get_json()
 
     task.title = request_body["title"]
@@ -76,4 +91,16 @@ def update_task(task_id):
         }
     }
 
+    return jsonify(response), 200
+
+@tasks_bp.route("/<task_id>", methods=["DELETE"])
+def delete_one_task(task_id):
+    task = validate_task(task_id)
+
+    db.session.delete(task)
+    db.session.commit()
+
+    response = {
+        "details": f"Task {task.task_id} \"{task.title}\" successfully deleted"
+    }
     return jsonify(response), 200
