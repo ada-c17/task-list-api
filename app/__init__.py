@@ -23,6 +23,7 @@ def create_app(test_config=None):
             "SQLALCHEMY_TEST_DATABASE_URI")
 
     # Import models here for Alembic setup
+    
     from app.models.task import Task
     from app.models.goal import Goal
 
@@ -30,5 +31,7 @@ def create_app(test_config=None):
     migrate.init_app(app, db)
 
     # Register Blueprints here
+    from .routes import  tasks_bp
+    app.register_blueprint(tasks_bp)
 
     return app
