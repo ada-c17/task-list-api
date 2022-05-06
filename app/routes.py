@@ -34,12 +34,7 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
     response_body = {
-        "task": {
-            "id": new_task.task_id,
-            "title": new_task.title,
-            "description": new_task.description,
-            "is_complete": False
-        }
+        "task": new_task.return_task_dict()
     }
 
     return make_response(jsonify(response_body), 201)
@@ -49,24 +44,14 @@ def get_tasks():
     tasks = Task.query.all()
     response = []
     for task in tasks:
-        response.append({
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": False
-        })
+        response.append(task.return_task_dict())
     return jsonify(response)
 
 @task_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = validate_task(task_id)
     response = {
-        "task": {
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": False
-        }
+        "task": task.return_task_dict()
     }
     return jsonify(response)
 
@@ -82,12 +67,7 @@ def update_task(task_id):
     db.session.commit()
 
     response = {
-        "task": {
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": False
-            }
+        "task": task.return_task_dict()
     }
 
     return make_response(jsonify(response), 200)
