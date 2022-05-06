@@ -30,23 +30,23 @@ def validate_task(task_id):
     return task
 
 
-def format_response_body():
+# def format_response_body():
     
-    task_instance = Task()
+#     task_instance = Task
 
-    if task_instance.completed_at:
-        completed_task = True
-    else:
-        completed_task = False
+#     if task_instance.completed_at:
+#         completed_task = True
+#     else:
+#         completed_task = False
     
-    task_response_body = {
-        "id": task_instance.task_id,
-        "title": task_instance.title,
-        "description": task_instance.description,
-        "is_complete": completed_task
-    }
+#     task_response_body = {
+#         "id": task_instance.task_id,
+#         "title": task_instance.title,
+#         "description": task_instance.description,
+#         "is_complete": completed_task
+#     }
 
-    return task_response_body
+#     return task_response_body
 
 
 
@@ -81,55 +81,55 @@ def create_task():
     #     }
     # }
 
-    create_response_body = format_response_body(new_task)
 
-
-            # response_body = jsonify({ "task" :
-            #     {
-            #         "id" : new_task.task_id,
-            #         "title" : new_task.title,
-            #         "description" : new_task.description,
-            #         "is_complete" : False
-            #     }
-                
-            # })
-
-    response_body = jsonify()
+    # response_body = jsonify({ "task" :
+    #     {
+    #         "id" : new_task.task_id,
+    #         "title" : new_task.title,
+    #         "description" : new_task.description,
+    #         "is_complete" : False
+    #     }
+        
+    # })
 
     db.session.add(new_task)
     db.session.commit()
 
     # NEED TO FIX THIS RESPONSE
-    return make_response({response_body}, 201)
+    # return make_response({response_body}, 201)
+    response_body = new_task.format_response_body()
+
+    # return response_body
+    return jsonify({"task": response_body})
 
 
-# ---- GET ALL TASKS ---- #
-@tasks_bp.route("", methods=["GET"])
-def get_all_tasks():
+# # ---- GET ALL TASKS ---- #
+# @tasks_bp.route("", methods=["GET"])
+# def get_all_tasks():
     
-    response_body = []
+#     response_body = []
 
-    tasks = Task.query.all()
+#     tasks = Task.query.all()
 
-    for task in tasks:
-        if task.completed_at == None:
-            response_body.append(
-                {
-                    "id" : task.task_id,
-                    "title" : task.title,
-                    "description" : task.description,
-                    "is_complete" : False
-                }
-            )
-        else:
-            response_body.append(
-                {
-                    "id" : task.task_id,
-                    "title" : task.title,
-                    "description" : task.description,
-                    "is_complete" : True
-                }
-            )
+    # for task in tasks:
+    #     if task.completed_at == None:
+    #         response_body.append(
+    #             {
+    #                 "id" : task.task_id,
+    #                 "title" : task.title,
+    #                 "description" : task.description,
+    #                 "is_complete" : False
+    #             }
+    #         )
+    #     else:
+    #         response_body.append(
+    #             {
+    #                 "id" : task.task_id,
+    #                 "title" : task.title,
+    #                 "description" : task.description,
+    #                 "is_complete" : True
+    #             }
+    #         )
 
 
     # Returned response body should be a list of dictionaries:
@@ -152,16 +152,16 @@ def get_all_tasks():
 
     # return make_response({"task": response_body}, 201)
     # return {"tasks": response_body}, 201
-    return jsonify(response_body)
+    # return jsonify(response_body)
 
 
 
 
 # ---- GET ONE TASK ---- #
-@tasks_bp.route("/<task_id>", methods=["GET"])
-def get_one_task(task_id):
+# @tasks_bp.route("/<task_id>", methods=["GET"])
+# def get_one_task(task_id):
 
-    task = validate_task(task_id)
+#     task = validate_task(task_id)
 
     # Return should be 
     # {
@@ -173,22 +173,22 @@ def get_one_task(task_id):
     #     }
     # }
 
-    return jsonify({"task" : 
-        {
-            "id" : task.task_id,
-            "title" : task.title,
-            "description" : task.description,
-        }
-    })
+    # return jsonify({"task" : 
+    #     {
+    #         "id" : task.task_id,
+    #         "title" : task.title,
+    #         "description" : task.description,
+    #     }
+    # })
 
 
 
 
 # ---- UPDATE ONE TASK ---- #
-@tasks_bp.route("/<task_id>", methods=["GET"])
-def update_task(task_id):
+# @tasks_bp.route("/<task_id>", methods=["GET"])
+# def update_task(task_id):
 
-    task = validate_task(task_id)
+#     task = validate_task(task_id)
 
     # Return should be 
     # {
@@ -200,25 +200,25 @@ def update_task(task_id):
     #     }
     # }
 
-    return jsonify({"task" : 
-        {
-            "id" : task.task_id,
-            "title" : task.title,
-            "description" : task.description,
-        }
-    })
+    # return jsonify({"task" : 
+    #     {
+    #         "id" : task.task_id,
+    #         "title" : task.title,
+    #         "description" : task.description,
+    #     }
+    # })
 
 
 
 # ---- DELETE ONE TASK ---- #
-@tasks_bp.route("/<task_id>", methods=["DELETE"])
-def delete_one_task(task_id):
+# @tasks_bp.route("/<task_id>", methods=["DELETE"])
+# def delete_one_task(task_id):
 
-    task = validate_task(task_id)
+#     task = validate_task(task_id)
 
-    db.session.delete(task)
-    # Commit the changes
-    db.session.commit()
+#     db.session.delete(task)
+#     # Commit the changes
+#     db.session.commit()
 
 
 
