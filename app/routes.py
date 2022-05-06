@@ -27,8 +27,15 @@ def validate_task(task_id):
 
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
-    tasks = Task.query.all()
-
+    params = request.args
+    if "sort" in params:
+        if params["sort"] == "asc":
+            tasks = Task.query.order_by(Task.title.asc()).all()
+        if params["sort"] == "desc":
+            tasks = Task.query.order_by(Task.title.desc()).all()
+    else:
+        tasks = Task.query.all()
+    
     response = []
     for task in tasks:
         response.append({
@@ -38,14 +45,6 @@ def get_all_tasks():
             "is_complete": bool(task.completed_at)
         })
 
-    params = request.args
-    if "sort" in params:
-        if params["sort"] == "asc":
-            response.sort(key=lambda x: x["title"])
-            #response.order_by(Task.title)
-        elif params["sort"] == "desc":
-            response.sort(reverse=True, key=lambda x: x["title"])
-    
     return jsonify(response), 200
 
 
