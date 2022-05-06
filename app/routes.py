@@ -24,7 +24,14 @@ def handle_tasks():
         )
 
     elif request.method == "GET":
+        
         tasks = Task.query.all()
+
+        param = request.args.get("sort")
+        if param:
+            is_desc = True if param == "desc" else False
+            tasks.sort(reverse=is_desc, key=lambda task:task.title)
+            
         res = []
         for task in tasks:
             res.append(
