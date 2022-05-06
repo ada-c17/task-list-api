@@ -4,22 +4,8 @@ from flask import Blueprint, jsonify, make_response, request, abort
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
-@tasks_bp.route("", methods=["GET"])
-def get_tasks():
-    tasks = Task.query.all()
-    tasks_response = []
-    for task in tasks:
-        is_complete = check_is_complete(task)
-        tasks_response.append({"id": task.task_id, "title": task.title, "description": task.description, "is_complete": is_complete})
-    return jsonify(tasks_response)
-
-@tasks_bp.route("/<task_id>", methods =["GET"])
-def get_one_task(task_id):
-    task = validate_task(task_id)
-    is_complete = check_is_complete(task)
-    return {"task": {"id": task.task_id, "title": task.title, "description": task.description, "is_complete": is_complete}}
-
 def validate_task(task_id):
+    '''Takes in one task_id, returns the Task object if it exists, otherwise aborts.'''
     try:
         task_id = int(task_id)
     except:
@@ -38,6 +24,29 @@ def check_is_complete(task):
         return False
     return True
 
+@tasks_bp.route("", methods=["GET"])
+def get_tasks():
+    
+    tasks = Task.query.all()
+    tasks_response = []
+    for task in tasks:
+        is_complete = check_is_complete(task)
+        tasks_response.append({"id": task.task_id, "title": task.title, "description": task.description, "is_complete": is_complete})
+    
+    sort_query = request.args.get("sort")
+    if sort_query == "asc":
+        tasks_response.sort(key=lambda t: t["title"])
+    if sort_query == "desc":
+        tasks_response.sort(reverse=True, key=lambda t: t["title"])
+    return jsonify(tasks_response)
+
+@tasks_bp.route("/<task_id>", methods =["GET"])
+def get_one_task(task_id):
+    task = validate_task(task_id)
+    is_complete = check_is_complete(task)
+    return {"task": {"id": task.task_id, "title": task.title, "description": task.description, "is_complete": is_complete}}
+
+
 @tasks_bp.route("", methods=["POST"])
 def handle_tasks():
     request_body = request.get_json()
@@ -46,7 +55,6 @@ def handle_tasks():
         "description" not in request_body:
         return jsonify({'details': 'Invalid data'}), 400
 
-
     new_task = Task(title=request_body["title"],
                     description=request_body["description"])
 
@@ -54,7 +62,6 @@ def handle_tasks():
     db.session.commit()
     
     is_complete = check_is_complete(new_task)
-
     body = {
         "task": {
             "id": new_task.task_id,
@@ -74,8 +81,7 @@ def update_task(task_id):
 
     if "title" not in request_body or \
         "description" not in request_body:
-        return jsonify({'msg': 'Request must include title and description.'}), 400
-
+        return jsonify({'details': 'Invalid data'}), 400
 
     task.title = request_body["title"]
     task.description = request_body["description"]
