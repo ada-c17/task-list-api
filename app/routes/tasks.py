@@ -7,7 +7,10 @@ tasks_bp = Blueprint("tasks", __name__, url_prefix='/tasks')
 
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
+    params = request.args
+
     tasks = Task.query.all()
+
     tasks_response = []
     for task in tasks:
         tasks_response.append({
@@ -16,6 +19,13 @@ def get_all_tasks():
             "description": task.description,
             "is_complete": False
         })
+
+    # there probably is way to query by sorted
+    if "sort" in params:
+        if params["sort"] == "asc":
+            tasks_response = sorted(tasks_response, key = lambda d: d["title"])
+        else:
+            tasks_response = sorted(tasks_response, key = lambda d: d["title"], reverse=True)
     
     return jsonify(tasks_response)
 
