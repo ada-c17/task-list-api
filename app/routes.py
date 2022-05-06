@@ -1,6 +1,7 @@
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, make_response, request, abort
+from datetime import date
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -55,7 +56,11 @@ def handle_tasks():
         "description" not in request_body:
         return jsonify({'details': 'Invalid data'}), 400
 
-    new_task = Task(title=request_body["title"],
+    if "completed_at" in request_body:
+        new_task = Task(title=request_body["title"],
+                    description=request_body["description"],
+                    completed_at=request_body["completed_at"])
+    else: new_task = Task(title=request_body["title"],
                     description=request_body["description"])
 
     db.session.add(new_task)
@@ -99,6 +104,30 @@ def update_task(task_id):
         }
     }
 
+    return make_response(body)
+
+
+@tasks_bp.route("/<task_id>/<mark>", methods=["PATCH"])
+def update_completion(task_id, mark):
+    task = validate_task(task_id)
+
+    if mark == "mark_incomplete":
+        is_complete = False
+        task.completed_at = None
+    if mark == "mark_complete":
+        is_complete = True
+        task.completed_at = date.today()
+    
+    db.session.commit()
+    
+    body = {
+        "task": {
+            "id": task.task_id,
+            "title": task.title ,
+            "description": task.description,
+            "is_complete": is_complete
+        }
+    }
     return make_response(body)
 
 
