@@ -73,3 +73,25 @@ def get_one_task(task_id):
 
     return task
 
+@tasks_bp.route('/<task_id>', methods=['PUT'])
+def update_task(task_id):
+    task = validate_task(task_id)
+    request_body = request.get_json()
+
+    if isinstance(task, Task):
+        task.title = request_body["title"]
+        task.description = request_body["description"]
+
+        db.session.commit()
+
+        return {
+        "task" : 
+            {
+                "is_complete" : False,
+                "description" : task.description,
+                "title" : task.title,
+                "id" : task.task_id
+            }
+        }, 200
+
+    return task
