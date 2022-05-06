@@ -1,6 +1,7 @@
 from app import db
 from app.models.task import Task
 from flask import Blueprint, request, make_response, jsonify, abort
+from datetime import datetime
 
 
 
@@ -15,7 +16,7 @@ def validate_task(task_id):
     task = Task.query.get(task_id)
 
     if not task:
-        return abort(make_response({"message" : f"Planet {task_id} is not found"}, 404))
+        return abort(make_response({"message" : f"Task {task_id} is not found"}, 404))
     return task
 
 @tasks_bp.route("", methods=["GET"])
@@ -72,3 +73,21 @@ def delete_task(task_id):
     db.session.commit()
 
     return make_response(jsonify({"details": f'Task {task.id} "{task.title}" successfully deleted'}), 200)
+
+@tasks_bp.route('/<task_id>/mark_complete', methods=['PATCH'])
+def mark_task_complete(task_id):
+    task = validate_task(task_id)
+
+    task.completed_at = datetime.now()
+    db.session.commit()
+
+    return make_response(jsonify({"task" : task.to_json()}))
+
+@tasks_bp.route('/<task_id>/mark_incomplete', methods=['PATCH'])
+def mark_task_incomplete(task_id):
+    task = validate_task(task_id)
+
+    task.completed_at = None
+    db.session.commit()
+
+    return make_response(jsonify({"task" : task.to_json()}))
