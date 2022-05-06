@@ -3,6 +3,12 @@ from flask import Blueprint, jsonify, request, abort, make_response
 import sqlalchemy
 from app.models.task import Task
 from app import db
+import requests
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -91,8 +97,12 @@ def delete_one_task(task_id):
 def mark_task_complete(task_id):
     task = validate_task(task_id)
     task.completed_at = datetime.now()
-
     db.session.commit()
+
+    SLACK_URL = 'https://slack.com/api/chat.postMessage'
+    msg_to_post = {"text": f"Someone just completed the task {task.title}", "channel" : "C03EF25FZNW"}
+    auth = os.environ.get('SLACK_BOT_TOKEN')
+    requests.post(SLACK_URL, json=msg_to_post, headers={'Authorization': f'Bearer {auth}'})
 
     rsp = {"task" : task.get_dict()}
     return jsonify(rsp), 200
