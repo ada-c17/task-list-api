@@ -12,72 +12,49 @@ def create_one_task():
         
     db.session.add(new_task)
     db.session.commit()
-    return jsonify({ 'task':
+    return jsonify(
         {"id": new_task.task_id,
         "title": new_task.title,
         "description": new_task.description,
-        "is_complete": new_task.is_complete}
+        "is_complete": bool(new_task.completed_at)
     }), 201
     
-def get_task_or_abort(task_id):
+def validate_task_id(task_id):
     try:
         task_id = int(task_id)
-    except ValueError:
-        rsp = {"msg": f"Invalid id: {task_id}"}
-        abort(make_response(jsonify(rsp), 400))
-    chosen_cat = Task.query.get(task_id)
+    except:
+        abort(make_response({"message": f"Task {task_id} invalid.  Must be numerical"}, 400))
+        
+    task = Task.query.get(task_id)
 
-    if chosen_cat is None:
-        rsp = {"msg": f"Could not find task with id {task_id}"}
-        abort(make_response(jsonify(rsp), 404))
-    return chosen_cat
+    if task is None:
+        abort(make_response({"message": f"Task {task_id} not found"}, 404))
+        
+    return task
 
 @tasks_bp.route('', methods=['GET'])
 def get_all_tasks():
-    params = request.args
-    if "title" in params and "description" in params:
-        title_name = params["title"]
-        description_value = params["description"]
-        cats = Task.query.filter_by(title=title_name, description=description_value)
-    elif "title" in params:
-        title_name = params["title"]
-        tasks = Task.query.filter_by(title=title_name)
-    elif "completed_at" in params:
-        completed_at_value = params["completed at"]
-        tasks = Task.query.filter_by(completed_at=completed_at_value)
-    else:
-        tasks = Task.query.all()
+    tasks = Task.query.all()
     tasks_response = []
     for task in tasks:
         tasks_response.append({
-            'id': task.task_id,
-            'title': task.title,
-            'description': task.description,
-            'completed_at': task.completed_at
+            "id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": bool(task.completed_at)
         })
     return jsonify(tasks_response)
+            
 
-def get_task_or_abort(task_id):
-    try:
-        task_id = int(task_id)
-    except ValueError:
-        rsp = {"msg": f"Invalid id: {task_id}"}
-        abort(make_response(jsonify(rsp), 400))
-    chosen_task = Task.query.get(task_id)
-
-    if chosen_task is None:
-        rsp = {"msg": f"Could not find task with id {task_id}"}
-        abort(make_response(jsonify(rsp), 404))
-    return chosen_task
 
 @tasks_bp.route('/<task_id>', methods=['GET'])
 def get_one_task(task_id):
-    chosen_task = get_task_or_abort(task_id)
+    chosen_task = validate_task_id(task_id)
     rsp = {
         'task id': chosen_task.task_id,
         'title': chosen_task.title,
         'description': chosen_task.description,
-        'is_complete': chosen_task.is_complete
+        'is_complete': bool(chosen_task.completed_at)
     }
     return jsonify(rsp), 200
 
