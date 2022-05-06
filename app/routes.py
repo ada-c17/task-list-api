@@ -31,7 +31,9 @@ def get_all_tasks():
 # retrieve one task by id
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task_by_id(task_id):
-    pass
+    task = validate_task(task_id)
+
+    return {"task": task.to_dict()}
 
 # check for valid task using id
 def validate_task(task_id):
