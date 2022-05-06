@@ -44,12 +44,25 @@ def create_tasks():
         "is_complete": completed_status
     }}, 201
 
+def ascFun(tasks):
+    #tasks = Task.query.all()
+    return list.sort(tasks, key=tasks["title"])
 
 @task_bp.route("", methods=["GET"])
 def get_all_tasks():
-    tasks = Task.query.all()
-    completed_status = completed_or_not(tasks)
-    response_body = []
+    """part of Wave02 sort by asc and desc"""
+    params = request.args
+    response_body, sort_cond = [], ""
+    if "sort" in params:
+        sort_cond = params["sort"]
+        if sort_cond == "asc":
+            tasks = Task.query.order_by(Task.title)
+        elif sort_cond == "desc":
+            tasks = Task.query.order_by(Task.title.desc())
+    else:
+        tasks = Task.query.all()
+    
+    completed_status = completed_or_not(tasks)   
     for task in tasks:
         response_body.append({
             "id": task.task_id, 
