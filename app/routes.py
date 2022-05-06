@@ -48,6 +48,14 @@ def get_one_task(task_id):
         'id': task.task_id,
         'title': task.title,
         'description': task.description,
-        "is_complete": false
+        "is_complete": False
     }}
     return jsonify(rsp), 200
+
+@tasks_bp.route('/<task_id>', methods=['DELETE'])
+def delete_one_task(task_id):
+    task = Task.query.get(task_id)
+    db.session.delete(task)
+    db.session.commit()
+
+    return jsonify({'details': f'Task {task.task_id} \"{task.title}\" successfully deleted'}), 200
