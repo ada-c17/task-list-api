@@ -30,5 +30,8 @@ def create_app(test_config=None):
     migrate.init_app(app, db)
 
     # Register Blueprints here
+    from app.models.task import Task
+    from .routes.routes import bp
+    app.register_blueprint(bp)
 
     return app
