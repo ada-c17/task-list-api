@@ -11,7 +11,7 @@ def validate_task(task_id):
     try:
         task_id = int(task_id)
     except:
-        abort(make_response({"message": f"Task {task_id} invalid"}, 400))
+        abort(make_response({"details": f"Task {task_id} invalid"}, 400))
     
     task = Task.query.get(task_id)
     if not task:
@@ -19,15 +19,20 @@ def validate_task(task_id):
     return task
 
 def check_task_request_body():
+
     request_body = request.get_json()
+
     if "title" not in request_body or "description" not in request_body:
         abort(make_response({"details":"Invalid data"},400))
+
     return request_body
 
 #Route Functions:
 @tasks_bp.route("", methods = ["POST"])
-def post_a_task():
+def post_new_task():
+
     request_body = check_task_request_body()
+
     if "completed_at" in request_body:
         new_task = Task(title = request_body["title"],
                     description = request_body["description"],
@@ -48,6 +53,7 @@ def post_a_task():
 
 @tasks_bp.route("", methods = ["GET"])
 def get_all_tasks():
+
     params = request.args
     if params:
         if params["sort"] == "asc":
@@ -56,6 +62,7 @@ def get_all_tasks():
             tasks= Task.query.order_by(Task.title.desc()).all()
     else:
         tasks = Task.query.all()
+
     tasks_response = []
     for task in tasks:
         tasks_response.append({
@@ -69,81 +76,86 @@ def get_all_tasks():
 
 @tasks_bp.route("/<task_id>", methods = ["GET"])
 def get_one_task(task_id):
-    task = validate_task(task_id)
+
+    chosen_task = validate_task(task_id)
+
     return jsonify({"task":
-            {"id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": task.is_complete
+            {"id": chosen_task.task_id,
+            "title": chosen_task.title,
+            "description": chosen_task.description,
+            "is_complete": chosen_task.is_complete
         }})
 
 @tasks_bp.route("/<task_id>", methods = ["PUT"])
 def update_one_task(task_id):
-    task = validate_task(task_id)
+
+    chosen_task = validate_task(task_id)
     request_body = check_task_request_body()
 
     if "completed_at" in request_body:
-        task.title = request_body["title"]
-        task.description = request_body["description"]
-        task.completed_at = datetime.utcnow()
-        task.is_complete = True
+        chosen_task.title = request_body["title"]
+        chosen_task.description = request_body["description"]
+        chosen_task.completed_at = datetime.utcnow()
+        chosen_task.is_complete = True
     else:
-        task.title = request_body["title"]
-        task.description = request_body["description"]
+        chosen_task.title = request_body["title"]
+        chosen_task.description = request_body["description"]
 
     db.session.commit()
 
     return (make_response({"task":
-            {"id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": task.is_complete,
+            {"id": chosen_task.task_id,
+            "title": chosen_task.title,
+            "description": chosen_task.description,
+            "is_complete": chosen_task.is_complete,
         }}, 200))
 
 @tasks_bp.route("/<task_id>", methods = ["DELETE"])
 def delete_one_task(task_id):
-    task = validate_task(task_id)
+    chosen_task = validate_task(task_id)
 
-    db.session.delete(task)
+    db.session.delete(chosen_task)
     db.session.commit()
-    return (make_response({"details": f"Task {task_id} \"{task.title}\" successfully deleted"}), 200)
+
+    return (make_response({"details":f"Task {task_id} \"{chosen_task.title}\" successfully deleted"}), 200)
 
 
 @tasks_bp.route("/<task_id>/mark_complete", methods = ["PATCH"])
 def patch_mark_complete(task_id):
-    task = validate_task(task_id)
 
-    task.completed_at = datetime.utcnow()
-    task.is_complete = True
+    chosen_task = validate_task(task_id)
+
+    chosen_task.completed_at = datetime.utcnow()
+    chosen_task.is_complete = True
 
     db.session.commit()
     
     return (make_response({"task":
-            {"id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": task.is_complete,
+            {"id": chosen_task.task_id,
+            "title": chosen_task.title,
+            "description": chosen_task.description,
+            "is_complete": chosen_task.is_complete,
         }}, 200))
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods = ["PATCH"])
 def patch_mark_incomplete(task_id):
-    task = validate_task(task_id)
 
-    task.completed_at = None
-    task.is_complete = False
+    chosen_task = validate_task(task_id)
+
+    chosen_task.completed_at = None
+    chosen_task.is_complete = False
 
     db.session.commit()
     
     return (make_response({"task":
-            {"id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": task.is_complete,
+            {"id": chosen_task.task_id,
+            "title": chosen_task.title,
+            "description": chosen_task.description,
+            "is_complete": chosen_task.is_complete,
         }}, 200))
 
 
 goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
-
 
 #Helper Functions:
 def validate_goal(goal_id):
@@ -158,14 +170,19 @@ def validate_goal(goal_id):
     return goal
 
 def check_goal_request_body():
+
     request_body = request.get_json()
+
     if"title" not in request_body:
         abort(make_response({"details": "Invalid data"}, 400))
+
     return request_body
 
 @goals_bp.route("", methods = ["POST"])
 def post_one_goal():
+
     request_body = check_goal_request_body()
+
     new_goal = Goal(title= request_body["title"] )
 
     db.session.add(new_goal)
@@ -178,9 +195,10 @@ def post_one_goal():
 
 @goals_bp.route("", methods = ["GET"])
 def get_all_goals():
-    goals_response = []
-    goals = Goal.query.all()
 
+    goals_response = []
+
+    goals = Goal.query.all()
     for goal in goals:
         goals_response.append({
             "id": goal.goal_id,
@@ -190,29 +208,32 @@ def get_all_goals():
 
 @goals_bp.route("/<goal_id>", methods = ["PUT"])
 def update_one_goal(goal_id):
-    goal = validate_goal(goal_id)
+
+    chosen_goal = validate_goal(goal_id)
     request_body = check_goal_request_body()
     
-    goal.title = request_body["title"]
+    chosen_goal.title = request_body["title"]
 
     db.session.commit()
 
     return jsonify({"goal": {
-        "id": goal.goal_id,
-        "title": goal.title
+        "id": chosen_goal.goal_id,
+        "title": chosen_goal.title
     }})
 
 @goals_bp.route("/<goal_id>", methods = ["GET"])
 def get_one_goal(goal_id):
-    goal = validate_goal(goal_id)
+
+    chosen_goal = validate_goal(goal_id)
 
     return jsonify({"goal": {
-        "id": goal.goal_id,
-        "title": goal.title
+        "id": chosen_goal.goal_id,
+        "title": chosen_goal.title
     }})
 
 @goals_bp.route("/<goal_id>", methods = ["DELETE"])
 def delete_one_goal(goal_id):
+
     chosen_goal = validate_goal(goal_id)
 
     db.session.add(chosen_goal)
