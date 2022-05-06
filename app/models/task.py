@@ -8,9 +8,13 @@ class Task(db.Model):
     completed_at = db.Column(db.DateTime)
 
     def return_task_dict(self):
+        if self.completed_at:
+            status = True
+        else:
+            status = False
         return {
             "id": self.task_id,
             "title": self.title,
             "description": self.description,
-            "is_complete": False
+            "is_complete": status
         }

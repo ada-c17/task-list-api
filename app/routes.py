@@ -3,6 +3,7 @@ from flask import Blueprint, request, make_response, jsonify, abort
 from app import db
 from app.models.task import Task
 from sqlalchemy import desc
+import datetime
 
 task_bp = Blueprint("task", __name__, url_prefix="/tasks")
 
@@ -32,6 +33,9 @@ def create_task():
     except KeyError:
         return make_response({"details": "Invalid data"}, 400)
 
+    if "completed_at" in request_body:
+        new_task.completed_at = request_body["completed_at"]
+    
     db.session.add(new_task)
     db.session.commit()
     response_body = {
@@ -87,5 +91,25 @@ def delete_task(task_id):
     db.session.commit()
 
     response = {'details': f'Task {task_id} "{task.title}" successfully deleted'}
+
+    return make_response(jsonify(response), 200)
+
+@task_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def complete_task(task_id):
+    task = validate_task(task_id)
+
+    task.completed_at = datetime.datetime.now()
+    db.session.commit()
+    response = {"task": task.return_task_dict()}
+
+    return make_response(jsonify(response), 200)
+
+@task_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def mark_incomplete(task_id):
+    task = validate_task(task_id)
+
+    task.completed_at = None
+    db.session.commit()
+    response = {"task": task.return_task_dict()}
 
     return make_response(jsonify(response), 200)
