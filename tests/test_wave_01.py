@@ -13,6 +13,9 @@ def test_get_tasks_no_saved_tasks(client):
     assert response.status_code == 200
     assert response_body == []
 
+
+
+
 # ----- TEST TWO ----- #
 @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_one_saved_tasks(client, one_task):
@@ -31,6 +34,10 @@ def test_get_tasks_one_saved_tasks(client, one_task):
             "is_complete": False
         }
     ]
+
+
+
+
 
 # ----- TEST THREE ----- #
 @pytest.mark.skip(reason="No way to test this feature yet")
@@ -51,6 +58,10 @@ def test_get_task(client, one_task):
         }
     }
 
+
+
+
+
 # ----- TEST FOUR ----- #
 # ----- PASSED ----- #
 # @pytest.mark.skip(reason="No way to test this feature yet")
@@ -62,6 +73,9 @@ def test_get_task_not_found(client):
     # Assert
     assert response.status_code == 404
     assert response_body == {"message" : f"This task is not found."}
+
+
+
 
 
 # ----- TEST FIVE ----- #
@@ -91,6 +105,10 @@ def test_create_task(client):
     assert new_task.description == "Test Description"
     assert new_task.completed_at == None
 
+
+
+
+
 # ----- TEST SIX ----- #
 @pytest.mark.skip(reason="No way to test this feature yet")
 def test_update_task(client, one_task):
@@ -117,6 +135,10 @@ def test_update_task(client, one_task):
     assert task.description == "Updated Test Description"
     assert task.completed_at == None
 
+
+
+
+
 # ----- TEST SEVEN ----- #
 @pytest.mark.skip(reason="No way to test this feature yet")
 def test_update_task_not_found(client):
@@ -135,6 +157,9 @@ def test_update_task_not_found(client):
     # **Complete test with assertion about response body***************
     # *****************************************************************
 
+
+
+
 # ----- TEST EIGHT----- #
 @pytest.mark.skip(reason="No way to test this feature yet")
 def test_delete_task(client, one_task):
@@ -146,9 +171,13 @@ def test_delete_task(client, one_task):
     assert response.status_code == 200
     assert "details" in response_body
     assert response_body == {
-        "details": 'Task 1 "Go on my daily walk 🏞" successfully deleted'
+        "details": 'Task 1 "Go on my daily walk 🏞 " successfully deleted'
     }
     assert Task.query.get(1) == None
+
+
+
+
 
 # ----- TEST NINE ----- #
 @pytest.mark.skip(reason="No way to test this feature yet")
@@ -167,6 +196,10 @@ def test_delete_task_not_found(client):
 
     assert Task.query.all() == []
 
+
+
+
+
 # ----- TEST TEN ----- #
 @pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_task_must_contain_title(client):
@@ -183,6 +216,9 @@ def test_create_task_must_contain_title(client):
         "details": "Invalid data"
     }
     assert Task.query.all() == []
+
+
+
 
 # ----- TEST ELEVEN ----- #
 @pytest.mark.skip(reason="No way to test this feature yet")
