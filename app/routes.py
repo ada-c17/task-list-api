@@ -11,10 +11,18 @@ def validate_task(task_id):
         return jsonify({"msg" : f"'{task_id}' is invalid"}), 400
     
     task = Task.query.get(task_id)
-
     if not task:
         return jsonify({"message" : f"Could not find '{task_id}'"}), 404
-    return task
+        
+    return {
+        "task" : 
+            {
+                "is_complete" : False,
+                "description" : task.description,
+                "title" : task.title,
+                "id" : task.task_id
+            }
+        }, 200
 
 @tasks_bp.route('', methods=['POST'])
 def create_task():
@@ -55,3 +63,8 @@ def get_tasks():
         )
 
     return jsonify(tasks_response), 200
+
+@tasks_bp.route('/<task_id>', methods=['GET'])
+def get_one_task(task_id):
+    task = validate_task(task_id)
+    return task
