@@ -56,21 +56,20 @@ def get_one_task(id):
     
     return make_response(jsonify(response_body), 200)
 
-
 @task_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
 
     try:
-        if not request_body["completed_at"]:
-            new_task = Task(
-                title=request_body["title"],
-                description=request_body["description"])
-        else:
+        if 'completed_at' in request_body:
             new_task = Task(
                 title=request_body["title"],
                 description=request_body["description"],
                 completed_at=request_body["completed_at"])
+        else:
+            new_task = Task(
+                title=request_body["title"],
+                description=request_body["description"])
     except KeyError:
         return abort(make_response(jsonify({"details":"Invalid data"}), 400))
 
@@ -93,13 +92,15 @@ def update_task(id):
     request_body = request.get_json()
 
     try:
-        task.title = request_body["title"]
-        task.description = request_body["description"]
+        if 'completed_at' in request_body:
+            task.title = request_body["title"]
+            task.description = request_body["description"]
+            task.completed_at = request_body["completed_at"]
+        else:
+            task.title = request_body["title"]
+            task.description = request_body["description"]
     except KeyError:
         return abort(make_response(jsonify({"details":"Invalid data"}), 400))
-
-    task.title = request_body["title"]
-    task.description = request_body["description"]
 
     db.session.commit()
     

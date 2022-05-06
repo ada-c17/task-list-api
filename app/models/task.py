@@ -6,7 +6,5 @@ class Task(db.Model):
     title = db.Column(db.String)
     description = db.Column(db.String)
     completed_at = db.Column(db.DateTime, default=None)
-    # is_completed = db.Column(db.Boolean, default=False)
-    
 
 
