@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request, abort, make_response
 from app.models.task import Task
 from app import db
+from sqlalchemy import asc, select
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -38,8 +39,24 @@ def create_one_task():
 
 @tasks_bp.route('', methods=['GET'])
 def get_all_tasks():
-    tasks = Task.query.all()
+    params = request.args
     task_response = []
+
+    if "sort" in params:
+    # if "sort" in params and params["sort"] == "asc":
+        sort_order = request.args.get('sort')
+        if sort_order == "asc":
+        # task_response = sorted(task_response, key=lambda d: d['title']) 
+        # task_response = select(Task.query.all()).order_by(asc(Task.title))
+            tasks = Task.query.order_by(Task.title.asc())
+    # elif "sort" in params and params["sort"] == "desc":
+        elif sort_order =="desc":
+    #     task_response = sorted(task_response, key=lambda d: d['title'], reverse=True) 
+            tasks = Task.query.order_by(Task.title.desc())
+    
+    else:
+        tasks = Task.query.all()
+
     for task in tasks:
         task_response.append({
             "id": task.task_id,
@@ -47,6 +64,7 @@ def get_all_tasks():
             "description": task.description,
             "is_complete": False
     })
+
     return jsonify(task_response), 200
 
 @tasks_bp.route('/<task_id>', methods=['GET'])
@@ -61,7 +79,7 @@ def get_one_task(task_id):
     return jsonify({"task": response}), 200
 
 @tasks_bp.route('/<task_id>', methods=['PUT'])
-def update_one_task(task_id):
+def put_one_task(task_id):
     one_task = validate_id(task_id)
     request_body = request.get_json()
     if 'title' not in request_body or 'description' not in request_body:
@@ -89,5 +107,28 @@ def delete_one_task(task_id):
     db.session.commit()
 
     return {"details": f'Task {one_task.task_id} "{one_task.title}" successfully deleted'}, 200
+
+@tasks_bp.route('/<task_id>', methods=['PATCH'])
+def patch_one_task(task_id):
+    one_task = validate_id(task_id)
+    request_body = request.get_json()
+    if 'title' not in request_body or 'description' not in request_body:
+        return {
+            "details": "Invalid data"
+        }, 400
+
+    one_task.title = request_body["title"]
+    one_task.description = request_body["description"]
+
+    db.session.commit()
+
+    response = {
+        "id": one_task.task_id,
+        "title": one_task.title,
+        "description": one_task.description,
+        "is_complete": False
+    }
+    return jsonify({"task": response}), 200
+
 
 
