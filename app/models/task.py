@@ -26,7 +26,12 @@ class Task(db.Model):
             instance_dict["is_complete"] = False
         return instance_dict
 
-
+    def update_self(self, data_dict):
+        for key in data_dict.keys():
+            if hasattr(self, key):
+                setattr(self, key, data_dict[key])
+            else:
+                raise ValueError(key)
 
 
     # Class Methods
