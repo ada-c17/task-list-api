@@ -156,7 +156,7 @@ def test_delete_task_not_found(client):
     assert Task.query.all() == []
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_task_must_contain_title(client):
     # Act
     response = client.post("/tasks", json={
