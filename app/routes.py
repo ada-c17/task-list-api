@@ -22,19 +22,13 @@ def format_response(task):
     response = {
     "task" : 
         {
-            "is_complete" : check_if_task_complete(task),
+            "is_complete" : bool(task.completed_at),
             "description" : task.description,
             "title" : task.title,
             "id" : task.task_id
         }
     }
     return response
-
-def check_if_task_complete(task):
-    if task.completed_at == None:
-        return False
-    return True
-
 
 @tasks_bp.route('', methods=['POST'])
 def create_task():
@@ -76,7 +70,7 @@ def get_tasks():
     for task in tasks:
         tasks_response.append(
             {
-                "is_complete" : check_if_task_complete(task),
+                "is_complete" : bool(task.completed_at),
                 "description" : task.description,
                 "title" : task.title,
                 "id" : task.task_id
