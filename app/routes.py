@@ -55,6 +55,8 @@ def get_all_tasks():
 
     tasks = Task.query.all()
 
+    query_param = request.args.get("sort")
+
     for task in tasks:
         if task.completed_at == None:
             tasks_response.append(
@@ -74,6 +76,14 @@ def get_all_tasks():
                     "is_complete" : True
                 }
             )
+    
+
+
+    if query_param == "asc":
+        tasks_response = sorted(tasks_response, key=lambda a: a["title"])
+    elif query_param == "desc":
+        tasks_response = sorted(tasks_response, key=lambda d: d["title"], reverse=True)
+
 
     return jsonify(tasks_response)
 
@@ -93,6 +103,24 @@ def get_one_task(task_id):
             "is_complete" : False
         }
     })
+
+
+
+
+# ---- GET TASKS IN ASCENDING ORDER ---- #
+# Expected: "title" : "A", then "title" : "B"
+
+
+# request.args.get("sort")
+# if sort is asc --> do this
+# if sort is desc --> do this 
+
+
+
+# ---- GET TASKS IN DESCENDING ORDER ---- #
+# Expected: "title" : "B", then "title" : "A"
+
+
 
 
 
