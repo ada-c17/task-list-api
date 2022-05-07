@@ -1,9 +1,12 @@
 from app.models.task import Task
 import pytest
 
+# ----- TESTS FOR GET ----- #
+
+
 # ----- TEST ONE ----- #
 # ----- PASSED ----- #
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_no_saved_tasks(client):
     # Act
     response = client.get("/tasks")
@@ -17,7 +20,7 @@ def test_get_tasks_no_saved_tasks(client):
 
 
 # ----- TEST TWO ----- #
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_one_saved_tasks(client, one_task):
     # Act
     response = client.get("/tasks")
@@ -78,6 +81,12 @@ def test_get_task_not_found(client):
 
 
 
+# ----- TESTS FOR POST ----- #
+
+
+
+
+
 # ----- TEST FIVE ----- #
 # ----- PASSED ----- #
 # @pytest.mark.skip(reason="No way to test this feature yet")
@@ -106,6 +115,11 @@ def test_create_task(client):
     assert new_task.description == "Test Description"
     assert new_task.completed_at == None
 
+
+
+
+
+# ----- TESTS FOR PUT ----- #
 
 
 
@@ -161,6 +175,13 @@ def test_update_task_not_found(client):
 
 
 
+
+
+# ----- TESTS FOR DELETE ----- #
+
+
+
+
 # ----- TEST EIGHT----- #
 @pytest.mark.skip(reason="No way to test this feature yet")
 def test_delete_task(client, one_task):
@@ -196,6 +217,15 @@ def test_delete_task_not_found(client):
     # *****************************************************************
 
     assert Task.query.all() == []
+
+
+
+
+
+
+
+
+# ----- MORE TESTS FOR POST ----- #
 
 
 
