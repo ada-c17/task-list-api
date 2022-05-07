@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, abort, make_response
+from flask import Blueprint, jsonify, request
 from app import db
 from app.models.task import Task
 from sqlalchemy import desc, asc
@@ -49,6 +49,10 @@ def create_task():
         description = request_body['description'],
         title = request_body['title']
     )
+
+    if "completed_at" in request_body:
+        new_task.completed_at = request_body['completed_at']
+
     db.session.add(new_task)
     db.session.commit()
     
@@ -100,6 +104,9 @@ def update_task(task_id):
         task.title = request_body["title"]
         task.description = request_body["description"]
         db.session.commit()
+
+        if "completed_at" in request_body:
+            task.completed_at = request_body['completed_at']
 
         return format_response(task), 200
     return task

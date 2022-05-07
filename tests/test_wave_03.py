@@ -140,9 +140,6 @@ def test_mark_incomplete_missing_task(client):
     assert Task.query.all() == []
 
 
-# Let's add this test for creating tasks, now that
-# the completion functionality has been implemented
-@pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_task_with_valid_completed_at(client):
     # Act
     response = client.post("/tasks", json={
@@ -170,9 +167,6 @@ def test_create_task_with_valid_completed_at(client):
     assert new_task.completed_at
 
 
-# Let's add this test for updating tasks, now that
-# the completion functionality has been implemented
-@pytest.mark.skip(reason="No way to test this feature yet")
 def test_update_task_with_completed_at_date(client, completed_task):
     # Act
     response = client.put("/tasks/1", json={
