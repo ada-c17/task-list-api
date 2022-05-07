@@ -28,17 +28,16 @@ def create_goal():
     request_body = request.get_json()
     
     try:
-        completed = request_body.get("completed_at")
-        if completed:
-            new_goal = Goal(
-                title = request_body["title"],
-                description = request_body["description"],
-                completed_at = request_body["completed_at"]
-            )
-        else:
-            new_goal = Goal(
-                title = request_body["title"],
-                description = request_body["description"]
+        # completed = request_body.get("completed_at")
+        # if completed:
+        #     new_goal = Goal(
+        #         title = request_body["title"],
+        #         description = request_body["description"],
+        #         completed_at = request_body["completed_at"]
+        #     )
+        # else:
+        new_goal = Goal(
+            title = request_body["title"]
         )
 
         db.session.add(new_goal)
@@ -47,10 +46,11 @@ def create_goal():
 
     db.session.commit()
     
-    goal = Goal.query.get(int(new_goal.goal_id))
-    is_complete = bool(goal.completed_at)
+    # goal = Goal.query.get(int(new_goal.goal_id))
+    # is_complete = bool(goal.completed_at)
 
-    return make_response({"goal": goal.to_dict(is_complete)}, 201)
+    return make_response({"goal": new_goal.to_dict()}, 201)
+    # return make_response({"goal": goal.to_dict(is_complete)}, 201)
 
 @goal_bp.route("", methods=["GET"])
 def read_all_goals():
@@ -77,18 +77,20 @@ def read_all_goals():
 
     goals_response = []
     for goal in goals:
-        is_complete = bool(goal.completed_at)
+        # is_complete = bool(goal.completed_at)
 
-        goals_response.append(goal.to_dict(is_complete))
+        # goals_response.append(goal.to_dict(is_complete))
+        goals_response.append(goal.to_dict())
 
     return jsonify(goals_response)
 
 @goal_bp.route("/<goal_id>", methods=["GET"])
 def get_one_goal(goal_id):
     goal = validate_goal(goal_id)
-    is_complete = bool(goal.completed_at)
+    # is_complete = bool(goal.completed_at)
     
-    return {"goal": goal.to_dict(is_complete)}
+    return {"goal": goal.to_dict()}
+    # return {"goal": goal.to_dict(is_complete)}
 
 @goal_bp.route("/<goal_id>", methods=["PUT"])
 def replace_goal(goal_id):
@@ -97,55 +99,57 @@ def replace_goal(goal_id):
     request_body = request.get_json()
 
     goal.title = request_body["title"]
-    goal.description = request_body["description"]
-    completed = request_body.get("completed_at")
-    if completed:
-        goal.completed_at = request_body["completed_at"]
-    is_complete = bool(goal.completed_at)
+    # completed = request_body.get("completed_at")
+    # if completed:
+    #     goal.completed_at = request_body["completed_at"]
+    # is_complete = bool(goal.completed_at)
 
     db.session.commit()
 
-    return {"goal": goal.to_dict(is_complete)}
+    return {"goal": goal.to_dict()}
+    # return {"goal": goal.to_dict(is_complete)}
 
 @goal_bp.route("/<goal_id>/mark_complete", methods=["PATCH"])
 def complete_goal(goal_id):
     goal = validate_goal(goal_id)
     request_body = request.get_json()
     
-    goal.completed_at = datetime.utcnow()
-    is_complete = bool(goal.completed_at)
+    # goal.completed_at = datetime.utcnow()
+    # is_complete = bool(goal.completed_at)
 
     title = request_body.get("title")
 
     if title:
         goal.title = request_body["title"]
-        auth_token = os.environ.get("Authorization")
-        headers = {
-            "Authorization": auth_token,
-            "Content-Type": "application/json; charset=utf-8"
-            }
+        # auth_token = os.environ.get("Authorization")
+        # headers = {
+        #     "Authorization": auth_token,
+        #     "Content-Type": "application/json; charset=utf-8"
+        #     }
 
-        data = {
-            "channel": 'test-channel',
-            "text": f"Someone just completed the goal {title}"
-        }
+        # data = {
+        #     "channel": 'test-channel',
+        #     "text": f"Someone just completed the goal {title}"
+        # }
 
-        slack_response = requests.post("https://slack.com/api/chat.postMessage", headers=headers, json=data)
+        # slack_response = requests.post("https://slack.com/api/chat.postMessage", headers=headers, json=data)
 
     db.session.commit()
     
-    return {"goal": goal.to_dict(is_complete)}
+    return {"goal": goal.to_dict()}
+    # return {"goal": goal.to_dict(is_complete)}
 
 @goal_bp.route("/<goal_id>/mark_incomplete", methods=["PATCH"])
 def incomplete_goal(goal_id):
     goal = validate_goal(goal_id)
     
     goal.completed_at = None
-    is_complete = bool(goal.completed_at)
+    # is_complete = bool(goal.completed_at)
 
     db.session.commit()
 
-    return {"goal": goal.to_dict(is_complete)}
+    return {"goal": goal.to_dict()}
+    # return {"goal": goal.to_dict(is_complete)}
 
 @goal_bp.route("/<goal_id>", methods=["DELETE"])
 def delete_goal(goal_id):
