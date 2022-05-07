@@ -90,6 +90,7 @@ def test_get_task_not_found(client):
 
 
 # ----- TEST FIVE ----- #
+# ----- PASSED ----- #
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_task(client):
     # Act

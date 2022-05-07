@@ -102,14 +102,36 @@ def get_one_task(task_id):
 def create_task():
     
     request_body = request.get_json()
+
     new_task = Task(title=request_body["title"],
                     description=request_body["description"])
+
+
+    # response_body = jsonify({ "task" : 
+    #     {
+    #         "id" : new_task.task_id,
+    #         "title" : new_task.title,
+    #         "description" : new_task.description,
+    #         "is_complete" : False
+    #     }
+    # })
 
     db.session.add(new_task)
     db.session.commit()
 
+    response_body = jsonify({"task" : 
+        {
+            "id" : new_task.task_id,
+            "title" : new_task.title,
+            "description" : new_task.description,
+            "is_complete" : False
+        }
+    })
+
+
     # NEED TO FIX THIS RESPONSE
-    return make_response({"task": new_task}, 201)
+    # return make_response(response_body, 201)
+    return response_body, 201
 
 
 
