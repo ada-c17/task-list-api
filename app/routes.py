@@ -1,5 +1,7 @@
 import json
 from os import abort
+from xmlrpc.client import DateTime
+from attr import validate
 from sqlalchemy import true
 from app import db
 from app.models.task import Task
@@ -107,15 +109,6 @@ def create_task():
                     description=request_body["description"])
 
 
-    # response_body = jsonify({ "task" : 
-    #     {
-    #         "id" : new_task.task_id,
-    #         "title" : new_task.title,
-    #         "description" : new_task.description,
-    #         "is_complete" : False
-    #     }
-    # })
-
     db.session.add(new_task)
     db.session.commit()
 
@@ -128,10 +121,33 @@ def create_task():
         }
     })
 
-
-    # NEED TO FIX THIS RESPONSE
-    # return make_response(response_body, 201)
     return response_body, 201
+
+
+
+# ---- UPDATE A TASK ---- #
+@tasks_bp.route("/<task_id>", methods=["PUT"])
+def update_task(task_id):
+    
+    task_to_update = validate_task(task_id)
+
+    request_body = request.get_json()
+
+    task_to_update.title = request_body["title"]
+    task_to_update.description = request_body["description"]
+
+    db.session.commit()
+
+    response_body = jsonify({"task" : 
+        {
+            "id" : task_to_update.task_id,
+            "title" : task_to_update.title,
+            "description" : task_to_update.description,
+            "is_complete" : False
+        }
+    })
+
+    return response_body, 200
 
 
 
