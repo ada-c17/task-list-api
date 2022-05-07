@@ -229,6 +229,7 @@ def test_delete_task_not_found(client):
 
 
 # ----- TEST TEN ----- #
+# ----- PASSED ----- #
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_task_must_contain_title(client):
     # Act
@@ -249,7 +250,8 @@ def test_create_task_must_contain_title(client):
 
 
 # ----- TEST ELEVEN ----- #
-@pytest.mark.skip(reason="No way to test this feature yet")
+# ----- PASSED ----- #
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_task_must_contain_description(client):
     # Act
     response = client.post("/tasks", json={

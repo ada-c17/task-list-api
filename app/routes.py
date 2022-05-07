@@ -105,16 +105,17 @@ def create_task():
     
     request_body = request.get_json()
 
+    # Title or Description is not in request body, return 400 response
     if not "title" in request_body or not "description" in request_body:
         return jsonify({
             "details" : "Invalid data"
         }), 400
 
-
+    # Create new Task instance
     new_task = Task(title=request_body["title"],
                     description=request_body["description"])
 
-
+    # Add new task and commit change
     db.session.add(new_task)
     db.session.commit()
 
