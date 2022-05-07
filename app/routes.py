@@ -179,7 +179,8 @@ def mark_as_complete(task_id):
         # Set completed_at as the datetime value
         task_to_mark_complete.completed_at = datetime.utcnow()
 
-    # If task is already marked complete or was marked above, return response body
+    # If task is already marked as 'complete' 
+    # (aka datetime value), return the response body where 'is_complete' is True
     if task_to_mark_complete.completed_at:
         # If it's marked, set is_complete to True
         response_body = jsonify({"task" : 
@@ -199,6 +200,7 @@ def mark_as_complete(task_id):
 
 
 # ---- COMPLETED TASK, MARK IT AS INCOMPLETE ---- #
+# ---- ALSO INCOMPLETED TASK, MARK IT AS INCOMPLETE ---- #
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_as_incomplete(task_id):
     # Get the specific task to mark
@@ -208,7 +210,8 @@ def mark_as_incomplete(task_id):
     if task_to_mark_incomplete.completed_at:
         task_to_mark_incomplete.completed_at = None
         
-        
+    # If task is already marked as 'incomplete' 
+    # (aka Null or None), return the response body where 'is_complete'is False
     if not task_to_mark_incomplete.completed_at:
         response_body = jsonify({"task" : 
             {
