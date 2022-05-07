@@ -32,7 +32,7 @@ def test_get_tasks_one_saved_tasks(client, one_task):
     ]
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_task(client, one_task):
     # Act
     response = client.get("/tasks/1")
