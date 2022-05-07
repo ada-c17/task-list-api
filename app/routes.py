@@ -19,7 +19,7 @@ def create_task():
     db.session.commit()
 
     if new_task.completed_at != None:
-        new_task.is_complete = True
+        new_task.is_complete == True
 
     return jsonify({'task':
     {'id':new_task.task_id, 
@@ -81,7 +81,7 @@ def update_task(task_id):
     db.session.commit()
     
     if task.completed_at != None:
-        task.is_complete = True
+        task.is_complete == True
 
     return jsonify({'task':
         {'id':task.task_id, 
@@ -89,3 +89,12 @@ def update_task(task_id):
         'description':task.description, 
         'is_complete':task.is_complete}
         })
+
+@tasks_bp.route('/<task_id>', methods=["DELETE"])
+def delete_task(task_id):
+    task = validate_task_id(task_id)
+
+    db.session.delete(task)
+    db.session.commit()
+
+    return make_response({"details": f"Task {task_id} \"{task.title}\" successfully deleted"})
