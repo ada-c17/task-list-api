@@ -167,16 +167,19 @@ def update_task(task_id):
 # ------------------------ PATCH REQUESTS ------------------------ #
 
 # ---- INCOMPLETED TASK, MARK IT AS COMPLETE ---- #
+# ---- ALSO INCOMPLETED TASK, MARK IT AS COMPLETE ---- #
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_as_complete(task_id):
 
     # Get the specific task to mark
     task_to_mark_complete = Task.query.get(task_id)
 
+    # If task is incomplete (aka set to None), assign a datatime value to it
     if task_to_mark_complete.completed_at == None:
         # Set completed_at as the datetime value
         task_to_mark_complete.completed_at = datetime.utcnow()
 
+    # If task is already marked complete or was marked above, return response body
     if task_to_mark_complete.completed_at:
         # If it's marked, set is_complete to True
         response_body = jsonify({"task" : 

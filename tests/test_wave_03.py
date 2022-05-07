@@ -67,6 +67,7 @@ def test_mark_incomplete_on_complete_task(client, completed_task):
 
 
 # ----- TEST THREE ----- #
+# ----- PASSED ----- #
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_mark_complete_on_completed_task(client, completed_task):
     # Arrange
