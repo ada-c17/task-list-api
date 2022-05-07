@@ -18,6 +18,19 @@ def validate_task(task_id):
 
     return task
 
+def make_task_dict(task):
+    task_dict = {"task": {
+            "id": task.id,
+            "title": task.title,
+            "description": task.description,
+    }}
+    if task.completed_at:
+        task_dict["task"]["is_complete"] = True
+    else:
+        task_dict["task"]["is_complete"] = False
+
+    return task_dict
+
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
     tasks = Task.query.all()
@@ -56,3 +69,18 @@ def get_one_task(task_id):
     task_response ={"task": task_dict}
 
     return jsonify(task_response), 200
+
+@tasks_bp.route("", methods=["POST"])
+def create_task():
+    request_body = request.get_json()
+    new_task = Task(title=request_body["title"],
+                    description=request_body["description"])
+
+    db.session.add(new_task)
+    db.session.commit()
+
+    task_dict = make_task_dict(new_task)
+
+    return jsonify(task_dict), 201
+
+
