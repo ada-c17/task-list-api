@@ -173,8 +173,9 @@ def mark_as_complete(task_id):
     # Get the specific task to mark
     task_to_mark_complete = Task.query.get(task_id)
 
-    # Set completed_at as the datetime value
-    task_to_mark_complete.completed_at = datetime.utcnow()
+    if task_to_mark_complete.completed_at == None:
+        # Set completed_at as the datetime value
+        task_to_mark_complete.completed_at = datetime.utcnow()
 
     if task_to_mark_complete.completed_at:
         # If it's marked, set is_complete to True
@@ -218,6 +219,21 @@ def mark_as_incomplete(task_id):
     db.session.add(task_to_mark_incomplete)
     db.session.commit()
     return response_body, 200
+
+
+
+
+# ---- COMPLETED TASK, MARK IT AS COMPLETE ---- #
+# @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+# def completed_mark_as_complete(task_id):
+
+#     # Get the specific task to mark
+#     task_to_mark_complete = Task.query.get(task_id)
+
+
+# ---- INCOMPLETED TASK, MARK IT AS INCOMPLETE ---- #
+
+
 
 
 
