@@ -1,4 +1,3 @@
-from urllib.parse import urlencode
 from flask import Blueprint, jsonify, request, make_response, abort
 from app import db
 from datetime import datetime
