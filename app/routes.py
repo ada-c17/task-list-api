@@ -1,6 +1,5 @@
 from os import abort
 from flask import Blueprint, jsonify, request, make_response, abort
-from sqlalchemy import desc, asc
 from app import db
 from datetime import datetime
 from app.models.task import Task
