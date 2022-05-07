@@ -20,7 +20,13 @@ def validate_task(task_id):
 
 @task_bp.route("", methods=["GET"])
 def get_all_saved_tasks():
-    tasks = Task.query.all()
+    sort_query = request.args.get("sort")
+    if sort_query == "asc":
+        tasks = Task.query.order_by(Task.title.asc())
+    elif sort_query == "desc":
+        tasks = Task.query.order_by(Task.title.desc())
+    else:
+        tasks = Task.query.all()
     tasks_response = []
     for task in tasks:
         tasks_response.append(
@@ -44,7 +50,6 @@ def get_one_task(task_id):
     "is_complete": bool(task.completed_at)}
     }) 
     #if this task doesn't exist, it should automatically return empty []
-
 
 @task_bp.route("", methods=["POST"])
 def create_task():
