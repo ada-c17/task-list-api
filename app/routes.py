@@ -1,6 +1,7 @@
 from operator import is_
 from xmlrpc.client import ResponseError
 from flask import Blueprint, request, make_response, jsonify, abort
+from sqlalchemy import null
 from app import db
 from app.models.task import Task 
 
@@ -11,6 +12,10 @@ tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 def create_task():
     request_body = request.get_json()
 
+    if "title" not in request_body or \
+        "description" not in request_body:
+        return make_response({"details": "Invalid data"}), 400
+
     new_task = Task(
         title=request_body["title"], 
         description=request_body["description"])
@@ -18,7 +23,7 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
 
-    if new_task.completed_at != None:
+    if new_task.completed_at != null:
         new_task.is_complete == True
 
     return jsonify({'task':
@@ -84,7 +89,7 @@ def update_task(task_id):
 
     db.session.commit()
     
-    if task.completed_at != None:
+    if task.completed_at != null:
         task.is_complete == True
 
     return jsonify({'task':
