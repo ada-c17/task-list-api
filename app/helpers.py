@@ -22,8 +22,7 @@ def call_slack(msg):
 
     query_params = {
         "channel": "task-notifications",
-        "text": msg,
-        "charset": "utf-8"
+        "text": msg
     }
 
     header = {
