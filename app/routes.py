@@ -58,12 +58,7 @@ def get_all_tasks():
 
     params = request.args
 
-    # query_param = request.args.get("sort")
     all_tasks = Task.query.all()
-
-    if "sort" in params:
-        query_param = request.args.get("sort")
-        # all_tasks = Task.query.filter_by(query_param)
 
     task_response = []
     
@@ -88,10 +83,14 @@ def get_all_tasks():
             )
 
 
-    if query_param == "asc":
-        task_response = sorted(task_response, key=lambda a: a["title"])
-    elif query_param == "desc":
-        task_response = sorted(task_response, key=lambda d: d["title"], reverse=True)
+    # Sorting Response body if there's a query parameter "sort"
+    if "sort" in params:
+        query_param = request.args.get("sort")
+
+        if query_param == "asc":
+            task_response = sorted(task_response, key=lambda a: a["title"])
+        elif query_param == "desc":
+            task_response = sorted(task_response, key=lambda d: d["title"], reverse=True)
 
 
     return jsonify(task_response)
