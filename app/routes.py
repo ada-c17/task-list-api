@@ -51,10 +51,14 @@ def validate_task_id(task_id):
     except ValueError:
         abort(make_response({"msg":f"The task with id {task_id} is invalid"}, 400))
     
-    tasks = Task.query.all()
-    for task in tasks: 
-        if task.task_id == task_id:
-            return task
+    task = Task.query.get(task_id)
+    if task:
+        return task
+
+    # tasks = Task.query.all()
+    # for task in tasks: 
+    #     if task.task_id == task_id:
+    #         return task
 
     abort(make_response({"msg":f"The task with id {task_id} is not found"}, 404))
 
