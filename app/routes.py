@@ -1,9 +1,10 @@
+import json
 from os import abort
-
 from sqlalchemy import true
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, abort, make_response, request
+from tests.conftest import one_task
 
 
 # ---- CREATING BLUEPRINT INSTANCE---- # 
@@ -82,25 +83,25 @@ def create_task():
     # }
 
 
-    # response_body = jsonify({ "task" :
-    #     {
-    #         "id" : new_task.task_id,
-    #         "title" : new_task.title,
-    #         "description" : new_task.description,
-    #         "is_complete" : False
-    #     }
+    response_body = jsonify({ "task" :
+        {
+            "id" : new_task.task_id,
+            "title" : new_task.title,
+            "description" : new_task.description,
+            "is_complete" : False
+        }
         
-    # })
+    })
+
+    # NEED TO FIX THIS RESPONSE
+    # return make_response({response_body}, 201)
 
     db.session.add(new_task)
     db.session.commit()
 
-    # NEED TO FIX THIS RESPONSE
-    # return make_response({response_body}, 201)
-    response_body = new_task.format_response_body()
-
-    # return response_body
-    return jsonify({"task": response_body})
+    # WORKS
+    # response_body = new_task.format_response_body()
+    return jsonify({"task": response_body}), 201
 
 
 # # ---- GET ALL TASKS ---- #
@@ -158,10 +159,12 @@ def create_task():
 
 
 # ---- GET ONE TASK ---- #
-# @tasks_bp.route("/<task_id>", methods=["GET"])
-# def get_one_task(task_id):
+@tasks_bp.route("/<task_id>", methods=["GET"])
+def get_one_task(task_id):
 
-#     task = validate_task(task_id)
+    valid_task = validate_task(task_id)
+
+    this_task = Task.query.get(valid_task)
 
     # Return should be 
     # {
@@ -181,6 +184,10 @@ def create_task():
     #     }
     # })
 
+    # return jsonify("task": task.)
+    response_body = this_task.format_response_body()
+
+    return response_body
 
 
 
