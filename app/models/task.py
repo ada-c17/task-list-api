@@ -1,5 +1,5 @@
-from xmlrpc.client import Boolean
 from app import db
+#from xmlrpc.client import Boolean
 
 
 class Task(db.Model):
