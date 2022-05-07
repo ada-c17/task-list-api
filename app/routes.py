@@ -39,7 +39,7 @@ def validate_task(task_id):
 
 #     if task.completed_at:
 #         is_complete = True
-    
+
 #     return jsonify({"task" : 
 #         {
 #             "id" : task.task_id,
@@ -186,9 +186,12 @@ def update_task(task_id):
 # ------------------------ PATCH REQUESTS ------------------------ #
 
 # ---- INCOMPLETED TASK, MARK IT AS COMPLETE ---- #
-# @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
-# def delete_one_task(task_id):
-#     pass
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def mark_as_complete(task_id):
+
+    # incompleted_to_mark = validate(task_id)
+
+    pass
 
 
 
