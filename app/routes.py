@@ -125,7 +125,7 @@ def delete_one_task(task_id):
     db.session.commit()
 
     response = {
-        "details": f"Task {task.task_id} \"{task.title}\" successfully deleted"
+        "details": f'Task {task.task_id} "{task.title}" successfully deleted'
     }
     return jsonify(response), 200
 
@@ -196,8 +196,11 @@ def validate_goal(goal_id):
 @goals_bp.route("", methods=["POST"])
 def create_one_goal():
     request_body = request.get_json()
-    # could refactor to try and except if no valid title input
-    new_goal = Goal(title=request_body["title"])
+    try:
+        new_goal = Goal(title=request_body["title"])
+    except:
+        response = {"details": "Invalid data"}
+        abort(make_response(jsonify(response), 400))
     db.session.add(new_goal)
     db.session.commit()
 
@@ -234,7 +237,7 @@ def get_one_goal(goal_id):
     return jsonify(response), 200
 
 @goals_bp.route("/<goal_id>", methods=["PUT"])
-def update_one_route(goal_id):
+def update_one_goal(goal_id):
     goal = validate_goal(goal_id)
     request_body = request.get_json()
 
@@ -247,4 +250,14 @@ def update_one_route(goal_id):
             "title": goal.title
         }
     }
+    return jsonify(response), 200
+
+@goals_bp.route("/<goal_id>", methods=["DELETE"])
+def delete_one_route(goal_id):
+    goal = validate_goal(goal_id)
+
+    db.session.delete(goal)
+    db.session.commit()
+
+    response = {"details": f'Goal {goal.goal_id} "{goal.title}" successfully deleted'}
     return jsonify(response), 200
