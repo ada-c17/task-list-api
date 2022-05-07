@@ -7,13 +7,15 @@ class Task(db.Model):
     title = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=False)
     completed_at = db.Column(db.DateTime, nullable=True)
+    goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'), nullable=True)
 
     def to_json(self):
         return {
             'id': self.task_id,
             'title': self.title,
             'description': self.description,
-            'is_complete': self.completed_at != None
+            'is_complete': self.completed_at != None,
+            'goal_id': self.goal_id
         }
     
     @classmethod

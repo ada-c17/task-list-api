@@ -5,9 +5,7 @@ from app.models.task import Task
 from app.models.goal import Goal
 import os
 import requests
-# from dotenv import load_dotenv
 
-# load_dotenv()
 
 task_bp = Blueprint('tasks', __name__, url_prefix = '/tasks')
 goal_bp = Blueprint('goals', __name__, url_prefix = '/goals')
@@ -156,3 +154,21 @@ def delete_goal(goal_id):
     db.session.commit()
 
     return jsonify({'details': f'Goal {goal_id} "{goal.title}" successfully deleted'}), 200
+
+@goal_bp.route('/<goal_id>/tasks', methods = ['POST'])
+def assign_tasks_to_goal(goal_id):
+    goal = Goal.validate_id(goal_id)
+    task_ids = request.get_json()['task_ids']
+    #TODO: validation of input json
+    for task_id in task_ids:
+        task = Task.validate_id(task_id)
+        task.goal_id = goal_id
+        db.session.commit()
+    
+    return jsonify({'id': int(goal_id), 'task_ids': task_ids}), 200
+
+@goal_bp.route('/<goal_id>/tasks', methods = ['GET'])
+def get_all_tasks_of_goal(goal_id):
+    goal = Goal.validate_id(goal_id)
+
+    return jsonify(goal.to_json(include_tasks=True)), 200
