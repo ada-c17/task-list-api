@@ -54,7 +54,7 @@ def get_all_tasks():
     tasks = Task.query.all()
 
     for task in tasks:
-        if task.completed_at == False:
+        if task.completed_at == None:
             tasks_response.append(
                 {
                     "id" : task.task_id,
@@ -73,7 +73,6 @@ def get_all_tasks():
                 }
             )
 
-
     # return make_response({"task": tasks_response}, 201)
     # return {"tasks": tasks_response}, 201
     return jsonify(tasks_response)
@@ -91,6 +90,7 @@ def get_one_task(task_id):
             "id" : task.task_id,
             "title" : task.title,
             "description" : task.description,
+            "is_complete" : False
         }
     })
 
