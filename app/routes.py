@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify, request, abort, make_response
 from app import db
 from app.models.task import Task
+from sqlalchemy import desc, asc
+
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -13,8 +15,8 @@ def validate_task(task_id):
     task = Task.query.get(task_id)
     if not task:
         return jsonify({"message" : f"Could not find '{task_id}'"}), 404
-
     return task
+
 
 def format_response(task):
     response = {
@@ -47,9 +49,19 @@ def create_task():
     
     return format_response(new_task), 201
 
+
 @tasks_bp.route('', methods=['GET'])
 def get_tasks():
-    tasks = Task.query.all()
+
+    # check for sort parameter
+    sort_query = request.args.get("sort")
+    if sort_query == "asc":
+        tasks = Task.query.order_by(asc(Task.title)).all()
+    elif sort_query == "desc":
+        tasks = Task.query.order_by(desc(Task.title)).all()
+    else:
+        tasks = Task.query.all()
+
     tasks_response = []
 
     for task in tasks:
@@ -64,14 +76,15 @@ def get_tasks():
 
     return jsonify(tasks_response), 200
 
+
 @tasks_bp.route('/<task_id>', methods=['GET'])
 def get_one_task(task_id):
     task = validate_task(task_id)
 
     if isinstance(task, Task):
         return format_response(task), 200
-
     return task
+
 
 @tasks_bp.route('/<task_id>', methods=['PUT'])
 def update_task(task_id):
@@ -84,7 +97,6 @@ def update_task(task_id):
         db.session.commit()
 
         return format_response(task), 200
-
     return task
 
 @tasks_bp.route('/<task_id>', methods=['DELETE'])
