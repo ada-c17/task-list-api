@@ -29,7 +29,7 @@ def create_task_dictionary(chosen_task):
             "description": chosen_task.description,
             "is_complete": False
         }
-    else: 
+    else:
         task_dict["task"] = {
             "id": chosen_task.task_id,
             "title": chosen_task.title,
@@ -61,7 +61,7 @@ def get_all_tasks():
             })
     
     if params and params["sort"] == "asc":
-        sorted_tasks = sorted(task_response, key = lambda task:task["title"])
+        sorted_tasks = sorted(task_response, key = lambda task:task["title"]) # referenced Geeksforgeeks
         return jsonify(sorted_tasks), 200
     elif params and params["sort"] == "desc":
         sorted_tasks = sorted(task_response, key = lambda task:task["title"], reverse = True)
@@ -79,10 +79,15 @@ def get_one_task(task_id):
 def create_one_task():
     request_body = request.get_json()
     try:
-
-        chosen_task = Task( title = request_body["title"],
-                    description = request_body["description"]
-                    )
+        if request_body.get("completed_at"):
+            chosen_task = Task( title = request_body["title"],
+                        description = request_body["description"],
+                        completed_at = request_body["completed_at"]
+                        )
+        else:
+            chosen_task = Task( title = request_body["title"],
+                        description = request_body["description"]
+                        )
     except KeyError:
         return {"details": "Invalid data"}, 400
 
