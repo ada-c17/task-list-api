@@ -1,5 +1,7 @@
+from this import d
 from flask import Blueprint, request,jsonify, make_response, abort
 from app.models.task import Task
+from app.models.goal import Goal 
 from app import db 
 from sqlalchemy import desc, asc
 from datetime import datetime 
@@ -10,6 +12,7 @@ from pprint import pprint
 PATH = "https://slack.com/api/chat.postMessage?channel=task-notifications&text="
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
+goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 
 @tasks_bp.route("", methods=["POST"])
 def create_task():
@@ -182,3 +185,90 @@ def delete_task(task_id):
     return jsonify({
         "details": f"Task {task_id} \"{task.title}\" successfully deleted"
     }), 200
+
+@goals_bp.route("", methods=["POST"])
+def create_goal():
+    request_body = request.get_json()
+
+    if "title" not in request_body:
+        return {"details": "Invalid data"}, 400
+    
+    new_goal = Goal(title=request_body["title"])
+
+    db.session.add(new_goal)
+    db.session.commit()
+
+    return {
+        "goal": {
+            "id": new_goal.goal_id,
+            "title": new_goal.title
+        }
+    }, 201
+
+def validate_goal(goal_id):
+    try:
+        goal_id = int(goal_id)
+    except ValueError:
+        return abort(make_response({"message":f"Goal {goal_id} invalid"}, 400))
+
+    goal = Goal.query.get(goal_id)
+
+    if goal is None:
+        abort(make_response({"message":f"Goal {goal_id} not found"}, 404))
+
+    return goal 
+
+
+@goals_bp.route("", methods=["GET"])
+def get_goals():
+    goals = Goal.query.all()
+    goals_response = []
+
+    for goal in goals:
+        goals_response.append({
+            "id": goal.goal_id,
+            "title": goal.title,
+        })
+    
+    return jsonify(goals_response), 200
+    
+@goals_bp.route("/<goal_id>", methods=["GET"])
+def get_goal(goal_id):
+    goal = validate_goal(goal_id)
+
+    return {
+        "goal": {
+            "id": goal.goal_id,
+            "title": goal.title 
+        }
+    }, 200
+
+@goals_bp.route("/<goal_id>", methods=["PUT"])
+def update_goal(goal_id):
+    goal = validate_goal(goal_id)
+    request_body = request.get_json()
+
+    if "title" not in request_body:
+        return {"details": "Invalid data"}, 400
+    else:
+        goal.title = request_body["title"]
+    
+    db.session.commit()
+
+    return {
+        "goal": {
+            "id": goal.goal_id,
+            "title": goal.title,
+        }
+    }, 200
+
+@goals_bp.route("/<goal_id>", methods=["DELETE"])
+def delete_goal(goal_id):
+    goal = validate_goal(goal_id)
+
+    db.session.delete(goal)
+    db.session.commit()
+
+    return {
+        "details": f'Goal {goal_id} "{goal.title}" successfully deleted'
+    }, 200

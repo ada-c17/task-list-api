@@ -1,3 +1,4 @@
+from re import A
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -26,10 +27,11 @@ def create_app(test_config=None):
     from app.models.task import Task
     from app.models.goal import Goal
     from app.routes import tasks_bp
-    
+    from app.routes import goals_bp
     db.init_app(app)
     migrate.init_app(app, db)
 
     # Register Blueprints here
     app.register_blueprint(tasks_bp)
+    app.register_blueprint(goals_bp)
     return app
