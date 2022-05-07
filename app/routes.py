@@ -8,18 +8,27 @@ task_list_bp = Blueprint("task_list", __name__, url_prefix='/tasks')
 @task_list_bp.route('', methods = ['POST'])
 def create_one_task():
     request_body = request.get_json()
+
+    if "description" not in request_body or "title" not in request_body:
+        rsp = {"details": "Invalid data"}
+        abort(make_response(jsonify(rsp), 400))
+
+
     new_task = Task(title=request_body['title'], 
                     description=request_body['description'])
     is_complete = False
     db.session.add(new_task)
     db.session.commit()
-    return{
+    rsp = {
         "task":{
         "id": new_task.task_id,
         "title": new_task.title,
         "description":new_task.description,
         "is_complete": is_complete
-    }}, 201 
+        }
+    }
+
+    return jsonify(rsp), 201
 
 
 def get_task_or_abort(task_id):
@@ -31,7 +40,8 @@ def get_task_or_abort(task_id):
     chosen_task = Task.query.get(task_id)
 
     if chosen_task is None:
-        rsp = {"msg": f"Could not find task with id {task_id}"}
+        #rsp = {"msg": f"Could not find task with id {task_id}"}
+        rsp =  {"msg": "Task not found"}
         abort(make_response(jsonify(rsp), 404))
     return chosen_task
 
@@ -71,18 +81,42 @@ def get_all_tasks():
     return jsonify(tasks_response)
 
 
+
+@task_list_bp.route('/<task_id>', methods = ['PUT'])
+def update_task(task_id):
+    chosen_task = get_task_or_abort(task_id)
+
+    request_body = request.get_json()
+    try:
+        chosen_task.title = request_body["title"]
+        chosen_task.description = request_body["description"]
+        #completed_at
+    except KeyError:
+        return{
+            "msg": "title and description are required"
+        }, 400
+    db.session.commit()
+
+    if chosen_task.completed_at is None:
+        is_complete = False
+    else:
+        is_complete = True
+
+    rsp = {
+        "task": {
+        'id': chosen_task.task_id,
+        'title': chosen_task.title,
+        'description': chosen_task.description,
+        'is_complete': is_complete
+        }
+        #"msg": f"task #{chosen_task.id} successfully replaced"
+    }
+    return jsonify(rsp), 200
+
 @task_list_bp.route('/<task_id>', methods = ['DELETE'])
 def delete_task(task_id):
-    try:
-        task_id = int(task_id)
-    except ValueError:
-        rsp = {"msg": f"Invalid id: {task_id}"}
-        return jsonify(rsp), 400
 
-    chosen_task = Task.query.get(task_id)
-    if chosen_task is None:
-        rsp = {"msg": f"Could not find task with id: {task_id}"}
-        return jsonify(rsp), 404
+    chosen_task = get_task_or_abort(task_id)
 
     db.session.delete(chosen_task)
     db.session.commit()
