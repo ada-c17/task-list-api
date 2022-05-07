@@ -19,9 +19,7 @@ def create_one_task():
         "title": new_task.title,
         "description":new_task.description,
         "is_complete": is_complete
-        #,
-       # "msg": f"Successfully created task with id {new_task.task_id}"
-    }}, 201
+    }}, 201 
 
 
 def get_task_or_abort(task_id):
@@ -52,6 +50,26 @@ def get_one_task(task_id):
         'is_complete': is_complete
     }}
     return jsonify(rsp), 200
+
+
+@task_list_bp.route('', methods = ['GET'])
+def get_all_tasks():
+    tasks = Task.query.all()
+    tasks_response = []
+    for task in tasks:
+        if task.completed_at is None:
+            is_complete = False
+        else:
+            is_complete = True
+
+        tasks_response.append({
+            'id': task.task_id,
+            'title': task.title,
+            'description': task.description,
+            'is_complete': is_complete
+        })
+    return jsonify(tasks_response)
+
 
 @task_list_bp.route('/<task_id>', methods = ['DELETE'])
 def delete_task(task_id):
