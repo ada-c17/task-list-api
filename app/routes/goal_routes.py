@@ -1,6 +1,8 @@
+from asyncio import Task
 from flask import Blueprint
 from app import db
 from app.models.goal import Goal
+from app.models.task import Task
 from flask import Blueprint, jsonify, abort, make_response, request
 import os
 # from .helper import validate_planet
@@ -85,3 +87,51 @@ def delete_a_goal(goal_id):
     db.session.commit()
 
     return make_response({'details':f'Goal {goal.goal_id} "{goal.title}" successfully deleted'},200)
+
+@goal_bp.route("/<goal_id>/tasks", methods=["POST"])
+def create_tasks(goal_id):
+    goal = Goal.query.get(goal_id)
+    goal.tasks = []
+    request_body = request.get_json()
+    task_ids = request_body["task_ids"]
+
+    for task_id in task_ids:
+        task = Task.query.get(task_id)
+        goal.tasks.append(task)
+
+    # refer to the documentation and try
+    # completing this endpoint yourself
+    response_task_ids = []
+    for task in goal.tasks:
+        response_task_ids.append(task.task_id)
+    
+    db.session.commit()
+
+    return {
+            "id": goal.goal_id,
+            "task_ids": response_task_ids
+        }
+
+@goal_bp.route("/<goal_id>/tasks", methods=["GET"])
+def tasks_of_one_goal(goal_id):
+    goal = Goal.query.get(goal_id)
+    tasks = []
+    try:
+        for task in goal.tasks:
+            tasks.append(task.make_json())
+    except:
+        abort(make_response(jsonify(f"goal not found"), 404))
+    
+    db.session.commit()    
+    return {"id":goal.goal_id, "title":goal.title, "tasks" :tasks},200
+
+    # refer to the documentation and try
+    # completing this endpoint yourself
+
+    
+    db.session.commit()
+
+    return {
+            "id": goal.goal_id,
+            "task_ids": response_task_ids
+        }
