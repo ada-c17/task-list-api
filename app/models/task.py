@@ -19,7 +19,7 @@ class Task(db.Model):
             
             return {
                 "id": self.task_id,
-                # "goal_id": self.goal_id,
+                "goal_id": self.goal_id,
                 "title": self.title,
                 "description": self.description,
                 "is_complete": is_complete
