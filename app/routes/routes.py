@@ -1,9 +1,11 @@
-# from turtle import title
 from datetime import datetime
+from email import message
 from flask import Blueprint, jsonify, abort, make_response, request
 from app import db
 from app.models.task import Task
 from sqlalchemy import asc, desc
+import os
+import requests
 
 bp = Blueprint('tasks', __name__, url_prefix='/tasks')
 
@@ -109,12 +111,30 @@ def replace_task(task_id):
 @bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def complete_task(task_id):
     task = validate_task(task_id)
+    request_body = request.get_json()
     
     task.completed_at = datetime.utcnow()
     is_complete = bool(task.completed_at)
 
-    db.session.commit()
+    title = request_body.get("title")
 
+    if title:
+        task.title = request_body["title"]
+        auth_token = os.environ.get("Authorization")
+        headers = {
+            "Authorization": auth_token,
+            "Content-Type": "application/json; charset=utf-8"
+            }
+
+        data = {
+            "channel": 'test-channel',
+            "text": f"Someone just completed the task {title}"
+        }
+
+        slack_response = requests.post("https://slack.com/api/chat.postMessage", headers=headers, json=data)
+
+    db.session.commit()
+    
     return {"task": task.to_dict(is_complete)}
 
 @bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
