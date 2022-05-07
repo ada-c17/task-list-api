@@ -7,7 +7,7 @@ from sqlalchemy import asc, desc
 import os
 import requests
 
-bp = Blueprint('tasks', __name__, url_prefix='/tasks')
+task_bp = Blueprint('tasks', __name__, url_prefix='/tasks')
 
 def validate_task(task_id):
     try:
@@ -23,12 +23,11 @@ def validate_task(task_id):
     return task
 
 
-@bp.route("", methods=["POST"])
+@task_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
     
     try:
-        print(f"Request body: {request_body}")
         completed = request_body.get("completed_at")
         if completed:
             new_task = Task(
@@ -53,7 +52,7 @@ def create_task():
 
     return make_response({"task": task.to_dict(is_complete)}, 201)
 
-@bp.route("", methods=["GET"])
+@task_bp.route("", methods=["GET"])
 def read_all_tasks():
     # title_param = request.args.get("title")
     # description_param = request.args.get("description")
@@ -84,14 +83,14 @@ def read_all_tasks():
 
     return jsonify(tasks_response)
 
-@bp.route("/<task_id>", methods=["GET"])
+@task_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = validate_task(task_id)
     is_complete = bool(task.completed_at)
     
     return {"task": task.to_dict(is_complete)}
 
-@bp.route("/<task_id>", methods=["PUT"])
+@task_bp.route("/<task_id>", methods=["PUT"])
 def replace_task(task_id):
     task = validate_task(task_id)
 
@@ -108,36 +107,41 @@ def replace_task(task_id):
 
     return {"task": task.to_dict(is_complete)}
 
-@bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+@task_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def complete_task(task_id):
+    title = ''
     task = validate_task(task_id)
     request_body = request.get_json()
     
     task.completed_at = datetime.utcnow()
     is_complete = bool(task.completed_at)
 
-    title = request_body.get("title")
+    if request_body:
+        title = request_body.get("title")
 
     if title:
         task.title = request_body["title"]
-        auth_token = os.environ.get("Authorization")
-        headers = {
-            "Authorization": auth_token,
-            "Content-Type": "application/json; charset=utf-8"
-            }
+        
+        # #Call to Slack API
+        # auth_token = os.environ.get("Authorization")
+        # headers = {
+        #     "Authorization": auth_token,
+        #     "Content-Type": "application/json; charset=utf-8"
+        #     }
 
-        data = {
-            "channel": 'test-channel',
-            "text": f"Someone just completed the task {title}"
-        }
+        # data = {
+        #     "channel": 'test-channel',
+        #     "text": f"Someone just completed the task {title}"
+        # }
 
-        slack_response = requests.post("https://slack.com/api/chat.postMessage", headers=headers, json=data)
+        # slack_response = requests.post("https://slack.com/api/chat.postMessage", headers=headers, json=data)
+        # # End of Slack API call
 
     db.session.commit()
     
     return {"task": task.to_dict(is_complete)}
 
-@bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+@task_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def incomplete_task(task_id):
     task = validate_task(task_id)
     
@@ -148,7 +152,7 @@ def incomplete_task(task_id):
 
     return {"task": task.to_dict(is_complete)}
 
-@bp.route("/<task_id>", methods=["DELETE"])
+@task_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
     task = validate_task(task_id)
 

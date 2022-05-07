@@ -31,7 +31,9 @@ def create_app(test_config=None):
 
     # Register Blueprints here
     from app.models.task import Task
-    from .routes.routes import bp
-    app.register_blueprint(bp)
+    from .routes.task_routes import task_bp
+    from .routes.goal_routes import goal_bp
+    app.register_blueprint(task_bp)
+    app.register_blueprint(goal_bp)
 
     return app
