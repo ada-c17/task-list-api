@@ -13,8 +13,7 @@ from tests.conftest import one_task
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
 
-# ---- HELPER FUNCTIONS ---- #
-
+# ------------------------ HELPER FUNCTIONS ------------------------ #
 
 def validate_task(task_id):
     # Check if task_id is a valid integer
@@ -35,17 +34,7 @@ def validate_task(task_id):
 
 
 
-
-# ---- ROUTE FUNCTIONS ---- #
-
-# class Task(db.Model):
-#     task_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     title = db.Column(db.String)
-#     description = db.Column(db.String)
-#     completed_at = db.Column(db.DateTime, nullable=True)
-
-
-
+# ------------------------ GET REQUESTS ------------------------ #
 
 # ---- GET ALL TASKS ---- #
 @tasks_bp.route("", methods=["GET"])
@@ -78,7 +67,6 @@ def get_all_tasks():
             )
     
 
-
     if query_param == "asc":
         tasks_response = sorted(tasks_response, key=lambda a: a["title"])
     elif query_param == "desc":
@@ -106,23 +94,7 @@ def get_one_task(task_id):
 
 
 
-
-# ---- GET TASKS IN ASCENDING ORDER ---- #
-# Expected: "title" : "A", then "title" : "B"
-
-
-# request.args.get("sort")
-# if sort is asc --> do this
-# if sort is desc --> do this 
-
-
-
-# ---- GET TASKS IN DESCENDING ORDER ---- #
-# Expected: "title" : "B", then "title" : "A"
-
-
-
-
+# ------------------------ POST REQUESTS ------------------------ #
 
 
 # ---- CREATE A TASK ---- #
@@ -158,6 +130,7 @@ def create_task():
 
 
 
+# ------------------------ PUT REQUESTS ------------------------ #
 
 # ---- UPDATE A TASK ---- #
 @tasks_bp.route("/<task_id>", methods=["PUT"])
@@ -187,6 +160,25 @@ def update_task(task_id):
     return response_body, 200
 
 
+
+# ------------------------ PATCH REQUESTS ------------------------ #
+
+# ---- INCOMPLETED TASK, MARK IT AS COMPLETE ---- #
+# @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+# def delete_one_task(task_id):
+#     pass
+
+
+
+
+
+
+# ---- COMPLETED TASK, MARK IT AS INCOMPLETE ---- #
+
+
+
+
+# ------------------------ DELETE REQUESTS ------------------------ #
 
 
 # ---- DELETE ONE TASK ---- #
