@@ -128,12 +128,8 @@ def test_update_task_not_found(client):
     assert response.status_code == 404
 
     assert response_body == {"Message": "Task 1 not found"}
-    # *****************************************************************
-    # **Complete test with assertion about response body***************
-    # *****************************************************************
 
-
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_delete_task(client, one_task):
     # Act
     response = client.delete("/tasks/1")
