@@ -163,4 +163,4 @@ def delete_one_task(task_id):
     db.session.commit()
 
     # Need to change this response body  
-    return make_response({"details" : f'Task {task_id} successfully deleted.'}, 200)
+    return make_response({"details" : f"Task {task_id} \" {task.description}\"successfully deleted."}, 200)
