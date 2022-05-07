@@ -106,6 +106,7 @@ def test_mark_complete_on_completed_task(client, completed_task):
 
 
 # ----- TEST FOUR ----- #
+# ----- PASSED ----- #
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_mark_incomplete_on_incomplete_task(client, one_task):
     # Act
@@ -135,11 +136,8 @@ def test_mark_complete_missing_task(client):
 
     # Assert
     assert response.status_code == 404
-
-    raise Exception("Complete test with assertion about response body")
-    # *****************************************************************
-    # **Complete test with assertion about response body***************
-    # *****************************************************************
+    assert response_body == {"message" : f"This task is not found."}
+    
 
 
 # ----- TEST SIX ----- #

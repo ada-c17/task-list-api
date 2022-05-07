@@ -203,8 +203,12 @@ def mark_as_complete(task_id):
 # ---- ALSO INCOMPLETED TASK, MARK IT AS INCOMPLETE ---- #
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_as_incomplete(task_id):
-    # Get the specific task to mark
-    task_to_mark_incomplete = Task.query.get(task_id)
+
+    verified_task = validate_task(task_id)
+
+    if verified_task:
+        # Get the specific task to mark
+        task_to_mark_incomplete = Task.query.get(task_id)
 
     # Task.completed_at is currently marked so set it to None
     if task_to_mark_incomplete.completed_at:
