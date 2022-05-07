@@ -8,6 +8,7 @@ tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 @tasks_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
+
     new_task = Task.from_json(request_body)
 
     db.session.add(new_task)
@@ -25,6 +26,27 @@ def get_all_tasks():
 def get_one_task(task_id):
     task = validate_task(task_id)
     return jsonify({'task':task.to_json()}), 200
+
+@tasks_bp.route("/<task_id>", methods=["PUT"])
+def update_one_task(task_id):
+    task = validate_task(task_id)
+    request_body = request.get_json()
+
+    task.update_task(request_body)
+
+    db.session.commit()
+
+    return jsonify({'task':task.to_json()}), 200
+
+
+@tasks_bp.route("/<task_id>", methods=["DELETE"])
+def delete_task(task_id):
+    task = validate_task(task_id)
+    db.session.delete(task)
+    db.session.commit()
+
+    return jsonify({"details":f'Task {task_id} "{task.title}" successfully deleted'} ), 200
+        
 
 
 

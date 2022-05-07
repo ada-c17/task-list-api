@@ -1,4 +1,5 @@
 from app import db
+from flask import abort, make_response
 
 
 class Task(db.Model):
@@ -15,14 +16,23 @@ class Task(db.Model):
                     "title" : self.title,
                     "description" : self.description,
                     "is_complete" : is_complete}
+    
 
+    def update_task(self, update_body):
+        self.title = update_body["title"]
+        self.description = update_body["description"]
+        self.completed_at = None
 
     @classmethod
     def from_json(cls, request_body):
+
+        if "title" not in request_body or "description" not in request_body:
+            abort(make_response({"details": "Invalid data"}, 400))
+
         new_task = cls(
-            title=request_body['title'],
-            description=request_body['description']
-            )
+            title=request_body["title"],
+            description=request_body["description"])
+        
         return new_task
 
 
