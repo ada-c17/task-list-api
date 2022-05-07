@@ -6,7 +6,6 @@ from app import db
 from datetime import datetime
 from flask.signals import request_finished
 
-
 @pytest.fixture
 def app():
     # create the app with a test config dictionary
