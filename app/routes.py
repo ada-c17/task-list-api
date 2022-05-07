@@ -1,13 +1,13 @@
+import datetime
 from flask import Blueprint, request, jsonify, make_response, abort
 from .models.task import Task
 from app import db
 
 task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 
-def completed_or_not(response):
-    complete = "is_complete"
+def completed_or_not(response_body):
     # [response] iterage in list of object, otherwise, TypeError
-    if complete in [response]: 
+    if response_body and "completed_at" in [response_body]:
         completed_status = True
     else:
         completed_status = False
@@ -15,27 +15,23 @@ def completed_or_not(response):
 
 @task_bp.route("", methods=["POST"])
 def create_tasks():
-    #database_records = Task.query.all()
     response_body = request.get_json()
-    
-    # try:
-    #     if response_body["title"] in database_records:
-    #         print("duplicated")
-    # except ValueError:
-    #     return {"msg": f"Duplicated title in the database records"}
-        
-    try:   
-        new_task = Task(title=response_body["title"], description=response_body["description"])
+    completed_status = False
+    try:
+        if response_body and "completed_at" in response_body:
+            completed_status = True
+            new_task = Task(title=response_body["title"], description=response_body["description"], completed_at=datetime.datetime.utcnow())
+        else:
+            completed_status = False
+            new_task = Task(title=response_body["title"], description=response_body["description"])
     except KeyError:
         return {
             "details": "Invalid data" #both title and description are required field
         }, 400 
+    
     db.session.add(new_task)
     db.session.commit()
-    #else:
-    #    raise ValueError(f"Task {new_title} already exists.")
     
-    completed_status = completed_or_not(response_body)
     return {
         "task": {
         "id": new_task.task_id,
@@ -44,10 +40,21 @@ def create_tasks():
         "is_complete": completed_status
     }}, 201
 
-def ascFun(tasks):
-    #tasks = Task.query.all()
-    return list.sort(tasks, key=tasks["title"])
-
+    #completed_status = completed_or_not(response_body)
+    #print(completed_status)
+    # try:
+    #     if completed_status == True:
+    #         print("pass?")
+    #          #completed_status = True
+    #         new_task = Task(title=response_body["title"], description=response_body["description"], completed_at=datetime.datetime.utcnow())
+    #     else:
+    #          #completed_status = False
+    #         new_task = Task(title=response_body["title"], description=response_body["description"])
+    # except KeyError:
+    #      return {
+    #          "details": "Invalid data" #both title and description are required field
+    #      }, 400 
+    
 @task_bp.route("", methods=["GET"])
 def get_all_tasks():
     """part of Wave02 sort by asc and desc"""
@@ -107,13 +114,18 @@ def get_one_task(taskID):
 def update_task(taskID):
     task = task_validation(taskID)
     response_body = request.get_json()
-    completed_status = completed_or_not(response_body)
-    
-    #update this task_id's title and description. *Forgot assign task_id*
+    #completed_status = completed_or_not(response_body)
+    if response_body and "completed_at" in response_body:
+        #update this task_id's title and description. *Forgot assign task_id*
+        task.completed_at = datetime.datetime.utcnow()
+        completed_status = True
+    else:
+        completed_status = False
+        
     task.title = response_body["title"]
     task.description = response_body["description"]
     
-    #required in our test, but response_body can be optional
+    #required in our test case, but response_body can be optional
     rsp = {
         "task": {
         "id": task.task_id,
@@ -121,8 +133,7 @@ def update_task(taskID):
         "description": task.description,
         "is_complete": completed_status
     }}
-    
-    #update in the db
+
     db.session.commit()
     
     return jsonify(rsp), 200
@@ -138,4 +149,34 @@ def delete_task(taskID):
     
     return {"details": f'Task {valid_task.task_id} \"{valid_task.title}\" successfully deleted'
     }, 200
+    
+"""Wave03"""
+@task_bp.route("/<taskID>/mark_complete", methods=["PATCH"])
+def update_tasks_with_completed(taskID):
+    task = task_validation(taskID)
+
+    task.completed_at = datetime.datetime.utcnow()
+    db.session.commit()
+    return {
+        "task": {
+        "id": task.task_id,
+        "title": task.title,
+        "description": task.description,
+        "is_complete": True
+    }}, 200
+
+@task_bp.route("/<taskID>/mark_incomplete", methods=["PATCH"])
+def update_tasks_with_not_completed(taskID):
+    task = task_validation(taskID)
+
+    task.completed_at = None
+    db.session.commit()
+    return {
+        "task": {
+        "id": task.task_id,
+        "title": task.title,
+        "description": task.description,
+        "is_complete": False
+    }}, 200
+    
     
