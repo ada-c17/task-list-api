@@ -1,7 +1,9 @@
 import datetime
 from flask import Blueprint, request, jsonify, make_response, abort
+import requests
 from .models.task import Task
 from app import db
+import os
 
 task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 
@@ -63,7 +65,7 @@ def get_all_tasks():
     if "sort" in params:
         sort_cond = params["sort"]
         if sort_cond == "asc":
-            tasks = Task.query.order_by(Task.title)
+            tasks = Task.query.order_by(Task.title.asc())
         elif sort_cond == "desc":
             tasks = Task.query.order_by(Task.title.desc())
     else:
@@ -154,9 +156,12 @@ def delete_task(taskID):
 @task_bp.route("/<taskID>/mark_complete", methods=["PATCH"])
 def update_tasks_with_completed(taskID):
     task = task_validation(taskID)
-
     task.completed_at = datetime.datetime.utcnow()
+    #db.session.add(task)
     db.session.commit()
+    #bot message post
+    slack_api_call(task)
+    
     return {
         "task": {
         "id": task.task_id,
@@ -165,12 +170,15 @@ def update_tasks_with_completed(taskID):
         "is_complete": True
     }}, 200
 
+    
+    
 @task_bp.route("/<taskID>/mark_incomplete", methods=["PATCH"])
 def update_tasks_with_not_completed(taskID):
     task = task_validation(taskID)
 
     task.completed_at = None
     db.session.commit()
+    
     return {
         "task": {
         "id": task.task_id,
@@ -179,4 +187,13 @@ def update_tasks_with_not_completed(taskID):
         "is_complete": False
     }}, 200
     
-    
+"""Wave04"""
+def slack_api_call(task):
+    SLACK_PATH = "https://slack.com/api/chat.postMessage"
+    OATH_TOKEN = os.environ.get("SLACK_TOKEN")
+    HEADERS = {"Authorization": f"Bearer {OATH_TOKEN}"}
+    PARAMS = {
+    "channel": "task-notifications",
+    "text": "Completed the task {task.title}"
+    }
+    response = requests.post(SLACK_PATH, params=PARAMS, headers=HEADERS)
