@@ -189,9 +189,23 @@ def update_task(task_id):
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_as_complete(task_id):
 
-    # incompleted_to_mark = validate(task_id)
+    incompleted_to_mark = validate(task_id)
 
-    pass
+    if incompleted_to_mark.completed_at == None:
+
+        incompleted_to_mark.completed_at = datetime.now()
+
+        response_body = jsonify({"task" : 
+            {
+                "id" : incompleted_to_mark.task_id,
+                "title" : incompleted_to_mark.title,
+                "description" : incompleted_to_mark.description,
+                "is_complete" : True
+            }
+        })
+
+    db.session.commit()
+    return response_body, 200
 
 
 
