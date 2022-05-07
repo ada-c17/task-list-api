@@ -151,6 +151,7 @@ def test_delete_goal(client, one_goal):
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
+    response_body = response.get_json()
     assert response_body == {"message": "Goal 1 not found"}
 
 # @pytest.mark.skip(reason="test to be completed by student")
