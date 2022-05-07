@@ -9,12 +9,12 @@ def validate_task(task_id):
     try:
         task_id = int(task_id)
     except:
-        abort(make_response({"message":f"task {task_id} invalid"}, 400))
+        abort(make_response({"Message":f"Task {task_id} invalid"}, 400))
 
     task = Task.query.get(task_id)
 
     if not task:
-        abort(make_response({"message":f"task {task_id} not found"}, 404))
+        abort(make_response({"Message":f"Task {task_id} not found"}, 404))
 
     return task
 
@@ -42,6 +42,7 @@ def get_all_tasks():
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = validate_task(task_id)
+
     task_dict = {
             "id": task.id,
             "title": task.title,
@@ -51,5 +52,7 @@ def get_one_task(task_id):
         task_dict["is_complete"] = True
     else:
         task_dict["is_complete"] = False
+
     task_response ={"task": task_dict}
+
     return jsonify(task_response), 200
