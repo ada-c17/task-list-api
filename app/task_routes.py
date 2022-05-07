@@ -1,8 +1,11 @@
+
 from flask import Blueprint, jsonify, abort, make_response, request
 from app import db
 from app.models.task import Task
 import datetime as dt
 from datetime import date
+import os
+import requests
 
 task_bp = Blueprint("Tasks", __name__, url_prefix="/tasks")
 
@@ -46,6 +49,16 @@ def update_task_safely(task, data_dict):
         error_message(f"Invalid key(s): {err}. Task not updated.", 400)
     except KeyError as err:
         error_message(f"Missing key(s): {err}. Task not updated.", 400)
+
+def send_slackbot_message(title):
+    path = "https://slack.com/api/chat.postMessage"
+    slackbot_key = os.environ.get("SLACK_OAUTH_TOKEN")
+    headers = {'authorization': 'Bearer ' + slackbot_key}
+    params = {
+        'channel' : 'task-notifications',
+        'text' : f'Someone just completed task {title}! :tada::tada::tada:',
+    }
+    requests.patch(path, headers=headers, params=params)
 
 
 
@@ -101,6 +114,7 @@ def complete_task_by_id(task_id, completion_status):
         completion_info = {
             "completed_at" : dt.date.today()
         }
+        send_slackbot_message(task.title)
     elif completion_status == "mark_incomplete":
         completion_info = {
             "completed_at" : None
