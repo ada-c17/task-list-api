@@ -2,9 +2,10 @@ from flask import Blueprint, jsonify, make_response, request, abort
 from app import db
 from app.models.task import Task
 
+
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix = "/tasks")
 
-# Create a new task
+
 @tasks_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
@@ -26,7 +27,7 @@ def create_task():
     
     return jsonify({"task": response}), 201
 
-# Get all tasks
+
 @tasks_bp.route("", methods=["GET"])
 def get_tasks():
     task_response = []
@@ -42,7 +43,7 @@ def get_tasks():
         })
     return jsonify(task_response)
 
-# Validate task id helper function
+
 def validate_task(task_id):
     try:
         task_id = int(task_id)
@@ -56,7 +57,7 @@ def validate_task(task_id):
 
     return task
 
-# Get one task
+
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = validate_task(task_id)
@@ -74,7 +75,6 @@ def get_one_task(task_id):
     return jsonify({"task": response}), 200
 
 
-# Update task
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
     task = validate_task(task_id)
@@ -95,3 +95,18 @@ def update_task(task_id):
         }
 
     return make_response({"task": response})
+
+
+@tasks_bp.route("/<task_id>", methods=["DELETE"])
+def delete_task(task_id):
+    task = validate_task(task_id)
+
+    db.session.delete(task)
+    db.session.commit()
+
+
+    response = {
+    "details": f"Task {task.task_id} \"{task.title}\" successfully deleted"
+    }
+
+    return jsonify(response), 200
