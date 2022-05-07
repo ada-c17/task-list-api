@@ -11,13 +11,13 @@ def make_task_safely(data_dict):
     try:
         return Task.from_dict(data_dict)
     except KeyError as err:
-        error_message(f"Missing key: {err}", 400)
+        error_message(f"Invalid data", 400)
 
 def update_task_safely(task, data_dict):
     try:
         return task.replace_details(data_dict)
     except KeyError as err:
-        error_message(f"Missing key: {err}", 400)
+        error_message(f"Invalid data", 400)
 
 def validate_task_id(id):
     try:
@@ -63,3 +63,11 @@ def update_task(id):
     db.session.commit()
 
     return jsonify({"task":updated_task})
+
+@task_bp.route("<id>", methods=["DELETE"])
+def delete_task(id):
+    task = validate_task_id(id)
+    db.session.delete(task)
+    db.session.commit()
+
+    return jsonify({"details":f'Task {id} "{task.title}" successfully deleted'})
