@@ -2,7 +2,7 @@ from app.models.task import Task
 import pytest
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_no_saved_tasks(client):
     # Act
     response = client.get("/tasks")
@@ -12,8 +12,7 @@ def test_get_tasks_no_saved_tasks(client):
     assert response.status_code == 200
     assert response_body == []
 
-
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_one_saved_tasks(client, one_task):
     # Act
     response = client.get("/tasks")
@@ -32,7 +31,7 @@ def test_get_tasks_one_saved_tasks(client, one_task):
     ]
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_task(client, one_task):
     # Act
     response = client.get("/tasks/1")
@@ -51,16 +50,17 @@ def test_get_task(client, one_task):
     }
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_task_not_found(client):
     # Act
-    response = client.get("/tasks/1")
+    response = client.get("/tasks/2")
     response_body = response.get_json()
 
     # Assert
     assert response.status_code == 404
-
-    raise Exception("Complete test with assertion about response body")
+    assert response_body == {"message":f"Task 2 not found"} #pass if refering to test db 
+    
+    #raise Exception("Complete test with assertion about response body")
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
@@ -68,13 +68,12 @@ def test_get_task_not_found(client):
 
 #@pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_task(client):
-    # Act
     response = client.post("/tasks", json={
         "title": "A Brand New Task",
         "description": "Test Description",
     })
     response_body = response.get_json()
-
+    #print(response_body)
     # Assert
     assert response.status_code == 201
     assert "task" in response_body

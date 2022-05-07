@@ -18,15 +18,32 @@ def validate_task(task_id):
 
     return task
 
+@task_bp.route("", methods=["GET"])
+def get_all_saved_tasks():
+    tasks = Task.query.all()
+    tasks_response = []
+    for task in tasks:
+        tasks_response.append(
+            {
+                "id": task.id,
+                "title": task.title,
+                "description": task.description,
+                "is_complete": bool(task.completed_at)
+            }
+        )
+    return jsonify(tasks_response), 200
+
 @task_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = validate_task(task_id)
 
+    # print(bool(task.completed_at))
+    # print(task.completed_at)
     return jsonify({"task":
-    {"id": task.task_id,
+    {"id": task.id,
     "title": task.title,
     "description": task.description,
-    "is_complete": task.completed_at}
+    "is_complete": bool(task.completed_at)}
     }) 
     #if this task doesn't exist, it should automatically return empty []
 
@@ -34,15 +51,17 @@ def get_one_task(task_id):
 @task_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
-    print(request_body)
+    # print('DEBUG: PRINTING')
+    # print(request_body)
     new_task = Task(title = request_body["title"],
                     description = request_body["description"])
+    # print('DEBUG: PRINTING TASK ID')
+    # print(new_task.id)
 
     db.session.add(new_task)
     db.session.commit()
-
     response_body = {"task":
-        {"id": new_task.task_id,
+        {"id": new_task.id,
         "title": new_task.title,
         "description": new_task.description,
         "is_complete": new_task.completed_at}
@@ -52,3 +71,21 @@ def create_task():
         response_body["task"]["is_complete"] = False
     return jsonify(response_body), 201
 
+@task_bp.route("/<task_id>", methods=["PUT"])
+def update_book(task_id):
+    task = validate_task(task_id)
+
+    request_body = request.get_json()
+
+    task.title = request_body["title"]
+    task.description = request_body["description"]
+
+    db.session.commit()
+    
+    response_body = {"task":
+        {"id": task.id,
+        "title": task.title,
+        "description": task.description,
+        "is_complete": bool(task.is_complete)
+    }}
+    return jsonify(response_body), 200
