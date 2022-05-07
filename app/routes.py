@@ -98,18 +98,18 @@ def get_one_task(task_id):
 
 
 # ---- CREATE A TASK ---- #
-# @tasks_bp.route("", methods=["POST"])
-# def create_task():
+@tasks_bp.route("", methods=["POST"])
+def create_task():
     
-#     request_body = request.get_json()
-#     new_task = Task(title=request_body["title"],
-#                     description=request_body["description"])
+    request_body = request.get_json()
+    new_task = Task(title=request_body["title"],
+                    description=request_body["description"])
 
-#     db.session.add(new_task)
-#     db.session.commit()
+    db.session.add(new_task)
+    db.session.commit()
 
-#     # NEED TO FIX THIS RESPONSE
-#     return make_response({"task": new_task}, 201)
+    # NEED TO FIX THIS RESPONSE
+    return make_response({"task": new_task}, 201)
 
 
 
