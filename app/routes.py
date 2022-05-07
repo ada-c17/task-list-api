@@ -7,15 +7,22 @@ task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")  # what is string 
 
 # CREATE TASK - "POST"
 # WE NEED TO TRY THIS
+# without create decorator from Task model
 @task_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()  # this is from request pckg
-    new_task = Task.create(request_body)   # create decorator from Task model
+    new_task = Task(title=request_body["title"], description=request_body["description"])
 
     db.session.add(new_task)
     db.session.commit()
 
-    return make_response(f"Task {new_task.title} successfully created", 201)
+    task_response_body = {
+            "id": new_task.task_id,
+            "title": new_task.title,
+            "description": new_task.description,
+            "is_complete": bool(new_task.completed_at),
+    }
+    return make_response(jsonify({"task": task_response_body}), 201)
 
 #GET SAVED TASKS - "GET" (all)
 @task_bp.route("", methods=["GET"])
