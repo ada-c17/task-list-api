@@ -16,3 +16,14 @@ def create_task():
     db.session.commit()
 
     return make_response({"task": Task.to_dict(new_task)}, 201)
+
+
+@bp.route("", methods=("GET",))
+def read_tasks():
+    """
+    As a client, I want to be able to make a `GET` request to `/tasks` when there is at least one saved task and get this response:
+
+    `200 OK`
+    """
+    tasks = Task.query.all()
+    return jsonify([Task.to_dict(task) for task in tasks])
