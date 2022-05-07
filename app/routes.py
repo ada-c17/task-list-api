@@ -111,6 +111,7 @@ def get_task(task_id):
     return make_response(jsonify({
             "task": {
                 "id": task.task_id,
+                # "goal_id": task.goal_id,
                 "title": task.title,
                 "description": task.description,
                 "is_complete": is_complete(task)
@@ -271,3 +272,50 @@ def delete_goal(goal_id):
     return {
         "details": f'Goal {goal_id} "{goal.title}" successfully deleted'
     }, 200
+
+
+@goals_bp.route("/<goal_id>/tasks", methods = ["POST"])
+def create_tasks_for_goal(goal_id):
+    goal = validate_goal(goal_id)
+    tasks = []
+    retrieved_tasks = []
+    request_body = request.get_json()
+
+    if "task_ids" in request_body:
+        tasks = request_body["task_ids"]
+
+    for task in tasks:
+        task = validate_task(task)
+        if task:
+            retrieved_tasks.append(task)
+    
+    goal.tasks = retrieved_tasks
+    db.session.commit()
+        
+    return {
+        "id": goal.goal_id,
+        "task_ids": tasks 
+    }, 200
+
+
+@goals_bp.route("/<goal_id>/tasks", methods = ["GET"])
+def get_tasks_for_goal(goal_id):
+    goal = validate_goal(goal_id)
+    tasks_response = []
+
+    tasks = goal.tasks 
+    for task in tasks:
+        tasks_response.append({
+            "id": task.task_id, 
+            "goal_id": task.goal_id,
+            "title": task.title, 
+            "description": task.description, 
+            "is_complete": is_complete(task)
+        })
+    
+    return {
+        "id": goal.goal_id,
+        "title": goal.title,
+        "tasks": tasks_response
+    }, 200
+
