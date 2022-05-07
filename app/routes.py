@@ -206,9 +206,10 @@ def mark_as_incomplete(task_id):
 
     # Task.completed_at is currently marked so set it to None
     if task_to_mark_incomplete.completed_at:
-
         task_to_mark_incomplete.completed_at = None
-        # If it's marked, set is_complete to False
+        
+        
+    if not task_to_mark_incomplete.completed_at:
         response_body = jsonify({"task" : 
             {
                 "id" : task_to_mark_incomplete.task_id,
