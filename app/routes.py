@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request, abort, make_response
 from app.models.task import Task
 from app import db
 from sqlalchemy import desc, asc
-import datetime 
+from datetime import datetime 
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -117,8 +117,7 @@ def replace_task(task_id):
 def mark_complete_task(task_id):
     chosen_task = get_task_or_abort(task_id)
 
-    chosen_task.completed_at = datetime.datetime.now()
-    #datetime.utcnow() with from datetime import datetime
+    chosen_task.completed_at = datetime.utcnow()
 
     db.session.commit()
     response = jsonify({"task": {
