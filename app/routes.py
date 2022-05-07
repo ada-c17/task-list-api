@@ -34,18 +34,24 @@ def create_task():
 
 @tasks_bp.route("", methods=["GET"])
 def get_tasks():
-    task_response = []
-    tasks = Task.query.all()
+    response = []
+    sort_by = request.args.get('sort')
+    if sort_by == "asc":
+        tasks = Task.query.order_by(Task.title.asc()).all()
+    elif sort_by == "desc":
+        tasks = Task.query.order_by(Task.title.desc()).all()
+    else:
+        tasks = Task.query.all()
 
     for task in tasks:
         is_complete = True if task.completed_at else False
-        task_response.append({
+        response.append({
             'id': task.task_id,
             'title': task.title,
             'description': task.description,
             'is_complete': is_complete
         })
-    return jsonify(task_response)
+    return jsonify(response)
 
 
 def validate_task(task_id):
