@@ -1,6 +1,6 @@
 import json
-from os import abort
-from xmlrpc.client import DateTime
+import os
+from datetime import datetime
 from attr import validate
 from sqlalchemy import true
 from app import db
@@ -34,21 +34,49 @@ def validate_task(task_id):
 
 
 
+# def format_task_response(task):
+#     is_complete = False
+
+#     if task.completed_at:
+#         is_complete = True
+    
+#     return jsonify({"task" : 
+#         {
+#             "id" : task.task_id,
+#             "title" : task.title,
+#             "description" : task.description,
+#             "is_complete" : is_complete
+#         }
+#     })
+
+
 # ------------------------ GET REQUESTS ------------------------ #
 
 # ---- GET ALL TASKS ---- #
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
-    
-    tasks_response = []
 
-    tasks = Task.query.all()
+    params = request.args
 
-    query_param = request.args.get("sort")
+    # query_param = request.args.get("sort")
 
-    for task in tasks:
+    if "sort" in params:
+        query_param = params["sort"]
+        all_tasks = Task.query.filter_by(query_param)
+
+
+    if query_param == "asc":
+        task_response = sorted(task_response, key=lambda a: a["title"])
+    elif query_param == "desc":
+        task_response = sorted(task_response, key=lambda d: d["title"], reverse=True)
+    else:
+        all_tasks = Task.query.all()
+
+    task_response = []
+
+    for task in all_tasks:
         if task.completed_at == None:
-            tasks_response.append(
+            task_response.append(
                 {
                     "id" : task.task_id,
                     "title" : task.title,
@@ -57,7 +85,7 @@ def get_all_tasks():
                 }
             )
         else:
-            tasks_response.append(
+            task_response.append(
                 {
                     "id" : task.task_id,
                     "title" : task.title,
@@ -65,15 +93,12 @@ def get_all_tasks():
                     "is_complete" : True
                 }
             )
+
+    # task_response = format_task_response(all_tasks)
     
 
-    if query_param == "asc":
-        tasks_response = sorted(tasks_response, key=lambda a: a["title"])
-    elif query_param == "desc":
-        tasks_response = sorted(tasks_response, key=lambda d: d["title"], reverse=True)
 
-
-    return jsonify(tasks_response)
+    return jsonify(task_response)
 
 
 
@@ -91,6 +116,8 @@ def get_one_task(task_id):
             "is_complete" : False
         }
     })
+
+    # return format_task_response(task), 200
 
 
 
