@@ -17,18 +17,22 @@ def validate_task(task_id):
         return jsonify({"message" : f"Could not find '{task_id}'"}), 404
     return task
 
-
 def format_response(task):
     response = {
     "task" : 
         {
-            "is_complete" : False,
+            "is_complete" : check_if_task_complete(task),
             "description" : task.description,
             "title" : task.title,
             "id" : task.task_id
         }
     }
     return response
+
+def check_if_task_complete(task):
+    if task.completed_at == None:
+        return False
+    return True
 
 
 @tasks_bp.route('', methods=['POST'])
@@ -67,7 +71,7 @@ def get_tasks():
     for task in tasks:
         tasks_response.append(
             {
-                "is_complete" : False,
+                "is_complete" : check_if_task_complete(task),
                 "description" : task.description,
                 "title" : task.title,
                 "id" : task.task_id
