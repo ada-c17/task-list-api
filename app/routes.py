@@ -10,6 +10,10 @@ tasks_bp = Blueprint("tasks_bp", __name__, url_prefix = "/tasks")
 def create_task():
     request_body = request.get_json()
 
+    if "title" not in request_body or \
+        "description" not in request_body:
+        abort(make_response({"details": "Invalid data"}, 400))
+
     task = Task(
         title = request_body["title"],
         description = request_body["description"]
