@@ -2,10 +2,11 @@ from flask import Blueprint, jsonify, abort, make_response, request
 from sqlalchemy import desc
 from app.models.task import Task
 from app import db
+from datetime import datetime
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix = "/tasks")
 
-def get_task_or_abort(task_id):
+def validate_input(task_id):
     try:
         task_id = int(task_id)
     except ValueError:
@@ -70,7 +71,7 @@ def get_all_tasks():
 
 @tasks_bp.route("/<task_id>", methods = ["GET"])
 def get_one_task(task_id):
-    chosen_task = get_task_or_abort(task_id)
+    chosen_task = validate_input(task_id)
     response = create_task_dictionary(chosen_task)
     return jsonify(response), 200
 
@@ -92,7 +93,7 @@ def create_one_task():
 
 @tasks_bp.route("/<task_id>", methods = ["PUT"])
 def add_one_task(task_id):
-    chosen_task = get_task_or_abort(task_id)
+    chosen_task = validate_input(task_id)
     request_body = request.get_json()
     try:
         chosen_task.title = request_body["title"]
@@ -107,10 +108,26 @@ def add_one_task(task_id):
 
 @tasks_bp.route("/<task_id>", methods = ["DELETE"])
 def delete_one_task(task_id):
-    chosen_task = get_task_or_abort(task_id)
+    chosen_task = validate_input(task_id)
     db.session.delete(chosen_task)
     db.session.commit()
 
     return {
         "details": f'Task {task_id} "{chosen_task.title}" successfully deleted'
     }, 200
+
+@tasks_bp.route("/<task_id>/mark_complete", methods = ["PATCH"])
+def update_task_complete(task_id):
+    chosen_task = validate_input(task_id)
+    chosen_task.completed_at = datetime.utcnow()
+    db.session.commit()
+    response = create_task_dictionary(chosen_task)
+    return jsonify(response), 200
+
+@tasks_bp.route("/<task_id>/mark_incomplete", methods = ["PATCH"])
+def update_task_incomplete(task_id):
+    chosen_task = validate_input(task_id)
+    chosen_task.completed_at = None
+    db.session.commit()
+    response = create_task_dictionary(chosen_task)
+    return jsonify(response), 200
