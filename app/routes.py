@@ -156,11 +156,21 @@ def update_task(task_id):
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_one_task(task_id):
 
-    task = validate_task(task_id)
+    verified_task = validate_task(task_id)
 
-    db.session.delete(task)
+    if verified_task:
+        task_to_delete = Task.query.get(task_id)
+
+
+    db.session.delete(task_to_delete)
     # Commit the changes
     db.session.commit()
 
     # Need to change this response body  
-    return make_response({"details" : f"Task {task_id} \" {task.description}\"successfully deleted."}, 200)
+    return {
+        "details": f'Task {task_id} \"{task_to_delete.title}\" successfully deleted'
+    }, 200
+
+    # {
+    #     "details": 'Task 1 "Go on my daily walk 🏞 " successfully deleted'
+    # }
