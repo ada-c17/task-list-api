@@ -5,13 +5,16 @@ from datetime import datetime
 import requests
 import os
 
+
 tasks_bp = Blueprint("tasks_bp", __name__,  url_prefix="/tasks")
 path="https://slack.com/api/chat.postMessage"
 SLACK_API_KEY = os.environ.get("SLACK_AUTH_KEY")
 
+
 @tasks_bp.route("about", methods=["GET"])
 def about():
-    return "The Task List Project by: Nina Patrina. Ada Developers Academy, 2022"
+    return "<h1> The Task List Project by: Nina Patrina. Ada Developers Academy, 2022 </h1>"
+
 
 def validate_task(id):
     try:
@@ -26,6 +29,7 @@ def validate_task(id):
 
     return task
 
+
 @tasks_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
@@ -35,25 +39,27 @@ def create_task():
     except KeyError:
         return {"details": "Invalid data"}, 400
 
+    #! check completed_at is a string that is not a datetime
     if "completed_at" in request_body:
         new_task.completed_at =request_body["completed_at"]
 
     db.session.add(new_task)
     db.session.commit()
 
-    return { 
-        "task": {
-            "id": new_task.task_id,
-            "title": new_task.title,
-            "description": new_task.description,
-            "is_complete": bool(new_task.completed_at)
-        }}, 201
+    return new_task.to_json(), 201
+
 
 @tasks_bp.route("", methods=["GET"])
 def read_all_tasks():
     params = request.args
     if "sort" in params:
-        tasks = Task.query.order_by(Task.title.asc()) if params["sort"]=="asc" else Task.query.order_by(Task.title.desc())
+        if params["sort"]=="asc":
+            tasks = Task.query.order_by(Task.title.asc()) 
+        elif params["sort"]=="desc":
+            tasks =Task.query.order_by(Task.title.desc())
+        #! which http status code to return? 
+        #  else:
+        #     tasks = Task.query.all()   
     else:
         tasks = Task.query.all()
 
@@ -69,16 +75,12 @@ def read_all_tasks():
         )
     return jsonify(tasks_response)
 
+
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def read_one_task(task_id):
     task = validate_task(task_id)
-    return  { 
-        "task": {
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": bool(task.completed_at)
-        }}
+    return  task.to_json()
+
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
@@ -90,13 +92,8 @@ def update_task(task_id):
     task.description = request_body["description"]
 
     db.session.commit()
-    return { 
-        "task": {
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": bool(task.completed_at)
-        }}, 200
+    return task.to_json(), 200
+
 
 @tasks_bp.route("/<task_id>/<mark>", methods=["PATCH"])
 def update_task1(task_id, mark):
@@ -104,7 +101,7 @@ def update_task1(task_id, mark):
 
     if mark =="mark_complete":
         task.completed_at =datetime.utcnow() 
-        slack_headers =  {"Authorization" :SLACK_API_KEY}
+        slack_headers =  {"Authorization" : "Bearer "+SLACK_API_KEY}
         myobj={"channel" :"task-notifications",
                "text":f"Someone just completed the task {task.title}"}
         requests.post(path,data = myobj, headers=slack_headers)
@@ -112,15 +109,11 @@ def update_task1(task_id, mark):
     elif mark =="mark_incomplete": 
         task.completed_at =None
 
+    #! should I return else?    
+
     db.session.commit()
 
-    return { 
-        "task": {
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": bool(task.completed_at)
-        }}, 200
+    return task.to_json(), 200
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):

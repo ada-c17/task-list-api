@@ -7,3 +7,13 @@ class Task(db.Model):
     title = db.Column(db.String(256))
     description = db.Column(db.Text)
     completed_at = db.Column(db.DateTime, nullable =True)
+
+    def to_json(self):
+        return { 
+            "task": {
+            "id": self.task_id,
+            "title": self.title,
+            "description": self.description,
+            "is_complete": bool(self.completed_at)
+            }}
+
