@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, request, abort, make_response
+from pytest import param
 from app.models.task import Task
 from app import db
-from sqlalchemy import asc, select
+import datetime
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -24,7 +25,12 @@ def create_one_task():
             "details": "Invalid data"
         }, 400
 
-    new_task = Task(title=request_body["title"],
+    if 'completed_at' in request_body:
+        new_task = Task(title=request_body["title"],
+                    description=request_body["description"],
+                    completed_at=request_body['completed_at'])
+    else:
+        new_task = Task(title=request_body["title"],
                     description=request_body["description"])
     db.session.add(new_task)
     db.session.commit()
@@ -34,7 +40,7 @@ def create_one_task():
         "id": new_task.task_id,
         "title": new_task.title,
         "description": new_task.description,
-        "is_complete": False
+        "is_complete": isinstance(new_task.completed_at, datetime.datetime)
     }}, 201
 
 @tasks_bp.route('', methods=['GET'])
@@ -62,7 +68,7 @@ def get_all_tasks():
             "id": task.task_id,
             "title": task.title,
             "description": task.description,
-            "is_complete": False
+            "is_complete": isinstance(task.completed_at, datetime.datetime)
     })
 
     return jsonify(task_response), 200
@@ -74,7 +80,7 @@ def get_one_task(task_id):
             "id": one_task.task_id,
             "title": one_task.title,
             "description": one_task.description,
-            "is_complete": False
+            "is_complete": isinstance(one_task.completed_at, datetime.datetime)
         }
     return jsonify({"task": response}), 200
 
@@ -96,7 +102,7 @@ def put_one_task(task_id):
         "id": one_task.task_id,
         "title": one_task.title,
         "description": one_task.description,
-        "is_complete": False
+        "is_complete": isinstance(one_task.completed_at, datetime.datetime)
     }
     return jsonify({"task": response}), 200
 
@@ -108,17 +114,14 @@ def delete_one_task(task_id):
 
     return {"details": f'Task {one_task.task_id} "{one_task.title}" successfully deleted'}, 200
 
-@tasks_bp.route('/<task_id>', methods=['PATCH'])
-def patch_one_task(task_id):
+@tasks_bp.route('/<task_id>/<mark>', methods=['PATCH'])
+def patch_one_task(task_id, mark=None):
     one_task = validate_id(task_id)
-    request_body = request.get_json()
-    if 'title' not in request_body or 'description' not in request_body:
-        return {
-            "details": "Invalid data"
-        }, 400
 
-    one_task.title = request_body["title"]
-    one_task.description = request_body["description"]
+    if mark == "mark_complete":
+        one_task.completed_at = datetime.datetime.now()
+    elif mark == 'mark_incomplete':
+        one_task.completed_at = None
 
     db.session.commit()
 
@@ -126,7 +129,7 @@ def patch_one_task(task_id):
         "id": one_task.task_id,
         "title": one_task.title,
         "description": one_task.description,
-        "is_complete": False
+        "is_complete": isinstance(one_task.completed_at, datetime.datetime)
     }
     return jsonify({"task": response}), 200
 
