@@ -3,8 +3,11 @@ from pytest import param
 from app.models.task import Task
 from app import db
 import datetime
+import os
+from slack_sdk import WebClient
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
+client = WebClient(token=os.environ['SLACK_BOT_TOKEN'])
 
 def validate_id(task_id):
     try:
@@ -62,7 +65,7 @@ def get_all_tasks():
     
     else:
         tasks = Task.query.all()
-
+    
     for task in tasks:
         task_response.append({
             "id": task.task_id,
@@ -120,6 +123,8 @@ def patch_one_task(task_id, mark=None):
 
     if mark == "mark_complete":
         one_task.completed_at = datetime.datetime.now()
+        response = client.chat_postMessage(channel='#task-notifications', text=f"Someone just completed the task {one_task.title}")
+
     elif mark == 'mark_incomplete':
         one_task.completed_at = None
 
@@ -132,6 +137,9 @@ def patch_one_task(task_id, mark=None):
         "is_complete": isinstance(one_task.completed_at, datetime.datetime)
     }
     return jsonify({"task": response}), 200
+
+########################################################
+########################################################
 
 
 
