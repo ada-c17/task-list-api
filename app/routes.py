@@ -34,9 +34,15 @@ def create_task():
     }), 201
 
 # GET all tasks
-@tasks_bp.route('', methods=["GET"])
+@tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
-    tasks = Task.query.all()
+    sort_query = request.args.get("sort")
+    if sort_query == "asc":
+        tasks = Task.query.order_by(Task.title.asc())
+    elif sort_query == "desc":
+        tasks = Task.query.order_by(Task.title.desc())
+    else:
+        tasks = Task.query.all()
 
     tasks_response = []
     for task in tasks:
@@ -68,7 +74,7 @@ def validate_task_id(task_id):
     abort(make_response({"msg":f"The task with id {task_id} is not found"}, 404))
 
 # GET one task 
-@tasks_bp.route('/<task_id>', methods=["GET"])
+@tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = validate_task_id(task_id)
 
@@ -79,7 +85,7 @@ def get_one_task(task_id):
     'is_complete':task.is_complete}
     })
 
-@tasks_bp.route('/<task_id>', methods=["PUT"])
+@tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
     task = validate_task_id(task_id)
     request_body = request.get_json()
@@ -99,7 +105,7 @@ def update_task(task_id):
         'is_complete':task.is_complete}
         })
 
-@tasks_bp.route('/<task_id>', methods=["DELETE"])
+@tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
     task = validate_task_id(task_id)
 
