@@ -7,17 +7,21 @@ tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
-   tasks = Task.query.all()
-   response_body = []
+    tasks = Task.query.all()
+    response_body = []
 
-   for task in tasks:
-       response_body.append(
-           {
-               "id": task.id,
-               "title": task.title,
-               "description": task.description,
-               "completed_at": task.completed_at
-           }
-       )
+    for task in tasks: # make dict then append response_body list
+        response = {
+            "id": task.id,
+            "title": task.title,
+            "description": task.description,
+        }
+        if task.completed_at:
+            response["is_complete"] = True
+        else:
+            response["is_complete"] = False
+        response_body.append(response)
+        
+    print(response_body)
 
-   return jsonify(response_body), 200
+    return jsonify(response_body), 200
