@@ -2,6 +2,9 @@ from app import db
 from app.models.task import Task 
 from datetime import datetime 
 from flask import Blueprint, jsonify, abort, make_response, request
+import os 
+from slack_sdk import WebClient 
+
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -111,12 +114,24 @@ def update_task(task_id):
 
 @tasks_bp.route("/<task_id>/<check_complete>", methods=["PATCH"])
 def update_is_complete(task_id, check_complete=None): 
+    channel_id = "task-notifications"
+    slack_key = os.environ.get('SLACKBOT_API_KEY')
+    client = WebClient(token=slack_key)
+
     task = validate_task(task_id)
+
     if check_complete == "mark_complete":
         task.completed_at = datetime.now()
+        response = client.chat_postMessage(
+                channel=channel_id, 
+                text=(f"Someone just completed the task {task.title}"))
     else:
-        task.completed_at = None  
+        task.completed_at = None
     
+    channel_id = "task-notifications"
+    slack_key = os.environ.get('SLACKBOT_API_KEY')
+    client = WebClient(token=slack_key)
+
     db.session.commit()
 
     response = {
