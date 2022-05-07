@@ -1,4 +1,6 @@
+from xmlrpc.client import DateTime
 from sqlalchemy import null
+import datetime
 from app import db
 from app.models.task import Task
 from flask import Blueprint, request, jsonify, make_response, abort
@@ -39,23 +41,36 @@ def validate_task(task_id):
 
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
+    # newlist = sorted(list_to_be_sorted, key=lambda d: d['name'])
+    # sort = sorted(Task.query.all(), key=lambda d: d["title"])
+    # User.query.order_by(User.username).all()
+    asc_query = request.args.get("sort")
+    if asc_query == "asc":
+        tasks = Task.query.order_by(Task.title.asc()).all()
+    elif asc_query == "desc":
+        tasks = Task.query.order_by(Task.title.desc()).all()
+    else:
+        tasks = Task.query.all()
+    # tasks_response = [task.to_json() for task in tasks]
     tasks_response = []
-    asc_query = request.args.get("title")
-    if asc_query:
-        tasks = Task.query.filter_by()
-    tasks = Task.query.all()
 
     for task in tasks:
+        complete = None
+        if task.completed_at == None:
+            complete = False
+        else:
+            complete = True
         tasks_response.append({
             "id": task.task_id,
             "title": task.title,
-            "description": task.description
+            "description": task.description,
+            "is_complete": complete
         })
-        if task.completed_at == None:
-            tasks_response[0]["is_complete"] = False
-        else:
-            tasks_response[0]["is_complete"] = True
-    return jsonify(tasks_response)
+        # if task.completed_at == None:
+        #     tasks_response[0]["is_complete"] = False
+        # else:
+        #     tasks_response[0]["is_complete"] = True
+    return make_response(jsonify(tasks_response), 200)
 
 
 @tasks_bp.route("/<task_id>", methods=["GET"])
@@ -120,6 +135,30 @@ def delete_one_task(task_id):
     return {
         "task": new_update.to_json()
     }, 200
+
+# for patch,  i am only trying to patch the "completed_at" portion
+# 1.) change the content inside completed_at
+# 2.) once its changed it is no longer false
+# 3.) convert it again into boolean
+
+
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def complete_update(task_id):
+    task = validate_task(task_id)
+    request_body = request.get_json()
+
+    if task.completed_at == None:
+        task.completed_at = datetime.datetime.now()
+    # task.completed_at = request_body["is_complete"]
+    # task.completed_at = request_body["is_complete"]
+
+    # request_body = ["is_complete"]
+    # request_body.datetime.now()
+    # # new_update = Task.update(request_body)
+    db.session.commit()
+    # except KeyError:
+    #     return abort(make_response(jsonify("Missing information")), 400)
+    return make_response(jsonify(task.to_json()), 200)
 
 
 """
