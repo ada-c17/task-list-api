@@ -75,8 +75,6 @@ def get_all_tasks():
                 }
             )
 
-    # return make_response({"task": tasks_response}, 201)
-    # return {"tasks": tasks_response}, 201
     return jsonify(tasks_response)
 
 
@@ -132,6 +130,7 @@ def create_task():
 
 
 
+
 # ---- UPDATE A TASK ---- #
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
@@ -140,9 +139,12 @@ def update_task(task_id):
 
     request_body = request.get_json()
 
+    # If task id is valid, update Title and Description
+    # Using the Title and Description in the request body
     task_to_update.title = request_body["title"]
     task_to_update.description = request_body["description"]
 
+    # Commit the change and send response body
     db.session.commit()
 
     response_body = jsonify({"task" : 
@@ -165,19 +167,15 @@ def delete_one_task(task_id):
 
     verified_task = validate_task(task_id)
 
+    # If task id is valid, get this specific task
     if verified_task:
         task_to_delete = Task.query.get(task_id)
 
-
+    # Delete the task and commit the changes
     db.session.delete(task_to_delete)
-    # Commit the changes
     db.session.commit()
 
     # Need to change this response body  
     return {
         "details": f'Task {task_id} \"{task_to_delete.title}\" successfully deleted'
     }, 200
-
-    # {
-    #     "details": 'Task 1 "Go on my daily walk 🏞 " successfully deleted'
-    # }

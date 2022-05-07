@@ -184,7 +184,8 @@ def test_update_task_not_found(client):
 
 
 # ----- TEST EIGHT----- #
-@pytest.mark.skip(reason="No way to test this feature yet")
+# ----- PASSED ----- #
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_delete_task(client, one_task):
     # Act
     response = client.delete("/tasks/1")
@@ -194,7 +195,7 @@ def test_delete_task(client, one_task):
     assert response.status_code == 200
     assert "details" in response_body
     assert response_body == {
-        "details": 'Task 1 "Go on my daily walk 🏞 " successfully deleted'
+        "details": 'Task 1 "Go on my daily walk 🏞" successfully deleted'
     }
     assert Task.query.get(1) == None
 
