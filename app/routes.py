@@ -69,3 +69,23 @@ def get_one_task(task_id):
     'description':task.description, 
     'is_complete':task.is_complete}
     })
+
+@tasks_bp.route('/<task_id>', methods=["PUT"])
+def update_task(task_id):
+    task = validate_task_id(task_id)
+    request_body = request.get_json()
+
+    task.title = request_body["title"]
+    task.description = request_body["description"]
+
+    db.session.commit()
+    
+    if task.completed_at != None:
+        task.is_complete = True
+
+    return jsonify({'task':
+        {'id':task.task_id, 
+        'title':task.title, 
+        'description':task.description, 
+        'is_complete':task.is_complete}
+        })
