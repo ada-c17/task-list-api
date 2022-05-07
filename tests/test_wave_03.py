@@ -161,7 +161,7 @@ def test_create_task_with_valid_completed_at(client):
     })
     response_body = response.get_json()
 
-    # Assert
+    # Assert    
     assert response.status_code == 201
     assert "task" in response_body
     assert response_body == {

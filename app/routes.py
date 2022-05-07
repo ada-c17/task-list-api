@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request, abort, make_response
 from app.models.task import Task
 from app.models.goal import Goal
 from app import db
-import datetime
+from datetime import datetime
 import requests
 import os
 
@@ -68,20 +68,38 @@ def get_one_task(task_id):
 @tasks_bp.route("", methods=["POST"])
 def create_one_task():
     request_body = request.get_json()
-    
     try:
-        if request_body.get("completed_at"):
-            new_task = Task(title=request_body["title"],
-                description=request_body["description"],
-                completed_at=request_body["completed_at"])
-                # When testing in Postman, make sure to add in format:
-                # "2022-05-06"
-        else:
-            new_task = Task(title=request_body["title"],
+        new_task = Task(title=request_body["title"],
                 description=request_body["description"])
     except:
         response = {"details": "Invalid data"}
         abort(make_response(jsonify(response), 400))
+    
+    if request_body.get("completed_at"):
+        try:
+            completed_at = str(request_body["completed_at"])
+            finished = datetime.strptime(completed_at, 
+                '%Y-%m-%d %H:%M:%S.%f')
+            new_task.completed_at = finished
+        except: # second to last test in wave 3 ends up here
+            response = {"details": "Invalid date data"}
+            abort(make_response(jsonify(response), 404))
+
+
+    # try:
+    #     if request_body.get("completed_at"):
+    #         new_task = Task(title=request_body["title"],
+    #             description=request_body["description"],
+    #             completed_at=request_body["completed_at"])
+    #             # When testing in Postman, make sure to add in format:
+    #             # "2022-05-06"
+    #     else:
+    #         new_task = Task(title=request_body["title"],
+    #             description=request_body["description"])
+    # except:
+    #     response = {"details": "Invalid data"}
+    #     abort(make_response(jsonify(response), 400))
+
     db.session.add(new_task)
     db.session.commit()
 
@@ -101,6 +119,7 @@ def update_task(task_id):
     task = validate_task(task_id)
     request_body = request.get_json()
 
+    # Add check here to make sure both are provided
     task.title = request_body["title"]
     task.description = request_body["description"]
 
@@ -134,7 +153,7 @@ def update_task_mark_complete(task_id):
     task = validate_task(task_id)
 
     if not task.completed_at:
-        task.completed_at = datetime.date.today()
+        task.completed_at = datetime.utcnow()
         db.session.commit()
         headers = {
             "Authorization": f"Bearer {SLACK_KEY}"
@@ -151,7 +170,7 @@ def update_task_mark_complete(task_id):
             "id": task.task_id,
             "title": task.title,
             "description": task.description,
-            "is_complete": bool(task.completed_at)
+            "is_complete": True
         }
     }
 
@@ -240,7 +259,8 @@ def get_one_goal(goal_id):
 def update_one_goal(goal_id):
     goal = validate_goal(goal_id)
     request_body = request.get_json()
-
+    
+    # Add catch if title is not there or invalid input
     goal.title = request_body["title"]
     db.session.commit()
 
