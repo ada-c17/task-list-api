@@ -9,22 +9,19 @@ tasks_bp = Blueprint("tasks_bp", __name__, url_prefix = "/tasks")
 def create_task():
     request_body = request.get_json()
 
-    new_task = Task(
+    task = Task(
         title = request_body["title"],
         description = request_body["description"]
     )
 
-    db.session.add(new_task)
+    db.session.add(task)
     db.session.commit()
 
-    if new_task.completed_at is None:
-        is_complete = False
-    else:
-        is_complete = True
+    is_complete = True if task.completed_at else False
 
-    response = {"id": new_task.task_id,
-        "title": new_task.title,
-        "description": new_task.description,
+    response = {"id": task.task_id,
+        "title": task.title,
+        "description": task.description,
         "is_complete": is_complete}
     
     return jsonify({"task": response}), 201
@@ -36,10 +33,7 @@ def get_tasks():
     tasks = Task.query.all()
 
     for task in tasks:
-        if task.completed_at is None:
-            is_complete = False
-        else:
-            is_complete = True
+        is_complete = True if task.completed_at else False
         task_response.append({
             'id': task.task_id,
             'title': task.title,
@@ -65,16 +59,15 @@ def validate_task(task_id):
 # Get one task
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
-    chosen_task = validate_task(task_id)
+    task = validate_task(task_id)
     is_complete = False
 
-    if chosen_task.completed_at:
-        is_complete == True
+    is_complete = True if task.completed_at else False
 
     response = {
-        "id": chosen_task.task_id,
-        "title": chosen_task.title,
-        "description": chosen_task.description,
+        "id": task.task_id,
+        "title": task.title,
+        "description": task.description,
         "is_complete": is_complete
         }
 
@@ -84,23 +77,20 @@ def get_one_task(task_id):
 # Update task
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
-    chosen_task = validate_task(task_id)
+    task = validate_task(task_id)
     request_body = request.get_json()
 
-    chosen_task.title = request_body["title"]
-    chosen_task.description = request_body["description"]
+    task.title = request_body["title"]
+    task.description = request_body["description"]
 
     db.session.commit()
 
-    if chosen_task.completed_at is None:
-        is_complete = False
-    else:
-        is_complete = True
+    is_complete = True if task.completed_at else False
 
     response = {
-        "id": chosen_task.task_id,
-        "title": chosen_task.title,
-        "description": chosen_task.description,
+        "id": task.task_id,
+        "title": task.title,
+        "description": task.description,
         "is_complete": is_complete
         }
 
