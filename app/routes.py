@@ -37,8 +37,6 @@ def get_all_saved_tasks():
 def get_one_task(task_id):
     task = validate_task(task_id)
 
-    # print(bool(task.completed_at))
-    # print(task.completed_at)
     return jsonify({"task":
     {"id": task.id,
     "title": task.title,
@@ -51,12 +49,13 @@ def get_one_task(task_id):
 @task_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
-    # print('DEBUG: PRINTING')
-    # print(request_body)
+
+    if "title" not in request_body or "description" not in request_body:
+        response_body = {"details": "Invalid data"}
+        return response_body, 400
+
     new_task = Task(title = request_body["title"],
                     description = request_body["description"])
-    # print('DEBUG: PRINTING TASK ID')
-    # print(new_task.id)
 
     db.session.add(new_task)
     db.session.commit()
@@ -64,11 +63,11 @@ def create_task():
         {"id": new_task.id,
         "title": new_task.title,
         "description": new_task.description,
-        "is_complete": new_task.completed_at}
+        "is_complete": bool(new_task.completed_at)}
     }
 
-    if response_body["task"]["is_complete"] == None:
-        response_body["task"]["is_complete"] = False
+    # if response_body["task"]["is_complete"] == None:
+    #     response_body["task"]["is_complete"] = False
     return jsonify(response_body), 201
 
 @task_bp.route("/<task_id>", methods=["PUT"])
@@ -86,6 +85,18 @@ def update_book(task_id):
         {"id": task.id,
         "title": task.title,
         "description": task.description,
-        "is_complete": bool(task.is_complete)
+        "is_complete": False
     }}
     return jsonify(response_body), 200
+
+@task_bp.route("/<task_id>" , methods = ["DELETE"])
+def delete_one_task(task_id):
+
+    task = validate_task(task_id)
+
+    db.session.delete(task)
+    db.session.commit()
+
+    response_body = (f'Task {task.id} "{task.title}" successfully deleted')
+
+    return make_response(jsonify({"details":response_body}))
