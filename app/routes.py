@@ -55,20 +55,8 @@ def get_all_tasks():
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = validate_task(task_id)
-
-    task_dict = {
-            "id": task.id,
-            "title": task.title,
-            "description": task.description,
-    }
-    if task.completed_at:
-        task_dict["is_complete"] = True
-    else:
-        task_dict["is_complete"] = False
-
-    task_response ={"task": task_dict}
-
-    return jsonify(task_response), 200
+    task_dict = make_task_dict(task)
+    return jsonify(task_dict), 200
 
 @tasks_bp.route("", methods=["POST"])
 def create_task():
