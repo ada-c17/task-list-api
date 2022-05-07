@@ -5,7 +5,6 @@ from app import db
 tasks_bp = Blueprint("bp", __name__, url_prefix="/tasks")
 
 def error_message(message, status_code):
-    def error_message(message, status_code):
         abort(make_response(jsonify(dict(details=message)), status_code))
 
 def make_task_safely(data_dict):
@@ -36,7 +35,7 @@ def create_task():
     db.session.add(task)
     db.session.commit()
 
-    return jsonify(f"Task {task.title} created successfully")
+    return jsonify({"task": task.to_dict()}), 201
 
 @tasks_bp.route("", methods=["GET"])
 def read_all_tasks():
@@ -48,4 +47,4 @@ def read_all_tasks():
 @tasks_bp.route("/<id>", methods=["Get"])
 def read_task_by_id(id):
     task = get_task_record_by_id(id)
-    return jsonify(task.to_dict())
+    return jsonify({"task":task.to_dict()})
