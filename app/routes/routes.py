@@ -7,7 +7,6 @@ import os
 import requests
 from datetime import datetime
 from sqlalchemy.sql.functions import now
-# from .helper import validate_planet
 
 task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 
