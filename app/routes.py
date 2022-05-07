@@ -3,7 +3,7 @@ from app import db
 from app.models.task import Task 
 from flask import Blueprint, abort, jsonify, make_response, request
 import datetime
-
+from sqlalchemy.sql.functions import now 
 
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
@@ -22,6 +22,9 @@ def create_task():
                     description=request_body["description"]
                     )
 
+    if "completed_at" in request_body:
+        new_task.completed_at = request_body["completed_at"]
+    #new_task.completed_at == None
     db.session.add(new_task)
     db.session.commit()
 
@@ -30,7 +33,7 @@ def create_task():
             "id": new_task.task_id,
             "title": new_task.title,
             "description": new_task.description,
-            "is_complete": False
+            "is_complete": bool(new_task.completed_at)
             }
             }), 201
 
@@ -106,7 +109,7 @@ def replace_task(id_of_task):
             "id": task.task_id,
             "title": task.title,
             "description": task.description,
-            "is_complete": False
+            "is_complete": bool(task.completed_at)
             }
             })
 
@@ -147,6 +150,7 @@ def update_task_incomplete(id_of_task):
     #     return {"details": "mark task is required"}, 400
 
     task.completed_at = None 
+    db.session.add(task)
     db.session.commit()
 
     return jsonify({
