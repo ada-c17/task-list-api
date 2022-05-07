@@ -5,7 +5,8 @@ from flask import Blueprint, jsonify, abort, make_response, request
 from sqlalchemy import asc,desc
 import os
 import requests
-# from datetime import datetime
+import datetime
+from datetime import datetime
 from sqlalchemy.sql.functions import now
 # from .helper import validate_planet
 
@@ -25,12 +26,12 @@ def validate_task(task_id):
 @task_bp.route("", methods=["POST"])
 def create_tasks():
     request_body = request.get_json()
-    if request_body['completed_at']:
-        the_time = request_body['completed_at']
-    else:
-        the_time = None
+    # if request_body['completed_at']:
+    #     the_time = request_body['completed_at']
+    # else:
+    #     the_time = None
     try:
-        new_task = Task(title = request_body["title"], description = request_body["description"], completed_at = the_time)
+        new_task = Task(title = request_body["title"], description = request_body["description"])
         db.session.add(new_task)
         db.session.commit()
     except:
