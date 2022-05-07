@@ -128,7 +128,8 @@ def mark_task_complete(id):
 
     confirmation_msg = {"task": task.make_response_dict()}
 
-    slack_response = slack_complete(task)
+    slack_complete(task)
+    #slack_response = slack_complete(task)
 
     #confirmation_msg["slack-response"] = slack_response.json()
     #for troubleshooting response from Slack API through postman
