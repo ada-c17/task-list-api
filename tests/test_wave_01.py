@@ -213,7 +213,6 @@ def test_delete_task_not_found(client):
     # Assert
     assert response.status_code == 404
     assert response_body == {"message" : f"This task is not found."}
-
     assert Task.query.all() == []
 
 
@@ -230,7 +229,7 @@ def test_delete_task_not_found(client):
 
 
 # ----- TEST TEN ----- #
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_task_must_contain_title(client):
     # Act
     response = client.post("/tasks", json={
