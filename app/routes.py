@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Blueprint, jsonify, request, abort, make_response
 import sqlalchemy
 from app.models.task import Task
+from app.models.goal import Goal
 from app import db
 import requests
 from dotenv import load_dotenv
@@ -11,6 +12,8 @@ import os
 load_dotenv()
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
+goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
+
 
 @tasks_bp.route("", methods=["POST"])
 def create_one_task():
@@ -34,6 +37,7 @@ def create_one_task():
     rsp = {"task" : new_task.get_dict()}
 
     return jsonify(rsp), 201
+
 
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
@@ -107,6 +111,7 @@ def mark_task_complete(task_id):
     rsp = {"task" : task.get_dict()}
     return jsonify(rsp), 200
 
+
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_task_incomplete(task_id):
     task = validate_task(task_id)
@@ -133,3 +138,94 @@ def validate_task(task_id):
     return task
 
 
+@goals_bp.route("", methods=["POST"])
+def create_one_goal():
+    if not request.is_json:
+        return {"msg" : "Missing JSON request body"}, 400
+    
+    request_body = request.get_json()
+    try:
+        title = request_body["title"]
+    except KeyError:
+        return {"details": "Invalid data"}, 400
+
+    new_goal = Goal(title=title)
+
+    db.session.add(new_goal)
+    db.session.commit()
+    
+    rsp = {"goal" : new_goal.get_dict()}
+
+    return jsonify(rsp), 201
+
+
+@goals_bp.route("", methods=["GET"])
+def get_all_goals():
+    sort_query = request.args.get("sort")
+    goals = Goal.query.all()
+    
+    if sort_query == "desc":
+        goals = Goal.query.order_by(sqlalchemy.desc(Goal.title))
+    elif sort_query == "asc":
+        goals = Goal.query.order_by(sqlalchemy.asc(Goal.title))
+
+    goals_response = []
+    for goal in goals:
+        goals_response.append(goal.get_dict())
+    
+    return jsonify(goals_response), 200
+
+
+@goals_bp.route("/<goal_id>", methods=["GET"])
+def get_one_goal(goal_id):
+    goal = validate_goal(goal_id)
+    rsp = {"goal" : goal.get_dict()}
+
+    return jsonify(rsp), 200
+
+
+def validate_goal(goal_id):
+    try:
+        goal_id = int(goal_id)
+    except:
+        rsp = {"msg" : f"Goal with id #{goal_id} is invalid."}
+        abort(make_response(rsp, 400))
+    
+    goal = Goal.query.get(goal_id)
+
+    if not goal:
+        rsp = {"msg" : f"Goal with id #{goal_id} is not found!"}
+        abort(make_response(rsp, 404))
+    return goal
+
+
+@goals_bp.route("/<goal_id>", methods=["PUT"])
+def update_one_goal(goal_id):
+    goal = validate_goal(goal_id)
+
+    if not request.is_json:
+        return {"msg" : "Missing JSON request body"}, 400
+
+    request_body = request.get_json()
+    try:
+        goal.title = request_body["title"]
+    except KeyError:
+        return {
+            "msg" : "Update failed due to missing data. Title is required!"
+        }, 400
+
+    db.session.commit()
+
+    rsp = {"goal" : goal.get_dict()}
+    return jsonify(rsp), 200
+
+
+@goals_bp.route("/<goal_id>", methods=["DELETE"])
+def delete_one_goal(goal_id):
+    goal = validate_goal(goal_id)
+
+    db.session.delete(goal)
+    db.session.commit()
+
+    rsp = {"details": f'Goal {goal_id} "{goal.title}" successfully deleted'}
+    return jsonify(rsp), 200
