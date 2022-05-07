@@ -4,7 +4,9 @@ from app.models.task import Task
 from flask import Blueprint, jsonify, abort, make_response, request
 from sqlalchemy import asc,desc
 import os
-import datetime
+import requests
+from datetime import datetime
+from sqlalchemy.sql.functions import now
 # from .helper import validate_planet
 
 task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
@@ -23,9 +25,12 @@ def validate_task(task_id):
 @task_bp.route("", methods=["POST"])
 def create_tasks():
     request_body = request.get_json()
-    
+    if request_body['completed_at']:
+        the_time = request_body['completed_at']
+    else:
+        the_time = None
     try:
-        new_task = Task(title = request_body["title"], description = request_body["description"])
+        new_task = Task(title = request_body["title"], description = request_body["description"], completed_at = the_time)
         db.session.add(new_task)
         db.session.commit()
     except:
@@ -69,8 +74,8 @@ def read_one_task(task_id):
 
 @task_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
-    task = validate_task(task_id)
 
+    task = validate_task(task_id)
     request_body = request.get_json()
     try: 
         task.title = request_body["title"]
@@ -92,3 +97,40 @@ def delete_a_task(task_id):
 
     return make_response({'details':f'Task {task.task_id} "{task.title}" successfully deleted'},200)
 
+@task_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def mark_complete(task_id):
+    task = Task.query.get(task_id)
+
+    if not task:
+        return make_response({"details":"Invalid data"},404)
+    
+    task.completed_at = now()
+
+    db.session.add(task)
+    db.session.commit()
+    if task.completed_at:
+        requests.post("https://slack.com/api/chat.postMessage",
+        data={
+            "token": os.environ.get("SLACK_TOKEN"), 
+            "channel": "task-notifications",
+            "text": f"Task {task.title} has been completed."
+            })
+    return {
+        "task": task.make_json()
+    }, 200
+
+@task_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def mark_incomplete(task_id):
+    task = Task.query.get(task_id)
+
+    if not task:
+        return make_response({"details":"Invalid data"},404)
+    
+    task.completed_at = None
+
+    db.session.add(task)
+    db.session.commit()
+
+    return {
+        "task": task.make_json()
+    }, 200
