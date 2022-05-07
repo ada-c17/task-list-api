@@ -71,4 +71,18 @@ def create_task():
 
     return jsonify(task_dict), 201
 
+@tasks_bp.route("/<task_id>", methods=["PUT"])
+def update_task(task_id):
+    task = validate_task(task_id)
+    request_body = request.get_json()
+
+    task.title = request_body["title"]
+    task.description = request_body["description"]
+
+    db.session.commit()
+
+    task_dict = make_task_dict(task)
+
+    return jsonify(task_dict), 200
+
 
