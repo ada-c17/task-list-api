@@ -1,7 +1,9 @@
 from sqlalchemy import asc, desc
 from app import db
 from app.models.task import Task 
-from flask import Blueprint, abort, jsonify, make_response, request  
+from flask import Blueprint, abort, jsonify, make_response, request
+import datetime
+
 
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
@@ -28,21 +30,14 @@ def create_task():
             "id": new_task.task_id,
             "title": new_task.title,
             "description": new_task.description,
-            "is_complete": new_task.is_complete
+            "is_complete": False
             }
             }), 201
 
 
 @tasks_bp.route("", methods=["GET"])
 def read_all_tasks():
-    # asc = request.args.get("title")
-    # if asc:
-    #     tasks = Task.query.order_by("title").all()
-    # #     #title_name = task_query["title"]
-    # #     #tasks = Task.query.order_by(sort=asc_query)
-    # #     tasks = Task.query.order_by(sort=asc)
-    # else:
-    #     tasks = Task.query.all()
+
     task_query = request.args
     if "sort" in task_query:
         if task_query["sort"] == "desc":
@@ -60,7 +55,7 @@ def read_all_tasks():
             "id": task.task_id,
             "title": task.title,
             "description": task.description,
-            "is_complete": task.is_complete
+            "is_complete": False
         })
     return jsonify(tasks_response)
 
@@ -90,13 +85,13 @@ def read_one_task(id_of_task):
             "id": task.task_id,
             "title": task.title,
             "description": task.description,
-            "is_complete": task.is_complete
+            "is_complete": False
             }
             })
 
 
 @tasks_bp.route("/<id_of_task>", methods=["PUT"])
-def update_task(id_of_task):
+def replace_task(id_of_task):
     task = validate_task(id_of_task)
 
     request_body = request.get_json()
@@ -111,9 +106,59 @@ def update_task(id_of_task):
             "id": task.task_id,
             "title": task.title,
             "description": task.description,
-            "is_complete": task.is_complete
+            "is_complete": False
             }
             })
+
+@tasks_bp.route("/<id_of_task>/mark_complete", methods=["PATCH"])
+def update_task_complete(id_of_task):
+    task = validate_task(id_of_task)
+    #request_body = request.get_json()
+
+    # try:
+    #     task.title = request_body["title"]
+    #     task.description = request_body["description"]
+    
+    # except KeyError:
+    #     return {"details": "mark task is required"}, 400
+
+    task.completed_at = datetime.datetime.now()
+    db.session.commit()
+
+    return jsonify({
+        "task": {
+            "id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": bool(task.completed_at)
+            }
+            }), 200
+
+@tasks_bp.route("/<id_of_task>/mark_incomplete", methods=["PATCH"])
+def update_task_incomplete(id_of_task):
+    task = validate_task(id_of_task)
+    #request_body = request.get_json()
+
+    # try:
+    #     task.title = request_body["title"]
+    #     task.description = request_body["description"]
+    
+    # except KeyError:
+    #     return {"details": "mark task is required"}, 400
+
+    task.completed_at = None 
+    db.session.commit()
+
+    return jsonify({
+        "task": {
+            "id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": bool(task.completed_at)
+            }
+            }), 200
+
+
 
 
 @tasks_bp.route("/<id_of_task>", methods=["DELETE"])
