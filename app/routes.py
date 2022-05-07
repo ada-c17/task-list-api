@@ -6,9 +6,17 @@ from app import db
 from app.models.task import Task
 from sqlalchemy import func
 from datetime import datetime
-
+import requests
+from flask import current_app as app
 # registering my blueprint
 tasks_bp=Blueprint("tasks",__name__,url_prefix="/tasks", )
+
+# helper function to send a slack message
+def send_slack_message(message):
+    url = "https://slack.com/api/chat.postMessage?channel=task-notifications&text=" + message
+    headers = {'Authorization': f'Bearer {app.config["SLACK_TOKEN"]}'} # using hidden token from .env
+    r = requests.patch(url, headers=headers)
+    
 
 # helper function to check if id is correct
 def validate_task(task_id):
@@ -136,6 +144,8 @@ def update_complete_task(task_id):
 
     db.session.commit()
 
+    send_slack_message(f'Someone just completed the task "{task.title}"')
+    
     rsp={
         "task": {
             "id": task.task_id,
