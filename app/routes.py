@@ -120,9 +120,18 @@ def mark_complete(task_id):
     task = validate_task(task_id)
 
     if isinstance(task, Task):
-        task.completed_at = datetime.now()
+        task.completed_at = datetime.utcnow()
         db.session.commit()
         return format_response(task), 200
     return task
 
+@tasks_bp.route('/<task_id>/mark_incomplete', methods=['PATCH'])
+def mark_incomplete(task_id):
+    task = validate_task(task_id)
+
+    if isinstance(task, Task):
+        task.completed_at = None
+        db.session.commit()
+        return format_response(task), 200
+    return task
 
