@@ -171,33 +171,53 @@ def update_task(task_id):
 def mark_as_complete(task_id):
 
     # Get the specific task to mark
-    task_to_mark = Task.query.get(task_id)
+    task_to_mark_complete = Task.query.get(task_id)
 
     # Set completed_at as the datetime value
-    task_to_mark.completed_at = datetime.utcnow()
+    task_to_mark_complete.completed_at = datetime.utcnow()
 
-    if task_to_mark.completed_at:
+    if task_to_mark_complete.completed_at:
         # If it's marked, set is_complete to True
         response_body = jsonify({"task" : 
             {
-                "id" : task_to_mark.task_id,
-                "title" : task_to_mark.title,
-                "description" : task_to_mark.description,
+                "id" : task_to_mark_complete.task_id,
+                "title" : task_to_mark_complete.title,
+                "description" : task_to_mark_complete.description,
                 "is_complete" : True
             }
         })
         
     # Add update, commit, and send response body 
-    db.session.add(task_to_mark)
+    db.session.add(task_to_mark_complete)
     db.session.commit()
     return response_body, 200
 
 
 
 # ---- COMPLETED TASK, MARK IT AS INCOMPLETE ---- #
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def mark_as_incomplete(task_id):
+    # Get the specific task to mark
+    task_to_mark_incomplete = Task.query.get(task_id)
 
+    # Task.completed_at is currently marked so set it to None
+    if task_to_mark_incomplete.completed_at:
 
+        task_to_mark_incomplete.completed_at = None
+        # If it's marked, set is_complete to False
+        response_body = jsonify({"task" : 
+            {
+                "id" : task_to_mark_incomplete.task_id,
+                "title" : task_to_mark_incomplete.title,
+                "description" : task_to_mark_incomplete.description,
+                "is_complete" : False
+            }
+        })
 
+    # Add update, commit, and send response body 
+    db.session.add(task_to_mark_incomplete)
+    db.session.commit()
+    return response_body, 200
 
 
 
