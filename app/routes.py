@@ -33,23 +33,6 @@ def validate_task(task_id):
     return task
 
 
-
-# def format_task_response(task):
-#     is_complete = False
-
-#     if task.completed_at:
-#         is_complete = True
-
-#     return jsonify({"task" : 
-#         {
-#             "id" : task.task_id,
-#             "title" : task.title,
-#             "description" : task.description,
-#             "is_complete" : is_complete
-#         }
-#     })
-
-
 # ------------------------ GET REQUESTS ------------------------ #
 
 # ---- GET ALL TASKS ---- #
@@ -60,6 +43,7 @@ def get_all_tasks():
 
     all_tasks = Task.query.all()
 
+    # Create the response body
     task_response = []
     
     for task in all_tasks:
@@ -112,12 +96,9 @@ def get_one_task(task_id):
         }
     })
 
-    # return format_task_response(task), 200
-
 
 
 # ------------------------ POST REQUESTS ------------------------ #
-
 
 # ---- CREATE A TASK ---- #
 @tasks_bp.route("", methods=["POST"])
@@ -189,26 +170,14 @@ def update_task(task_id):
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_as_complete(task_id):
 
-    # incompleted_to_mark = validate(task_id)
+    # Get the specific task to mark
     task_to_mark = Task.query.get(task_id)
 
-    # if incompleted_to_mark.completed_at == None:
-
-    #     incompleted_to_mark.completed_at = datetime.now()
-
-    #     response_body = jsonify({"task" : 
-    #         {
-    #             "id" : incompleted_to_mark.task_id,
-    #             "title" : incompleted_to_mark.title,
-    #             "description" : incompleted_to_mark.description,
-    #             "is_complete" : True
-    #         }
-    #     })
-
+    # Set completed_at as the datetime value
     task_to_mark.completed_at = datetime.utcnow()
 
     if task_to_mark.completed_at:
-        
+        # If it's marked, set is_complete to True
         response_body = jsonify({"task" : 
             {
                 "id" : task_to_mark.task_id,
@@ -218,13 +187,10 @@ def mark_as_complete(task_id):
             }
         })
         
-
+    # Add update, commit, and send response body 
     db.session.add(task_to_mark)
     db.session.commit()
     return response_body, 200
-
-
-
 
 
 
@@ -233,8 +199,9 @@ def mark_as_complete(task_id):
 
 
 
-# ------------------------ DELETE REQUESTS ------------------------ #
 
+
+# ------------------------ DELETE REQUESTS ------------------------ #
 
 # ---- DELETE ONE TASK ---- #
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
@@ -250,7 +217,6 @@ def delete_one_task(task_id):
     db.session.delete(task_to_delete)
     db.session.commit()
 
-    # Need to change this response body  
     return {
         "details": f'Task {task_id} \"{task_to_delete.title}\" successfully deleted'
     }, 200

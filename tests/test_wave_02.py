@@ -3,6 +3,7 @@ import pytest
 
 
 # ----- TEST ONE ----- #
+# ----- PASSED ----- #
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_sorted_asc(client, three_tasks):
     # Act
@@ -34,6 +35,7 @@ def test_get_tasks_sorted_asc(client, three_tasks):
 
 
 # ----- TEST TWO ----- #
+# ----- PASSED ----- #
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_sorted_desc(client, three_tasks):
     # Act
