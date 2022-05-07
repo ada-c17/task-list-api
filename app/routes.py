@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, abort, make_response
 from app.models.task import Task
 from app import db
 from sqlalchemy import desc, asc
+import datetime 
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -16,12 +17,13 @@ def create_one_task():
         new_task.title = request_body["title"]
         new_task.description = request_body["description"]
         
-    
-    
     except KeyError:
         return {
             "details": "Invalid data"
         } , 400
+
+    if "completed_at" in request_body:
+        new_task.completed_at = request_body["completed_at"]
 
     db.session.add(new_task)
     db.session.commit()
@@ -89,11 +91,18 @@ def replace_task(task_id):
     try:
         chosen_task.title = request_body["title"]
         chosen_task.description = request_body["description"]
+        
     
     except KeyError:
         return {
             "details": "title, description are required"
         } , 400
+
+    try:
+        chosen_task.completed_at = request_body["completed_at"]
+
+    except KeyError:
+        pass
 
     db.session.commit()
     response = jsonify({"task": {
@@ -103,6 +112,42 @@ def replace_task(task_id):
                 "is_complete": bool(chosen_task.completed_at)}
     })
     return response, 200
+
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def mark_complete_task(task_id):
+    chosen_task = get_task_or_abort(task_id)
+
+    chosen_task.completed_at = datetime.datetime.now()
+    #datetime.utcnow() with from datetime import datetime
+
+    db.session.commit()
+    response = jsonify({"task": {
+        "id": chosen_task.task_id,
+                "title": chosen_task.title,
+                "description": chosen_task.description,
+                "is_complete": bool(chosen_task.completed_at)}
+    })
+    return response, 200
+
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def mark_incomplete_task(task_id):
+    chosen_task = get_task_or_abort(task_id)
+
+    
+    chosen_task.completed_at = None
+
+    print (chosen_task)
+
+    db.session.commit()
+    response = jsonify({"task": {
+        "id": chosen_task.task_id,
+                "title": chosen_task.title,
+                "description": chosen_task.description,
+                "is_complete": bool(chosen_task.completed_at)}
+    })
+
+    return response, 200
+
 
 
 @tasks_bp.route("/<task_id>", methods = ["DELETE"])
