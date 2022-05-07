@@ -1,5 +1,6 @@
+from urllib import response
 from xmlrpc.client import DateTime
-from sqlalchemy import null
+from sqlalchemy import null, true
 import datetime
 from app import db
 from app.models.task import Task
@@ -37,6 +38,31 @@ def validate_task(task_id):
 #     if task_id.completed_at == None:
 #         return False
 #     return True
+@tasks_bp.route("", methods=["POST"])
+def create_task():
+    request_body = request.get_json()
+    # new_task = Task(title=request_body["title"],
+    #                 description=request_body["description"])
+
+    # new_task = Task.create(request_body)
+    # if task.completed_at != None:
+    #     task.completed_at = None
+    # if task.completed_at == None:
+    #     task.completed_at = datetime.datetime.now()
+    # valid completed at == True
+    # if Task
+
+    try:
+        new_task = Task.create(request_body)
+        if "completed_at" in request_body:
+            new_task.completed_at = request_body["completed_at"]
+        db.session.add(new_task)
+        db.session.commit()
+
+    except KeyError:
+        return abort(make_response(jsonify({"details": "Invalid data"}), 400))
+
+    return make_response(jsonify(new_task.to_json()), 201)
 
 
 @tasks_bp.route("", methods=["GET"])
@@ -77,27 +103,6 @@ def get_all_tasks():
 def handle_task(task_id):
     task = validate_task(task_id)
     return make_response(jsonify(task.to_json()), 200)
-
-
-@tasks_bp.route("", methods=["POST"])
-def create_task():
-    request_body = request.get_json()
-    # new_task = Task(title=request_body["title"],
-    #                 description=request_body["description"])
-
-    # new_task = Task.create(request_body)
-    try:
-        new_task = Task.create(request_body)
-        db.session.add(new_task)
-
-        db.session.commit()
-    except KeyError:
-        return make_response(jsonify({"details": "Invalid data"})), 400
-
-    # is_complete=request_body["is_complete"])
-    # db.session.add(new_task)
-    # db.session.commit()
-    return new_task.to_json(), 201
 
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
@@ -149,16 +154,26 @@ def complete_update(task_id):
 
     if task.completed_at == None:
         task.completed_at = datetime.datetime.now()
-    # task.completed_at = request_body["is_complete"]
-    # task.completed_at = request_body["is_complete"]
 
-    # request_body = ["is_complete"]
-    # request_body.datetime.now()
-    # # new_update = Task.update(request_body)
     db.session.commit()
     # except KeyError:
     #     return abort(make_response(jsonify("Missing information")), 400)
     return make_response(jsonify(task.to_json()), 200)
+
+
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def incomplete_update(task_id):
+    task = validate_task(task_id)
+    request_body = request.get_json()
+
+    if task.completed_at != None:
+        task.completed_at = None
+
+    db.session.commit()
+    # except KeyError:
+    #     return abort(make_response(jsonify("Missing information")), 400)
+    return make_response(jsonify(task.to_json()), 200)
+# /tasks/1/mark_incomplete
 
 
 """
