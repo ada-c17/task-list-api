@@ -3,18 +3,23 @@ from turtle import title
 from flask import Blueprint, make_response,request,jsonify,abort
 from sqlalchemy import asc, false, null, true
 from app import db
+from app.models.goal import Goal
 from app.models.task import Task
 from sqlalchemy import func
 from datetime import datetime
 import requests
 from flask import current_app as app
-# registering my blueprint
-tasks_bp=Blueprint("tasks",__name__,url_prefix="/tasks", )
+
+# registering my blueprints
+tasks_bp = Blueprint ("tasks", __name__, url_prefix= "/tasks", )
+goals_bp = Blueprint ("goals", __name__, url_prefix= "/goals", )
 
 # helper function to send a slack message
 def send_slack_message(message):
     url = "https://slack.com/api/chat.postMessage?channel=task-notifications&text=" + message
+   
     headers = {'Authorization': f'Bearer {app.config["SLACK_TOKEN"]}'} # using hidden token from .env
+    
     r = requests.patch(url, headers=headers)
     
 
@@ -33,13 +38,41 @@ def validate_task(task_id):
     
     return task
 
+def validate_goal(goal_id):
+    # handling invalid planet_id input
+    try:
+        goal_id=int(goal_id)
+    except:
+        abort(make_response({"msg":f"Goal # {goal_id} is invalid id "},400)) 
+    
+    #read task id 
+    goal=Goal.query.get(goal_id)
+    if goal is None:
+        abort(make_response({"msg":f"Goal # {goal_id} not found "},404)) 
+    
+    return goal   
+
 
 # helper function to check request body
 def check_request_body():
     request_body = request.get_json()
+
     if "title" not in request_body or "description" not in request_body:
         abort(make_response({"details":f"Invalid data"}, 400))
+   
     return request_body
+
+# helper function to check request body for goals
+def check_request_body_for_goals():
+    request_body = request.get_json()
+
+    if "title" not in request_body:
+        abort(make_response({"details":f"Invalid data"}, 400))
+   
+    return request_body
+
+
+
 
 # create new task
 @tasks_bp.route("", methods=["POST"])
@@ -172,3 +205,53 @@ def update_incomplete_task(task_id):
              }
              }
     return ((rsp),200)    
+
+
+    #*****************************************************************************
+    #***********************************GOAL**************************************
+
+# create new goal
+@goals_bp.route("", methods=["POST"])
+def create_goal():
+    request_body = check_request_body_for_goals()
+    #request_body=request.get_json()
+    new_goal=Goal(
+        title=request_body["title"])
+        
+    db.session.add(new_goal)
+    db.session.commit()
+
+    rsp={
+        "goal": {
+             "id": new_goal.goal_id,
+             "title": new_goal.title }
+             }
+    return jsonify(rsp),201  
+
+# get all goals
+@goals_bp.route("", methods=["GET"])
+def get_all_goals():  
+
+    goals = Goal.query.all()
+    
+    # building response
+    goals_response = [] 
+    
+    for goal in goals:
+        goals_response.append({
+            "id": goal.goal_id,
+            "title": goal.title
+            })
+
+    return jsonify(goals_response)    
+
+
+# get one saved goal
+@goals_bp.route("/<goal_id>", methods=["GET"]) 
+def get_one_goal(goal_id):
+    goal=validate_goal(goal_id)
+    return {
+        "goal": {
+        "id" : goal.goal_id,
+        "title": goal.title }}, 200  
+
