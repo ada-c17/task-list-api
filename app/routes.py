@@ -228,6 +228,7 @@ def mark_as_complete(task_id):
         # }
         # slack_request = requests.post(SLACK_URL, headers=headers, params=q_params)
 
+        slack_notification(task_to_mark_complete)
 
         # If it's marked, set is_complete to True
         response_body = jsonify({"task" : 
