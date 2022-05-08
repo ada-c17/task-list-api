@@ -8,12 +8,12 @@ from flask import Blueprint, jsonify, abort, make_response, request
 from tests.conftest import one_task
 
 
-# ---- CREATING BLUEPRINT INSTANCE---- # 
+# ------------------------ BLUEPRINT INSTANCE ------------------------ # 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
+# ------------------------ SLACK ------------------------ # 
 SLACK_URL = "https://slack.com/api/chat.postMessage"
 SLACK_TOKEN =  os.environ.get("SLACK_TOKEN")
-# SLACK_CHANNEL_ID = os.environ.get("SLACK_TASK_NOTIFICATION_CHANNEL_ID")
 
 
 # ------------------------ HELPER FUNCTIONS ------------------------ #
@@ -47,6 +47,25 @@ def slack_notification(task_to_notify):
     slack_request = requests.post(SLACK_URL, headers=headers, params=q_params)
     
     return slack_request
+
+
+def format_response_body(task):
+
+    if task.completed_at:
+        is_complete = True
+    else:
+        is_complete = False
+    
+    response_body = jsonify({"task" : 
+        {
+            "id" : task.task_id,
+            "title" : task.title,
+            "description" : task.description,
+            "is_complete" : is_complete
+        }
+    })
+
+    return response_body
 
 
 # ------------------------ GET REQUESTS ------------------------ #
@@ -103,14 +122,16 @@ def get_all_tasks():
 def get_one_task(task_id):
     task = validate_task(task_id)
 
-    return jsonify({"task" : 
-        {
-            "id" : task.task_id,
-            "title" : task.title,
-            "description" : task.description,
-            "is_complete" : False
-        }
-    })
+    # return jsonify({"task" : 
+    #     {
+    #         "id" : task.task_id,
+    #         "title" : task.title,
+    #         "description" : task.description,
+    #         "is_complete" : False
+    #     }
+    # })
+
+    return format_response_body(task), 200
 
 
 
@@ -131,13 +152,13 @@ def create_task():
 
 
     if "completed_at" in request_body:
-        is_complete = True
+        # is_complete = True
 
         new_task = Task(title=request_body["title"],
                         description=request_body["description"],
                         completed_at=datetime.utcnow())
     else:
-        is_complete = False
+        # is_complete = False
 
         new_task = Task(title=request_body["title"],
                         description=request_body["description"])
@@ -147,16 +168,18 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
 
-    response_body = jsonify({"task" : 
-        {
-            "id" : new_task.task_id,
-            "title" : new_task.title,
-            "description" : new_task.description,
-            "is_complete" : is_complete
-        }
-    })
+    # response_body = jsonify({"task" : 
+    #     {
+    #         "id" : new_task.task_id,
+    #         "title" : new_task.title,
+    #         "description" : new_task.description,
+    #         "is_complete" : is_complete
+    #     }
+    # })
 
-    return response_body, 201
+    # return response_body, 201
+
+    return format_response_body(new_task), 201
 
 
 
@@ -176,24 +199,26 @@ def update_task(task_id):
     task_to_update.description = request_body["description"]
 
 
-    if "completed_at" in request_body:
-        is_complete = True
-    else:
-        is_complete = False
+    # if "completed_at" in request_body:
+    #     is_complete = True
+    # else:
+    #     is_complete = False
 
     # Commit the change and send response body
     db.session.commit()
 
-    response_body = jsonify({"task" : 
-        {
-            "id" : task_to_update.task_id,
-            "title" : task_to_update.title,
-            "description" : task_to_update.description,
-            "is_complete" : is_complete
-        }
-    })
+    # response_body = jsonify({"task" : 
+    #     {
+    #         "id" : task_to_update.task_id,
+    #         "title" : task_to_update.title,
+    #         "description" : task_to_update.description,
+    #         "is_complete" : is_complete
+    #     }
+    # })
 
-    return response_body, 200
+    # return response_body, 200
+
+    return format_response_body(task_to_update), 200
 
 
 
@@ -223,19 +248,21 @@ def mark_as_complete(task_id):
         slack_notification(task_to_mark_complete)
 
         # If it's marked, set is_complete to True
-        response_body = jsonify({"task" : 
-            {
-                "id" : task_to_mark_complete.task_id,
-                "title" : task_to_mark_complete.title,
-                "description" : task_to_mark_complete.description,
-                "is_complete" : True
-            }
-        })
+        # response_body = jsonify({"task" : 
+        #     {
+        #         "id" : task_to_mark_complete.task_id,
+        #         "title" : task_to_mark_complete.title,
+        #         "description" : task_to_mark_complete.description,
+        #         "is_complete" : True
+        #     }
+        # })
         
     # Add update, commit, and send response body 
     db.session.add(task_to_mark_complete)
     db.session.commit()
-    return response_body, 200
+    # return response_body, 200
+
+    return format_response_body(task_to_mark_complete), 200
 
 
 
@@ -256,20 +283,22 @@ def mark_as_incomplete(task_id):
         
     # If task is already marked as 'incomplete' 
     # (aka Null or None), return the response body where 'is_complete'is False
-    if not task_to_mark_incomplete.completed_at:
-        response_body = jsonify({"task" : 
-            {
-                "id" : task_to_mark_incomplete.task_id,
-                "title" : task_to_mark_incomplete.title,
-                "description" : task_to_mark_incomplete.description,
-                "is_complete" : False
-            }
-        })
+    # if not task_to_mark_incomplete.completed_at:
+    #     response_body = jsonify({"task" : 
+    #         {
+    #             "id" : task_to_mark_incomplete.task_id,
+    #             "title" : task_to_mark_incomplete.title,
+    #             "description" : task_to_mark_incomplete.description,
+    #             "is_complete" : False
+    #         }
+    #     })
 
     # Add update, commit, and send response body 
     db.session.add(task_to_mark_incomplete)
     db.session.commit()
-    return response_body, 200
+    # return response_body, 200
+
+    return format_response_body, 200
 
 
 
