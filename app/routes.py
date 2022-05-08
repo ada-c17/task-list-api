@@ -5,8 +5,13 @@ from app import db
 
 task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")  # what is string "task_bp", why do we need
 
-# CREATE TASK - "POST"
-# WE NEED TO TRY THIS
+
+'''
+POST ROUTE
+'''
+
+# CREATE TASK
+# LOCALHOST
 # without create decorator from Task model
 @task_bp.route("", methods=["POST"])
 def create_task():
@@ -24,7 +29,12 @@ def create_task():
     }
     return make_response(jsonify({"task": task_response_body}), 201)
 
-#GET SAVED TASKS - "GET" (all)
+
+'''
+GET ROUTES
+'''
+
+# GET SAVED TASKS - (all)
 @task_bp.route("", methods=["GET"])
 def read_saved_tasks():
     # if we have query parameters
@@ -67,18 +77,45 @@ def validate_task(task_id):
 def read_one_task(task_id):
     task = validate_task(task_id)
 
-    return jsonify(task.to_json(), 200)   # to_json is our function in class - how does it know to get tehre
+    task_response_body = {
+            "id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": bool(task.completed_at),
+    }
+    return make_response(jsonify({"task": task_response_body}), 200)
+
+'''
+PUT ROUTES
+'''
 
 # UPDATE ONE TASK
+# without update function in task.py
 @task_bp.route("/<task_id>", methods = ["PUT"])
-def update_one_planet(task_id):
+def update_task(task_id):
     task = validate_task(task_id)
 
     request_body = request.get_json()
-    task.update(request_body)
+
+    task.title = request_body["title"]
+    task.description = request_body["description"]
+
+    # task.update(request_body)
     db.session.commit()
 
-    return make_response(jsonify(f"Task # {task.task_id} successfully updated"), 200)
+    task_response_body = {
+            "id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": bool(task.completed_at),
+    }
+
+    return make_response(jsonify({"task": task_response_body}), 200)
+
+
+'''
+DELETE ROUTE
+'''
 
 # DELETE ONE TASK
 @task_bp.route("/<task_id>", methods = ["DELETE"])
@@ -88,7 +125,14 @@ def delete_one_task(task_id):
     db.session.delete(task)
     db.session.commit()
 
-    return make_response(f"Task # {task.id} successfully deleted"), 200
+    delete_response = {
+        "details": f"Task {task.task_id} \"{task.title}\" successfully deleted'"
+    }
+
+    return make_response(jsonify({"details": delete_response}), 200)
+
+    return make_response(jsonify({"task": task_response_body}), 200)
+
 
 
 # =========
