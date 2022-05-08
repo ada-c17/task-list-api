@@ -14,7 +14,7 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
     
-    return make_response(jsonify({"task": new_task.to_json()}), 201)
+    return jsonify({"task": new_task.to_json()}), 201
 
 # Get Tasks
 @tasks_bp.route("", methods = ["GET"])
@@ -46,4 +46,9 @@ def update_task(task_id):
 # Delete Task
 @tasks_bp.route("/<task_id>", methods = ["DELETE"])
 def delete_task(task_id):
-    pass
+    task = check_task_exists(task_id)
+
+    db.session.delete(task)
+    db.session.commit()
+
+    return jsonify({"details": f'Task {task.task_id} "{task.title}" successfully deleted'}), 200
