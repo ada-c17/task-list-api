@@ -8,7 +8,8 @@ class Task(db.Model):
     completed_at = db.Column(db.DateTime, default = None, nullable = True)
 
     def to_json(self):
+        is_complete = False if not self.completed_at else True
         return {"id": self.task_id, 
                 "title": self.title, 
                 "description": self.description, 
-                "is_complete": False}
+                "is_complete": is_complete}

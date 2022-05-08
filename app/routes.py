@@ -1,6 +1,7 @@
 from app import db
 from flask import Blueprint, jsonify, request, make_response
 from app.models.task import Task
+from .routes_helper import check_task_exists
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix = "/tasks")
 
@@ -18,12 +19,17 @@ def create_task():
 # Get Tasks
 @tasks_bp.route("", methods = ["GET"])
 def get_all_tasks():
-    pass
+    tasks = Task.query.all()
+    tasks_response = [task.to_json() for task in tasks]
+
+    return jsonify(tasks_response), 200
 
 # Get a single Task
 @tasks_bp.route("/<task_id>", methods = ["GET"])
 def get_one_task(task_id):
-    pass
+    task = check_task_exists(task_id)
+
+    return make_response(jsonify({"task": task.to_json()}), 200)
 
 # Update Task
 @tasks_bp.route("/<task_id>", methods = ["PUT"])
@@ -31,6 +37,6 @@ def update_task(task_id):
     pass
 
 # Delete Task
-@tasks_bp.rotue("/<task_id>", methods = ["DELETE"])
+@tasks_bp.route("/<task_id>", methods = ["DELETE"])
 def delete_task(task_id):
     pass
