@@ -2,6 +2,7 @@ from app import db
 from flask import Blueprint, jsonify, request, make_response
 from app.models.task import Task
 from .routes_helper import check_task_exists, try_to_make_task
+from datetime import date
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix = "/tasks")
 
@@ -50,6 +51,17 @@ def update_task(task_id):
     db.session.commit()
 
     return make_response(jsonify({"task": task.to_json()}), 200)
+
+@tasks_bp.route("/<task_id>/mark_complete", methods = ["PATCH"])
+def mark_task_complete(task_id):
+    task = check_task_exists(task_id)
+
+    task.completed_at = date.today()
+
+    db.session.commit()
+
+    return make_response(jsonify({"task": task.to_json()}), 200)
+
 
 # Delete Task
 @tasks_bp.route("/<task_id>", methods = ["DELETE"])
