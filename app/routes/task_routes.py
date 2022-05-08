@@ -40,7 +40,7 @@ def add_task():
     db.session.add(new_task)
     db.session.commit()
 
-    task_response = {"task":new_task.to_dict()}
+    task_response = {"task":new_task.task_to_dict()}
 
     return jsonify(task_response), 201
 
@@ -54,13 +54,13 @@ def get_tasks():
     else:
         tasks = Task.query.all()
 
-    result_list = [task.to_dict() for task in tasks]
+    result_list = [task.task_to_dict() for task in tasks]
     return jsonify(result_list)
 
 @task_bp.route("/<id>", methods=["GET"])
 def get_task_by_id(id):
     task = validate_task_id(id)
-    result = {"task": task.to_dict()}
+    result = {"task": task.task_to_dict()}
     return jsonify(result)
 
 @task_bp.route("<id>", methods=["PUT"])

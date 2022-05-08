@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, make_response, request, abort
 from app import db
 from app.models.goal import Goal
+from .task_routes import validate_task_id, Task
 # from sqlalchemy import desc
 # import requests
 # import os
@@ -80,6 +81,27 @@ def delete_goal(id):
     db.session.commit()
 
     return jsonify({"details":f'Goal {id} "{goal.title}" successfully deleted'})
+
+@goal_bp.route("/<id>/tasks", methods=["POST"])
+def add_task_to_goal(id):
+    goal = validate_goal_id(id)
+    request_body = request.get_json()
+    data_dict = {"task_ids": []}
+    for task in request_body["task_ids"]:
+        validate_task_id(task)
+        data_dict["task_ids"].append(task)
+    # updated_goal = update_goal_safely(goal, request_body)
+    update_tasks_in_goal = update_goal_safely(goal, data_dict)
+    db.session.commit()
+    # task_response = {"goal":update_tasks_in_goal}
+
+    return jsonify(update_tasks_in_goal), 200
+
+@goal_bp.route("/<id>/tasks", methods=["GET"])
+def get_tasks_from_goal(id):
+    goal = validate_goal_id(id)
+    result = goal.get_tasks()
+    return jsonify(result)
 
 # @task_bp.route("<id>/mark_complete", methods=["PATCH"])
 # def mark_complete(id):

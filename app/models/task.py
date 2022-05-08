@@ -1,5 +1,6 @@
 import datetime
 from app import db
+from app.models.goal import Goal
 
 
 class Task(db.Model):
@@ -9,13 +10,24 @@ class Task(db.Model):
     description = db.Column(db.String)
     is_complete = db.Column(db.Boolean, default=False)
     completed_at = db.Column(db.DateTime)
+    goal_id = db.Column(db.Integer, db.ForeignKey(Goal.goal_id))
+    # goal = db.relationship("Goal", back_populates="task")
 
-    def to_dict(self):
-        return dict(
-            id=self.id,
-            title=self.title,
-            description=self.description,
-            is_complete=self.is_complete)
+    def task_to_dict(self):
+        if self.goal_id:
+            return dict(
+                id=self.id,
+                title=self.title,
+                description=self.description,
+                is_complete=self.is_complete,
+                goal_id = self.goal_id
+            )
+        else:
+            return dict(
+                id=self.id,
+                title=self.title,
+                description=self.description,
+                is_complete=self.is_complete)
     
     @classmethod
     def from_dict(cls, data_dict):
@@ -39,15 +51,15 @@ class Task(db.Model):
         if "completed_at" in data_dict:
             self.completed_at=data_dict["completed_at"]
             self.is_complete=True
-        return self.to_dict()
+        return self.task_to_dict()
 
     def mark_done(self):
         self.is_complete = True
         current_time = datetime.datetime.now()
         self.completed_at = current_time
-        return self.to_dict()
+        return self.task_to_dict()
 
     def mark_not_done(self):
         self.is_complete = False
         self.completed_at = None
-        return self.to_dict()
+        return self.task_to_dict()
