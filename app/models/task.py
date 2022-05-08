@@ -1,5 +1,5 @@
 from app import db
-from .common import define_validation_on_model
+from .common import validate_id_by_model
 
 
 class Task(db.Model):
@@ -21,6 +21,5 @@ class Task(db.Model):
         return details
     
     @classmethod
-    @define_validation_on_model
     def validate_id(cls, target_id):
-        pass
+        return validate_id_by_model(cls, target_id)
