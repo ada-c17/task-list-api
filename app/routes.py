@@ -26,11 +26,18 @@ def create_task():
 
     if "title" not in request_body or\
         "description" not in request_body:
-        return jsonify({"details": "Invalid data"}), 400
-    
+        return jsonify({"details": "Invalid data"}), 400        
+
+    if "completed_at" in request_body:
+        completed_status = request_body["completed_at"]
+    else:
+        completed_status = None
+
     new_task = Task(
         title=request_body["title"],
-        description=request_body["description"])
+        description=request_body["description"],
+        completed_at=completed_status
+    )
 
     db.session.add(new_task)
     db.session.commit()
@@ -91,6 +98,9 @@ def update_saved_task(task_id):
 
     task.title = request_body["title"]
     task.description = request_body["description"]
+
+    if "completed_at" in request_body:
+        task.completed_at = request_body["completed_at"]
 
     db.session.commit()
     
