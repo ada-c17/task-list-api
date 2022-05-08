@@ -13,16 +13,20 @@ goal_bp = Blueprint('goals', __name__, url_prefix = '/goals')
 @task_bp.route('', methods = ['GET'])
 def get_all_tasks():
     if not request.args:
-        all_tasks = [task.to_json() for task in Task.query.all()]
+        return jsonify([task.to_json() for task in Task.query.all()]), 200
+    
+    params = dict(request.args) # Conversion to make args object mutable
+    sort_style = params.pop('sort', None)
+    # TODO: Check behavior of filter_by() when supplied parameter not in model
+    if sort_style and len(params) > 0:
+        all_tasks = [task.to_json() for task in 
+                        Task.query.filter_by(**params)
+                                .order_by(getattr(Task.title,sort_style)())]
+    elif sort_style:
+        all_tasks = [task.to_json() for task in 
+                        Task.query.order_by(getattr(Task.title,sort_style)())]
     else:
-        params = dict(request.args)
-        sort_style = params.pop('sort', None)
-        if sort_style and len(params) > 0:
-            all_tasks = [task.to_json() for task in Task.query.filter_by(**params).order_by(getattr(Task.title,sort_style)())]
-        elif sort_style:
-            all_tasks = [task.to_json() for task in Task.query.order_by(getattr(Task.title,sort_style)())]
-        else:
-            all_tasks = [task.to_json() for task in Task.query.filter_by(**params)]
+        all_tasks = [task.to_json() for task in Task.query.filter_by(**params)]
 
     return jsonify(all_tasks), 200
 
