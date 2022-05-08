@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, make_response, request, abort
 from app import db
 from app.models.task import Task
+from .helpers import validate_task
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -27,3 +28,9 @@ def get_all_tasks():
         task_response_body.append(task.to_json())
 
     return jsonify(task_response_body), 200
+
+@tasks_bp.route("/<task_id>", methods=["GET"])
+def get_one_task(task_id):
+    task = validate_task(task_id)
+
+    return jsonify({"task": task.to_json()}), 200
