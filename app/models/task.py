@@ -12,16 +12,26 @@ class Task(db.Model):
         if not self.completed_at:
             is_complete = False
 
-            return {"id" : self.task_id,
-                    "title" : self.title,
-                    "description" : self.description,
-                    "is_complete" : is_complete}
+        if self.completed_at:
+            is_complete = True
+
+
+        return {"id" : self.task_id,
+                "title" : self.title,
+                "description" : self.description,
+                "is_complete" : is_complete}
     
 
     def update_task(self, update_body):
-        self.title = update_body["title"]
-        self.description = update_body["description"]
-        self.completed_at = None
+        if "completed_at" in update_body:
+            self.title = update_body["title"]
+            self.description = update_body["description"]
+            self.completed_at = update_body["completed_at"]
+
+        elif "completed_at" not in update_body:
+            self.title = update_body["title"]
+            self.description = update_body["description"]
+
 
     @classmethod
     def from_json(cls, request_body):
@@ -29,9 +39,17 @@ class Task(db.Model):
         if "title" not in request_body or "description" not in request_body:
             abort(make_response({"details": "Invalid data"}, 400))
 
-        new_task = cls(
+        if "completed_at" in request_body:    
+            new_task = cls(
+            title=request_body["title"],
+            description=request_body["description"],
+            completed_at = request_body["completed_at"])
+
+        elif "completed_at" not in request_body:
+            new_task = cls(
             title=request_body["title"],
             description=request_body["description"])
+
         
         return new_task
 
