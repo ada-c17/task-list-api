@@ -6,7 +6,6 @@ from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, abort, make_response, request
 from tests.conftest import one_task
-from dotenv import load_dotenv
 
 
 # ---- CREATING BLUEPRINT INSTANCE---- # 
