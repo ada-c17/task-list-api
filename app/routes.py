@@ -15,7 +15,7 @@ def validate_input(task_id):
             return task
     abort(make_response ({'details': 'This task id does not exist'}, 404))
 
-def validate_if_completed(completed_at):
+def is_completed(completed_at):
     if completed_at is None:
         return False
     else: 
@@ -28,8 +28,14 @@ def create_a_task():
         return ({'details': 'Invalid data'}, 400)
     elif not 'title' in request_body:
         return ({'details': 'Invalid data'}, 400)
-    new_task = Task(title=request_body['title'],
+
+    if not "completed_at" in request_body:
+        new_task = Task(title=request_body['title'],
                     description=request_body['description'])
+    else: 
+        new_task = Task(title=request_body['title'],
+                    description=request_body['description'],
+                    completed_at = request_body['completed_at'])
     
     db.session.add(new_task)
     db.session.commit()
@@ -38,7 +44,7 @@ def create_a_task():
             'id' :new_task.task_id,
             'title': new_task.title,
             'description': new_task.description,
-            'is_complete': validate_if_completed(new_task.completed_at)}} , 201
+            'is_complete': is_completed(new_task.completed_at)}} , 201
 
 @tasks_bp.route("", methods=['GET'])
 def get_all_tasks():
@@ -61,7 +67,7 @@ def get_all_tasks():
             'id' :task.task_id,
             'title': task.title,
             'description': task.description,
-            'is_complete': validate_if_completed(task.completed_at)
+            'is_complete': is_completed(task.completed_at)
             }) , 201
             
     return jsonify(tasks_response)
@@ -73,7 +79,7 @@ def get_one_task(task_id):
         'id' :task.task_id,
         'title': task.title,
         'description': task.description,
-        'is_complete': validate_if_completed(task.completed_at)
+        'is_complete': is_completed(task.completed_at)
     }
     return jsonify(response_body), 200
 
@@ -87,13 +93,17 @@ def update_one_task(task_id):
         chosen_task.description = request_body['description']
     except KeyError:
         return {'msg':'title and description are required'} ,404
+
+    if 'completed_at' in request_body:
+        chosen_task.completed_at = request_body['completed_at']
+
     db.session.commit()
     
     return {'task': {  
             'id' :chosen_task.task_id,
             'title': chosen_task.title,
             'description': chosen_task.description,
-            'is_complete': validate_if_completed(chosen_task.completed_at)}} , 200
+            'is_complete': is_completed(chosen_task.completed_at)}} , 200
 
 
 @tasks_bp.route('/<task_id>/mark_complete', methods = ['PATCH'])
@@ -102,12 +112,12 @@ def complete_one_task(task_id):
     chosen_task = Task.query.get(task_id)
     chosen_task.completed_at= datetime.utcnow()
     db.session.commit()
-    
+
     return {'task': {  
             'id' :chosen_task.task_id,
             'title': chosen_task.title,
             'description': chosen_task.description,
-            'is_complete': validate_if_completed(chosen_task.completed_at)}} , 200
+            'is_complete': is_completed(chosen_task.completed_at)}} , 200
 
 @tasks_bp.route('/<task_id>/mark_incomplete', methods = ['PATCH'])
 def incomplete_one_task(task_id):
@@ -120,7 +130,7 @@ def incomplete_one_task(task_id):
             'id' :chosen_task.task_id,
             'title': chosen_task.title,
             'description': chosen_task.description,
-            'is_complete': validate_if_completed(chosen_task.completed_at)}} , 200
+            'is_complete': is_completed(chosen_task.completed_at)}} , 200
 
 
 
