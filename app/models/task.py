@@ -24,3 +24,8 @@ class Task(db.Model):
             "is_complete": True if self.completed_at else False
 
         }
+
+    def update(self, req_body):
+        self.title = req_body["title"]
+        self.description = req_body["description"]
+        self.completed_at = req_body.get("completed_at")

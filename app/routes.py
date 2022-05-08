@@ -34,3 +34,18 @@ def get_one_task(task_id):
     task = validate_task(task_id)
 
     return jsonify({"task": task.to_json()}), 200
+
+@tasks_bp.route("/<task_id>", methods=["PUT"])
+def update_task(task_id):
+    task = validate_task(task_id)
+
+    request_body = request.get_json()
+
+    if request_body.get("title") and request_body.get("description"):
+        task.update(request_body)
+    else:
+        abort(make_response({"details": "Invalid data"}, 400))
+
+    db.session.commit()
+    
+    return jsonify({"task": task.to_json()}), 200
