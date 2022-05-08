@@ -37,8 +37,17 @@ def validate_task(task_id):
     return task
 
 
-def slack_notification():
-    pass
+def slack_notification(task_to_notify):
+    headers = {"Authorization" : f"Bearer {SLACK_TOKEN}"}
+
+    q_params = {
+        "channel": "task-notifications", 
+        "text": f"Someone just completed the task {task_to_notify.title}"
+    }
+    
+    slack_request = requests.post(SLACK_URL, headers=headers, params=q_params)
+    
+    return slack_request
 
 
 # ------------------------ GET REQUESTS ------------------------ #
