@@ -91,3 +91,12 @@ def update_saved_task(task_id):
             "is_complete": bool(task.completed_at)
         }
     }
+
+@tasks_bp.route("/<task_id>", methods=["DELETE"])
+def delete_task(task_id):
+    task = validate_task_or_abort(task_id)
+
+    db.session.delete(task)
+    db.session.commit()
+
+    return jsonify({"details": f"Task {task_id} \"{task.title}\" successfully deleted"})
