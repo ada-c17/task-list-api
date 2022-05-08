@@ -11,10 +11,22 @@ tasks_bp = Blueprint("tasks_bp", __name__, url_prefix = "/tasks")
 @tasks_bp.route("", methods=["POST"])
 def create_one_task():
     request_body = request.get_json()
+
+    if "title" not in request_body:
+        return {
+            "details": "Invalid data"
+        }, 400
+    if "description" not in request_body:
+        return {
+            "details": "Invalid data"
+        }, 400
+
     new_task = Task(
         title=request_body["title"],
         description=request_body["description"]
     )
+
+
     db.session.add(new_task)
     db.session.commit()
 
@@ -73,7 +85,7 @@ def replace_one_task(task_id):
         
     except KeyError:
         return {
-            "message": "title and description are required"
+            "details": "Invalid data"
         } , 400
 
     db.session.commit()
@@ -100,6 +112,8 @@ def delete_task(task_id):
         "details": f"Task {chosen_task.task_id} \"Go on my daily walk 🏞\" successfully deleted" }, 200
 
 
+
+#helper function to handle invalid task id and no task in DB
 def get_task_or_abort(task_id):
     try:
         task_id = int(task_id)
