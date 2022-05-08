@@ -266,3 +266,18 @@ def get_one_goal(goal_id):
     }}
     return jsonify(rsp), 200
 
+@goal_bp.route("/<goal_id>", methods=["PUT"])
+def update_goal(goal_id):
+    goal = goal_id_validation(goal_id)
+    request_body = request.get_json()
+    
+    if request_body and "title" in request_body:
+        goal.title = request_body["title"]
+    db.session.commit()
+    
+    return jsonify({
+        "goal": {
+            "id": goal.goal_id,
+            "title": goal.title
+        }
+    }), 200
