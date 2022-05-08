@@ -210,9 +210,9 @@ def mark_as_incomplete(task_id):
         # Get the specific task to mark
         task_to_mark_incomplete = Task.query.get(task_id)
 
-    # Task.completed_at is currently marked so set it to None
-    if task_to_mark_incomplete.completed_at:
-        task_to_mark_incomplete.completed_at = None
+        # Task.completed_at is currently marked so set it to None
+        if task_to_mark_incomplete.completed_at:
+            task_to_mark_incomplete.completed_at = None
         
     # If task is already marked as 'incomplete' 
     # (aka Null or None), return the response body where 'is_complete'is False
