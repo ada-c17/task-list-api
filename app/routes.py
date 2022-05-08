@@ -1,6 +1,7 @@
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, make_response, request
+import datetime
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -14,8 +15,9 @@ def create_task():
             }, 400)
 
     new_task = Task(title=request_body["title"],
-                    description=request_body["description"])
-
+                    description=request_body["description"],
+                    completed_at=request_body.get("completed_at"))
+                    
     db.session.add(new_task)
     db.session.commit()
 
@@ -89,10 +91,10 @@ def update_task(task_id):
 
     return {
         "task": {
-            "id": 1,
-            "title": "Updated Task Title",
-            "description": "Updated Test Description",
-            "is_complete": False
+            "id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": task.completed_at is not None
         }
     }
 
@@ -110,4 +112,49 @@ def delete_task(task_id):
         "details": f'Task {task.task_id} "{task.title}" successfully deleted'
         })
 
+
+# Mark complete on incomplete task
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def mark_task_complete(task_id):
+    request_body = request.get_json()
+    task = Task.query.get(task_id)
+
+    if task is None:
+        return make_response({}, 404)
+
+    task.completed_at = datetime.datetime.now()
+
+    db.session.commit()
+
+    return {
+    "task": {
+    "id": task.task_id,
+    "title": task.title,
+    "description": task.description,
+    "is_complete": task.completed_at is not None
+    }
+}
+
+
+# Mark incomplete on complete task
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def mark_task_incomplete(task_id):
+    request_body = request.get_json()
+    task = Task.query.get(task_id)
+
+    if task is None:
+        return make_response({}, 404)
+
+    task.completed_at = None
+
+    db.session.commit()
+
+    return {
+    "task": {
+    "id": task.task_id,
+    "title": task.title,
+    "description": task.description,
+    "is_complete": task.completed_at is not None
+    }
+}
 
