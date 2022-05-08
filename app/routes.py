@@ -1,7 +1,7 @@
 from app import db
 from app.models.task import Task
 from flask import Blueprint, request, jsonify, make_response, abort
-
+from datetime import datetime
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
 # CREATE aka POST new task at endpoint: /tasks
@@ -10,22 +10,24 @@ def create_task():
     request_body = request.get_json()
     if "title" not in request_body or "description" not in request_body:
         return make_response(jsonify(dict(details="Invalid data")), 400)
-
-    new_task = Task.from_dict(request_body)
-
+    
+    new_task = Task.create(request_body)
+    
     db.session.add(new_task)
     db.session.commit()
     
     #COMPARE these return statement options...significance of make_response (something to do with headers but importance?)
     # return make_response(jsonify(response_body), 201)
     # return make_response(jsonify({"task": new_task.to_dict()}), 201)
-    return jsonify({"task": new_task.to_dict()}), 201   #Although you need to include "task" in the respond per the tests. 
-# SEE to_dict() method in task.py ...confused about to_json()...same thing? I keep seeing it in other examples. 
+    return jsonify({"task": new_task.to_dict()}), 201   
 
 # GET ALL TASKS aka READ at endpoint /tasks
 @tasks_bp.route("", methods=["GET"])
 def read_all_tasks():
     tasks_response = []
+    #Because our Task Model is derived from db.Model we inherit some 
+    #functionality such as a helper function/method called query:
+    # tasks = Task.query.all()
     title_query = request.args.get("sort")
 
     if title_query == "asc":
@@ -39,30 +41,7 @@ def read_all_tasks():
 
     tasks_response = [task.to_dict() for task in tasks]
 
-    return make_response(jsonify(tasks_response), 200)
-    #Because our Task Model is derived from db.Model we inherit some 
-    #functionality such as a helper function/method called query:
-    # tasks = Task.query.all()
-
-#ALTERNATIVE APPROACH TO LIST COMPREHENSION ACTUALLY USED FURTHER BELOW. 
-    # for task in tasks:  # We iterate over all tasks in tasks so we can collect their data and format it into a response
-    #     # tasks_list.append(
-    #     #     {
-    #     #         "id": task.task_id, 
-    #     #         "title": task.title,
-    #     #         "description": task.description,x
-    #     #         "is_complete": False if task.completed_at == None else True  ##Confused about what this should be...False?? It is optional
-    #     # }
-    #     # )
-    # # A more streamlined approach is to use class method to_dict() from task.py:
-    #     tasks_list.append(task.to_dict())
-
-    # return jsonify(tasks_list) # By default, a response with no specified status code returns 200 OK
-
-    #tasks_list contains a list of task dictionaries. 
-    # To turn it into a Response object, we pass it into jsonify(). 
-    # This will be our common practice when returning a list of something. 
-    # When we are returning strings or dictionaries, we can use make_response, which we'll learn about later.
+    return make_response(jsonify(tasks_response), 200) 
 
 #####
 # GET aka READ task at endpoint: /tasks/id 
@@ -128,20 +107,49 @@ def update_one_task(id):
     request_body = request.get_json()
     task_keys = request_body.keys()
 
-    if "name" in task_keys:
-        task.name = request_body["name"]
-    if "color" in   task_keys:
-        task.color = request_body["color"]
-    if "personality" in task_keys:
-        task.personality = request_body["personality"]
+    if "title" in task_keys:
+        task.title = request_body["title"]
+    if "description" in task_keys:
+        task.description = request_body["description"]
+    if "completed_at" in task_keys:
+        task.completed_at = request_body["completed_at"]
 
     db.session.commit()
     return make_response(f"Task# {task.task_id} successfully updated"), 200
 
+# PATCH a task at endpoint: tasks/id/mark_complete 
+@tasks_bp.route("/<id>/mark_complete", methods=["PATCH"])
+def mark_complete(id):
+    task = validate_task(id)
+    
+    # if task.completed_at:
+    task.completed_at = datetime.utcnow()
+
+    db.session.commit()
+    return make_response(jsonify({"task": task.to_dict()}), 200)
+
+# PATCH a task at endpoint: tasks/id/mark_incomplete
+@tasks_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
+def mark_incomplete(id):
+    task = validate_task(id)
+
+    task.completed_at = None
+
+    db.session.commit()
+    return make_response(jsonify({"task": task.to_dict()}), 200)
 
 
 
 
+
+
+    # task.completed_at = datetime.utcnow
+
+    # if task.completed_at is None:
+    #     task.completed_at = datetime.utcnow()
+    # elif task.completed_at is not None:
+    #     task.copleted_at = datetime.utcnow()
+    
 
 
 
