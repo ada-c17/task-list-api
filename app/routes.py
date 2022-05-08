@@ -34,6 +34,7 @@ def get_all_tasks():
             tasks = Task.query.order_by(Task.title.asc()).all()
         elif params["sort"] == "desc":
             tasks = Task.query.order_by(Task.title.desc()).all()
+        # add else if value for sort is invalid
     else:
         tasks = Task.query.all()
     
@@ -77,28 +78,29 @@ def create_one_task():
     
     if request_body.get("completed_at"):
         try:
-            completed_at = str(request_body["completed_at"])
-            finished = datetime.strptime(completed_at, 
-                '%Y-%m-%d %H:%M:%S.%f')
+            # request object (python to json) converts datetime.utcnow() format
+            # Example:
+            # From datetime class- 2022-05-07 18:48:06.598253
+            # To string class- 'Sat, 07 May 2022 23:59:31 GMT' 
+            completed_at = request_body["completed_at"] 
+            # I want my endpoint to accepted completed_at in either format
+            # Converted string format will always start with a letter that is the day of the week
+            if completed_at[0].isalpha():
+                finished = datetime.strptime(completed_at, 
+                    '%a, %d %B %Y %H:%M:%S %Z')
+            else:
+                # completed_at is passed in as (example): '2022-05-07 18:48:06.598253'
+                # This is one way I tested in Postman, so I wanted it to work too
+                # It will never start with a letter
+                finished = datetime.strptime(completed_at, 
+                    '%Y-%m-%d %H:%M:%S.%f')
             new_task.completed_at = finished
-        except: # second to last test in wave 3 ends up here
+        except: 
+            # Again, any input is invalid that is not:
+            # '2022-05-07 18:48:06.598253' 
+            # 'Sat, 07 May 2022 23:59:31 GMT'
             response = {"details": "Invalid date data"}
-            abort(make_response(jsonify(response), 404))
-
-
-    # try:
-    #     if request_body.get("completed_at"):
-    #         new_task = Task(title=request_body["title"],
-    #             description=request_body["description"],
-    #             completed_at=request_body["completed_at"])
-    #             # When testing in Postman, make sure to add in format:
-    #             # "2022-05-06"
-    #     else:
-    #         new_task = Task(title=request_body["title"],
-    #             description=request_body["description"])
-    # except:
-    #     response = {"details": "Invalid data"}
-    #     abort(make_response(jsonify(response), 400))
+            abort(make_response(jsonify(response), 400))
 
     db.session.add(new_task)
     db.session.commit()
@@ -120,6 +122,7 @@ def update_task(task_id):
     request_body = request.get_json()
 
     # Add check here to make sure both are provided
+    # Assuming that completed_at can only be changed by mark_(in)complete
     task.title = request_body["title"]
     task.description = request_body["description"]
 
