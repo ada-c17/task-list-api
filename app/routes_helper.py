@@ -11,9 +11,7 @@ def check_task_exists(task_id):
 
 def try_to_make_task(response_body):
     try:
-        task = Task.make_task(response_body)
+        return Task.make_task(response_body)
     except KeyError:
         abort(make_response(jsonify({"details": "Invalid data"}), 400))
-    
-    return task
 

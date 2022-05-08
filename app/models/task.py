@@ -11,7 +11,6 @@ class Task(db.Model):
     def make_task(cls,request_body):
         new_task = cls(title = request_body["title"], 
                         description = request_body["description"])
-        
         return new_task
 
     def to_json(self):
