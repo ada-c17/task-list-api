@@ -37,17 +37,9 @@ def read_all_goals():
 def read_tasks(goal_id):
     goal = validate_goal(goal_id)
     tasks_response = []
-    
     for task in goal.tasks:
-        tasks_response.append(
-            {
-                "id": task.task_id,
-                "title": task.title,
-                "description": task.description,
-                "is_complete": bool(task.completed_at),
-                "goal_id": goal.goal_id
-            }
-        )
+        tasks_response.append(task.to_dict()["task"])
+            
     return jsonify({"id": goal.goal_id,
                 "title": goal.title,
                 "tasks":tasks_response})    
@@ -77,14 +69,13 @@ def link_task_child_to_goal(goal_id):
     for n in request_body["task_ids"]:
         goal.tasks.append(Task.query.get(n))
 
-    ##? if not content:
+    ##! if not content:
     #?         flash('Content is required!')
     #?        return redirect(url_for('index'))
 
     db.session.commit()
     return {"id":goal.goal_id,
-    "task_ids": request_body["task_ids"]}
-    #! don't like the last line logic
+    "task_ids": [task.task_id for task in goal.tasks]}
 
 
 @goals_bp.route("/<goal_id>", methods=["PUT"])

@@ -65,14 +65,7 @@ def get_all_tasks():
 
     tasks_response = []
     for task in tasks:
-        tasks_response.append(
-            {
-                "id": task.task_id,
-                "title": task.title,
-                "description": task.description,
-                "is_complete": bool(task.completed_at)
-            }
-        )
+        tasks_response.append(task.to_dict()["task"])
     return jsonify(tasks_response)
 
 
