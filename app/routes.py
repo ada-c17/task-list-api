@@ -28,18 +28,11 @@ def get_all_tasks():
 
 @task_bp.route('', methods = ['POST'])
 def create_task():
-    task_details = request.get_json()
-    # Validate and clean input
-    if 'title' not in task_details or 'description' not in task_details:
+    try:
+        new_task = Task.new_task(request.get_json())
+    except ValueError:
         abort(make_response(jsonify({"details": "Invalid data"}),400))
-    if 'completed_at' not in task_details:
-        task_details['completed_at'] = None
     
-    new_task = Task(
-        title = task_details['title'],
-        description = task_details['description'],
-        completed_at = task_details['completed_at']
-        )
     db.session.add(new_task)
     db.session.commit()
 

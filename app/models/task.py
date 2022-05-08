@@ -21,5 +21,19 @@ class Task(db.Model):
         return details
     
     @classmethod
+    def new_task(cls, task_details):
+        # Validate and clean input
+        if 'title' not in task_details or 'description' not in task_details:
+            raise ValueError
+        if 'completed_at' not in task_details:
+            task_details['completed_at'] = None
+        
+        return cls(
+            title = task_details['title'],
+            description = task_details['description'],
+            completed_at = task_details['completed_at']
+        )
+    
+    @classmethod
     def validate_id(cls, target_id):
         return validate_id_by_model(cls, target_id)
