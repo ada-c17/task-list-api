@@ -2,6 +2,8 @@ from flask import Blueprint, jsonify, make_response, request, abort
 from app import db
 from app.models.task import Task
 from sqlalchemy import desc
+import requests
+import os
 
 task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -85,6 +87,7 @@ def mark_complete(id):
     updated_task = task.mark_done()
 
     db.session.commit()
+    send_slack_message(f"Someone just completed the task {task.title}")
 
     return jsonify({"task":updated_task})
 
@@ -96,3 +99,8 @@ def mark_incomplete(id):
     db.session.commit()
 
     return jsonify({"task":updated_task})
+
+def send_slack_message(message):
+    Slack_Key = os.environ.get("Slack_API_Token")
+    requests.post('https://slack.com/api/chat.postMessage', params={'text':message, 'channel':'task-notifications'}, headers={'Authorization':Slack_Key})
+    return True
