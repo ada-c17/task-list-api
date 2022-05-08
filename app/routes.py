@@ -282,7 +282,7 @@ def mark_as_incomplete(task_id):
             task_to_mark_incomplete.completed_at = None
         
     # If task is already marked as 'incomplete' 
-    # (aka Null or None), return the response body where 'is_complete'is False
+    # (aka Null or None), return the response body where 'is_complete' is False
     # if not task_to_mark_incomplete.completed_at:
     #     response_body = jsonify({"task" : 
     #         {
@@ -298,7 +298,7 @@ def mark_as_incomplete(task_id):
     db.session.commit()
     # return response_body, 200
 
-    return format_response_body, 200
+    return format_response_body(task_to_mark_incomplete), 200
 
 
 
