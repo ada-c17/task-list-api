@@ -2,6 +2,8 @@ from flask import Blueprint, request, make_response, jsonify, abort
 from app.models.task import Task
 from app import db
 from datetime import date
+import requests
+import os
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -75,6 +77,7 @@ def mark_complete(task_id):
     task = valid_task(task_id)
     task.completed_at = date.today()
     db.session.commit()
+    post_slack_message(f"Someone just completed the task {task.title}")
 
     return make_response(
             jsonify({"task":display_task(task)}), 200
@@ -110,3 +113,18 @@ def display_task(task):
         "description" : task.description,
         "is_complete" : False if not task.completed_at else True
     }
+
+def post_slack_message(text):
+    URL = "https://slack.com/api/chat.postMessage"
+    token = os.environ.get("SLACK_TOKEN")
+    params = {
+        "channel":"task-notifications",
+        "text":text
+    }
+    headers = {
+        "Authorization" : "Bearer " + token
+    }
+
+    response = requests.post(URL, headers=headers, params=params)
+    response_body = response.json()
+    return response_body["ok"]
