@@ -2,7 +2,7 @@ from re import A
 from flask import Blueprint, jsonify, request, abort, make_response
 from app.models.task import Task
 from app import db
-from sqlalchemy import asc, desc
+from datetime import datetime
 
 
 task_list_bp = Blueprint("task_list", __name__, url_prefix='/tasks')
@@ -15,10 +15,14 @@ def create_one_task():
         rsp = {"details": "Invalid data"}
         abort(make_response(jsonify(rsp), 400))
 
-
-    new_task = Task(title=request_body['title'], 
+    if "completed_at" in request_body:
+        new_task = Task(title=request_body['title'], 
+                    description=request_body['description'], completed_at=request_body['completed_at'])
+    else:
+        new_task = Task(title=request_body['title'], 
                     description=request_body['description'])
-    is_complete = False
+
+    is_complete = check_is_completed(new_task)
     db.session.add(new_task)
     db.session.commit()
     rsp = {
@@ -47,15 +51,21 @@ def get_task_or_abort(task_id):
         abort(make_response(jsonify(rsp), 404))
     return chosen_task
 
+#helper function, checks if task is complete
+def check_is_completed(task):
+    if task.completed_at is None:
+        is_complete = False
+    else:
+        is_complete = True
+    
+    return is_complete
+
 
 
 @task_list_bp.route('/<task_id>', methods = ['GET'])
 def get_one_task(task_id):
     chosen_task = get_task_or_abort(task_id)
-    if chosen_task.completed_at is None:
-        is_complete = False
-    else:
-        is_complete = True
+    is_complete = check_is_completed(chosen_task)
 
     rsp = {'task':{
         'id': chosen_task.task_id,
@@ -69,25 +79,10 @@ def get_one_task(task_id):
 @task_list_bp.route('', methods = ['GET'])
 def get_all_tasks():
 
-    #params = request.args
-    #if "sort" in params:
-        
-        #if params["sort"] == "asc":
-            #p = 1
-            #tasks = Task.query.order_by(asc("title"))
-            #tasks = Task.query.order_by(Task.title.asc())
-            #tasks = Task.query.order_by("Task.title asc")
-        #elif params["sort"] is "desc":
-    #else:
-        #p = 2
-
     tasks = Task.query.all()
     tasks_response = []
     for task in tasks:
-        if task.completed_at is None:
-            is_complete = False
-        else:
-            is_complete = True
+        is_complete = check_is_completed(task)
 
         tasks_response.append({
             'id': task.task_id,
@@ -116,6 +111,42 @@ def get_all_tasks():
     return jsonify(tasks_response)
 
 
+@task_list_bp.route('/<task_id>/mark_complete', methods = ['PATCH'])
+def mark_complete(task_id):
+    chosen_task = get_task_or_abort(task_id)
+
+    chosen_task.completed_at = datetime.utcnow()
+    is_complete = check_is_completed(chosen_task)
+
+    db.session.commit()
+
+    rsp = {
+        "task": {
+            'id': chosen_task.task_id,
+            'title': chosen_task.title,
+            'description': chosen_task.description,
+            'is_complete': is_complete
+        }
+    }
+    return jsonify(rsp), 200
+
+@task_list_bp.route('/<task_id>/mark_incomplete', methods = ['PATCH'])
+def mark_incomplete(task_id):
+    chosen_task = get_task_or_abort(task_id)
+    chosen_task.completed_at = None
+    is_complete = check_is_completed(chosen_task)
+    
+    db.session.commit()
+
+    rsp = {
+        "task": {
+            'id': chosen_task.task_id,
+            'title': chosen_task.title,
+            'description': chosen_task.description,
+            'is_complete': is_complete
+        }
+    }
+    return jsonify(rsp), 200
 
 
 @task_list_bp.route('/<task_id>', methods = ['PUT'])
@@ -131,12 +162,10 @@ def update_task(task_id):
         return{
             "msg": "title and description are required"
         }, 400
-    db.session.commit()
+    
+    is_complete = check_is_completed(chosen_task)
 
-    if chosen_task.completed_at is None:
-        is_complete = False
-    else:
-        is_complete = True
+    db.session.commit()
 
     rsp = {
         "task": {
