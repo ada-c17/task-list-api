@@ -21,7 +21,16 @@ def create_task():
 
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
-    tasks = Task.query.all()
+    sort_query = request.args.get("sort")
+
+    if sort_query:
+        if sort_query == "asc":
+            tasks = Task.query.order_by(Task.title)
+        elif sort_query == "desc":
+            tasks = Task.query.order_by(Task.title.desc())
+
+    else:
+        tasks = Task.query.all()
 
     task_response_body = []
     for task in tasks:
