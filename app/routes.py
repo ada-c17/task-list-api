@@ -16,4 +16,14 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
 
-    return make_response(jsonify(new_task.to_json()), 201)
+    return make_response(jsonify({"task": new_task.to_json()}), 201)
+
+@tasks_bp.route("", methods=["GET"])
+def get_all_tasks():
+    tasks = Task.query.all()
+
+    task_response_body = []
+    for task in tasks:
+        task_response_body.append(task.to_json())
+
+    return jsonify(task_response_body), 200

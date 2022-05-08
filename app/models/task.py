@@ -18,10 +18,9 @@ class Task(db.Model):
 
     def to_json(self):
         return {
-            "task":{
             "id": self.task_id,
             "title": self.title,
             "description": self.description,
             "is_complete": True if self.completed_at else False
-            }
+
         }
