@@ -2,6 +2,8 @@ from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, make_response, request
 import datetime
+import requests
+import os
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -126,14 +128,24 @@ def mark_task_complete(task_id):
 
     db.session.commit()
 
+    # Send notification in Slack
+    requests.post('https://slack.com/api/chat.postMessage',
+        params={
+            'channel':'task-notifications', 
+            'text': f"Someone just completed the task {task.title}",
+        }, headers={
+            'authorization': f'Bearer {os.environ.get("ENVIRONMENT_VARAIBLE_SLACK_TOKEN")}'
+        }
+    )
+
     return {
-    "task": {
-    "id": task.task_id,
-    "title": task.title,
-    "description": task.description,
-    "is_complete": task.completed_at is not None
+        "task": {
+        "id": task.task_id,
+        "title": task.title,
+        "description": task.description,
+        "is_complete": task.completed_at is not None
+        }
     }
-}
 
 
 # Mark incomplete on complete task
@@ -150,11 +162,11 @@ def mark_task_incomplete(task_id):
     db.session.commit()
 
     return {
-    "task": {
-    "id": task.task_id,
-    "title": task.title,
-    "description": task.description,
-    "is_complete": task.completed_at is not None
+        "task": {
+        "id": task.task_id,
+        "title": task.title,
+        "description": task.description,
+        "is_complete": task.completed_at is not None
+        }
     }
-}
 
