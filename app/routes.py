@@ -3,6 +3,15 @@ from sqlalchemy import desc
 from app.models.task import Task
 from app import db
 from datetime import datetime
+import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+PATH = "https://slack.com/api/chat.postMessage"
+API_KEY = os.environ.get("SLACK_TOKEN")
+
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix = "/tasks")
 
@@ -37,6 +46,19 @@ def create_task_dictionary(chosen_task):
             "is_complete": True
         }
     return task_dict
+
+def create_slack_api_request(chosen_task):
+    params = {
+        "text": f"Someone just completed the task {chosen_task.title}",
+        "channel": "task-notifications"
+        }
+    hdrs = {
+        "Authorization": f"Bearer {API_KEY}"
+    }
+    r = requests.post(PATH, data = params, headers = hdrs)
+    return r
+
+
 
 
 @tasks_bp.route("", methods = ["GET"])
@@ -122,6 +144,7 @@ def delete_one_task(task_id):
 def update_task_complete(task_id):
     chosen_task = validate_input(task_id)
     chosen_task.completed_at = datetime.utcnow()
+    create_slack_api_request(chosen_task)
     db.session.commit()
     response = create_task_dictionary(chosen_task)
     return jsonify(response), 200
