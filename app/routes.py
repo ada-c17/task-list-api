@@ -153,12 +153,14 @@ def delete_task(taskID):
     }, 200
     
 """Wave03"""
+"""Wave04"""
 @task_bp.route("/<taskID>/mark_complete", methods=["PATCH"])
 def update_tasks_with_completed(taskID):
     task = task_validation(taskID)
     task.completed_at = datetime.datetime.utcnow()
     #db.session.add(task)
     db.session.commit()
+    
     #bot message post
     slack_api_call(task)
     
@@ -187,7 +189,7 @@ def update_tasks_with_not_completed(taskID):
         "is_complete": False
     }}, 200
     
-"""Wave04"""
+
 def slack_api_call(task):
     SLACK_PATH = "https://slack.com/api/chat.postMessage"
     OATH_TOKEN = os.environ.get("SLACK_TOKEN")
@@ -197,3 +199,4 @@ def slack_api_call(task):
     "text": "Completed the task {task.title}"
     }
     response = requests.post(SLACK_PATH, params=PARAMS, headers=HEADERS)
+    print(response.json())
