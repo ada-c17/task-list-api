@@ -1,6 +1,7 @@
 from app import db
 from flask import Blueprint, jsonify, make_response, request, abort
 from .models.task import Task
+from datetime import datetime
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -49,7 +50,8 @@ def create_task():
         request_body = request.get_json()
         new_task = Task(
             title=request_body["title"],
-            description=request_body["description"]
+            description=request_body["description"],
+            completed_at=request_body.get("completed_at")
             )
     except: 
         abort(make_response({"details": "Invalid data"}, 400))
@@ -88,3 +90,24 @@ def delete_task(task_id):
 
     return make_response(jsonify({"details": f'Task {task_id} "{task.title}" successfully deleted'}), 200)
 
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def mark_task_complete(task_id):
+    task = validate_task(task_id)
+    task.completed_at = datetime.utcnow()
+    
+    db.session.commit()
+
+    response_body = {"task": task.to_dict()}
+
+    return make_response(jsonify(response_body), 200)
+
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def mark_task_incomplete(task_id):
+    task = validate_task(task_id)
+    task.completed_at = None
+    
+    db.session.commit()
+
+    response_body = {"task": task.to_dict()}
+
+    return make_response(jsonify(response_body), 200)
