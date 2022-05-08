@@ -42,7 +42,12 @@ def create_task_dictionary(chosen_task):
 @tasks_bp.route("", methods = ["GET"])
 def get_all_tasks():
     params = request.args
-    tasks = Task.query.all()
+    if params and params["sort"] == "desc":
+        tasks = Task.query.order_by(Task.title.desc()).all()
+    elif params and params["sort"] == "asc":
+        tasks = Task.query.order_by(Task.title.asc()).all()
+    else:
+        tasks = Task.query.all()
     task_response = []
     for task in tasks:
         if task.completed_at is None:
@@ -59,15 +64,7 @@ def get_all_tasks():
                 "description": task.description,
                 "is_complete": True
             })
-    
-    if params and params["sort"] == "asc":
-        sorted_tasks = sorted(task_response, key = lambda task:task["title"]) # referenced Geeksforgeeks
-        return jsonify(sorted_tasks), 200
-    elif params and params["sort"] == "desc":
-        sorted_tasks = sorted(task_response, key = lambda task:task["title"], reverse = True)
-        return jsonify(sorted_tasks), 200
-    else:
-        return jsonify(task_response), 200
+    return jsonify(task_response), 200
 
 @tasks_bp.route("/<task_id>", methods = ["GET"])
 def get_one_task(task_id):
