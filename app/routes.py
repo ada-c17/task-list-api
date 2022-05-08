@@ -159,6 +159,12 @@ def update_task(task_id):
     task_to_update.title = request_body["title"]
     task_to_update.description = request_body["description"]
 
+
+    if "completed_at" in request_body:
+        is_complete = True
+    else:
+        is_complete = False
+
     # Commit the change and send response body
     db.session.commit()
 
@@ -167,7 +173,7 @@ def update_task(task_id):
             "id" : task_to_update.task_id,
             "title" : task_to_update.title,
             "description" : task_to_update.description,
-            "is_complete" : False
+            "is_complete" : is_complete
         }
     })
 

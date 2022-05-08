@@ -132,6 +132,7 @@ def test_mark_incomplete_on_incomplete_task(client, one_task):
 
 
 # ----- TEST FIVE ----- #
+# ----- PASSED ----- #
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_mark_complete_missing_task(client):
     # Act
@@ -145,6 +146,7 @@ def test_mark_complete_missing_task(client):
 
 
 # ----- TEST SIX ----- #
+# ----- PASSED ----- #
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_mark_incomplete_missing_task(client):
     # Act
@@ -161,6 +163,7 @@ def test_mark_incomplete_missing_task(client):
 
 
 # ----- TEST SEVEN ----- #
+# ----- PASSED ----- #
 # Let's add this test for creating tasks, now that
 # the completion functionality has been implemented
 # @pytest.mark.skip(reason="No way to test this feature yet")
@@ -192,9 +195,10 @@ def test_create_task_with_valid_completed_at(client):
 
 
 # ----- TEST EIGHT ----- #
+# ----- PASSED ----- #
 # Let's add this test for updating tasks, now that
 # the completion functionality has been implemented
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_update_task_with_completed_at_date(client, completed_task):
     # Act
     response = client.put("/tasks/1", json={
