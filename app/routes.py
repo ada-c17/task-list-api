@@ -235,10 +235,10 @@ def mark_as_complete(task_id):
         # Get the specific task to mark
         task_to_mark_complete = Task.query.get(task_id)
 
-        # If task is incomplete (aka set to None), assign a datatime value to it
-        if task_to_mark_complete.completed_at == None:
-            # Set completed_at as the datetime value
-            task_to_mark_complete.completed_at = datetime.utcnow()
+    # If task is incomplete (aka set to None), assign a datatime value to it
+    if not task_to_mark_complete.completed_at:
+        # Set completed_at as the datetime value
+        task_to_mark_complete.completed_at = datetime.utcnow()
 
     # If task is already marked as 'complete' 
     # (aka datetime value), return the response body where 'is_complete' is True
