@@ -112,15 +112,20 @@ def create_task():
             "details" : "Invalid data"
         }), 400
 
-    if "complete_at" in request_body:
+
+
+    if "completed_at" in request_body:
         is_complete = True
+
+        new_task = Task(title=request_body["title"],
+                        description=request_body["description"],
+                        completed_at=datetime.utcnow())
     else:
         is_complete = False
 
+        new_task = Task(title=request_body["title"],
+                        description=request_body["description"])
 
-    # Create new Task instance
-    new_task = Task(title=request_body["title"],
-                    description=request_body["description"])
 
     # Add new task and commit change
     db.session.add(new_task)
