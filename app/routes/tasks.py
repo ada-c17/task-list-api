@@ -11,11 +11,6 @@ path="https://slack.com/api/chat.postMessage"
 SLACK_API_KEY = os.environ.get("SLACK_AUTH_KEY")
 
 
-@tasks_bp.route("about", methods=["GET"])
-def about():
-    return "<h1> The Task List Project by: Nina Patrina. Ada Developers Academy, 2022 </h1>"
-
-
 def validate_task(id):
     try:
         id = int(id)
@@ -39,9 +34,12 @@ def create_task():
     except KeyError:
         return {"details": "Invalid data"}, 400
 
-    #! check completed_at is a string that is not a datetime
     if "completed_at" in request_body:
-        new_task.completed_at =request_body["completed_at"]
+        try:
+            # check completed_at is a string that is a datetime
+            new_task.completed_at=datetime.strptime(request_body["completed_at"], '%a, %d %b %Y %H:%M:%S %Z')
+        except:
+            abort(make_response({"message":f"the value of the completed_at should be in a date format: %a, %d %b %Y %H:%M:%S %Z"}, 400))
 
     db.session.add(new_task)
     db.session.commit()
@@ -50,18 +48,20 @@ def create_task():
 
 
 @tasks_bp.route("", methods=["GET"])
-def read_all_tasks():
-    params = request.args
-    if "sort" in params:
-        if params["sort"]=="asc":
-            tasks = Task.query.order_by(Task.title.asc()) 
-        elif params["sort"]=="desc":
-            tasks =Task.query.order_by(Task.title.desc())
-        #! which http status code to return? 
-        #  else:
-        #     tasks = Task.query.all()   
-    else:
-        tasks = Task.query.all()
+def get_all_tasks():
+    tasks = Task.query
+    #does not make much sense in this particular filter-sort. But I programmed it "chained", so we can filter first and then sort filtered data
+    title_query = request.args.get("title")
+    sort_query = request.args.get("sort")
+    if title_query:
+        tasks = tasks.filter_by(title=title_query)
+
+    if sort_query =="sort by id descending":
+        tasks=tasks.order_by(Task.task_id.desc())    
+    elif sort_query=="asc":
+        tasks = tasks.order_by(Task.title.asc()) 
+    elif sort_query=="desc":
+        tasks =tasks.order_by(Task.title.desc())
 
     tasks_response = []
     for task in tasks:
@@ -108,8 +108,6 @@ def update_task1(task_id, mark):
 
     elif mark =="mark_incomplete": 
         task.completed_at =None
-
-    #! should I return else?    
 
     db.session.commit()
 

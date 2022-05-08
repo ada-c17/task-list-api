@@ -2,9 +2,7 @@ from flask import Blueprint, jsonify, abort, make_response, request
 from app.models.goal import Goal
 from app import db
 
-
 goals_bp = Blueprint("goals_bp", __name__,  url_prefix="/goals")
-
 
 def validate_goal(id):
     try:
@@ -63,3 +61,7 @@ def delete_goal(goal_id):
     db.session.commit()
 
     return {"details": f"Goal {goal.goal_id} \"{goal.title}\" successfully deleted"}    
+
+@goals_bp.errorhandler(404)
+def pageNotFound(error):
+    return "<h1> Page not found </h1>", 404      
