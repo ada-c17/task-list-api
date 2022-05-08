@@ -1,5 +1,4 @@
-import json
-import os
+import json, os, requests
 from datetime import datetime
 from attr import validate
 from sqlalchemy import true
@@ -188,6 +187,10 @@ def update_task(task_id):
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_as_complete(task_id):
 
+    SLACK_URL = "https://slack.com/api/chat.postMessage"
+    SLACK_TOKEN =  os.environ.get("SLACK_TOKEN")
+    # SLACK_CHANNEL_ID = os.environ.get("SLACK_TASK_NOTIFICATION_CHANNEL_ID")
+
     verified_task = validate_task(task_id)
 
     if verified_task:
@@ -202,6 +205,16 @@ def mark_as_complete(task_id):
     # If task is already marked as 'complete' 
     # (aka datetime value), return the response body where 'is_complete' is True
     if task_to_mark_complete.completed_at:
+
+        # Task is marked 'complete' so we want to have a notification on Slack
+        headers = {"Authorization" : "Bearer {SLACK_TOKEN}"}
+        q_params = {
+            "channel": "task-notifications", 
+            "text": f"Someone just completed the task {task_to_mark_complete.description}!"
+        }
+        slack_request = requests.post(SLACK_URL, headers=headers, params=q_params)
+
+
         # If it's marked, set is_complete to True
         response_body = jsonify({"task" : 
             {
@@ -215,7 +228,7 @@ def mark_as_complete(task_id):
     # Add update, commit, and send response body 
     db.session.add(task_to_mark_complete)
     db.session.commit()
-    return response_body, 200
+    return slack_request, response_body, 200
 
 
 
