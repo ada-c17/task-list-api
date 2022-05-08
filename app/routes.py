@@ -243,7 +243,7 @@ def mark_as_complete(task_id):
     # Add update, commit, and send response body 
     db.session.add(task_to_mark_complete)
     db.session.commit()
-    return slack_request, response_body, 200
+    return response_body, 200
 
 
 
