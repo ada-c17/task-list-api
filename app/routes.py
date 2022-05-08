@@ -213,7 +213,7 @@ def create_goals():
     if "title" in resquest_body:
         goal = Goal(title=resquest_body["title"])
     else:
-        return {"details": "Invalid data"}
+        return {"details": "Invalid data"}, 400
     
     db.session.add(goal)
     db.session.commit()
@@ -281,3 +281,18 @@ def update_goal(goal_id):
             "title": goal.title
         }
     }), 200
+    
+@goal_bp.route("/<goal_id>", methods=["DELETE"])
+def delete_goal(goal_id):
+    goal = goal_id_validation(goal_id)
+    goals = Goal.query.all()
+    
+    if len(goals) < 1:
+        raise AttributeError("No object!")
+    
+    db.session.delete(goal)
+    db.session.commit()
+    
+    return {
+        "details": f"Goal {goal.goal_id} \"{goal.title}\" successfully deleted"
+    }, 200
