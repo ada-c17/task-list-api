@@ -165,7 +165,7 @@ def create_task():
 # ---- UPDATE A TASK ---- #
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
-    
+
     task_to_update = validate_task(task_id)
 
     request_body = request.get_json()
@@ -220,13 +220,6 @@ def mark_as_complete(task_id):
     if task_to_mark_complete.completed_at:
 
         # Task is marked 'complete' so we want to have a notification on Slack
-        # headers = {"Authorization" : f"Bearer {SLACK_TOKEN}"}
-        # q_params = {
-        #     "channel": "task-notifications", 
-        #     "text": f"Someone just completed the task {task_to_mark_complete.description}"
-        # }
-        # slack_request = requests.post(SLACK_URL, headers=headers, params=q_params)
-
         slack_notification(task_to_mark_complete)
 
         # If it's marked, set is_complete to True
