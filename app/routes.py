@@ -198,11 +198,10 @@ def slack_api_call(task):
     OATH_TOKEN = os.environ.get("SLACK_TOKEN")
     HEADERS = {"Authorization": f"Bearer {OATH_TOKEN}"}
     PARAMS = {
-    "channel": "task-notifications",
-    "text": "Completed the task {task.title}"
+        "channel": "task-notifications",
+        "text": f"Completed the task {task.title}"
     }
-    response = requests.post(SLACK_PATH, params=PARAMS, headers=HEADERS)
-    print(response.json())
+    requests.post(SLACK_PATH, params=PARAMS, headers=HEADERS)
     
     
     """Wave05"""
