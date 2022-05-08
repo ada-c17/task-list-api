@@ -37,6 +37,10 @@ def validate_task(task_id):
     return task
 
 
+def slack_notification():
+    pass
+
+
 # ------------------------ GET REQUESTS ------------------------ #
 
 # ---- GET ALL TASKS ---- #
