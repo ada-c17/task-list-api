@@ -42,11 +42,17 @@ def create_a_task():
 
 @tasks_bp.route("", methods=['GET'])
 def get_all_tasks():
-    title_query = request.args.get('title')
-    if title_query:
-        tasks = Task.query.filter_by(title=title_query)
+    sort_query = request.args.get('sort')
+    if sort_query == 'desc':
+        tasks = Task.query.order_by(Task.title.desc())
     else:
-        tasks = Task.query.all()
+        tasks = Task.query.order_by(Task.title)
+
+    # title_query = request.args.get('title')
+    # if title_query:
+    #     tasks = Task.query.filter_by(title=title_query)
+    # else:
+    #     tasks = Task.query.all()
 
     tasks_response = []
     for task in tasks:
