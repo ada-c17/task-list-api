@@ -2,7 +2,7 @@ from app.models.task import Task
 import pytest
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+# Wave 1 / Test 1
 def test_get_tasks_no_saved_tasks(client):
     # Act
     response = client.get("/tasks")
@@ -13,7 +13,7 @@ def test_get_tasks_no_saved_tasks(client):
     assert response_body == []
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+# Wave 1 / Test 2
 def test_get_tasks_one_saved_tasks(client, one_task):
     # Act
     response = client.get("/tasks")
