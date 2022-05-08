@@ -108,10 +108,20 @@ def mark_incomplete(task_id):
 def get_task(task_id):
     task = validate_task(task_id)
 
-    return make_response(jsonify({
+    if task.goal_id:
+        return make_response(jsonify({
             "task": {
                 "id": task.task_id,
-                # "goal_id": task.goal_id,
+                "goal_id": task.goal_id,
+                "title": task.title,
+                "description": task.description,
+                "is_complete": is_complete(task)
+            }
+        })), 200
+    else:
+        return make_response(jsonify({
+            "task": {
+                "id": task.task_id,
                 "title": task.title,
                 "description": task.description,
                 "is_complete": is_complete(task)
@@ -124,9 +134,9 @@ def get_all_tasks():
     params = request.args 
     if "sort" in params:
         sort = params["sort"]
-        if sort == "asc":
+        if sort.lower() == "asc":
             tasks = Task.query.order_by(asc(Task.title)).all()
-        elif sort == "desc":
+        elif sort.lower() == "desc":
             tasks = Task.query.order_by(desc(Task.title)).all()
     else:    
         tasks = Task.query.all()
