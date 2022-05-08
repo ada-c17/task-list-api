@@ -37,8 +37,8 @@ def validate_task(task_id):
     return task
 
 
-def slack_notification():
-    pass
+# def slack_notification():
+#     pass
 
 
 # ------------------------ GET REQUESTS ------------------------ #
@@ -212,12 +212,12 @@ def mark_as_complete(task_id):
     if task_to_mark_complete.completed_at:
 
         # Task is marked 'complete' so we want to have a notification on Slack
-        # headers = {"Authorization" : f"Bearer {SLACK_TOKEN}"}
-        # q_params = {
-        #     "channel": "task-notifications", 
-        #     "text": f"Someone just completed the task {task_to_mark_complete.description}"
-        # }
-        # slack_request = requests.post(SLACK_URL, headers=headers, params=q_params)
+        headers = {"Authorization" : f"Bearer {SLACK_TOKEN}"}
+        q_params = {
+            "channel": "task-notifications", 
+            "text": f"Someone just completed the task {task_to_mark_complete.description}"
+        }
+        slack_request = requests.post(SLACK_URL, headers=headers, params=q_params)
 
 
         # If it's marked, set is_complete to True
@@ -233,7 +233,7 @@ def mark_as_complete(task_id):
     # Add update, commit, and send response body 
     db.session.add(task_to_mark_complete)
     db.session.commit()
-    return response_body, 200
+    return slack_request, response_body, 200
 
 
 
