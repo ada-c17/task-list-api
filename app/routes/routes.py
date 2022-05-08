@@ -4,9 +4,9 @@ from app import db
 from app.models.task import Task
 from .helpers import send_slack_completed_message, validate_task
 from datetime import date 
-from app import load_dotenv
-tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
+
+tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
 @tasks_bp.route("", methods=["POST"])
 def create_task():
@@ -32,7 +32,6 @@ def read_tasks():
         tasks = Task.query.all()
 
     tasks_response = [task.to_json() for task in tasks]
-    print(tasks_response)
         
     return jsonify(tasks_response), 200
 

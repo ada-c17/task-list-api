@@ -1,5 +1,6 @@
 from flask import abort, make_response
 from app.models.task import Task
+from app.models.goal import Goal
 import requests
 import os 
 
@@ -29,3 +30,16 @@ def send_slack_completed_message(task):
     # data = {"data": "f'Someone just completed the task {task.title}"}
 
     response_body = requests.get(PATH, params=query_params, headers=headers)
+
+
+def validate_goal(goal_id):
+    try:
+        goal_id = int(goal_id)
+    except:
+        abort(make_response({"message":f"goal {goal_id} invalid"}, 400))
+
+    goal = Goal.query.get(goal_id)    
+    if not goal: 
+        return abort(make_response({"message":f"goal {goal_id} not found"}, 404))
+            
+    return goal
