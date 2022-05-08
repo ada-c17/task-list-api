@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, abort, make_response, request
 from app import db
 from app.models.task import Task
-
+from datetime import datetime 
 tasks_bp = Blueprint ('tasks_bp', __name__, url_prefix = '/tasks')
 
 def validate_input(task_id):
@@ -77,7 +77,7 @@ def get_one_task(task_id):
     }
     return jsonify(response_body), 200
 
-@tasks_bp.route('/<task_id>', methods = ['PUT', 'PATCH'])
+@tasks_bp.route('/<task_id>', methods = ['PUT'])
 def update_one_task(task_id):
     validate_input(task_id)
     chosen_task = Task.query.get(task_id)
@@ -85,7 +85,6 @@ def update_one_task(task_id):
     try:
         chosen_task.title = request_body['title']
         chosen_task.description = request_body['description']
-        #chosen_task.completed_at= request_body['completed_at']
     except KeyError:
         return {'msg':'title and description are required'} ,404
     db.session.commit()
@@ -95,6 +94,35 @@ def update_one_task(task_id):
             'title': chosen_task.title,
             'description': chosen_task.description,
             'is_complete': validate_if_completed(chosen_task.completed_at)}} , 200
+
+
+@tasks_bp.route('/<task_id>/mark_complete', methods = ['PATCH'])
+def complete_one_task(task_id):
+    validate_input(task_id)
+    chosen_task = Task.query.get(task_id)
+    chosen_task.completed_at= datetime.utcnow()
+    db.session.commit()
+    
+    return {'task': {  
+            'id' :chosen_task.task_id,
+            'title': chosen_task.title,
+            'description': chosen_task.description,
+            'is_complete': validate_if_completed(chosen_task.completed_at)}} , 200
+
+@tasks_bp.route('/<task_id>/mark_incomplete', methods = ['PATCH'])
+def incomplete_one_task(task_id):
+    validate_input(task_id)
+    chosen_task = Task.query.get(task_id)
+    chosen_task.completed_at= None
+    db.session.commit()
+    
+    return {'task': {  
+            'id' :chosen_task.task_id,
+            'title': chosen_task.title,
+            'description': chosen_task.description,
+            'is_complete': validate_if_completed(chosen_task.completed_at)}} , 200
+
+
 
 @tasks_bp.route('/<task_id>',methods = ['DELETE'])
 def delete_task(task_id):
