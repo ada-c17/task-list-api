@@ -70,3 +70,36 @@ def get_one_task(task_id):
         'is_complete': validate_if_completed(task.completed_at)
     }
     return jsonify(response_body), 200
+
+@tasks_bp.route('/<task_id>', methods = ['PUT', 'PATCH'])
+def update_one_task(task_id):
+    validate_input(task_id)
+    chosen_task = Task.query.get(task_id)
+    request_body = request.get_json()
+    try:
+        chosen_task.title = request_body['title']
+        chosen_task.description = request_body['description']
+        #chosen_task.completed_at= request_body['completed_at']
+    except KeyError:
+        return {'msg':'title and description are required'} ,404
+    db.session.commit()
+    
+    return {'task': {  
+            'id' :chosen_task.task_id,
+            'title': chosen_task.title,
+            'description': chosen_task.description,
+            'is_complete': validate_if_completed(chosen_task.completed_at)}} , 200
+
+@tasks_bp.route('/<task_id>',methods = ['DELETE'])
+def delete_task(task_id):
+    validate_input(task_id)
+    chosen_task = Task.query.get(task_id)
+    if chosen_task is None:
+        response = {"msg": f" This is an invalid id -{task_id}-"}
+        return jsonify(response), 404
+    
+    db.session.delete(chosen_task)
+    db.session.commit()
+
+    return{'details':f'Task {chosen_task.task_id} "{chosen_task.title}" successfully deleted'}, 200
+
