@@ -3,6 +3,7 @@ from os import abort
 from app import db
 from flask import Blueprint, jsonify, abort, make_response, request
 from app.models.task import Task
+from sqlalchemy import asc, desc
 
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix = "/tasks")
@@ -43,7 +44,15 @@ def create_one_task():
 
 @tasks_bp.route("", methods=["GET"])
 def read_all_tasks():
-    tasks = Task.query.all()
+    param = request.args
+    if "sort" in param:
+        if param["sort"] == "asc":
+            tasks = Task.query.order_by(Task.title.asc())
+        elif param["sort"] == "desc":
+            tasks = Task.query.order_by(Task.title.desc())
+    else:
+        tasks = Task.query.all()
+
     tasks_response = []
     for task in tasks:
         tasks_response.append(
@@ -54,6 +63,7 @@ def read_all_tasks():
                 "is_complete": False
             }
         )
+
     return jsonify(tasks_response), 200
 
 
