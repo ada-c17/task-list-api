@@ -1,10 +1,12 @@
-from flask import Blueprint, jsonify, make_response, request, abort
+from multiprocessing.reduction import send_handle
+from flask import Blueprint, jsonify, make_response, request
 from app import db
 from app.models.task import Task
-from .helpers import validate_task
+from .helpers import send_slack_completed_message, validate_task
 from datetime import date 
-
+from app import load_dotenv
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
+
 
 @tasks_bp.route("", methods=["POST"])
 def create_task():
@@ -33,6 +35,7 @@ def read_tasks():
     print(tasks_response)
         
     return jsonify(tasks_response), 200
+
 
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
@@ -63,13 +66,16 @@ def delete_task(task_id):
 
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_task_complete(task_id):
-    task = validate_task(task_id)
+
+    task = validate_task(task_id) 
     
     task.completed_at = date.today()
-    
-    db.session.commit()
 
-    return jsonify({"task":task.to_json()}), 200
+    db.session.commit()
+    
+    send_slack_completed_message(task)
+
+    return jsonify ({'task': task.to_json()}), 200
 
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
