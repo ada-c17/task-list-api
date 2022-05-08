@@ -18,6 +18,7 @@ def validate_task_or_abort(task_id):
         abort(make_response({"error": f"Task {task_id} not found"}, 404))
     return task
 
+
 @tasks_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
@@ -44,12 +45,19 @@ def create_task():
 
     return jsonify(response), 201
 
+
 @tasks_bp.route("", methods=["GET"])
 def get_saved_tasks():
-    tasks = Task.query.all()
+
+    sort_query = request.args.get("sort")
+    if sort_query == "asc":
+        tasks = Task.query.order_by(Task.title.asc()).all()
+    elif sort_query == "desc":
+        tasks = Task.query.order_by(Task.title.desc()).all()
+    else:
+        tasks = Task.query.all()
 
     task_list = []
-
     for task in tasks:
         task_list.append({
             "id": task.task_id,
@@ -59,6 +67,7 @@ def get_saved_tasks():
         })
     
     return jsonify(task_list)
+
 
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_saved_task(task_id):
@@ -71,6 +80,7 @@ def get_one_saved_task(task_id):
             "is_complete": bool(task.completed_at)
         }
     }
+
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_saved_task(task_id):
@@ -91,6 +101,7 @@ def update_saved_task(task_id):
             "is_complete": bool(task.completed_at)
         }
     }
+
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):

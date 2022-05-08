@@ -1,7 +1,7 @@
 import pytest
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#Wave 2 / Test 1
 def test_get_tasks_sorted_asc(client, three_tasks):
     # Act
     response = client.get("/tasks?sort=asc")
@@ -29,7 +29,7 @@ def test_get_tasks_sorted_asc(client, three_tasks):
     ]
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#Wave 2 / Test 2
 def test_get_tasks_sorted_desc(client, three_tasks):
     # Act
     response = client.get("/tasks?sort=desc")
