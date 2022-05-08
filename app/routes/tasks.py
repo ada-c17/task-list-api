@@ -44,7 +44,7 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
 
-    return new_task.to_json(), 201
+    return new_task.to_dict(), 201
 
 
 @tasks_bp.route("", methods=["GET"])
@@ -79,7 +79,7 @@ def get_all_tasks():
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def read_one_task(task_id):
     task = validate_task(task_id)
-    return  task.to_json()
+    return  task.to_dict()
 
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
@@ -92,7 +92,7 @@ def update_task(task_id):
     task.description = request_body["description"]
 
     db.session.commit()
-    return task.to_json(), 200
+    return task.to_dict(), 200
 
 
 @tasks_bp.route("/<task_id>/<mark>", methods=["PATCH"])
@@ -111,7 +111,7 @@ def update_task1(task_id, mark):
 
     db.session.commit()
 
-    return task.to_json(), 200
+    return task.to_dict(), 200
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
