@@ -1,7 +1,7 @@
 from app import db
 from flask import Blueprint, jsonify, request, make_response
 from app.models.task import Task
-from .routes_helper import check_task_exists
+from .routes_helper import check_task_exists, try_to_make_task
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix = "/tasks")
 
@@ -9,7 +9,7 @@ tasks_bp = Blueprint("tasks", __name__, url_prefix = "/tasks")
 @tasks_bp.route("", methods = ["POST"])
 def create_task():
     request_body = request.get_json()
-    new_task = Task.make_task(request_body)
+    new_task = try_to_make_task(request_body)
 
     db.session.add(new_task)
     db.session.commit()
