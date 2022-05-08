@@ -36,6 +36,7 @@ def validate_task(task_id):
     return task
 
 
+
 def slack_notification(task_to_notify):
     headers = {"Authorization" : f"Bearer {SLACK_TOKEN}"}
 
@@ -47,6 +48,7 @@ def slack_notification(task_to_notify):
     slack_request = requests.post(SLACK_URL, headers=headers, params=q_params)
     
     return slack_request
+
 
 
 def format_response_body(task):
@@ -101,10 +103,6 @@ def get_all_tasks():
                 }
             )
 
-    # for task in all_tasks:
-        
-    #     task_response.append(format_response_body(task))
-
 
     # Sorting Response body if there's a query parameter "sort"
     if "sort" in params:
@@ -124,6 +122,7 @@ def get_all_tasks():
 # ---- GET ONE TASK BY ID ---- #
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
+
     task = validate_task(task_id)
 
     return format_response_body(task), 200
@@ -139,7 +138,7 @@ def create_task():
     request_body = request.get_json()
 
     # Title or Description is not in request body, return 400 response
-    if not "title" in request_body or not "description" in request_body:
+    if "title" not in request_body or "description" not in request_body:
         return jsonify({
             "details" : "Invalid data"
         }), 400
