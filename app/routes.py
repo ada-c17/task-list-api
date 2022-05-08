@@ -1,11 +1,13 @@
 from app import db
 from app.models.task import Task
+from app.models.goal import Goal
 from flask import Blueprint, jsonify, make_response, request
 import datetime
 import requests
 import os
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
+goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
 # Create a task
 @tasks_bp.route("", methods=["POST"])
@@ -47,8 +49,6 @@ def getting_tasks():
         tasks = Task.query.order_by(Task.title.desc())
     else:
         tasks = Task.query.all()
-
-
 
     tasks_response = []
     for task in tasks:
@@ -169,4 +169,98 @@ def mark_task_incomplete(task_id):
         "is_complete": task.completed_at is not None
         }
     }
+
+
+# Create a goal
+@goals_bp.route("", methods=["POST"])
+def create_goal():
+    request_body = request.get_json()
+    if "title" not in request_body:
+        return make_response({
+            "details": "Invalid data"
+            }, 400)
+
+    new_goal = Goal(title=request_body["title"])
+                    
+    db.session.add(new_goal)
+    db.session.commit()
+
+    return make_response(
+        jsonify({
+            "goal": {
+                "id": new_goal.goal_id,
+                "title": new_goal.title,
+            }
+        }), 
+        201)
+
+
+# Getting saved goals/ no saved goals
+@goals_bp.route("", methods=["GET"])
+def getting_goals():
+    sort = request.args.get("sort")
+    if sort == "asc":
+        goals = Goal.query.order_by(Goal.title.asc())
+    elif sort == "desc":
+        goals = Goal.query.order_by(Goal.title.desc())
+    else:
+        goals = Goal.query.all()
+
+    goals_response = []
+    for goal in goals:
+        goals_response.append({
+            "id": goal.goal_id,
+            "title": goal.title,
+        })
+
+    return jsonify(goals_response)
+
+
+# Get one goal
+@goals_bp.route("/<goal_id>", methods=["GET"])
+def get_one_goal(goal_id):
+    goal = Goal.query.get(goal_id)
+    if goal is None:
+        return make_response({}, 404)
+
+    return {
+        "goal": {
+            "id": goal.goal_id,
+            "title": goal.title,
+        }
+    }
+
+
+# Update goal
+@goals_bp.route("/<goal_id>", methods=["PUT"])
+def update_goal(goal_id):
+    request_body = request.get_json()
+    goal = Goal.query.get(goal_id)
+    if goal is None:
+        return make_response({}, 404)
+
+    goal.title = request_body["title"]
+
+    db.session.commit()
+
+    return {
+        "goal": {
+            "id": goal.goal_id,
+            "title": goal.title,
+        }
+    }
+
+
+# Delete goal
+@goals_bp.route("/<goal_id>", methods=["DELETE"])
+def delete_goal(goal_id):
+    goal = Goal.query.get(goal_id)
+    if goal is None:
+        return make_response({}, 404)
+    db.session.delete(goal)
+    db.session.commit()
+
+    return make_response({
+        "details": f'Goal {goal.goal_id} "{goal.title}" successfully deleted'
+        })
 
