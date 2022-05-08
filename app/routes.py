@@ -112,6 +112,12 @@ def create_task():
             "details" : "Invalid data"
         }), 400
 
+    # if "complete_at" in request_body:
+    #     is_complete = True
+    # else:
+    #     is_complete = False
+
+
     # Create new Task instance
     new_task = Task(title=request_body["title"],
                     description=request_body["description"])
@@ -125,7 +131,7 @@ def create_task():
             "id" : new_task.task_id,
             "title" : new_task.title,
             "description" : new_task.description,
-            "is_complete" : False
+            "is_complete" : is_complete
         }
     })
 
