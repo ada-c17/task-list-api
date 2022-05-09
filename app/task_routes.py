@@ -1,7 +1,9 @@
+from email import header
 from app import db
 from flask import Blueprint, request,make_response, abort,jsonify
 from app.models.task import Task
 from app.models.goal import Goal
+import requests
 #from .goal_routes import validate_goal
 from datetime import datetime
 
@@ -108,6 +110,18 @@ def patch_mark_complete(task_id):
     chosen_task.completed_at = datetime.utcnow()
 
     db.session.commit()
+
+    path = "https://slack.com/api/chat.postMessage"
+
+    query_params ={
+        "channel": "task-notification",
+        "text": f"Someone just completed the task {chosen_task.title}"
+    }
+    header = {"Authorization": "Bearer xoxb-2905283926039-3488669274294-TgEQ6t7ssq0XljvIxircBged"}
+
+    response = requests.post(path, params = query_params, headers= header)
+    
+    #print("The value of response is", response)
     
     return chosen_task.task_to_JSON()
 
