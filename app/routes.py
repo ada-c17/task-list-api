@@ -29,7 +29,7 @@ def validate_task(task_id):
 def create_one_task():
     request_body = request.get_json()
     try: 
-        if request_body['completed_at']:
+        if 'completed_at' in request_body: # if request_body.get('completed_at') or  # Dictionary method to get value of attribute; or return None
             new_task = Task(title=request_body['title'], description=request_body['description'], completed_at=request_body['completed_at'])
         else:
             new_task = Task(title=request_body['title'], description=request_body['description'])
