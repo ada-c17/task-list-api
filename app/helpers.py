@@ -1,6 +1,8 @@
 from flask import abort, make_response
 from app.models.task import Task
+from app.models.goal import Goal
 import requests
+import os
 
 def valid_task(task_id):
     try:
@@ -36,3 +38,21 @@ def post_slack_message(text):
     response = requests.post(URL, headers=headers, params=params)
     response_body = response.json()
     return response_body["ok"]
+
+def display_goal(goal):
+    return {
+        "id": goal.goal_id,
+        "title": goal.title
+    }
+
+def valid_goal(goal_id):
+    try:
+        goal_id = int(goal_id)
+    except:
+        abort(make_response({"msg":f"Task id {goal_id} invalid"}, 400))
+    
+    goal = Goal.query.get(goal_id)
+    if not goal:
+        abort(make_response({"msg":f"Task id {goal_id} not found"}, 404))
+
+    return goal

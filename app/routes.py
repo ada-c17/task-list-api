@@ -1,12 +1,12 @@
 from flask import Blueprint, request, make_response, jsonify, abort
+from app.models.goal import Goal
 from app.models.task import Task
 from app import db
 from datetime import date
-import requests
-import os
-from app.helpers import valid_task, display_task, post_slack_message
+from app.helpers import valid_task, display_task, display_goal,post_slack_message
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
+goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 
 @tasks_bp.route("", methods=["GET", "POST"])
 def handle_tasks():
@@ -41,9 +41,8 @@ def handle_tasks():
             
         res = []
         for task in tasks:
-            res.append(
-                display_task(task)
-            )
+            res.append(display_task(task))
+
         return make_response(jsonify(res), 200)
 
 @tasks_bp.route("/<task_id>", methods=["GET", "PUT", "DELETE"])
@@ -94,3 +93,31 @@ def mark_incomplete(task_id):
     return make_response(
             jsonify({"task":display_task(task)}), 200
         )
+
+@goals_bp.route("", methods = ["POST","GET"])
+def handle_goals():
+    if request.method == "POST":
+        request_body = request.get_json()
+        try:
+            goal = Goal(title = request_body["title"])
+        except:
+            abort(make_response({"details":"Invalid data"}, 400))
+        
+        db.session.add(goal)
+        db.session.commit()
+
+        return make_response(
+            jsonify({"goal":display_goal(goal)}), 201
+            )
+    
+    elif request.method == "GET":
+        goals = Goal.query.all()
+        res = []
+        for goal in goals:
+            res.append(display_goal(goal))
+        return make_response(jsonify(res), 200)
+        
+
+@goals_bp.route("/<goal_id>", methods = ["GET", "PUT", "DELETE"])
+def handle_goal():
+    pass
