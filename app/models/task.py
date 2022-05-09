@@ -6,6 +6,7 @@ class Task(db.Model):
     title = db.Column(db.String)
     description = db.Column(db.String)
     completed_at = db.Column(db.DateTime, default=None)
+    is_complete = db.Column(db.Boolean, default=False)
 
 # class Task:
 #     def __init__(self, id, title, description, completed_at=None):
