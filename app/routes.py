@@ -12,6 +12,7 @@ from tests.conftest import one_task
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
 # Add goal Blueprint
+goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 
 # ------------------------ SLACK ------------------------ # 
 SLACK_URL = "https://slack.com/api/chat.postMessage"
