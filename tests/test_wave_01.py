@@ -202,3 +202,15 @@ def test_create_task_must_contain_description(client):
         "details": "Invalid data"
     }
     assert Task.query.all() == []
+
+
+pytest.mark.skip(reason="No way to test this feature yet")
+def test_get_task_with_invalid_task_id(client, three_tasks):
+    response = client.get("/tasks/hi")
+    response_body = response.get_json()
+
+    assert response.status_code == 400
+    assert "details" in response_body
+    assert response_body == {
+        "details" : "Invalid data"
+    }

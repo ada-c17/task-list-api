@@ -4,7 +4,6 @@ from flask import Blueprint, request,make_response, abort,jsonify
 from app.models.task import Task
 from app.models.goal import Goal
 import requests
-#from .goal_routes import validate_goal
 from datetime import datetime
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
@@ -14,7 +13,7 @@ def validate_task(task_id):
     try:
         task_id = int(task_id)
     except:
-        abort(make_response({"details": f"Task {task_id} invalid"}, 400))
+        abort(make_response({"details": "Invalid data"}, 400))
     
     task = Task.query.get(task_id)
     if not task:
@@ -121,8 +120,6 @@ def patch_mark_complete(task_id):
 
     response = requests.post(path, params = query_params, headers= header)
     
-    #print("The value of response is", response)
-    
     return chosen_task.task_to_JSON()
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods = ["PATCH"])
@@ -135,13 +132,3 @@ def patch_mark_incomplete(task_id):
     db.session.commit()
     
     return chosen_task.task_to_JSON()
-
-
-# @tasks_bp.route("/<goal_id>", methods = ["GET"])
-# def get_one_task(goal_id):
-
-#     chosen_goal = validate_goal(goal_id)
-
-#     task = Task.query.order_by(goal.goal_id).limit(1)
-
-#     return (make_response(task.task_to_JSON(), 200))

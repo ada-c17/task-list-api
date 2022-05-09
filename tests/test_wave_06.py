@@ -24,6 +24,19 @@ def test_post_task_ids_to_goal(client, one_goal, three_tasks):
 
 
 pytest.mark.skip(reason="No way to test this feature yet")
+def test_post_task_ids_to_goal_without_task_id(client, one_goal, three_tasks):
+    # Act
+    response = client.post("/goals/1/tasks", json = {"task_ids": []})
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    assert "details" in response_body
+    assert response_body == {
+        "details": "Invalid data"
+    }
+
+pytest.mark.skip(reason="No way to test this feature yet")
 def test_post_task_ids_to_goal_already_with_goals(client, one_task_belongs_to_one_goal, three_tasks):
     # Act
     response = client.post("/goals/1/tasks", json={
@@ -72,7 +85,6 @@ def test_get_tasks_for_specific_goal_no_tasks(client, one_goal):
         "tasks": []
     }
 
-
 pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_for_specific_goal(client, one_task_belongs_to_one_goal):
     # Act
@@ -97,8 +109,7 @@ def test_get_tasks_for_specific_goal(client, one_task_belongs_to_one_goal):
         ]
     }
 
-
-@pytest.mark.skip(reason="No way to test this feature yet")
+pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_task_includes_goal_id(client, one_task_belongs_to_one_goal):
     response = client.get("/tasks/1")
     response_body = response.get_json()

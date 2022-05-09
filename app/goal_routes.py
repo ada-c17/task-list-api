@@ -2,7 +2,6 @@ from app import db
 from flask import Blueprint, request,make_response, abort,jsonify
 from app.models.task import Task
 from app.models.goal import Goal
-#from app.models.goal.Goal import check_goal_JSON_request_body
 from .task_routes import validate_task
 from datetime import datetime
 
@@ -11,7 +10,7 @@ def validate_goal(goal_id):
     try:
         goal_id = int(goal_id)
     except:
-        abort(make_response({"message": f"Goal {goal_id} invalid"}, 400))
+        abort(make_response({"details": "Invalid data"}, 400))
     
     goal = Goal.query.get(goal_id)
     if not goal:
@@ -49,9 +48,9 @@ def get_all_goals():
     params = request.args
     if params:
         if params["sort"] == "asc":
-            tasks = Goal.query.order_by(Goal.title.asc()).all()
+            goals = Goal.query.order_by(Goal.title.asc()).all()
         elif params["sort"] == "desc":
-            tasks= Goal.query.order_by(Goal.title.desc()).all()
+            goals= Goal.query.order_by(Goal.title.desc()).all()
     else:
         goals = Goal.query.all()
 
@@ -95,7 +94,7 @@ def post_task_to_specific_goal(goal_id):
 
     request_body = request.get_json()
 
-    if "task_ids" not in request_body:
+    if not request_body["task_ids"]:
         return make_response({"details": "Invalid data"}, 400)
     
     for task_id in request_body["task_ids"]:
@@ -111,17 +110,11 @@ def post_task_to_specific_goal(goal_id):
 
 @goals_bp.route("/<goal_id>/tasks", methods = ["GET"])
 def get_tasks_to_specific_goal(goal_id):
+
     goal = validate_goal(goal_id)
-    # tasks_response = [task.task_to_JSON()["task"] for task in goal.tasks]
-    tasks_response = []
-    for task in goal.tasks:
-        tasks_response.append({
-            "id": task.task_id,
-            "goal_id": task.goal_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": bool(task.completed_at)
-        })
+
+    tasks_response = [task.task_to_JSON()["task"] for task in goal.tasks]
+
     return make_response({
         "id": goal.goal_id,
         "title": goal.title,
