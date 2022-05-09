@@ -107,19 +107,20 @@ def update_task_by_id(task_id):
     return return_database_info_task(task.self_to_dict())
 
 @task_bp.route("/<task_id>/<completion_status>", methods=["PATCH"])
-def complete_task_by_id(task_id, completion_status):
+def update_task_completion_status(task_id, completion_status):
     task = get_task_by_id(task_id)
 
     if completion_status == "mark_complete":
         completion_info = {
             "completed_at" : dt.date.today()
         }
+        update_task_safely(task, completion_info)
         send_slackbot_message(task.title)
     elif completion_status == "mark_incomplete":
         completion_info = {
             "completed_at" : None
         }
-    update_task_safely(task, completion_info)
+        update_task_safely(task, completion_info)
 
     db.session.commit()
 
