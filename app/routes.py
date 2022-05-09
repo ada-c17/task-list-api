@@ -2,7 +2,7 @@ from app import db
 from flask import Blueprint, jsonify, request, make_response
 from app.models.task import Task
 from .routes_helper import check_task_exists, try_to_make_task
-from datetime import date
+from datetime import datetime
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix = "/tasks")
 
@@ -56,7 +56,7 @@ def update_task(task_id):
 def mark_task_complete(task_id):
     task = check_task_exists(task_id)
 
-    task.completed_at = date.today()
+    task.completed_at = datetime.utcnow()
 
     db.session.commit()
 
