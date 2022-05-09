@@ -111,7 +111,7 @@ def delete_task(task_id):
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_task_complete(task_id):
     task = validate_task(task_id)
-    if not task.completed_at:
+    if task.completed_at == None:
         task.completed_at = datetime.now()
         task.completed_at = task.completed_at.replace(tzinfo=timezone.utc)
 
@@ -120,6 +120,20 @@ def mark_task_complete(task_id):
     db.session.commit()
 
     return jsonify(task_dict), 200
+
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def mark_task_incomplete(task_id):
+    task = validate_task(task_id)
+    if task.completed_at != None:
+        task.completed_at = None
+
+    task_dict = make_task_dict(task)
+
+    db.session.commit()
+
+    return jsonify(task_dict), 200
+    
+
 
 
 
