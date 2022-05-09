@@ -8,8 +8,10 @@ from flask import Blueprint, jsonify, abort, make_response, request
 from tests.conftest import one_task
 
 
-# ------------------------ BLUEPRINT INSTANCE ------------------------ # 
+# ------------------------ BLUEPRINT INSTANCES ------------------------ # 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
+
+# Add goal Blueprint
 
 # ------------------------ SLACK ------------------------ # 
 SLACK_URL = "https://slack.com/api/chat.postMessage"
@@ -69,6 +71,7 @@ def format_response_body(task):
 
     return response_body
 
+# ------------------------ TASKS ------------------------ #
 
 # ------------------------ GET REQUESTS ------------------------ #
 
@@ -265,3 +268,14 @@ def delete_one_task(task_id):
     return {
         "details": f'Task {task_id} \"{task_to_delete.title}\" successfully deleted'
     }, 200
+
+
+
+
+# ------------------------ GOALS ------------------------ #
+# ------------------------ GET REQUESTS ------------------------ #
+
+# ---- GET ALL TASKS ---- #
+# @tasks_bp.route("", methods=["GET"])
+# def get_all_goals():
+#     pass
