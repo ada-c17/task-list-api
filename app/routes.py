@@ -62,6 +62,15 @@ def mark_task_complete(task_id):
 
     return make_response(jsonify({"task": task.to_json()}), 200)
 
+@tasks_bp.route("/<task_id>/mark_incomplete", methods = ["PATCH"])
+def mark_task_incomplete(task_id):
+    task = check_task_exists(task_id)
+
+    task.completed_at = None
+
+    db.session.commit()
+
+    return make_response(jsonify({"task": task.to_json()}), 200)
 
 # Delete Task
 @tasks_bp.route("/<task_id>", methods = ["DELETE"])
