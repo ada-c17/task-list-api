@@ -2,7 +2,7 @@ from os import abort
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, abort, make_response, request
-# from SQLAlchemy import asc, desc
+from datetime import datetime, timezone
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -107,6 +107,19 @@ def delete_task(task_id):
     db.session.commit()
 
     return jsonify({"details": f'Task {task_id} "{task.title}" successfully deleted'}), 200
+
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def mark_task_complete(task_id):
+    task = validate_task(task_id)
+    if not task.completed_at:
+        task.completed_at = datetime.now()
+        task.completed_at = task.completed_at.replace(tzinfo=timezone.utc)
+
+    task_dict = make_task_dict(task)
+
+    db.session.commit()
+
+    return jsonify(task_dict), 200
 
 
 
