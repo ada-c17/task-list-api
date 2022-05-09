@@ -167,6 +167,9 @@ def update_task_incomplete(task_id):
     response = create_task_dictionary(chosen_task)
     return jsonify(response), 200
 
+
+#****** routes for goals ******
+
 @goals_bp.route("", methods = ["GET"])
 def get_all_goals():
     goals = Goal.query.all()
@@ -183,3 +186,40 @@ def get_one_goal(goal_id):
     chosen_goal = validate_input(goal_id, Goal)
     response = create_goal_dictionary(chosen_goal)
     return jsonify(response), 200
+
+@goals_bp.route("", methods = ["POST"])
+def create_one_goal():
+    request_body = request.get_json()
+    try:
+        chosen_goal = Goal(title = request_body["title"])
+    except KeyError:
+        return {"details": "Invalid data"}, 400
+    
+    db.session.add(chosen_goal)
+    db.session.commit()
+    response = create_goal_dictionary(chosen_goal)
+    return jsonify(response), 201
+
+@goals_bp.route("/<goal_id>", methods = ["PUT"])
+def update_goal_complete(goal_id):
+    chosen_goal = validate_input(goal_id, Goal)
+    request_body = request.get_json()
+    try:
+        chosen_goal.title = request_body["title"]
+    except KeyError:
+        return {
+            "msg": "title is required"
+        }, 400
+    db.session.commit()
+    response = create_goal_dictionary(chosen_goal)
+    return jsonify(response), 200
+
+@goals_bp.route("/<goal_id>", methods = ["DELETE"])
+def delete_one_goal(goal_id):
+    chosen_goal = validate_input(goal_id, Goal)
+    db.session.delete(chosen_goal)
+    db.session.commit()
+
+    return {
+        "details": f'Goal {goal_id} "{chosen_goal.title}" successfully deleted'
+    }, 200
