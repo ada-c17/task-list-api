@@ -1,6 +1,7 @@
 from flask import Blueprint,jsonify, request, make_response, abort
 from app.models.task import Task
 from app import db
+from sqlalchemy import asc, desc
 
 tasks_bp = Blueprint("task", __name__,url_prefix="/tasks")
 
@@ -28,17 +29,24 @@ def create_one_task():
 
 @tasks_bp.route('', methods=['GET'])
 def get_all_tasks():
-    params = request.args
-    if "title" in params and "description" in params:
-        title_exp = params["title"]
-        description_exp=params["age"]
-        tasks = Task.query.filter_by(title = title_exp, description = description_exp)
-    elif "title" in params:
-        title_exp = params["title"]
-        tasks = Task.query.filter_by(title = title_exp)
-    elif "description" in params:
-        description_exp=params["age"]
-        tasks = Task.query.filter_by(description = description_exp)
+    sort_query = request.args.get("sort")
+    # title_query = request.args.get("title")
+    # if title_query:
+    #     tasks = Task.query.filter_by(title= title_query)
+    if sort_query == "asc":
+        tasks = Task.query.order_by(asc(Task.title))
+    elif sort_query == "desc":
+        tasks = Task.query.order_by(desc(Task.title))
+
+    # if "title" in params and "description" in params:
+    #     description_exp=params["age"]
+    #     tasks = Task.query.filter_by(title = title_exp, description = description_exp)
+    # elif "title" in params:
+    #     title_exp = params["title"]
+    #     tasks = Task.query.filter_by(title = title_exp)
+    # elif "description" in params:
+    #     description_exp=params["age"]
+    #     tasks = Task.query.filter_by(description = description_exp)
     else:
         tasks= Task.query.all()
 
