@@ -1,4 +1,4 @@
-from flask import Blueprint, request,jsonify, make_response, abort
+from flask import Blueprint, request,jsonify, make_response
 from app.models.task import Task
 from app import db 
 from sqlalchemy import desc, asc
@@ -37,8 +37,9 @@ def mark_complete(task_id):
     task.completed_at = datetime.utcnow()
     db.session.commit()
     
-    headers = { "Authorization": "Bearer " + os.environ.get(
-            "SLACK_API_TOKEN") }
+    # headers = { "Authorization": "Bearer " + os.environ.get(
+    #         "SLACK_API_TOKEN") }
+    headers = { "Authorization": "Bearer " + os.environ.get("SLACK_API_TOKEN", "") }
     
     requests.post(PATH + f"Someone just completed the task {task.title}", headers=headers)
 

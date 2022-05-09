@@ -35,3 +35,7 @@ class Task(db.Model):
             abort(make_response({"message":f"Task {task_id} not found"}, 404))
         
         return task 
+
+    @classmethod
+    def from_json(cls):
+        pass 
