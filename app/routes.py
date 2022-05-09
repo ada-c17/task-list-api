@@ -1,7 +1,11 @@
 from flask import Blueprint, jsonify, abort, make_response, request
+import requests
 from app import db
 from app.models.task import Task
-from datetime import datetime 
+from datetime import datetime
+import os 
+
+
 tasks_bp = Blueprint ('tasks_bp', __name__, url_prefix = '/tasks')
 
 def validate_input(task_id):
@@ -112,6 +116,9 @@ def complete_one_task(task_id):
     chosen_task = Task.query.get(task_id)
     chosen_task.completed_at= datetime.utcnow()
     db.session.commit()
+    slack_message = f'Someone just completed the task {chosen_task.title}'
+    requests.post(f'https://slack.com/api/chat.postMessage?channel=task-list&text={slack_message}',
+            headers = {'Authorization': f'Bearer {os.environ.get("SLACK_BOT_TOKEN")}'})
 
     return {'task': {  
             'id' :chosen_task.task_id,
