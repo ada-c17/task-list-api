@@ -2,6 +2,12 @@ from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, make_response, request, abort
 from datetime import date
+import requests
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -91,7 +97,7 @@ def update_task(task_id):
     task.title = request_body["title"]
     task.description = request_body["description"]
 
-    db.session.commit() # To make sure the changes go all the way to postgres
+    db.session.commit() 
 
     is_complete = check_is_complete(task)
 
@@ -117,6 +123,12 @@ def update_completion(task_id, mark):
     if mark == "mark_complete":
         is_complete = True
         task.completed_at = date.today()
+        API_TOKEN = os.environ.get("API_TOKEN")
+        path = "https://slack.com/api/chat.postMessage"
+        query_params = {"channel": "task-notifications", "text": f"Someone Just completed the task {task.title}"}
+        header_info = {"Authorization" : f"Bearer {API_TOKEN}"}
+        requests.post(path, params=query_params, headers=header_info)
+
     
     db.session.commit()
     
