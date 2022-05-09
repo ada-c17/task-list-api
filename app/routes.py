@@ -72,7 +72,7 @@ def get_all_tasks():
             'title': task.title,
             'description': task.description,
             'is_complete': is_completed(task.completed_at)
-            }) , 201
+            }) , 200
             
     return jsonify(tasks_response)
 
