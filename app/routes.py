@@ -1,3 +1,5 @@
+# from xmlrpc.client import _datetime
+import datetime
 from flask import Blueprint, jsonify, request, abort, make_response
 from .models.task import Task
 from app import db
@@ -26,8 +28,11 @@ def validate_task(task_id):
 @task_bp.route("", methods=["POST"])
 def create_one_task():
     request_body = request.get_json()
-    try:
-        new_task = Task(title=request_body['title'], description=request_body['description'])
+    try: 
+        if request_body['completed_at']:
+            new_task = Task(title=request_body['title'], description=request_body['description'], completed_at=request_body['completed_at'])
+        else:
+            new_task = Task(title=request_body['title'], description=request_body['description'])
     except:
         abort(make_response({"details": "Invalid data"}, 400))
 
@@ -102,6 +107,46 @@ def update_one_task(task_id):
         "is_complete": is_complete } 
         }
     return jsonify(response), 200
+
+# request body will have { 'id': 1, 'is_complete' = false}
+# completed_at = db.Column(db.DateTime, default=None) 
+
+@task_bp.route("/<task_id>/mark_complete", methods=['PATCH'])
+def mark_task_completed(task_id):
+    task = validate_task(task_id)
+    request_body = request.get_json()
+    # try:
+        # need to mark the task as completed, and update this in the record
+        # and save in the data base
+    task.completed_at = datetime.datetime.now()  # do I need to somehow use  datetime.utcnow()?
+    is_complete = complete_or_not(task)
+    db.session.commit()
+    response = {"task":
+    {   "id": task.task_id,
+        "title": task.title ,
+        "description": task.description,
+        "is_complete": is_complete } 
+        }
+    return jsonify(response), 200
+
+@task_bp.route("/<task_id>/mark_incomplete", methods=['PATCH'])
+def mark_task_incomplete(task_id):
+    task = validate_task(task_id)
+    request_body = request.get_json()
+
+    task.completed_at = None
+    is_complete = False
+    db.session.commit()
+    response = {"task":
+    {   "id": task.task_id,
+        "title": task.title ,
+        "description": task.description,
+        "is_complete": is_complete } 
+        }
+    return jsonify(response), 200
+
+
+
 
 # request body:
 #        { "title": "Updated Task Title",
