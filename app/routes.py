@@ -43,8 +43,10 @@ def create_task():
 
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
-
+    param = request.args.get("sort")
+    
     tasks_response = []
+    
     tasks = Task.query.all()
     for task in tasks:
         tasks_response.append({
@@ -53,6 +55,10 @@ def get_all_tasks():
             "description": task.description,
             "is_complete": task.is_complete
         })
+    if param == "asc":
+        tasks_response = sorted(tasks_response, key=lambda d: d["title"])
+    if param == "desc":
+        tasks_response = sorted(tasks_response, key=lambda d: d["title"], reverse=True)
     
     return jsonify(tasks_response)
 
