@@ -29,7 +29,6 @@ def get_task(id):
     return parse_response(response)
 
 def update_task(id,title,description):
-
     query_params = {
         "title": title,
         "description": description

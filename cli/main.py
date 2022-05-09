@@ -14,7 +14,6 @@ OPTIONS = {
         }
 
 def list_options():
-
     for number, feature in OPTIONS.items():
         print(f"{number}. {feature}")
 
@@ -123,7 +122,6 @@ def delete_all_tasks():
         print_surround_stars("Deleted all tasks.")
 
 def run_cli():
-    
     play = True
     while play:
 
