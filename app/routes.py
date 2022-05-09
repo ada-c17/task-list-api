@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, abort, make_response, request
 from sqlalchemy import desc
 from app.models.task import Task
+from app.models.goal import Goal
 from app import db
 from datetime import datetime
 import requests
@@ -14,20 +15,21 @@ API_KEY = os.environ.get("SLACK_TOKEN")
 
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix = "/tasks")
+goals_bp = Blueprint("goals_bp", __name__, url_prefix = "/goals")
 
-def validate_input(task_id):
+def validate_input(item_id, model_name):
     try:
-        task_id = int(task_id)
+        item_id = int(item_id)
     except ValueError:
-        response = {"msg": f"Invalid id: {task_id}"}
+        response = {"msg": f"Invalid id: {item_id}"}
         abort(make_response(jsonify(response), 400))
 
-    chosen_task = Task.query.get(task_id)    
+    chosen_item = model_name.query.get(item_id)    
 
-    if chosen_task is None:
-        response = {"msg": f"Could not find task with id {task_id}"}
+    if chosen_item is None:
+        response = {"msg": f"Could not find item with id {item_id}"}
         abort(make_response(jsonify(response), 404))
-    return chosen_task
+    return chosen_item
 
 def create_task_dictionary(chosen_task):
     task_dict= {}
@@ -46,6 +48,14 @@ def create_task_dictionary(chosen_task):
             "is_complete": True
         }
     return task_dict
+
+def create_goal_dictionary(chosen_goal):
+    goal_dict= {}
+    goal_dict["goal"] = {
+            "id": chosen_goal.goal_id,
+            "title": chosen_goal.title,
+        }
+    return goal_dict
 
 def create_slack_api_request(chosen_task):
     params = {
@@ -90,7 +100,7 @@ def get_all_tasks():
 
 @tasks_bp.route("/<task_id>", methods = ["GET"])
 def get_one_task(task_id):
-    chosen_task = validate_input(task_id)
+    chosen_task = validate_input(task_id, Task)
     response = create_task_dictionary(chosen_task)
     return jsonify(response), 200
 
@@ -117,7 +127,7 @@ def create_one_task():
 
 @tasks_bp.route("/<task_id>", methods = ["PUT"])
 def add_one_task(task_id):
-    chosen_task = validate_input(task_id)
+    chosen_task = validate_input(task_id, Task)
     request_body = request.get_json()
     try:
         chosen_task.title = request_body["title"]
@@ -132,7 +142,7 @@ def add_one_task(task_id):
 
 @tasks_bp.route("/<task_id>", methods = ["DELETE"])
 def delete_one_task(task_id):
-    chosen_task = validate_input(task_id)
+    chosen_task = validate_input(task_id, Task)
     db.session.delete(chosen_task)
     db.session.commit()
 
@@ -142,7 +152,7 @@ def delete_one_task(task_id):
 
 @tasks_bp.route("/<task_id>/mark_complete", methods = ["PATCH"])
 def update_task_complete(task_id):
-    chosen_task = validate_input(task_id)
+    chosen_task = validate_input(task_id, Task)
     chosen_task.completed_at = datetime.utcnow()
     create_slack_api_request(chosen_task)
     db.session.commit()
@@ -151,8 +161,25 @@ def update_task_complete(task_id):
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods = ["PATCH"])
 def update_task_incomplete(task_id):
-    chosen_task = validate_input(task_id)
+    chosen_task = validate_input(task_id, Task)
     chosen_task.completed_at = None
     db.session.commit()
     response = create_task_dictionary(chosen_task)
+    return jsonify(response), 200
+
+@goals_bp.route("", methods = ["GET"])
+def get_all_goals():
+    goals = Goal.query.all()
+    goal_response = []
+    for goal in goals:
+        goal_response.append({
+            "id": goal.goal_id,
+            "title": goal.title,
+            })
+    return jsonify(goal_response), 200
+
+@goals_bp.route("/<goal_id>", methods = ["GET"])
+def get_one_goal(goal_id):
+    chosen_goal = validate_input(goal_id, Goal)
+    response = create_goal_dictionary(chosen_goal)
     return jsonify(response), 200
