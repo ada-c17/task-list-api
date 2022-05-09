@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, make_response, request
+from flask import Blueprint, jsonify, make_response, request, abort
 from app.models.task import Task
 from app import db
 
@@ -18,12 +18,37 @@ def create_task():
     return make_response({"task": Task.to_dict(new_task)}, 201)
 
 
-@bp.route("", methods=("GET",))
-def read_tasks():
-    """
-    As a client, I want to be able to make a `GET` request to `/tasks` when there is at least one saved task and get this response:
+@bp.route("/<task_id>", methods=("GET",))
+def read_tasks(task_id=""):
+    if not task_id:
+        tasks = Task.query.all()
+        return jsonify([Task.to_dict(task) for task in tasks])
 
-    `200 OK`
-    """
-    tasks = Task.query.all()
-    return jsonify([Task.to_dict(task) for task in tasks])
+    task = validate_task_id(task_id)
+    return make_response({"task": Task.to_dict(task)}, 200)
+
+
+# @bp.route("/<task_id>", methods=("PUT",))
+# def read_tasks(task_id=""):
+#     request_body = request.get_json()
+#     task = validate_task_id(task_id)
+
+#     task.title = request_body["title"]
+#     task.description = request_body["description"]
+
+#     db.session.commit()
+#     return jsonify({"task": Task.to_dict(task)}, 200)
+
+
+def validate_task_id(task_id):
+    try:
+        task_id = int(task_id)
+    except:
+        abort(make_response({"message": f"Invalid task id {task_id}"}, 400))
+
+    task = Task.query.get(task_id)
+
+    if not task:
+        abort(make_response({"message": f"Task id not found"}, 404))
+        # abort(make_response({"message": f"Task id {task_id} not found"}, 404))
+    return task

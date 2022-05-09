@@ -32,7 +32,7 @@ def test_get_tasks_one_saved_tasks(client, one_task):
     ]
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_task(client, one_task):
     # Act
     response = client.get("/tasks/1")
@@ -51,7 +51,7 @@ def test_get_task(client, one_task):
     }
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_task_not_found(client):
     # Act
     response = client.get("/tasks/1")
@@ -60,10 +60,14 @@ def test_get_task_not_found(client):
     # Assert
     assert response.status_code == 404
 
-    raise Exception("Complete test with assertion about response body")
+    # raise Exception("Complete test with assertion about response body")
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
+    # how to get task_id into response body?
+    # assert response_body == {"message": f"Task id {task_id} not found"}
+    assert response_body == {"message": f"Task id not found"}
+
 
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
@@ -93,7 +97,7 @@ def test_create_task(client):
     assert new_task.completed_at == None
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_update_task(client, one_task):
     # Act
     response = client.put("/tasks/1", json={
