@@ -4,6 +4,21 @@ from app.models.goal import Goal
 import requests
 import os
 
+def post_slack_message(text):
+    URL = "https://slack.com/api/chat.postMessage"
+    token = os.environ.get("SLACK_TOKEN")
+    params = {
+        "channel":"task-notifications",
+        "text":text
+    }
+    headers = {
+        "Authorization" : "Bearer " + token
+    }
+
+    response = requests.post(URL, headers=headers, params=params)
+    response_body = response.json()
+    return response_body["ok"]
+
 def valid_task(task_id):
     try:
         task_id = int(task_id)
@@ -24,21 +39,6 @@ def display_task(task):
         "is_complete" : False if not task.completed_at else True
     }
 
-def post_slack_message(text):
-    URL = "https://slack.com/api/chat.postMessage"
-    token = os.environ.get("SLACK_TOKEN")
-    params = {
-        "channel":"task-notifications",
-        "text":text
-    }
-    headers = {
-        "Authorization" : "Bearer " + token
-    }
-
-    response = requests.post(URL, headers=headers, params=params)
-    response_body = response.json()
-    return response_body["ok"]
-
 def display_goal(goal):
     return {
         "id": goal.goal_id,
@@ -49,10 +49,10 @@ def valid_goal(goal_id):
     try:
         goal_id = int(goal_id)
     except:
-        abort(make_response({"msg":f"Task id {goal_id} invalid"}, 400))
+        abort(make_response({"msg":f"Goal id {goal_id} invalid"}, 400))
     
     goal = Goal.query.get(goal_id)
     if not goal:
-        abort(make_response({"msg":f"Task id {goal_id} not found"}, 404))
+        abort(make_response({"msg":f"Goal id {goal_id} not found"}, 404))
 
     return goal
