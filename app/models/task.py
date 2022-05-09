@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy import null
 from app import db
 from flask import make_response, abort
@@ -43,4 +44,13 @@ class Task(db.Model):
     def update(self, request_body):
         self.title = request_body["title"]
         self.description = request_body["description"]
+        try:
+            self.completed_at = request_body["completed_at"]
+        except KeyError:
+            self.completed_at = None
+    
+    def mark_complete(self):
+        self.completed_at = datetime.now()
+
+    def mark_incomplete(self):
         self.completed_at = None
