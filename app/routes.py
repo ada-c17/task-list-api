@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, make_response, request, abort
 from app import db
 from app.models.task import Task
-
+from sqlalchemy import asc, desc
+import json
 
 # creating task with using POST in our route decorator
 task_bp = Blueprint("tasks", __name__, url_prefix = "/tasks")
@@ -23,8 +24,7 @@ def create_task():
             "is_complete": bool(new_task.completed_at)
         }
     }
-    return make_response(jsonify(response_body), 201)
-
+    return make_response(jsonify(response_body)), 201
         
 #validating task and using as a helper function in other functions
 def validate_task(task_id):
@@ -45,14 +45,24 @@ def validate_task(task_id):
 #get all task by using GET in route decorater 
 @task_bp.route("", methods = ["GET"])
 def get_all_tasks():
-    tasks = Task.query.all()
+    sort_query = request.args.get("sort")
+    if sort_query == "asc":
+        tasks = Task.query.order_by(asc(Task.title))
+    elif sort_query == "desc":
+        tasks = Task.query.order_by(desc(Task.title))
+    else:
+        tasks = Task.query.all()
+    
     response = []
     for task in tasks:
+        if task == None or task == "": 
+            pass
         response.append({
             "id": task.task_id,
             "title": task.title,
             "description": task.description,
-            "is_complete": bool(task.completed_at)})  
+            "is_complete": bool(task.completed_at)}) 
+        
     return jsonify(response), 200
 
 
@@ -89,7 +99,6 @@ def replace_one_task(task_id):
             }
         }
     return jsonify(response_body), 200
-
 
 #deleting task by using DELETE in rout and by accessing task id
 @task_bp.route("/<task_id>", methods = ["DELETE"])
