@@ -2,6 +2,7 @@ from os import abort
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, abort, make_response, request
+# from SQLAlchemy import asc, desc
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -18,7 +19,8 @@ def validate_task(task_id):
 
     return task
 
-def make_task_dict(task):
+def make_task_dict(task): #refactor so that functions that call it and need the "task" key create it manually,
+# so that the functionality of this helper function can be extended
     task_dict = {"task": {
             "id": task.id,
             "title": task.title,
@@ -33,11 +35,19 @@ def make_task_dict(task):
 
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
-    tasks = Task.query.all()
     response_body = []
 
-    for task in tasks: # make dict then append response_body list
-        response = {
+    # Get sort query. If sort query, sort according to param. If not, get all tasks unsorted.
+    sort_query = request.args.get("sort")
+    if sort_query == "asc":
+        tasks = Task.query.order_by(Task.title.asc())
+    elif sort_query == "desc":
+        tasks = Task.query.order_by(Task.title.desc())
+    else:
+        tasks = Task.query.all()
+
+    for task in tasks: 
+        response = { # use make_task_dict here once it's refactored
             "id": task.id,
             "title": task.title,
             "description": task.description,
