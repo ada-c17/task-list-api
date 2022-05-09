@@ -11,7 +11,7 @@ def create_task():
     # into lists and dictionaries and give you the return value.
     request_body = request.get_json()
     if "title" not in request_body or "description" not in request_body:
-        return make_response("Invalid request!", 400)
+        return make_response(jsonify(dict(details="Invalid data")), 400)
 
     new_task = Task(
         title = request_body["title"],
@@ -68,11 +68,11 @@ def read_all_tasks():
 
 #####
 # GET aka READ task at endpoint: /tasks/id 
-@tasks_bp.route("/<task_id>", methods=["GET"])
-def get_task_by_id(task_id):
-    task = validate_task(task_id)
+@tasks_bp.route("/<id>", methods=["GET"])
+def get_task_by_id(id):
+    task = validate_task(id)
 
-#Could alternatively ue a hash to look things up by id.  ...need to practice this later. 
+    # Initial approach:
     # return {"task":{
     #         "id": task.task_id,
     #         "title": task.title,
@@ -86,54 +86,56 @@ def get_task_by_id(task_id):
     return jsonify({"task": task.to_dict()}), 201
     # return make_response(jsonify({"task": task.to_dict()}), 201)
 
-@tasks_bp.route("/<task_id>", methods=['PUT'])
-def update_task(task_id):
-    task = validate_task(task_id)
+# *************Could alternatively use a hash to look things up by id.  ...need to practice this later. 
+
+@tasks_bp.route("/<id>", methods=['PUT'])
+def update_task(id):
+    task = validate_task(id)
 
     request_body = request.get_json()
 
-    task.title = request_body["title"]
-    task.description = request_body["description"]
-
+    task.update(request_body)
     db.session.commit()
+    return jsonify({"task": task.to_dict()}), 200
+    # return make_response(jsonify({"task": f"{task_id} successfully updated"})), 200
 
-    return make_response(f"Task #{task.id} successfully updated")
-
-####
 # DELETE /tasks/id
-@tasks_bp.route("<task_id>", methods=['DELETE'])
-def delete_one_task(task_id):
-    task = validate_task(task_id)
+@tasks_bp.route("<id>", methods=['DELETE'])
+def delete_one_task(id):
+    task = validate_task(id)
 
     db.session.delete(task)
     db.session.commit()
 
-    # return make_response(f"Task #{task_id} successfully deleted", 200)
-    return make_response(f"Task #{task.task_id} successfully deleted"), 200  #Do I need to jsonify this?
-
-
+    # return make_response(f"Task #{id} successfully deleted", 200)
+    # return make_response(f"Task #{task.task_id} successfully deleted"), 200  #Do I need to jsonify this?
+    # return jsonify(dict(details= f"Task {id} {task.to_dict()["title"]})), 200
+    return jsonify({'details': f'Task {id} "{task.title}" successfully deleted'}), 200
 #####
+
+
 #QUALITY CONTROL HELPER FUNCTION
-def validate_task(task_id):
+def validate_task(id):
     try:
-        task_id = int(task_id)
+        id = int(id)
     except ValueError: 
         # return jsonify({}), 400     .....OR
-        # abort(make_response(jsonify(dict(details=f"invalid id: {id}")), 400))
-        abort(make_response({"message":f"task {task_id} invalid"}, 400))
+        abort(make_response(jsonify(dict(details=f"invalid id: {id}")), 400))
+        # abort(make_response({"message":f"task {task_id} invalid"}, 400))
 
-    task = Task.query.get(task_id)
+    task = Task.query.get(id)
     if task:
         return task
 
     elif not task:
-        abort(make_response({"message": f"task {task_id} not found"}, 404))
+        abort(make_response(jsonify(dict(message= f"task {id} not found")), 404))
+        # abort(make_response({"message": f"task {id} not found"}, 404))
     
 #########   
 # PATCH a task at endpoint: tasks/id  #Remember PATCH is just altering one or some attributes whereas PUT replaces a record. 
 @tasks_bp.route("/<id>", methods=["PATCH"])
-def update_one_task(task_id):
-    task = validate_task(task_id)
+def update_one_task(id):
+    task = validate_task(id)
     request_body = request.get_json()
     task_keys = request_body.keys()
 
