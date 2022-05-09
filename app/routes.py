@@ -11,11 +11,18 @@ task_bp = Blueprint('task_bp', __name__, url_prefix="/tasks")
 @task_bp.route('', methods=['POST'])
 def create_one_task():
     request_body = request.get_json()
+    try:
+        request_body["title"] == True
+        request_body["description"] == True
+    except KeyError:
+        rsp = {"details": "Invalid data"}
+        abort(make_response(jsonify(rsp), 400))
+
     new_task = Task(
         title = request_body["title"],
         description = request_body["description"],
     )
-
+    
     db.session.add(new_task)
     db.session.commit()
 
@@ -47,7 +54,7 @@ def get_task_or_abort(task_id):
 
 
 @task_bp.route('/<task_id>', methods=['GET'])
-def get_one_task(task_id):
+def get_or_update_one_task(task_id):
     selected_task = get_task_or_abort(task_id)
 
     if selected_task.completed_at is None:
@@ -59,7 +66,7 @@ def get_one_task(task_id):
             "title": selected_task.title,
             "description": selected_task.description,
             "is_complete": selected_task.completed_at
-    }
+        }
     }
     return jsonify(rsp), 200
 
@@ -81,7 +88,37 @@ def get_all_tasks():
 
     return jsonify(tasks_response), 200    
 
+@task_bp.route('/<task_id>', methods=['PUT'])
+def update_one_task(task_id):
+    selected_task = get_task_or_abort(task_id)
+    request_body = request.get_json()
+    try:
+        selected_task.title = request_body["title"]
+        selected_task.description = request_body["description"]
+    except KeyError:
+        return {"details": "Invalid data"}, 400   
+    db.session.commit()
 
-@task_bp.route('', methods=['DELETE'])
-def delete_one_task():
-    pass
+    if selected_task.completed_at is None:
+        selected_task.completed_at = False
+
+    rsp = {
+        "task": {
+            "id": selected_task.task_id,
+            "title": selected_task.title,
+            "description": selected_task.description,
+            "is_complete": selected_task.completed_at
+        }
+    }
+    return jsonify(rsp), 200
+
+@task_bp.route('/<task_id>', methods=['DELETE'])
+def delete_one_task(task_id):
+    selected_task = get_task_or_abort(task_id)
+
+    db.session.delete(selected_task)
+    db.session.commit()
+
+    return {
+        "details": 
+        f'Task {selected_task.task_id} \"{selected_task.title}" successfully deleted'}, 200
