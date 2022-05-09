@@ -1,6 +1,7 @@
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, make_response, request, abort
+#from sqlalchemy import asc, desc
 
 def validate_task(task_id):
     try:
@@ -17,41 +18,48 @@ def validate_task(task_id):
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
 
-@tasks_bp.route("", methods=["GET", "POST"])
-def handle_task():
-    if request.method == "GET":
+@tasks_bp.route("", methods=["GET"])
+def get_tasks():
+    order_by_query = request.args.get("sort")
+    if order_by_query == "asc":
+        tasks = Task.query.order_by(Task.title.asc())
+    elif order_by_query == "desc":
+        tasks = Task.query.order_by(Task.title.desc())
+    else:
         tasks = Task.query.all()
-        task_response = []
-        for task in tasks:
-            task_response.append({
-                "id":task.task_id,
-                "title":task.title,
-                "description":task.description,
-                "is_complete":False
-            })
-        return jsonify(task_response)
 
-    elif request.method == "POST":
-        request_body = request.get_json()
+    task_response = []
+    for task in tasks:
+        task_response.append({
+            "id":task.task_id,
+            "title":task.title,
+            "description":task.description,
+            "is_complete":False
+        })
+    return jsonify(task_response)
 
-        try:
-            new_task = Task(title=request_body["title"],
-                        description=request_body["description"])
-        except:
-            abort(make_response({"details": "Invalid data"}, 400))
 
-        db.session.add(new_task)
-        db.session.commit()
+@tasks_bp.route("", methods=["POST"])
+def post_task():
+    request_body = request.get_json()
 
-        response_body = {
-            "task": {
-                "id": new_task.task_id,
-                "title": new_task.title,
-                "description": new_task.description,
-                "is_complete": False
-        }}
+    try:
+        new_task = Task(title=request_body["title"],
+                    description=request_body["description"])
+    except:
+        abort(make_response({"details": "Invalid data"}, 400))
 
-        return make_response(response_body, 201)
+    db.session.add(new_task)
+    db.session.commit()
+
+    response_body = {
+        "task": {
+            "id": new_task.task_id,
+            "title": new_task.title,
+            "description": new_task.description,
+            "is_complete": False
+    }}
+    return make_response(response_body, 201)
 
 
 @tasks_bp.route("/<task_id>", methods=["GET"])
@@ -101,3 +109,22 @@ def delete_task(task_id):
     }
 
     return make_response(response_body)
+
+
+@tasks_bp.route("/<task_id>", methods=["PATCH"])
+def complete_task(task_id):
+    task = validate_task(task_id)
+    pass
+
+
+
+
+
+
+
+
+
+
+
+
+
