@@ -3,7 +3,6 @@ from flask import Blueprint, request,make_response, abort,jsonify
 from app.models.task import Task
 from app.models.goal import Goal
 from .task_routes import validate_task
-from datetime import datetime
 
 #Helper Functions:
 def validate_goal(goal_id):
@@ -31,11 +30,7 @@ goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
 @goals_bp.route("", methods = ["POST"])
 def post_one_goal():
 
-    request_body = check_goal_request_body()
-
-    #request_body = check_goal_JSON_request_body()
-
-    new_goal = Goal(title= request_body["title"])
+    new_goal = Goal.goal_from_JSON()
 
     db.session.add(new_goal)
     db.session.commit()
@@ -52,7 +47,7 @@ def get_all_goals():
         elif params["sort"] == "desc":
             goals= Goal.query.order_by(Goal.title.desc()).all()
     else:
-        goals = Goal.query.all()
+        goals = Goal.query.order_by(Goal.goal_id)
 
     goals_response = [goal.goal_to_JSON()["goal"] for goal in goals]
 
@@ -61,14 +56,13 @@ def get_all_goals():
 @goals_bp.route("/<goal_id>", methods = ["PUT"])
 def update_one_goal(goal_id):
 
-    chosen_goal = validate_goal(goal_id)
-    request_body = check_goal_request_body()
+    updating_goal = validate_goal(goal_id)
     
-    chosen_goal.title = request_body["title"]
+    updating_goal.title = Goal.goal_from_JSON().title
 
     db.session.commit()
 
-    return chosen_goal.goal_to_JSON()
+    return updating_goal.goal_to_JSON()
 
 @goals_bp.route("/<goal_id>", methods = ["GET"])
 def get_one_goal(goal_id):

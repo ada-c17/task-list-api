@@ -17,3 +17,13 @@ class Goal(db.Model):
         #     rsp["goal"]["tasks"] = self.tasks
         
         return rsp
+
+    @staticmethod
+    def goal_from_JSON():
+        request_body = request.get_json()
+
+        if "title" not in request_body:
+            abort(make_response({"details":"Invalid data"},400))
+
+        goal = Goal(title = request_body["title"])
+        return goal

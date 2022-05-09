@@ -35,15 +35,7 @@ def check_task_request_body():
 @tasks_bp.route("", methods = ["POST"])
 def post_new_task():
 
-    request_body = check_task_request_body()
-
-    if "completed_at" in request_body:
-        new_task = Task(title = request_body["title"],
-                    description = request_body["description"],
-                    completed_at = request_body["completed_at"])
-    else:
-        new_task = Task(title = request_body["title"],
-                        description = request_body["description"])
+    new_task = Task.task_from_JSON()
 
     db.session.add(new_task)
     db.session.commit()
@@ -60,7 +52,7 @@ def get_all_tasks():
         elif params["sort"] == "desc":
             tasks= Task.query.order_by(Task.title.desc()).all()
     else:
-        tasks = Task.query.all()
+        tasks = Task.query.order_by(Task.task_id)
 
     tasks_response = [task.task_to_JSON()["task"] for task in tasks]
 
@@ -76,21 +68,25 @@ def get_one_task(task_id):
 @tasks_bp.route("/<task_id>", methods = ["PUT"])
 def update_one_task(task_id):
 
-    chosen_task = validate_task(task_id)
-    request_body = check_task_request_body()
+    updating_task = validate_task(task_id)
 
-    if "completed_at" in request_body:
-        chosen_task.title = request_body["title"]
-        chosen_task.description = request_body["description"]
-        chosen_task.completed_at = request_body["completed_at"]
-        chosen_task.is_complete = True
-    else:
-        chosen_task.title = request_body["title"]
-        chosen_task.description = request_body["description"]
+    updating_task.title = Task.task_from_JSON().title
+    updating_task.description = Task.task_from_JSON().description
+    updating_task.completed_at = Task.task_from_JSON().completed_at
+
+    # request_body = check_task_request_body()
+
+    # if "completed_at" in request_body:
+    #     updating_task.title = request_body["title"]
+    #     updating_task.description = request_body["description"]
+    #     updating_task.completed_at = request_body["completed_at"]
+    # else:
+    #     updating_task.title = request_body["title"]
+    #     updating_task.description = request_body["description"]
 
     db.session.commit()
 
-    return chosen_task.task_to_JSON()
+    return updating_task.task_to_JSON()
 
 @tasks_bp.route("/<task_id>", methods = ["DELETE"])
 def delete_one_task(task_id):
