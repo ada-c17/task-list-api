@@ -5,6 +5,8 @@ from app.models.task import Task
 from app.models.goal import Goal
 import requests
 from datetime import datetime
+import os
+
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -116,7 +118,8 @@ def patch_mark_complete(task_id):
         "channel": "task-notification",
         "text": f"Someone just completed the task {chosen_task.title}"
     }
-    header = {"Authorization": "Bearer xoxb-2905283926039-3488669274294-TgEQ6t7ssq0XljvIxircBged"}
+    header = {"Authorization": os.environ.get(
+            "SLACK_API_TOKEN")}
 
     response = requests.post(path, params = query_params, headers= header)
     
