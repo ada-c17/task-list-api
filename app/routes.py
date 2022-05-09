@@ -4,6 +4,7 @@ from attr import validate
 from sqlalchemy import true
 from app import db
 from app.models.task import Task
+from app.models.goal import Goal
 from flask import Blueprint, jsonify, abort, make_response, request
 from tests.conftest import one_task
 
@@ -13,6 +14,7 @@ tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
 # Add goal Blueprint
 goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
+
 
 # ------------------------ SLACK ------------------------ # 
 SLACK_URL = "https://slack.com/api/chat.postMessage"
@@ -276,7 +278,13 @@ def delete_one_task(task_id):
 # ------------------------ GOALS ------------------------ #
 # ------------------------ GET REQUESTS ------------------------ #
 
-# ---- GET ALL TASKS ---- #
-# @tasks_bp.route("", methods=["GET"])
-# def get_all_goals():
-#     pass
+# ---- GET ALL GOALS ---- #
+@goals_bp.route("", methods=["GET"])
+def get_all_goals():
+    
+    params = request.args
+
+    all_goals = Goal.query.all()
+
+    # Create the response body
+    goal_response = []
