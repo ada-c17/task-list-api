@@ -1,4 +1,3 @@
-import re
 from flask import Blueprint, request,jsonify, make_response, abort
 from app.models.task import Task
 from app.models.goal import Goal 
@@ -7,7 +6,6 @@ from sqlalchemy import desc, asc
 from datetime import datetime 
 import requests
 import os  
-from pprint import pprint 
 
 PATH = "https://slack.com/api/chat.postMessage?channel=task-notifications&text="
 
