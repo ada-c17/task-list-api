@@ -2,6 +2,7 @@ from flask import Blueprint,jsonify, request, make_response, abort
 from app.models.task import Task
 from app import db
 from sqlalchemy import asc, desc
+from datetime import datetime
 
 tasks_bp = Blueprint("task", __name__,url_prefix="/tasks")
 
@@ -14,6 +15,9 @@ def create_one_task():
         }), 400
     new_task = Task(title=request_body["title"],
                   description=request_body["description"])
+
+    if "completed_at" in request_body:
+        new_task.completed_at = request_body["completed_at"]
 
     db.session.add(new_task)
     db.session.commit()
@@ -135,3 +139,44 @@ def delete_one_task(task_id):
     }
 
     return jsonify(response_body), 200
+
+# update chosen task is completed
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def update_task_is_complete(task_id):
+    chosen_task = get_task_or_abort(task_id)
+
+    chosen_task.completed_at = datetime.utcnow()
+
+    db.session.commit()
+
+    rsp = {
+        "task":{
+        'id':chosen_task.task_id,
+        'title':chosen_task.title,
+        'description':chosen_task.description,
+        'is_complete':bool(chosen_task.completed_at)}
+    }
+
+    return jsonify(rsp), 200
+
+# update chosen task is Incompleted
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def update_task_is_incomplete(task_id):
+    chosen_task = get_task_or_abort(task_id)
+
+    chosen_task.completed_at = None
+
+    db.session.commit()
+
+    rsp = {
+        "task":{
+        'id':chosen_task.task_id,
+        'title':chosen_task.title,
+        'description':chosen_task.description,
+        'is_complete':bool(chosen_task.completed_at)}
+    }
+
+    return jsonify(rsp), 200
+
+
+
