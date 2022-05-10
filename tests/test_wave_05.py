@@ -71,6 +71,9 @@ def test_get_goal_not_found(client):
 
 
 # ----- TEST FIVE ----- #
+
+# FAILING: {'goal': {'id': None, 'title': 'My New Goal'}} != {'goal': {'id': 1, 'title': 'My New Goal'}}
+
 @pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_goal(client):
     # Act
@@ -91,8 +94,11 @@ def test_create_goal(client):
 
 
 # ----- TEST SIX ----- #
-# @pytest.mark.skip(reason="test to be completed by student")
-# def test_update_goal(client, one_goal):
+
+# FAILING: AttributeError: 'str' object has no attribute 'goal_id'
+
+@pytest.mark.skip(reason="test to be completed by student")
+def test_update_goal(client, one_goal):
 
     # Act
     # ---- Complete Act Here ----
@@ -103,7 +109,6 @@ def test_create_goal(client):
     response_body = response.get_json()
 
     # Assert
-    # ---- Complete Assertions Here ----
     assert response.status_code == 200
     assert "goal" in response_body
     assert response_body == {
@@ -112,13 +117,13 @@ def test_create_goal(client):
             "title": "Updated Goal Title"
         }
     }
-    # ---- Complete Assertions Here ----
 
 
 # ----- TEST SEVEN ----- #
+# ----- PASSED ----- #
 # @pytest.mark.skip(reason="test to be completed by student")
 def test_update_goal_not_found(client):
-    # raise Exception("Complete test")
+
     # Act
     response = client.put("/goals/1", json={
         "title" : "Updated Goal Title"
@@ -127,10 +132,8 @@ def test_update_goal_not_found(client):
     response_body = response.get_json()
 
     # Assert
-    # ---- Complete Assertions Here ----
     assert response.status_code == 404
     assert response_body == {"message" : f"This goal is not found."}
-    # ---- Complete Assertions Here ----
 
 
 # ----- TEST EIGHT ----- #
@@ -158,17 +161,21 @@ def test_delete_goal(client, one_goal):
 
 
 # ----- TEST NINE ----- #
-@pytest.mark.skip(reason="test to be completed by student")
+# ----- PASSED ----- #
+# @pytest.mark.skip(reason="test to be completed by student")
 def test_delete_goal_not_found(client):
-    raise Exception("Complete test")
 
     # Act
-    # ---- Complete Act Here ----
+    response = client.delete("/goals/1")
+    response_body = response.get_json()
 
     # Assert
     # ---- Complete Assertions Here ----
-    # assertion 1 goes here
-    # assertion 2 goes here
+    assert response.status_code == 404
+    assert "message" in response_body
+    assert response_body == {
+        "message" : f"This goal is not found."
+    }
     # ---- Complete Assertions Here ----
 
 # ----- TEST TEN ----- #

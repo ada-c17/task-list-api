@@ -331,7 +331,7 @@ def get_one_goal(goal_id):
         # If it's not, 400 response code
         abort(make_response({"message" : f"Goal ID is invalid."}, 400))
 
-    # Search for this goal_id in the Task Blueprint
+    # Search for this goal_id in the Goal Blueprint
     goal = Goal.query.get(goal_id)
 
 
@@ -347,35 +347,40 @@ def get_one_goal(goal_id):
 
 
 # ---- CREATE A GOAL ---- #
-# @goals_bp.route("", methods=["POST"])
-# def create_goal():
-#     # pass
 
-#     request_body = request.get_json()
+# NEED TO FIX THIS! FAILING TEST 5
 
-#     new_goal = Goal(title=request_body["title"])
+@goals_bp.route("", methods=["POST"])
+def create_goal():
 
-#     response_body = jsonify({ "goal" : 
-#         {
-#             "id" : new_goal.goal_id,
-#             "title" : new_goal.title
-#         }
-#     })
+    request_body = request.get_json()
+
+    new_goal = Goal(title=request_body["title"])
+
+    response_body = jsonify({ "goal" : 
+        {
+            "id" : new_goal.goal_id,
+            "title" : new_goal.title
+        }
+    })
 
 
-#     # Add new task and commit change
-#     db.session.add(new_goal)
-#     db.session.commit()
+    # Add new task and commit change
+    db.session.add(new_goal)
+    db.session.commit()
 
-#     return response_body, 201
+    return response_body, 201
 
 
 
 # ---- UPDATE GOAL ---- #
+
+# NEED TO FIX THIS! FAILING TEST 6
+
 @goals_bp.route("/<goal_id>", methods=["PUT"])
 def update_goal(goal_id):
 
-    # Search for this goal_id in the Task Blueprint
+    # Search for this goal_id in the Goal Blueprint
     goal_to_update = Goal.query.get(goal_id)
 
     # If this specific goal isn't found, 404 response code
@@ -389,15 +394,32 @@ def update_goal(goal_id):
     # db.session.add(goal_to_update)
     db.session.commit()
 
-    # return format_goal_response_body(goal_to_update), 200
+    return format_goal_response_body(goal_to_update), 200
 
-    response_body = jsonify({"goal" : 
-        {
-            "id" : goal_to_update.goal_id,
-            "title" : goal_to_update.title
-        }
-    })
+    # response_body = jsonify({"goal" : 
+    #     {
+    #         "id" : goal_to_update.goal_id,
+    #         "title" : goal_to_update.title
+    #     }
+    # })
 
-    return response_body, 200
+    # return response_body, 200
 
 
+# ---- DELETE ONE TASK ---- #
+@goals_bp.route("/<goal_id>", methods=["DELETE"])
+def delete_goal(goal_id):
+    
+    # Check if task_id is a valid integer
+    try:
+        goal_id = int(goal_id)
+    except:
+        # If it's not, 400 response code
+        abort(make_response({"message" : f"Goal ID is invalid."}, 400))
+
+    # Search for this task_id in the Task Blueprint
+    goal = Goal.query.get(goal_id)
+
+    # If this specific task isn't found, 404 response code
+    if not goal:
+        abort(make_response({"message" : f"This goal is not found."}, 404))
