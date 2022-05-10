@@ -1,8 +1,9 @@
 from asyncio import tasks
+from os import environ
 from flask import Blueprint, jsonify, abort, make_response, request
 from app.models.task import Task
 from app import db
-from .models.helpers import validate_task
+from .models.helpers import post_slack_message, validate_task 
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -87,6 +88,8 @@ def delete_one_task(id):
 @tasks_bp.route("/<id>/mark_complete", methods = ["PATCH"])
 def mark_one_task_complete(id):
 	task = validate_task(id)
+
+	post_slack_message(f"Someone just completed the task {task.title}")
 
 	task.mark_complete()
 
