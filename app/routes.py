@@ -451,19 +451,21 @@ def update_goal(goal_id):
 @goals_bp.route("/<goal_id>", methods=["DELETE"])
 def delete_goal(goal_id):
     
-    # Check if task_id is a valid integer
-    try:
-        goal_id = int(goal_id)
-    except:
-        # If it's not, 400 response code
-        abort(make_response({"message" : f"Goal ID is invalid."}, 400))
+    # # Check if task_id is a valid integer
+    # try:
+    #     goal_id = int(goal_id)
+    # except:
+    #     # If it's not, 400 response code
+    #     abort(make_response({"message" : f"Goal ID is invalid."}, 400))
 
-    # Search for this task_id in the Task Blueprint
-    goal_to_delete = Goal.query.get(goal_id)
+    # # Search for this task_id in the Task Blueprint
+    # goal_to_delete = Goal.query.get(goal_id)
 
-    # If this specific task isn't found, 404 response code
-    if not goal_to_delete:
-        abort(make_response({"message" : f"This goal is not found."}, 404))
+    # # If this specific task isn't found, 404 response code
+    # if not goal_to_delete:
+    #     abort(make_response({"message" : f"This goal is not found."}, 404))
+
+    goal_to_delete = validate_goal(goal_id)
 
 
     db.session.delete(goal_to_delete)
