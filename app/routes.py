@@ -349,8 +349,9 @@ def get_one_goal(goal_id):
 
 
 # ---- CREATE A GOAL ---- #
-# @goals_bp.route("", methods=["POST"])
-# def create_goal():
+@goals_bp.route("", methods=["POST"])
+def create_goal():
+    pass
 
 #     request_body = request.get_json()
 
@@ -369,6 +370,7 @@ def get_one_goal(goal_id):
 #     db.session.commit()
 
 #     return response_body, 201
+
 
 
 # ---- UPDATE GOAL ---- #

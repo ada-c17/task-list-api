@@ -55,6 +55,7 @@ def test_get_goal(client, one_goal):
 
 
 # ----- TEST FOUR ----- #
+# ----- PASSED ----- #
 # @pytest.mark.skip(reason="test to be completed by student")
 def test_get_goal_not_found(client):
     pass
