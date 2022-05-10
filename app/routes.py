@@ -18,8 +18,7 @@ def send_slack_notification(task):
         # 'format': 'json', do we need this line?
     }
 
-    return requests.post(slack_path, params=query_param, headers=headers)
-    
+    return requests.post(slack_path, params=query_param, headers=headers)  
 
 def validate_task(task_id):
     #this portion makes sure the input type is valid
@@ -40,21 +39,15 @@ def task_response(task):
     if task.completed_at:
         is_complete = True
 
-    if not task.goal_id:
-        return jsonify({'task':
+    response_dict = {'task':
             {'id': task.task_id,
             'title': task.title,
             'description': task.description,
             'is_complete': is_complete}
-        })
-    else:
-        return jsonify({'task':
-            {'id': task.task_id,
-            'goal_id': task.goal_id,
-            'title': task.title,
-            'description': task.description,
-            'is_complete': is_complete}
-        })
+        }
+    if task.goal_id:
+        response_dict['task']['goal_id'] = task.goal_id
+    return jsonify(response_dict)
 
 @tasks_bp.route('', methods=['GET'])
 def get_tasks():
@@ -81,12 +74,6 @@ def get_tasks():
         })
     return jsonify(tasks_response)
 
-@tasks_bp.route('/<task_id>', methods=['GET'])
-def get_one_task(task_id):
-    task = validate_task(task_id)
-
-    return task_response(task)
-
 @tasks_bp.route('', methods=['POST'])
 def create_task():
     request_body = request.get_json() #turns request body into python dictionary
@@ -94,50 +81,48 @@ def create_task():
         'description' not in request_body:
         return jsonify({'details': 'Invalid data'}), 400
     
-    if 'completed_at' in request_body:
-        new_task = Task(title=request_body['title'], 
-                        description=request_body['description'],
-                        completed_at=datetime.utcnow())
-    else:
-        new_task = Task(title=request_body['title'], 
+    new_task = Task(title=request_body['title'], 
                     description=request_body['description'])
+    
+    if 'completed_at' in request_body:
+        new_task.completed_at=datetime.utcnow()
     
     db.session.add(new_task)
     db.session.commit()
 
     return task_response(new_task), 201
 
-@tasks_bp.route('/<task_id>', methods=['PUT'])
-def update_task(task_id):
+@tasks_bp.route('/<task_id>', methods=['DELETE', 'PUT', 'GET'])
+def handle_one_task(task_id):
     task = validate_task(task_id)
-    request_body = request.get_json()
+    response_body = task_response(task)
+    if request.method == 'DELETE':
+        task = validate_task(task_id)
 
-    if 'title' not in request_body or\
-        'description' not in request_body:
-        return jsonify({'msg': f'Request must include title and description'}), 400
+        response_body = jsonify({
+            'details': f'Task {task_id} "{task.title}" successfully deleted'
+        }), 200
+        db.session.delete(task)
+    elif request.method == 'PUT':
+        request_body = request.get_json()
 
-    task.title = request_body['title']
-    task.description = request_body['description']
+        if 'title' not in request_body or\
+            'description' not in request_body:
+            return jsonify({'msg': f'Request must include title and description'}), 400
 
-    if 'completed_at' in request_body:
-        task.completed_at = datetime.utcnow()
+        task.title = request_body['title']
+        task.description = request_body['description']
+
+        if 'completed_at' in request_body:
+            task.completed_at = datetime.utcnow()
+
+        response_body = task_response(task)
+    elif request.method == 'GET':
+        return response_body
 
     db.session.commit()
+    return response_body
 
-    return task_response(task)
-
-@tasks_bp.route('/<task_id>', methods=['DELETE'])
-def delete_one_task(task_id):
-    task = validate_task(task_id)
-
-    response_body = jsonify({
-        'details': f'Task {task_id} "{task.title}" successfully deleted'
-    })
-    db.session.delete(task)
-    db.session.commit()
-
-
-    return response_body, 200
 
 @tasks_bp.route('/<task_id>/mark_complete', methods=['PATCH'])
 def mark_complete(task_id):
@@ -189,12 +174,6 @@ def get_goals():
     
     return jsonify(goals_response)
 
-@goals_bp.route('/<goal_id>', methods=['GET'])
-def get_one_goal(goal_id):
-    goal = validate_goal(goal_id)
-
-    return {'goal':goal_response(goal)}
-
 @goals_bp.route('', methods=['POST'])
 def create_goal():
     request_body = request.get_json()
@@ -209,27 +188,26 @@ def create_goal():
 
     return {'goal': goal_response(new_goal)}, 201
 
-@goals_bp.route('/<goal_id>', methods=['PUT'])
-def update_goal(goal_id):
-    request_body = request.get_json()
+@goals_bp.route('/<goal_id>', methods=['DELETE', 'PUT', 'GET'])
+def handle_one_goal(goal_id):
     goal = validate_goal(goal_id)
-    
-    goal.title = request_body['title']
+    response_body = {'goal': goal_response(goal)}
 
-    db.session.commit()
-
-    return {'goal': goal_response(goal)}
-
-@goals_bp.route('/<goal_id>', methods=['DELETE'])
-def delete_goal(goal_id):
-    goal = validate_goal(goal_id)
-
-    response_body = jsonify({
+    if request.method == 'DELETE':
+        response_body = jsonify({
         'details': f'Goal {goal_id} "{goal.title}" successfully deleted'
-    })
-    db.session.delete(goal)
+        })
+        db.session.delete(goal)
+        
+    elif request.method == 'PUT':
+        request_body = request.get_json()
+        goal.title = request_body['title']
+        response_body = {'goal': goal_response(goal)}
+    
+    elif request.method == 'GET':
+        return response_body
+        
     db.session.commit()
-
     return response_body
 
 @goals_bp.route('/<goal_id>/tasks', methods=['POST'])
@@ -259,7 +237,7 @@ def get_tasks_for_goal(goal_id):
             is_complete = True
         tasks_response.append({
             "id": task.task_id,
-            'goal_id': task.goal_id,
+            "goal_id": task.goal_id,
             "title": task.title,
             "description": task.description,
             "is_complete": is_complete
