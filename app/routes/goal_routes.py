@@ -165,10 +165,14 @@ def get_tasks_for_goal(goal_id):
         is_complete = bool(task.completed_at)
         tasks_response.append(
             {
-            "task_id": task.task_id,
+            "id": task.task_id,
+            "goal_id": goal.goal_id,
             "title": task.title,
             "description": task.description,
             "is_complete": is_complete
             }
         )
-    return jsonify(tasks_response)
+    return jsonify({
+        "id": goal.goal_id,
+        "title": goal.title,
+        "tasks": tasks_response})
