@@ -99,15 +99,10 @@ def replace_goal(goal_id):
     request_body = request.get_json()
 
     goal.title = request_body["title"]
-    # completed = request_body.get("completed_at")
-    # if completed:
-    #     goal.completed_at = request_body["completed_at"]
-    # is_complete = bool(goal.completed_at)
-
+    
     db.session.commit()
 
     return {"goal": goal.to_dict()}
-    # return {"goal": goal.to_dict(is_complete)}
 
 @goal_bp.route("/<goal_id>/mark_complete", methods=["PATCH"])
 def complete_goal(goal_id):
