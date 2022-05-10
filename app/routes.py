@@ -288,3 +288,15 @@ def get_all_goals():
 
     # Create the response body
     goal_response = []
+
+
+    for goal in all_goals:
+
+        goal_response.append(
+            {
+                "id" : 1, 
+                "title" : f"Example Goal Title {goal.goal_id}"
+            }
+        )
+
+    return goal_response, 200
