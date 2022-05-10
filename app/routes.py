@@ -3,6 +3,9 @@ from app import db
 from app.models.task import Task
 from sqlalchemy import desc, asc
 from datetime import datetime
+import requests
+import os
+
 
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
@@ -18,7 +21,7 @@ def validate_task(task_id):
         return jsonify({"message" : f"Could not find '{task_id}'"}), 404
     return task
 
-def format_response(task):
+def format_as_dict(task):
     response = {
     "task" : 
         {
@@ -29,6 +32,15 @@ def format_response(task):
         }
     }
     return response
+
+def push_complete_to_slack(task):
+    bot_token = os.environ.get("SLACK_BOT_TOKEN")
+    params = {
+        "channel" : "task-notifications", 
+        "text" : f"Someone just completed the task {task.title}"
+        }
+    headers = {"authorization" : "Bearer " + bot_token}
+    requests.post("https://slack.com/api/chat.postMessage", params=params, headers=headers)
 
 @tasks_bp.route('', methods=['POST'])
 def create_task():
@@ -50,7 +62,7 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
     
-    return format_response(new_task), 201
+    return format_as_dict(new_task), 201
 
 
 @tasks_bp.route('', methods=['GET'])
@@ -81,7 +93,7 @@ def get_one_task(task_id):
     task = validate_task(task_id)
 
     if isinstance(task, Task):
-        return format_response(task), 200
+        return format_as_dict(task), 200
     return task
 
 
@@ -98,7 +110,7 @@ def update_task(task_id):
         if "completed_at" in request_body:
             task.completed_at = request_body['completed_at']
 
-        return format_response(task), 200
+        return format_as_dict(task), 200
     return task
 
 @tasks_bp.route('/<task_id>', methods=['DELETE'])
@@ -117,9 +129,11 @@ def mark_complete(task_id):
     task = validate_task(task_id)
 
     if isinstance(task, Task):
+
         task.completed_at = datetime.utcnow()
         db.session.commit()
-        return format_response(task), 200
+        push_complete_to_slack(task)
+        return format_as_dict(task), 200
     return task
 
 @tasks_bp.route('/<task_id>/mark_incomplete', methods=['PATCH'])
@@ -129,6 +143,6 @@ def mark_incomplete(task_id):
     if isinstance(task, Task):
         task.completed_at = None
         db.session.commit()
-        return format_response(task), 200
+        return format_as_dict(task), 200
     return task
 
