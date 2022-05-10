@@ -62,7 +62,7 @@ def test_get_goal_not_found(client):
     # assertion 2 goes here
     # ---- Complete Test ----
     assert ValueError
-    assert response_body == {"msg": f"Given task #1 is not found."}
+    assert response_body == {"msg": f"Given goal #1 is not found."}
 
 #@pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_goal(client): 
@@ -118,7 +118,7 @@ def test_update_goal_not_found(client):
     # Assert
     # ---- Complete Assertions Here ----
     assert ValueError
-    assert response_body == {"msg": f"Given task #1 is not found."}
+    assert response_body == {"msg": f"Given goal #1 is not found."}
     # ---- Complete Assertions Here ----
 
 
@@ -157,7 +157,7 @@ def test_delete_goal_not_found(client):
     # Assert
     # ---- Complete Assertions Here ----
     assert ValueError
-    assert response_body ==  {"msg": f"Given task #1 is not found."}
+    assert response_body ==  {"msg": f"Given goal #1 is not found."}
     # ---- Complete Assertions Here ----
 
 
