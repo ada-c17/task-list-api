@@ -53,7 +53,7 @@ def get_all_tasks():
             "description": task.description,
         }
         if task.completed_at:
-            response["is_complete"] = True
+            response["is_complete"] = task.completed_at
         else:
             response["is_complete"] = False
         response_body.append(response)
@@ -77,6 +77,9 @@ def create_task():
                         description=request_body["description"])
     except:
         abort(make_response({"details": f"Invalid data"}, 400))
+
+    if "completed_at" in request_body:
+        new_task.completed_at = request_body["completed_at"]
 
     db.session.add(new_task)
     db.session.commit()
