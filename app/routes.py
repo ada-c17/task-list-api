@@ -452,66 +452,54 @@ def post_goals_to_tasks(goal_id, task_id):
 @goals_bp.route("/<goal_id>/tasks", methods=["GET"])
 def get_tasks_one_goal(goal_id):
     
-    # goal_to_get = validate_goal(goal_id)
-
-    goal_request_body = request.get_json()
-
     # Get one goal
-    # goal_to_get = get_one_goal(goal_id)
+    goal_to_get = validate_goal(goal_id)
+
+    # goal_request_body = request.get_json()
+
+    tasks_response = []
+
+    for task in goal_to_get.tasks:
+
+        tasks_response.append({
+            "id" : task.task_id,
+            "goal_id" : task.goal_id,
+            "title" : task.title,
+            "description": task.description,
+            "is_complete": task.completed_at,
+        }
+        )
+
+    # return tasks_response, 200
+
+    response_body = {
+        "id" : goal_to_get.goal_id, 
+        "title" : goal_to_get.title,
+        "tasks" : tasks_response
+    }
+
+    return response_body
 
 
-    # Check if goal_id is a valid integer
-    try:
-        goal_id = int(goal_id)
-    except:
-        # If it's not, 400 response code
-        abort(make_response({"message" : f"Goal ID is invalid."}, 400))
-
-    # Search for this goal_id in the Goal Blueprint
-    goal = Goal.query.get(goal_id)
-
-
-
-    # If this specific goal isn't found, 404 response code
-    if not goal:
-        abort(make_response({"details" : f"Invalid data"}, 404))
-
-
-
-
-    # if "title" in request_body:
-
-    if "tasks" in goal_request_body:
-        # Get tasks by task id
-        task_id_to_get = goal_request_body["id"]
-
-        task_response_body = get_one_task(task_id_to_get)
-
-    # return format_response_body(task_response_body), 200
-        # pass
 
 
     # Get the tasks associated with that one goal
 
-
-# def get_one_goal(goal_id):
-
-    # # Check if goal_id is a valid integer
-    # try:
-    #     goal_id = int(goal_id)
-    # except:
-    #     # If it's not, 400 response code
-    #     abort(make_response({"message" : f"Goal ID is invalid."}, 400))
-
-    # # Search for this goal_id in the Goal Blueprint
-    # goal = Goal.query.get(goal_id)
-
-
-
-    # # If this specific goal isn't found, 404 response code
-    # if not goal:
-    #     abort(make_response({"details" : f"Invalid data"}, 404))
-
     
+# def validate_goal(goal_id):
+#     # Check if task_id is a valid integer
+#     try:
+#         goal_id = int(goal_id)
+#     except:
+#         # If it's not, 400 response code
+#         abort(make_response({"message" : f"Goal ID is invalid."}, 400))
 
+
+#     validated_goal = Goal.query.get(goal_id)
+
+#     # If this specific goal isn't found, 404 response code
+#     if not validated_goal:
+#         abort(make_response({"message" : f"This goal is not found."}, 404))
+    
+#     return validated_goal
 
