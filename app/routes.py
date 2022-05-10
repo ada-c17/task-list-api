@@ -1,6 +1,5 @@
 from asyncio import tasks
-from os import environ
-from flask import Blueprint, jsonify, abort, make_response, request
+from flask import Blueprint, jsonify,request
 from app.models.task import Task
 from app import db
 from .models.helpers import post_slack_message, validate_task 

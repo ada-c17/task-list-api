@@ -1,8 +1,6 @@
 from flask import abort, make_response
 from .task import Task
 import os, requests
-from dotenv import load_dotenv
-
 
 def validate_task(id):
 	try:
