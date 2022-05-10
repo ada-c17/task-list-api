@@ -21,10 +21,13 @@ class Task(db.Model):
         return response
 
     @classmethod
-    def from_json(cls,json_obj):
-        return Task(title=json_obj["title"],
-                    description=json_obj["description"],
-                    completed_at=json_obj["completed_at"])
+    def from_json(cls,request_body):
+        try:
+            return cls(title=request_body["title"],
+                description=request_body["description"],
+                completed_at=request_body.get("completed_at",None))
+        except KeyError:
+            return abort(make_response({"details":"Invalid data"},400))
     
     @classmethod
     def validate_id(cls,id):

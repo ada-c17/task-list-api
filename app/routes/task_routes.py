@@ -29,15 +29,7 @@ def get_tasks():
 @tasks_bp.route("",methods=["POST"])
 def make_task():
     request_body = request.get_json()
-    completed_at = request_body.get("completed_at",None)
-    try:
-        new_task = Task(
-            title=request_body["title"],
-            description=request_body["description"],
-            completed_at=completed_at
-        )
-    except KeyError:
-        return make_response({"details":"Invalid data"},400)
+    new_task = Task.from_json(request_body)
     db.session.add(new_task)
     db.session.commit()
     response = Task.to_json(new_task)
