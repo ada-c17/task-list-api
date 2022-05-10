@@ -3,10 +3,7 @@ from app.models.goal import Goal
 from app.models.task import Task
 from app.routes.task_routes import validate_task
 from flask import Blueprint, request, make_response, jsonify, abort
-from sqlalchemy import asc,desc
-from datetime import date
-import os
-import requests
+
 
 goals_bp = Blueprint("goal", __name__, url_prefix="/goals")
 
@@ -104,16 +101,43 @@ def delete_goal(id):
 # Post Task IDs to a GOAL
 @goals_bp.route("/<id>/tasks", methods=["POST"])
 def post_task_ids_to_goal(id):
-    goal_id = validate_goal(id)
-    task_ids = request.get_json()
+    goal = validate_goal(id)
+    request_body = request.get_json()
 
-    # checks to ensure that all tasks are valid
-    for task in task_ids:
-        print(task)
-        task.goal_id = goal_id
+    for task_id in request_body["task_ids"]:
+        validate_task(task_id)
+        task = Task.query.get(task_id)
+        task.goal_id = goal.id
     
     db.session.commit()
     
-    return None
-
+    response_body = {}
+    response_body = {
+            "id":goal.id,
+            "task_ids": request_body["task_ids"]
+            }
     
+    return make_response(jsonify(response_body), 200)
+
+# Get tasks for one specific goal
+@goals_bp.route("/<id>/tasks", methods=["GET"])
+def get_all_tasks_by_goal(id):
+    goal = validate_goal(id)
+    
+    tasks_response = []
+    for task in goal.tasks:
+        tasks_response.append({
+            "id":task.id,
+            "goal_id": task.goal_id,
+            "title":task.title,
+            "description":task.description,
+            "is_complete": True if task.completed_at else False
+            })
+    
+    response_body = {
+        "id": goal.id,
+        "title": goal.title,
+        "tasks": tasks_response
+    }
+
+    return make_response(jsonify(response_body), 200)

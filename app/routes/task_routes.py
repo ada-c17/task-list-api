@@ -49,12 +49,21 @@ def get_one_task(id):
     task = validate_task(id)
     response_body = {}
 
-    response_body["task"] = {
-        "id":task.id,
-        "title":task.title,
-        "description":task.description,
-        "is_complete": True if task.completed_at else False
-        }
+    if task.goal_id:
+        response_body["task"] = {
+            "id":task.id,
+            "goal_id": task.goal_id,
+            "title":task.title,
+            "description":task.description,
+            "is_complete": True if task.completed_at else False
+            }
+    else:
+        response_body["task"] = {
+            "id":task.id,
+            "title":task.title,
+            "description":task.description,
+            "is_complete": True if task.completed_at else False
+            }
     
     return make_response(jsonify(response_body), 200)
 
