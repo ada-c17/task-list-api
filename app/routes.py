@@ -4,6 +4,10 @@ from app import db
 from app.models.task import Task
 # import dependencies
 from flask import Blueprint, jsonify, make_response, request, abort
+import os
+import requests
+
+SLACK_TOKEN = os.environ.get("SLACK_TOKEN")
 
 # initialize Blueprint instance
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
@@ -106,7 +110,7 @@ def update_task(task_id):
         rsp["is_complete"] = True
     else:
         rsp["is_complete"] = False
-        
+
     return make_response({"task":rsp}, 200)
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
@@ -125,6 +129,16 @@ def mark_complete(task_id):
     task.completed_at = datetime.utcnow()
     db.session.commit()
 
+    # call the Slack API and send out Slack messages
+    slack_url = "https://slack.com/api/chat.postMessage"
+    headers = {"Authorization": f"Bearer {SLACK_TOKEN}"}
+    params = {
+        "channel": "task-notifications",
+        "text": f"Someone just completed the task {task.title}"
+        }
+    requests.post(slack_url, headers=headers, data=params)
+
+    # get the response when marking complete on a completed task
     return make_response({"task":{"id":task.id,
                                 "title": task.title,
                                 "description": task.description,
