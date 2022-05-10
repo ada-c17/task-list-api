@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request, make_response, abort
+from pytest import param
 from app.models.task import Task
 from app import db
 
@@ -53,19 +54,13 @@ def create_a_task():
 
 @tasks_bp.route('', methods=['GET'])
 def get_all_tasks():
-    # params = request.args
-    # if "completed_at" in params and "description" in params:
-    #     completed_at_title = params["completed_at"]
-    #     description_value = params["description"]
-    #     tasks = Task.query.filter_by(completed_at=completed_at_title, description=description_value)
-    # elif "completed_at" in params:
-    #     completed_at_title = params["completed_at"]
-    #     tasks = Task.query.filter_by(completed_at=completed_at_title)
-    # elif "description" in params:
-    #     description_value = params["description"]
-    #     tasks = Task.query.filter_by(description=description_value)
-    # else:
-    tasks = Task.query.all()
+    params = request.args
+    if request.args.get("sort") == "asc":
+        tasks = Task.query.order_by(Task.title.asc())
+    elif request.args.get("sort") == "desc":
+        tasks = Task.query.order_by(Task.title.desc())
+    else:
+        tasks = Task.query.all()
     tasks_response = []
     
     for task in tasks:
