@@ -4,7 +4,7 @@ from app import db
 class Goal(db.Model):
     goal_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
-    tasks = db.relationship("Task", back_populates="goal")
+    tasks = db.relationship("Task", back_populates="goal", lazy=True)
 
     required_attributes = {
         "title": True, 
@@ -16,22 +16,15 @@ class Goal(db.Model):
             id=self.goal_id,
             title=self.title
         )
-        # if self.completed_at:
-        #     instance_dict["is_complete"] = True
-        # else:
-        #     instance_dict["is_complete"] = False
         return instance_dict
 
     def self_to_dict_with_tasks(self):
+        task_list = [task.self_to_dict_with_goal() for task in self.tasks]
         instance_dict = dict(
             id=self.goal_id,
             title=self.title,
-            tasks=self.tasks
+            tasks=task_list if task_list else []
         )
-        # if self.completed_at:
-        #     instance_dict["is_complete"] = True
-        # else:
-        #     instance_dict["is_complete"] = False
         return instance_dict
 
     def update_self(self, data_dict):
@@ -41,10 +34,8 @@ class Goal(db.Model):
             else:
                 raise ValueError(key)
     
-    def id_and_task_list_only(self):
-        task_ids = []
-        for task in self.tasks:
-            task_ids.append(task.task_id)
+    def id_and_task_ids_only(self):
+        task_ids = [task.task_id for task in self.tasks]
 
         id_and_tasks_dict = dict(
             id=self.goal_id,

@@ -92,8 +92,10 @@ def get_all_tasks():
 @task_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = get_task_by_id(task_id)
-
-    return return_database_info_task(task.self_to_dict_no_goal())
+    if task.goal_id:
+        return return_database_info_task(task.self_to_dict_with_goal())
+    else:
+        return return_database_info_task(task.self_to_dict_no_goal())
 
 @task_bp.route("/<task_id>", methods=["PUT", "PATCH"])
 def update_task_by_id(task_id):

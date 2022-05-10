@@ -153,5 +153,11 @@ def add_tasks_to_goal(goal_id):
 
     db.session.commit()
 
-    return return_database_info_list(goal.id_and_task_list_only())
+    return return_database_info_list(goal.id_and_task_ids_only())
+
+@goal_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_goal_with_tasks(goal_id):
+    goal = get_goal_by_id(goal_id)
+
+    return return_database_info_list(goal.self_to_dict_with_tasks())
 
