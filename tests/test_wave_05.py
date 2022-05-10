@@ -1,7 +1,8 @@
 import pytest
 
 # ----- TEST ONE ----- #
-@pytest.mark.skip(reason="No way to test this feature yet")
+# ----- PASSED ----- #
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_goals_no_saved_goals(client):
     # Act
     response = client.get("/goals")
@@ -61,7 +62,7 @@ def test_get_goal_not_found(client):
     # ---- Complete Test ----
 
 # ----- TEST FIVE ----- #
-# @pytest.mark.skip(reason="No way to test this feature yet")
+@pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_goal(client):
     # Act
     response = client.post("/goals", json={
