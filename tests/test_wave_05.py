@@ -169,13 +169,12 @@ def test_delete_goal_not_found(client):
     response_body = response.get_json()
 
     # Assert
-    # ---- Complete Assertions Here ----
     assert response.status_code == 404
     assert "message" in response_body
     assert response_body == {
         "message" : f"This goal is not found."
     }
-    # ---- Complete Assertions Here ----
+
 
 
 
