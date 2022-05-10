@@ -3,6 +3,8 @@ from app.models.task import Task
 from app import db
 from sqlalchemy import asc, desc
 from datetime import datetime
+import requests
+import os
 
 tasks_bp = Blueprint("task", __name__,url_prefix="/tasks")
 
@@ -146,8 +148,21 @@ def update_task_is_complete(task_id):
     chosen_task = get_task_or_abort(task_id)
 
     chosen_task.completed_at = datetime.utcnow()
-
     db.session.commit()
+
+    path = "https://slack.com/api/chat.postMessage"
+    SLACK_TOKEN = os.environ.get("SLACK_TOKEN")
+    data={
+        "channel": "task-notifications",
+        "text": f"{chosen_task.title} is completed",
+        "format":"json"
+    }
+
+    headers = { "Authorization": f"Bearer { SLACK_TOKEN }"
+    }
+
+    requests.post(path, params=data, headers=headers )
+
 
     rsp = {
         "task":{
@@ -177,6 +192,5 @@ def update_task_is_incomplete(task_id):
     }
 
     return jsonify(rsp), 200
-
 
 
