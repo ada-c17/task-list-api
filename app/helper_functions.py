@@ -52,12 +52,16 @@ def update_record_safely(cls, record, data_dict):
 
 def send_slackbot_message(task_title):
     path = "https://slack.com/api/chat.postMessage"
+    print(path)
     slackbot_key = os.environ.get("SLACK_OAUTH_TOKEN")
+    print(slackbot_key)
     headers = {'authorization': f'Bearer {slackbot_key}'}
+    print(headers)
     params = {
         'channel' : 'task-notifications',
         'text' : f'Someone just completed task {task_title}! :tada::tada::tada:',
     }
+    print(params)
     requests.patch(path, headers=headers, params=params)
 
 
