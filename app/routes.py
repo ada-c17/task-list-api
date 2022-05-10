@@ -7,8 +7,8 @@ from .models.task import Task
 from app import db
 import os
 
-task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
-goal_bp = Blueprint("goal_bp", __name__, url_prefix="/goals")
+task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
+goal_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
 def completed_or_not(response_body):
     # [response] iterage in list of object, otherwise, TypeError
@@ -242,13 +242,13 @@ def goal_id_validation(input_id):
     try:
         input_id = int(input_id)
     except ValueError:
-        rsp = {"msg": f"Invalid task id #{input_id}."}
+        rsp = {"msg": f"Invalid goal id #{input_id}."}
         abort(make_response(jsonify(rsp), 400))
     
     valid_id = Goal.query.get(input_id)
      
     if valid_id is None:
-        rsp = {"msg": f"Given task #{input_id} is not found."}
+        rsp = {"msg": f"Given goal #{input_id} is not found."}
         #raise ValueError({"msg": f"Given task #{taskID} is not found."})
         abort(make_response(jsonify(rsp), 404))
 
@@ -295,3 +295,24 @@ def delete_goal(goal_id):
     return {
         "details": f"Goal {goal.goal_id} \"{goal.title}\" successfully deleted"
     }, 200
+    
+@goal_bp.route("/<goal_id>/tasks", methods=["POST"])
+def create_tasks_for_one_goal(goal_id):
+    goal = goal_id_validation(goal_id)
+    goal = Goal.query.get(goal_id) 
+    print(goal.tasks)
+    request_body = request.get_json()
+    
+    for task_id in request_body.get("task_ids"):
+        task = Task.query.get(task_id)
+        goal.tasks.append(task)
+    
+    #db.session.add(task)
+    db.session.commit()
+    print(goal.tasks)
+    #print(tasks, tasks.task_id)
+    return jsonify({
+        "id": task.goal_id,
+        "task_ids": request_body.get("task_ids")
+    }), 200
+    
