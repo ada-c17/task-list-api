@@ -14,14 +14,14 @@ def create_task():
     db.session.add(task)
     db.session.commit()
 
-    return make_response({"task": Task.to_dict(task)}, 201)
+    return make_response(jsonify({"task": task.to_dict()}), 201)
 
 
 @bp.route("/<task_id>", methods=("GET",))
 def read_tasks(task_id):
     if not task_id:
         tasks = Task.query.all()
-        return jsonify([Task.to_dict(task) for task in tasks])
+        return jsonify([task.to_dict() for task in tasks])
 
     task = validate_task_id(task_id)
     return make_response(jsonify({"task": task.to_dict()}), 200)
@@ -32,7 +32,7 @@ def update_task(task_id):
     request_body = request.get_json()
     task = validate_task_id(task_id)
 
-    updated_task = Task.override_task(task, request_body)
+    updated_task = task.override_task(request_body)
     db.session.add(updated_task)
     db.session.commit()
 
@@ -51,10 +51,10 @@ def validate_task_id(task_id):
     try:
         task_id = int(task_id)
     except:
-        abort(make_response({"message": "Invalid task id"}, 400))
+        abort(make_response({"message": "Invalid data"}, 400))
 
     task = Task.query.get(task_id)
 
     if not task:
-        abort(make_response({"message": "Task id not found"}, 404))
+        abort(make_response({"message": "Task 1 not found"}, 404))
     return task
