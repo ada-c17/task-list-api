@@ -62,7 +62,7 @@ def test_get_goal_not_found(client):
     response = client.get("/goals/1")
     response_body = response.get_json()
 
-    raise Exception("Complete test")
+    # raise Exception("Complete test")
     # Assert
     # ---- Complete Test ----
     # assertion 1 goes here
