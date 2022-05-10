@@ -4,7 +4,7 @@ from app.models.task import Task
 from app import db
 import datetime
 import os
-import requests
+from app.slack_helper import *
 
 SLACK_OAUTH_TOKEN = os.environ.get("SLACK_OAUTH_TOKEN")
 
@@ -80,11 +80,7 @@ def complete_task(id):
     task = Task.validate_id(id)
     task.completed_at = datetime.datetime.utcnow()
     db.session.commit()
-    slack_path="https://slack.com/api/chat.postMessage"
-    slack_headers = {"Authorization":f"Bearer {SLACK_OAUTH_TOKEN}"}
-    slack_params = {"channel":"task",
-                    "text":f"Someone just completed the task {task.title}"}
-    requests.post(slack_path,data=slack_params,headers=slack_headers)
+    post_slack_msg(task)
     response = Task.to_json(task)
     return make_response(response,200)
 
