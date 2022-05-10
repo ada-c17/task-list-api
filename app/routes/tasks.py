@@ -11,8 +11,7 @@ tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 # Wave 1
 # get all task list
 @tasks_bp.route("", methods=["GET"])
-def read_all_tast():
-
+def read_all_tasts():
     # sort all tasts by title
     params = request.args
     if "sort" in params:
@@ -38,6 +37,7 @@ def read_all_tast():
 
     return jsonify(response_body), 200
 
+
 # helper function to check task id
 def validate_task_id(task_id):
     """
@@ -58,6 +58,7 @@ def validate_task_id(task_id):
             return task
     abort(make_response({"message": f"The task id {task_id} is not found"}, 404))
 
+
 # get one task by id
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def read_task_by_id(task_id):
@@ -71,6 +72,7 @@ def read_task_by_id(task_id):
         }
     }
     return jsonify(response_body), 200
+
 
 # helper function to check key dictionary exist or not
 def validate_data_key_for_post_or_update():
@@ -132,6 +134,7 @@ def update_task(task_id):
 
     return jsonify(response_body), 200
 
+
 # delete task by id
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_one_task_by_id(task_id):
@@ -141,3 +144,58 @@ def delete_one_task_by_id(task_id):
     response_body = {"details": f'Task {task_id} "{chosen_task.title}" successfully deleted'}
     return jsonify(response_body), 200
 
+
+# Wave 3
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def update_to_mark_complete(task_id):
+    chosen_task = validate_task_id(task_id)
+    request_task = request.get_json()
+    # if "completed_at" in request_task and request_task["completed_at"]:
+    #     chosen_task.completed_at = request_task["completed_at"]
+    # else:
+    #     chosen_task.completed_at = datetime.utcnow()
+    chosen_task.completed_at = datetime.utcnow()
+    db.session.commit()
+
+    # post message to slack workspace
+    SLACK_API_TOKEN = os.environ.get("SLACK_TOKEN")
+    SLACK_PATH = "https://slack.com/api/chat.postMessage"
+    MESSAGE = f"Someone just completed the task {chosen_task.title}"
+    CHANNEL = "task-notifications"
+    query_params = {
+        "channel": CHANNEL,
+        "text": MESSAGE
+    }
+    header = {
+        "Authorization": SLACK_API_TOKEN
+    }
+    
+    slack_response = requests.post(SLACK_PATH, params=query_params, headers=header)
+    
+    response_body = {
+        "task": {
+            "id": chosen_task.id,
+            "title": chosen_task.title,
+            "description": chosen_task.description,
+            "is_complete": bool(chosen_task.completed_at)
+        }
+    } 
+
+    return jsonify(response_body), 200
+
+
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def update_to_mark_incomplete(task_id):
+    chosen_task = validate_task_id(task_id)
+    chosen_task.completed_at = None
+    db.session.commit()
+    response_body = {
+        "task": {
+            "id": chosen_task.id,
+            "title": chosen_task.title,
+            "description": chosen_task.description,
+            "is_complete": bool(chosen_task.completed_at)
+        }
+    } 
+
+    return jsonify(response_body), 200
