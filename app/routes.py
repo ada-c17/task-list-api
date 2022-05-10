@@ -324,10 +324,56 @@ def get_all_goals():
 
 # ---- GET ONE GOAL BY ID ---- #
 @goals_bp.route("/<goal_id>", methods=["GET"])
-def get_one_task(goal_id):
+def get_one_goal(goal_id):
 
 #     # goal = validate_task(goal_id)
 
+    # Check if goal_id is a valid integer
+    try:
+        goal_id = int(goal_id)
+    except:
+        # If it's not, 400 response code
+        abort(make_response({"message" : f"Goal is invalid."}, 400))
+
+    # Search for this goal_id in the Task Blueprint
+    goal = Goal.query.get(goal_id)
+
+    # If this specific goal isn't found, 404 response code
+    if not goal:
+        abort(make_response({"message" : f"This goal is not found."}, 404))
+
+
+    return format_goal_response_body(goal), 200
+
+# ------------------------ POST OR PUT REQUESTS ------------------------ #
+
+
+# ---- CREATE A GOAL ---- #
+# @goals_bp.route("", methods=["POST"])
+# def create_goal():
+
+#     request_body = request.get_json()
+
+#     new_goal = Goal(title=request_body["title"])
+
+#     response_body = jsonify({ "goal" : 
+#         {
+#             "id" : new_goal.goal_id,
+#             "title" : new_goal.title
+#         }
+#     })
+
+
+#     # Add new task and commit change
+#     db.session.add(new_goal)
+#     db.session.commit()
+
+#     return response_body, 201
+
+
+# ---- UPDATE GOAL ---- #
+@goals_bp.route("/<goal_id>", methods=["GET"])
+def update_goal(goal_id):
     # Check if task_id is a valid integer
     try:
         goal_id = int(goal_id)
@@ -335,37 +381,22 @@ def get_one_task(goal_id):
         # If it's not, 400 response code
         abort(make_response({"message" : f"Goal is invalid."}, 400))
 
-    # Search for this task_id in the Task Blueprint
-    goal = Goal.query.get(goal_id)
+    # Search for this goal_id in the Task Blueprint
+    goal_to_update = Goal.query.get(goal_id)
 
-    # If this specific task isn't found, 404 response code
-    if not goal:
+    # If this specific goal isn't found, 404 response code
+    if not goal_to_update:
         abort(make_response({"message" : f"This goal is not found."}, 404))
 
 
-    return format_goal_response_body(goal), 200
 
-# ------------------------ POST REQUESTS ------------------------ #
-
-
-# ---- CREATE A GOAL ---- #
-@goals_bp.route("", methods=["POST"])
-def create_goal():
 
     request_body = request.get_json()
 
-    new_goal = Goal(title=request_body["title"])
-
-    response_body = jsonify({ "goal" : 
-        {
-            "id" : new_goal.goal_id,
-            "title" : new_goal.title
-        }
-    })
+    goal_to_update = request_body["title"]
 
 
-    # Add new task and commit change
-    db.session.add(new_goal)
     db.session.commit()
 
-    return response_body, 201
+    return format_goal_response_body(goal_to_update), 200
+
