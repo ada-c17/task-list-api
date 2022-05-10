@@ -21,9 +21,9 @@ class Task(db.Model):
         return {
             "task": {
                 "id": self.task_id,
-                "TITLE": self.title,
+                "title": self.title,
                 "description": self.description,
-                "is_complete": self.completed_at
+                "is_complete": bool(self.completed_at)
              }
         }
 
