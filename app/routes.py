@@ -89,6 +89,8 @@ def format_goal_response_body(goal):
 
     return response_body
 
+
+
 # ------------------------ TASKS ------------------------ #
 
 # ------------------------ GET REQUESTS ------------------------ #
@@ -343,6 +345,9 @@ def get_one_goal(goal_id):
 
     return format_goal_response_body(goal), 200
 
+
+
+
 # ------------------------ POST OR PUT REQUESTS ------------------------ #
 
 
@@ -411,7 +416,7 @@ def update_goal(goal_id):
     # return response_body, 200
 
 
-# ---- DELETE ONE TASK ---- #
+# ---- DELETE GOAL ---- #
 @goals_bp.route("/<goal_id>", methods=["DELETE"])
 def delete_goal(goal_id):
     
@@ -423,8 +428,16 @@ def delete_goal(goal_id):
         abort(make_response({"message" : f"Goal ID is invalid."}, 400))
 
     # Search for this task_id in the Task Blueprint
-    goal = Goal.query.get(goal_id)
+    goal_to_delete = Goal.query.get(goal_id)
 
     # If this specific task isn't found, 404 response code
-    if not goal:
+    if not goal_to_delete:
         abort(make_response({"message" : f"This goal is not found."}, 404))
+
+
+    db.session.delete(goal_to_delete)
+    db.session.commit()
+
+    return {
+        "details" : f"Goal {goal_id} \"{goal_to_delete.title}\" successfully deleted"
+    }, 200
