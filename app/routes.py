@@ -166,7 +166,7 @@ def delete_task(task_id):
     db.session.delete(task)
     db.session.commit()
 
-    return (make_response({"details":f"Task {task_id} \"Go on my daily walk 🏞\" successfully deleted"}), 200)    
+    return (make_response({"details":f'Task {task_id} "{task.title}" successfully deleted'}), 200)
 
 
 # Creating Custom Endpoints   
@@ -255,3 +255,32 @@ def get_one_goal(goal_id):
         "id" : goal.goal_id,
         "title": goal.title }}, 200  
 
+# update goal
+@goals_bp.route("/<goal_id>", methods=["PUT"])   
+def update_goal(goal_id):
+    goal=validate_goal(goal_id)
+    request_body=check_request_body_for_goals()
+
+    goal.title=request_body["title"]
+   
+    db.session.commit()
+
+    rsp={
+        "goal": {
+            "id": goal.goal_id,
+            "title": goal.title }
+             }
+    return jsonify(rsp),200
+
+
+# delete goal
+@goals_bp.route("/<goal_id>", methods=["DELETE"])   
+def delete_goal(goal_id):
+    goal=validate_goal(goal_id)
+
+    db.session.delete(goal)
+    db.session.commit()
+
+    return (make_response({"details":f'Goal {goal_id} "{goal.title}" successfully deleted'}), 200)    
+
+#\"{goal.title}\"

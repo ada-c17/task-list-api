@@ -145,6 +145,10 @@ def test_delete_task(client, one_task):
         "details": 'Task 1 "Go on my daily walk 🏞" successfully deleted'
     }
     assert Task.query.get(1) == None
+    
+    # Check that the goal was deleted
+    response = client.get("/tasks/1")
+    assert response.status_code == 404
 
 
 #@pytest.mark.skip(reason="No way to test this feature yet")
