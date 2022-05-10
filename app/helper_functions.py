@@ -55,7 +55,7 @@ def send_slackbot_message(task_title):
     slackbot_key = os.environ.get("SLACK_OAUTH_TOKEN")
     headers = {'authorization': f'Bearer {slackbot_key}'}
     params = {
-        'channel' : 'goal-notifications',
+        'channel' : 'task-notifications',
         'text' : f'Someone just completed task {task_title}! :tada::tada::tada:',
     }
     requests.patch(path, headers=headers, params=params)
