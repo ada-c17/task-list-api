@@ -29,13 +29,26 @@ def get_task_record_by_id(id):
 @tasks_bp.route("", methods = ["POST"])
 def create_task():
     request_body = request.get_json()
+    if "title" not in request_body or "description" not in request_body:
+        return make_response("Invalid Request", 400)
 
-    task = make_task_safely(request_body)
+    new_task = Task(title=request_body["title"],
+                        description=request_body["description"])
 
-    db.session.add(task)
+    #task = make_task_safely(request_body)
+
+    db.session.add(new_task)
     db.session.commit()
 
-    return jsonify({"task": task.to_dict()}), 201
+    task_dict = {"id": new_task.task_id,
+        "title": new_task.title,
+        "description": new_task.description,
+        "is_complete" : bool(new_task.completed_at)
+    }
+
+    return jsonify({"task": task_dict}), 201
+
+    #return jsonify({"task": task.to_dict()}), 201
 
 @tasks_bp.route("", methods=["GET"])
 def read_all_tasks():
