@@ -1,4 +1,5 @@
 
+from sqlalchemy import desc
 from app import db
 from app.models.task import Task
 from app.helper import validate_task
@@ -32,8 +33,16 @@ def create_task():
 # GET all
 @tasks_bp.route("", methods=["GET"])
 def read_task():
+
+    sort_query = request.args.get("sort")
+    if sort_query == 'asc':
+        tasks = Task.query.order_by(Task.title).all()
+    elif sort_query == 'desc':
+        tasks = Task.query.order_by(desc(Task.title)).all()
+    else:
+        tasks = Task.query.all()
+    
     tasks_response = []
-    tasks = Task.query.all()
     for task in tasks:
         tasks_response.append(
             {
