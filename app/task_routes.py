@@ -72,13 +72,13 @@ def create_new_task():
     db.session.add(new_task)
     db.session.commit()
 
-    return success_message(dict(task=new_task.self_to_dict()), 201)
+    return success_message(dict(task=new_task.self_to_dict_no_goal()), 201)
 
 @task_bp.route("", methods=["GET"])
 def get_all_tasks():
     sort_param = request.args.get("sort")
     tasks = Task.query.all()
-    all_tasks = [task.self_to_dict() for task in tasks]
+    all_tasks = [task.self_to_dict_no_goal() for task in tasks]
     if not sort_param:
         return return_database_info_list(all_tasks)
     if sort_param == "asc":
@@ -93,7 +93,7 @@ def get_all_tasks():
 def get_one_task(task_id):
     task = get_task_by_id(task_id)
 
-    return return_database_info_task(task.self_to_dict())
+    return return_database_info_task(task.self_to_dict_no_goal())
 
 @task_bp.route("/<task_id>", methods=["PUT", "PATCH"])
 def update_task_by_id(task_id):
@@ -104,7 +104,7 @@ def update_task_by_id(task_id):
 
     db.session.commit()
 
-    return return_database_info_task(task.self_to_dict())
+    return return_database_info_task(task.self_to_dict_no_goal())
 
 @task_bp.route("/<task_id>/<completion_status>", methods=["PATCH"])
 def update_task_completion_status(task_id, completion_status):
@@ -124,7 +124,7 @@ def update_task_completion_status(task_id, completion_status):
 
     db.session.commit()
 
-    return return_database_info_task(task.self_to_dict())
+    return return_database_info_task(task.self_to_dict_no_goal())
 
 
 @task_bp.route("/<task_id>", methods=["DELETE"])

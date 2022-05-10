@@ -6,19 +6,34 @@ class Task(db.Model):
     title = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=False)
     completed_at = db.Column(db.DateTime, nullable=True)
+    goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'), nullable=True)
+    goal = db.relationship("Goal", back_populates="tasks")
 
     required_attributes = {
         "title": True, 
         "description" : True,
-        "completed_at" : False
+        "completed_at" : False,
         }
 
     # Instance Methods
-    def self_to_dict(self):
+    def self_to_dict_no_goal(self):
         instance_dict = dict(
             id=self.task_id,
             title=self.title,
             description=self.description
+        )
+        if self.completed_at:
+            instance_dict["is_complete"] = True
+        else:
+            instance_dict["is_complete"] = False
+        return instance_dict
+    
+    def self_to_dict_with_goal(self):
+        instance_dict = dict(
+            id=self.task_id,
+            title=self.title,
+            description=self.description,
+            goal_id=self.goal_id
         )
         if self.completed_at:
             instance_dict["is_complete"] = True

@@ -2,6 +2,8 @@
 from flask import Blueprint, jsonify, abort, make_response, request
 from app import db
 from app.models.goal import Goal
+from app.models.task import Task
+from app.task_routes import get_task_by_id
 import datetime as dt
 from datetime import date
 import os
@@ -72,13 +74,13 @@ def create_new_goal():
     db.session.add(new_goal)
     db.session.commit()
 
-    return success_message(dict(goal=new_goal.self_to_dict()), 201)
+    return success_message(dict(goal=new_goal.self_to_dict_no_tasks()), 201)
 
 @goal_bp.route("", methods=["GET"])
 def get_all_goals():
     sort_param = request.args.get("sort")
     goals = Goal.query.all()
-    all_goals = [goal.self_to_dict() for goal in goals]
+    all_goals = [goal.self_to_dict_no_tasks() for goal in goals]
     if not sort_param:
         return return_database_info_list(all_goals)
     if sort_param == "asc":
@@ -93,7 +95,7 @@ def get_all_goals():
 def get_one_goal(goal_id):
     goal = get_goal_by_id(goal_id)
 
-    return return_database_info_goal(goal.self_to_dict())
+    return return_database_info_goal(goal.self_to_dict_no_tasks())
 
 @goal_bp.route("/<goal_id>", methods=["PUT", "PATCH"])
 def update_goal_by_id(goal_id):
@@ -104,7 +106,7 @@ def update_goal_by_id(goal_id):
 
     db.session.commit()
 
-    return return_database_info_goal(goal.self_to_dict())
+    return return_database_info_goal(goal.self_to_dict_no_tasks())
 
 # @goal_bp.route("/<goal_id>/<completion_status>", methods=["PATCH"])
 # def update_goal_completion_status(goal_id, completion_status):
@@ -124,7 +126,7 @@ def update_goal_by_id(goal_id):
 
 #     db.session.commit()
 
-#     return return_database_info_goal(goal.self_to_dict())
+#     return return_database_info_goal(goal.self_to_dict_no_tasks())
 
 
 @goal_bp.route("/<goal_id>", methods=["DELETE"])
@@ -135,3 +137,21 @@ def delete_goal(goal_id):
     db.session.commit()
 
     return success_message(dict(details=f'Goal {goal.goal_id} "{goal.title}" successfully deleted'))
+
+
+
+# Join Routes
+
+@goal_bp.route("/<goal_id>/tasks", methods=["POST"])
+def add_tasks_to_goal(goal_id):
+    goal = get_goal_by_id(goal_id)
+    request_body = request.get_json()
+
+    for elem in request_body["task_ids"]:
+        task = get_task_by_id(elem)
+        goal.tasks.append(task)
+
+    db.session.commit()
+
+    return return_database_info_list(goal.id_and_task_list_only())
+
