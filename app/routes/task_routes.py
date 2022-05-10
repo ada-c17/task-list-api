@@ -1,4 +1,3 @@
-from wsgiref.util import request_uri
 from flask import Blueprint, jsonify, make_response, request, abort
 from app.models.task import Task
 from app import db
@@ -32,13 +31,13 @@ def make_task():
     new_task = Task.from_json(request_body)
     db.session.add(new_task)
     db.session.commit()
-    response = Task.to_json(new_task)
+    response = new_task.to_json()
     return make_response(response,201)
 
 @tasks_bp.route("/<id>",methods=["GET"])
 def get_task(id):
     task = Task.validate_id(id)
-    response = Task.to_json(task)
+    response = task.to_json()
     return make_response(response,200)
 
 @tasks_bp.route("/<id>",methods=["PATCH","PUT"])
@@ -57,7 +56,7 @@ def update_task(id):
         except KeyError:
             return make_response({"details":"Incomplete data"},400)
     db.session.commit()
-    response = Task.to_json(task)
+    response = task.to_json()
     return make_response(response,200)
 
 @tasks_bp.route("/<id>",methods=["DELETE"])
@@ -73,7 +72,7 @@ def complete_task(id):
     task.completed_at = datetime.datetime.utcnow()
     db.session.commit()
     post_slack_msg(task)
-    response = Task.to_json(task)
+    response = task.to_json()
     return make_response(response,200)
 
 @tasks_bp.route("/<id>/mark_incomplete",methods=["PATCH"])
@@ -81,5 +80,5 @@ def uncomplete_task(id):
     task = Task.validate_id(id)
     task.completed_at = None
     db.session.commit()
-    response = Task.to_json(task)
+    response = task.to_json()
     return make_response(response,200)

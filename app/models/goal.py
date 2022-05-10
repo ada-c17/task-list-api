@@ -5,7 +5,8 @@ from flask import make_response, abort
 class Goal(db.Model):
     goal_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
-
+    tasks = db.relationship("Task",back_populates="goal",lazy=True)
+    
     def to_json(self,goal=True):
         response = {
                 "id": self.goal_id,

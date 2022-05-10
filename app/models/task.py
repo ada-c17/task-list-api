@@ -7,7 +7,9 @@ class Task(db.Model):
     title = db.Column(db.String, nullable=False)
     description = db.Column(db.String)
     completed_at = db.Column(db.DateTime)
-
+    goal_id = db.Column(db.Integer,db.ForeignKey('goal.goal_id'),nullable=True)
+    goal = db.relationship("Goal",back_populates="tasks")
+    
     def to_json(self,task=True):
         response = {
                 "id": self.task_id,
@@ -15,6 +17,8 @@ class Task(db.Model):
                 "description": self.description,
                 "is_complete": bool(self.completed_at)
                 }
+        if self.goal_id is not None:
+            response["goal_id"] = self.goal_id
         if task:
             response = { 
                 "task": response}
