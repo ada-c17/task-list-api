@@ -32,14 +32,21 @@ def check_is_complete(task):
         return False
     return True
 
+def make_task_dict(task):
+    '''Takes in one instance of task object, returns its attributes in a dict.'''
+    is_complete = check_is_complete(task)
+    task_dict = {"id": task.task_id, "title": task.title, "description": task.description, "is_complete": is_complete}
+    if task.goal_id:
+        task_dict["goal_id"] = task.goal_id
+    return task_dict
+
 @tasks_bp.route("", methods=["GET"])
 def get_tasks():
     
     tasks = Task.query.all()
     tasks_response = []
     for task in tasks:
-        is_complete = check_is_complete(task)
-        tasks_response.append({"id": task.task_id, "title": task.title, "description": task.description, "is_complete": is_complete})
+        tasks_response.append(make_task_dict(task))
     
     sort_query = request.args.get("sort")
     if sort_query == "asc":
@@ -51,12 +58,7 @@ def get_tasks():
 @tasks_bp.route("/<task_id>", methods =["GET"])
 def get_one_task(task_id):
     task = validate_task(task_id)
-    is_complete = check_is_complete(task)
-    body = {"task": {"id": task.task_id, "title": task.title, "description": task.description, "is_complete": is_complete}}
-
-    if task.goal_id:
-        body["task"]["goal_id"] = task.goal_id
-    
+    body = {"task": make_task_dict(task)}
     return body
 
 
@@ -72,21 +74,13 @@ def handle_tasks():
         new_task = Task(title=request_body["title"],
                     description=request_body["description"],
                     completed_at=request_body["completed_at"])
-    else: new_task = Task(title=request_body["title"],
+    else:
+        new_task = Task(title=request_body["title"],
                     description=request_body["description"])
 
     db.session.add(new_task)
     db.session.commit()
-    
-    is_complete = check_is_complete(new_task)
-    body = {
-        "task": {
-            "id": new_task.task_id,
-            "title": new_task.title ,
-            "description": new_task.description,
-            "is_complete": is_complete
-        }
-    }
+    body = {"task": make_task_dict(new_task)}
         
     return make_response(jsonify(body), 201)
 
@@ -104,17 +98,7 @@ def update_task(task_id):
     task.description = request_body["description"]
 
     db.session.commit() 
-
-    is_complete = check_is_complete(task)
-
-    body = {
-        "task": {
-            "id": task.task_id,
-            "title": task.title ,
-            "description": task.description,
-            "is_complete": is_complete
-        }
-    }
+    body = {"task": make_task_dict(task)}
 
     return make_response(body)
 
@@ -124,10 +108,8 @@ def update_completion(task_id, mark):
     task = validate_task(task_id)
 
     if mark == "mark_incomplete":
-        is_complete = False
         task.completed_at = None
     if mark == "mark_complete":
-        is_complete = True
         task.completed_at = date.today()
         API_TOKEN = os.environ.get("API_TOKEN")
         path = "https://slack.com/api/chat.postMessage"
@@ -135,17 +117,8 @@ def update_completion(task_id, mark):
         header_info = {"Authorization" : f"Bearer {API_TOKEN}"}
         requests.post(path, params=query_params, headers=header_info)
 
-    
     db.session.commit()
-    
-    body = {
-        "task": {
-            "id": task.task_id,
-            "title": task.title ,
-            "description": task.description,
-            "is_complete": is_complete
-        }
-    }
+    body = {"task": make_task_dict(task)}
     return make_response(body)
 
 
