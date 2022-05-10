@@ -30,7 +30,7 @@ class Task(db.Model):
                 description = data_dict["description"]
             )
 
-    # def replace_details(self, data_dict):
-    #     self.title = data_dict["title"]
-    #     self.description = data_dict["description"]
-    #     self.completed_at = data_dict["completed_at"]
+    def replace_details(self, data_dict):
+        self.title = data_dict["title"]
+        self.description = data_dict["description"]
+        #self.completed_at = data_dict["is_complete"]

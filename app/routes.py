@@ -13,6 +13,12 @@ def make_task_safely(data_dict):
     except KeyError as err:
         error_message(f"Missing key: {err}", 400)
 
+def replace_task_safely(task, data_dict):
+    try:
+        task.replace_details(data_dict)
+    except KeyError as err:
+        error_message(f"Missing key: {err}", 400)
+
 def get_task_record_by_id(id):
     try:
         id = int(id)
@@ -29,26 +35,12 @@ def get_task_record_by_id(id):
 @tasks_bp.route("", methods = ["POST"])
 def create_task():
     request_body = request.get_json()
-    if "title" not in request_body or "description" not in request_body:
-        return make_response("Invalid Request", 400)
-
-    new_task = Task(title=request_body["title"],
-                        description=request_body["description"])
-
-    #task = make_task_safely(request_body)
+    new_task = make_task_safely(request_body)
 
     db.session.add(new_task)
     db.session.commit()
 
-    task_dict = {"id": new_task.task_id,
-        "title": new_task.title,
-        "description": new_task.description,
-        "is_complete" : bool(new_task.completed_at)
-    }
-
-    return jsonify({"task": task_dict}), 201
-
-    #return jsonify({"task": task.to_dict()}), 201
+    return jsonify({"task": new_task.to_dict()}), 201
 
 @tasks_bp.route("", methods=["GET"])
 def read_all_tasks():
@@ -57,7 +49,46 @@ def read_all_tasks():
 
     return jsonify(result_list)
 
-@tasks_bp.route("/<id>", methods=["Get"])
-def read_task_by_id(id):
-    task = get_task_record_by_id(id)
+@tasks_bp.route("/<task_id>", methods=["Get"])
+def read_task_by_id(task_id):
+    task = get_task_record_by_id(task_id)
     return jsonify({"task":task.to_dict()})
+
+# @tasks_bp.route("/<task_id>", methods=["PATCH"])
+# def update_task_by_id(task_id):
+#     task = get_task_record_by_id(task_id)
+#     request_body = request.get_json()
+#     task_keys = request_body.keys()
+
+#     if "title" in task_keys:
+#         task.title = request_body["title"]
+#     if "description" in task_keys:
+#         task.description = request_body["description"]
+#     if "is_complete" in task_keys:
+#         task.completed_at = request_body["is_complete"] 
+
+#     db.session.commit()
+#     return jsonify({"task":task.to_dict()})
+
+@tasks_bp.route("/<task_id>", methods=["PUT"])
+def replace_task_by_id(task_id):
+    request_body = request.get_json()
+    task = get_task_record_by_id(task_id)
+
+    replace_task_safely(task, request_body)
+
+    db.session.add(task)
+    db.session.commit()
+
+    return jsonify({"task":task.to_dict()})
+
+@tasks_bp.route("/<task_id>", methods=["DELETE"])
+def delete_task_by_id(task_id):
+    task = get_task_record_by_id(task_id)
+
+    db.session.delete(task)
+    db.session.commit()
+
+    return jsonify({"details": f'Task {task.task_id} "{task.title}" successfully deleted'})
+
+
