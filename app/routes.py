@@ -50,7 +50,7 @@ GET ROUTES
 #     return sorted_dict
 
 
-# GET SAVED TASKS - (all)
+# GET SAVED TASKS - ALL, QUERY PARAMS
 @task_bp.route("", methods=["GET"])
 def read_saved_tasks():
 
@@ -93,17 +93,11 @@ def validate_task(task_id):
     return task
 
 # GET ONE TASK
-@task_bp.route("/<task_id>", methods=["GET"])  # spaces or no spaces
+@task_bp.route("/<task_id>", methods=["GET"])
 def read_one_task(task_id):
     task = validate_task(task_id)
 
-    task_response_body = {
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": bool(task.completed_at),
-    }
-    return make_response(jsonify({"task": task_response_body}), 200)
+    return make_response(jsonify(task.to_json()), 200)
 
 '''
 PUT ROUTES
