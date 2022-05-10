@@ -165,7 +165,6 @@ def test_create_task_with_valid_completed_at(client):
     # Assert
     assert response.status_code == 201
     assert "task" in response_body
-    print(response_body)
     assert response_body == {
         "task": {
             "id": 1,
@@ -183,7 +182,7 @@ def test_create_task_with_valid_completed_at(client):
 
 # Let's add this test for updating tasks, now that
 # the completion functionality has been implemented
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_update_task_with_completed_at_date(client, completed_task):
     # Act
     response = client.put("/tasks/1", json={
