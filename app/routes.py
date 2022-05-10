@@ -11,21 +11,16 @@ tasks_bp = Blueprint("tasks",__name__,url_prefix="/tasks")
 def get_tasks():
     sort_query = request.args.get("sort")
     if sort_query:
-        if sort_query.lower() == "desc":
-            tasks = Task.query.order_by(Task.title.desc())
         if sort_query.lower() == "asc":
             tasks = Task.query.order_by(Task.title)
+        elif sort_query.lower() == "desc":
+            tasks = Task.query.order_by(Task.title.desc())
     else:
         tasks = Task.query.all()
     response = []
     if tasks:
         for task in tasks:
-            response.append({
-                "id":task.task_id,
-                "title":task.title,
-                "description":task.description,
-                "is_complete":False if not task.completed_at else True
-            })
+            response.append(task.to_json(task=False))
     return make_response(jsonify(response),200)
 
 @tasks_bp.route("",methods=["POST"])
@@ -42,44 +37,18 @@ def make_task():
         return make_response({"details":"Invalid data"},400)
     db.session.add(new_task)
     db.session.commit()
-    response = {
-        "task": {
-            "id":new_task.task_id,
-            "title":new_task.title,
-            "description":new_task.description,
-            "is_complete":False if not new_task.completed_at else True
-        }
-    }
+    response = Task.to_json(new_task)
     return make_response(response,201)
 
 @tasks_bp.route("/<id>",methods=["GET"])
 def get_task(id):
-    try:
-        id = int(id)
-    except ValueError:
-        return make_response({"details":"Invalid data"},400)
-    task = Task.query.get(id)
-    if not task:
-        return make_response({"details":f"Task #{id} does not exist"}, 404)
-    response = {
-        "task": {
-            "id":task.task_id,
-            "title":task.title,
-            "description":task.description,
-            "is_complete":False if not task.completed_at else True
-        }
-    }
+    task = Task.validate_id(id)
+    response = Task.to_json(task)
     return make_response(response,200)
 
 @tasks_bp.route("/<id>",methods=["PATCH","PUT"])
 def update_task(id):
-    try:
-        id = int(id)
-    except ValueError:
-        return make_response({"details":"Invalid data"},400)
-    task = Task.query.get(id)
-    if not task:
-        return make_response({"details":f"Task #{id} does not exist"}, 404)
+    task = Task.validate_id(id)
     request_body = request.get_json()
     if request.method=="PATCH":
         if request_body.get("title"):
@@ -93,67 +62,28 @@ def update_task(id):
         except KeyError:
             return make_response({"details":"Incomplete data"},400)
     db.session.commit()
-    response = {
-        "task": {
-            "id":task.task_id,
-            "title":task.title,
-            "description":task.description,
-            "is_complete":False if not task.completed_at else True
-        }
-    }
+    response = Task.to_json(task)
     return make_response(response,200)
 
 @tasks_bp.route("/<id>",methods=["DELETE"])
 def delete_task(id):
-    try:
-        id = int(id)
-    except ValueError:
-        return make_response({"details":"Invalid data"},400)
-    task = Task.query.get(id)
-    if not task:
-        return make_response({"details":f"Task #{id} does not exist"}, 404)
+    task = Task.validate_id(id)
     db.session.delete(task)
     db.session.commit()
     return make_response({"details":f"Task {task.task_id} \"{task.title}\" successfully deleted"},200)
 
 @tasks_bp.route("/<id>/mark_complete",methods=["PATCH"])
 def complete_task(id):
-    try:
-        id = int(id)
-    except ValueError:
-        return make_response({"details":"Invalid data"},400)
-    task = Task.query.get(id)
-    if not task:
-        return make_response({"details":f"Task #{id} does not exist"}, 404)
+    task = Task.validate_id(id)
     task.completed_at = datetime.datetime.utcnow()
     db.session.commit()
-    response = {
-        "task": {
-            "id":task.task_id,
-            "title":task.title,
-            "description":task.description,
-            "is_complete":False if not task.completed_at else True
-        }
-    }
+    response = Task.to_json(task)
     return make_response(response,200)
 
 @tasks_bp.route("/<id>/mark_incomplete",methods=["PATCH"])
 def uncomplete_task(id):
-    try:
-        id = int(id)
-    except ValueError:
-        return make_response({"details":"Invalid data"},400)
-    task = Task.query.get(id)
-    if not task:
-        return make_response({"details":f"Task #{id} does not exist"}, 404)
+    task = Task.validate_id(id)
     task.completed_at = None
     db.session.commit()
-    response = {
-        "task": {
-            "id":task.task_id,
-            "title":task.title,
-            "description":task.description,
-            "is_complete":False if not task.completed_at else True
-        }
-    }
+    response = Task.to_json(task)
     return make_response(response,200)
