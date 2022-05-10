@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, make_response, abort
 from app import db
 from app.models.task import Task
 from datetime import datetime
+from app.routes.ada_bot import send_msg_completed_task
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix='/tasks')
 
@@ -146,6 +147,9 @@ def mark_task_complete(task_id):
     chosen_task = validate_task(task_id)
 
     chosen_task.completed_at = datetime.utcnow()
+
+    send_msg_completed_task(chosen_task.title)
+
     db.session.commit()
 
     return jsonify({
