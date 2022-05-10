@@ -113,9 +113,6 @@ def update_one_task(task_id):
 # completed_at = db.Column(db.DateTime, default=None) 
 
 
-
-# request_body { 'id': 1, 'is_complete' = false, 'title': 'My Beautiful Task'}
-
 @task_bp.route("/<task_id>/mark_complete", methods=['PATCH'])
 def mark_task_completed(task_id):
     task = validate_task(task_id)
@@ -135,9 +132,9 @@ def mark_task_completed(task_id):
     bot_token = 'Bearer '+ os.environ.get('SLACK_BOT_TOKEN')
     print(bot_token)
     slack = requests.post('https://slack.com/api/chat.postMessage', headers={'Authorization': bot_token}, params={'channel': 'task-notifications', 'text':f'Someone just completed the task {task.title}', 'format': 'json'})
-    print(slack)
-    print(slack.content)
-    print('*****')
+    # print(slack)
+    # print(slack.content)
+    # print('*****')
     return jsonify(response), 200
 
 
