@@ -10,7 +10,7 @@ class Task(db.Model):
     def to_dict(self):
         return {
             "task": {
-                "id": self.id,
+                "task_id": self.id,
                 "title": self.title,
                 "description": self.description,
                 "is_complete": self.completed_at
