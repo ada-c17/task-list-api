@@ -23,10 +23,16 @@ class Task(db.Model):
 
     def to_json(self):
         is_complete = False if not self.completed_at else True
-        return {"id": self.task_id, 
+
+        json_response = {"id": self.task_id, 
                 "title": self.title, 
                 "description": self.description, 
                 "is_complete": is_complete}
+        
+        if self.goal_id:
+            json_response["goal_id"] = self.goal_id
+        
+        return json_response
     
     def update_task(self, request_body):
         self.title = request_body["title"]

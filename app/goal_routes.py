@@ -69,3 +69,16 @@ def create_tasks(goal_id):
     db.session.commit()
 
     return jsonify({"id": goal.goal_id, "task_ids": request_body["task_ids"]}), 200
+
+# Create Tasks belonging to one Goal
+@goals_bp.route("/<goal_id>/tasks", methods = ["GET"])
+def get_tasks(goal_id):
+    goal = check_goal_exists(goal_id)
+
+    response = goal.to_json()
+    response["tasks"] = []
+
+    for task in goal.tasks:
+        response["tasks"].append(task.to_json())
+
+    return jsonify(response), 200
