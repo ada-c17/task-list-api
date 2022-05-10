@@ -73,9 +73,7 @@ def test_get_goal_not_found(client):
 
 
 # ----- TEST FIVE ----- #
-
-# FAILING: {'goal': {'id': None, 'title': 'My New Goal'}} != {'goal': {'id': 1, 'title': 'My New Goal'}}
-
+# ----- PASSED ----- #
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_goal(client):
     # Act
