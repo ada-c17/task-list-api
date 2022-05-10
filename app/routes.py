@@ -9,12 +9,12 @@ bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 @bp.route("", methods=("POST",))
 def create_task():
     request_body = request.get_json()
-    new_task = Task(title=request_body["title"], description=request_body["description"])
+    task = Task(title=request_body["title"], description=request_body["description"])
 
-    db.session.add(new_task)
+    db.session.add(task)
     db.session.commit()
 
-    return make_response({"task": Task.to_dict(new_task)}, 201)
+    return make_response({"task": Task.to_dict(task)}, 201)
 
 
 @bp.route("/<task_id>", methods=("GET",))
@@ -24,7 +24,7 @@ def read_tasks(task_id):
         return jsonify([Task.to_dict(task) for task in tasks])
 
     task = validate_task_id(task_id)
-    return make_response(jsonify({"task": Task.to_dict(task)}, 200))
+    return make_response(jsonify({"task": task.to_dict()}), 200)
 
 
 @bp.route("/<task_id>", methods=("PUT",))
@@ -32,11 +32,11 @@ def update_task(task_id):
     request_body = request.get_json()
     task = validate_task_id(task_id)
 
-    task.title = request_body["title"]
-    task.description = request_body["description"]
+    updated_task = Task.override_task(task, request_body)
+    db.session.add(updated_task)
     db.session.commit()
 
-    return make_response(jsonify({"task": Task.to_dict(task)}, 200))
+    return make_response(jsonify({"task": task.to_dict()}, 200))
 
 
 @bp.route("/<task_id>", methods=("DELETE",))

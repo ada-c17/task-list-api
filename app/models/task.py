@@ -15,8 +15,9 @@ class Task(db.Model):
             is_complete=False if self.completed_at == None else self.completed_at
         )
         
-    # def override_task(self, data_dict):
-    #     pass
+    def override_task(self, data_dict):
+        self.title = data_dict["title"]
+        self.description = data_dict["description"]
 
     # @classmethod
     # def from_dict(cls, data_dict):
