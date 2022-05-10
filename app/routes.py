@@ -286,6 +286,9 @@ def get_all_goals():
 
     all_goals = Goal.query.all()
 
+    if not all_goals:
+        return 404
+
     # Create the response body
     goal_response = []
 
@@ -300,3 +303,33 @@ def get_all_goals():
         )
 
     return goal_response, 200
+
+
+# ------------------------ PUT REQUESTS ------------------------ #
+
+
+# ---- CREATE A TASK ---- #
+@goals_bp.route("", methods=["POST"])
+def create_goal():
+
+    request_body = request.get_json()
+
+    # # Title or Description is not in request body, return 400 response
+    # if "title" not in request_body or "description" not in request_body:
+    #     return jsonify({
+    #         "details" : "Invalid data"
+    #     }), 400
+
+
+
+    # if "completed_at" in request_body:
+
+    new_goal = Goal(title=request_body["title"])
+
+
+
+    # Add new task and commit change
+    db.session.add(new_goal)
+    db.session.commit()
+
+    # return format_response_body(new_task), 201
