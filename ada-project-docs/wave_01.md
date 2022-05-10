@@ -62,7 +62,6 @@ As a client, I want to be able to make a `POST` request to `/tasks` with the fol
 {
   "title": "A Brand New Task",
   "description": "Test Description",
-  "completed_at": null
 }
 ```
 
