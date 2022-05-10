@@ -1,6 +1,8 @@
 from flask import Blueprint, request, make_response, abort, jsonify
+from sqlalchemy import asc
 from app.models.task import Task
 from app import db
+from datetime import date
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -44,6 +46,7 @@ def read_all_tasks():
     title_param = request.args.get("title")
     description_param = request.args.get("description")
     is_complete_param = request.args.get("is_complete")
+    sort_param = request.args.get("sort")
     # start the query
     tasks = Task.query
     # build up the search criteria based on params present
@@ -53,6 +56,10 @@ def read_all_tasks():
         tasks = tasks.filter_by(description=description_param)
     if is_complete_param:
         tasks = tasks.filter_by(completed_at=is_complete_param)
+    if sort_param == "asc":
+        tasks = tasks.order_by(Task.title.asc())
+    elif sort_param == "desc":
+        tasks = tasks.order_by(Task.title.desc())
     # execute the search and return all records that meet the criteria built
     tasks = tasks.all()
     tasks_response = []
@@ -84,3 +91,11 @@ def delete_task(task_id):
     db.session.delete(task)
     db.session.commit()
     return make_response({"details": f'Task {task_id} "{task.title}" successfully deleted'})
+
+# MARK COMPLETE
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def mark_complete(task_id):
+    task = validate_id(task_id)
+    task.completed_at = date.today()
+    db.session.commit()
+    return make_response({"task": task.to_dict()})
