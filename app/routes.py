@@ -389,14 +389,14 @@ def update_goal(goal_id):
     # db.session.add(goal_to_update)
     db.session.commit()
 
-    return format_goal_response_body(goal_to_update), 200
+    # return format_goal_response_body(goal_to_update), 200
 
-    # response_body = jsonify({"goal" : 
-    #     {
-    #         "id" : goal_to_update.goal_id,
-    #         "title" : goal_to_update.title
-    #     }
-    # })
+    response_body = jsonify({"goal" : 
+        {
+            "id" : goal_to_update.goal_id,
+            "title" : goal_to_update.title
+        }
+    })
 
-    # return response_body, 200
+    return response_body, 200
 
