@@ -1,4 +1,5 @@
 import datetime
+import json
 from flask import Blueprint, request, jsonify, make_response, abort
 import requests
 
@@ -335,4 +336,78 @@ database visualization
        2 | A Brand New Task   | Test Description                 | 2022-05-07 21:05:26.080884 |        
        8 | A Brand New Task   | Test Description                 | 2022-05-08 21:03:25.409507 |        
 
+ goal_id |                title                 
+---------+--------------------------------------
+       1 | Build a habit of going outside daily
+       2 | Build a habit of sleeping at 11 pm
+       3 | Build a habit of getting up at 7 am
 """
+
+"""test_get_tasks_for_specific_goal """
+@goal_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_tasks_for_one_goal(goal_id):
+    goal = goal_id_validation(goal_id)
+    goals = Goal.query.get(goal_id)
+    #tasks = Task.query.all() #but where is this task_id from
+    
+    rsp = {
+        "id": goal.goal_id,
+        "title": goal.title,
+        "tasks" : []
+        #"tasks": json.dumps(tasks)
+    }
+    task_status = False
+    print(len(goals.tasks))
+    for task in goals.tasks:
+        if task.completed_at is not None:
+            task_status = True
+        goals.tasks.append({
+            "id": task.task_id,
+            "goal_id": task.goal_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": task_status
+    })
+    print(len(goals.tasks))
+    # task_status = False
+    # for task in tasks:
+    #     if task.completed_at is not None:
+    #         task_status = True
+    #         goals.tasks.append({
+    #             "id": task.task_id,
+    #             "goal_id": goal_id,
+    #             "title": task.title,
+    #             "description": task.description,
+    #             "is_complete": task_status
+    #     })
+    # print(goals.tasks)
+    
+    # rsp = {
+    #     "id": goal.goal_id,
+    #     "title": goal.title,
+    #     "tasks" : []
+    #     #"tasks": json.dumps(tasks.__dict__)
+    # }
+    return make_response(jsonify(rsp), 200)
+    
+# @task_bp.route("/tasks/<goal_id>", methods=["GET"])
+# def get_one_task_with_goal_id(goal_id):
+#     goal = goal_id_validation(goal_id)
+#     goal = Goal.query.get(goal_id)
+    
+#     task_status = False
+#     for task in goal.tasks:
+#         if "completed_at" in goal.tasks:
+#             task_status = True
+        
+#         if task.goal_id == goal_id:
+#             rsp = {
+#                 "task": {
+#                 "id": task.task_id,
+#                 "goal_id": goal.goal_id,
+#                 "title": task.title,
+#                 "description": task.description,
+#                 "is_complete": task_status
+#             }}
+        
+#     return jsonify(rsp), 200
