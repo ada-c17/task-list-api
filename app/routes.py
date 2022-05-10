@@ -29,14 +29,15 @@ def read_tasks(task_id):
 
 @bp.route("/<task_id>", methods=("PUT",))
 def update_task(task_id):
-    request_body = request.get_json()
     task = validate_task_id(task_id)
+    request_body = request.get_json()
 
-    updated_task = task.override_task(request_body)
-    db.session.add(updated_task)
+    task.title = request_body["title"]
+    task.description = request_body["description"]
+    
     db.session.commit()
 
-    return make_response(jsonify({"task": task.to_dict()}, 200))
+    return jsonify({"task": task.to_dict()}), 200
 
 
 @bp.route("/<task_id>", methods=("DELETE",))
