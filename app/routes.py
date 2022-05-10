@@ -30,9 +30,9 @@ def get_all_saved_tasks():
     elif sort_query == "desc":
         tasks = Task.query.order_by(Task.title.desc())
     else:
-        tasks = Task.query.all()
+        tasks = Task.query.all() #list of objects
     tasks_response = []
-    for task in tasks:
+    for task in tasks: #each row is converted to an object
         tasks_response.append(
             {
                 "id": task.id,
