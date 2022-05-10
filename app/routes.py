@@ -296,7 +296,7 @@ def format_goal_response_body(goal):
     })
 
     return response_body
-    
+
 # ------------------------ GET REQUESTS ------------------------ #
 
 # ---- GET ALL GOALS ---- #
@@ -367,17 +367,16 @@ def create_goal():
 
     new_goal = Goal(title=request_body["title"])
 
+    # Add new task and commit change
+    db.session.add(new_goal)
+    db.session.commit()
+
     response_body = jsonify({ "goal" : 
         {
             "id" : new_goal.goal_id,
             "title" : new_goal.title
         }
     })
-
-
-    # Add new task and commit change
-    db.session.add(new_goal)
-    db.session.commit()
 
     return response_body, 201
 
