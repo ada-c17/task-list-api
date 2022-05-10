@@ -1,4 +1,5 @@
 import json, os, requests
+from urllib import response
 
 from app import db
 from app.models.task import Task
@@ -433,3 +434,84 @@ def delete_goal(goal_id):
     return {
         "details" : f"Goal {goal_id} \"{goal_to_delete.title}\" successfully deleted"
     }, 200
+
+
+
+
+
+################# NESTED ROUTES #################
+@goals_bp.route("/<goal_id>/tasks", methods=["POST"])
+def post_goals_to_tasks(goal_id, task_id):
+    
+    request_body = request.get_json()
+
+    # if "task_ids" in request_body:
+    pass
+
+
+@goals_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_tasks_one_goal(goal_id):
+    
+    # goal_to_get = validate_goal(goal_id)
+
+    goal_request_body = request.get_json()
+
+    # Get one goal
+    # goal_to_get = get_one_goal(goal_id)
+
+
+    # Check if goal_id is a valid integer
+    try:
+        goal_id = int(goal_id)
+    except:
+        # If it's not, 400 response code
+        abort(make_response({"message" : f"Goal ID is invalid."}, 400))
+
+    # Search for this goal_id in the Goal Blueprint
+    goal = Goal.query.get(goal_id)
+
+
+
+    # If this specific goal isn't found, 404 response code
+    if not goal:
+        abort(make_response({"details" : f"Invalid data"}, 404))
+
+
+
+
+    # if "title" in request_body:
+
+    if "tasks" in goal_request_body:
+        # Get tasks by task id
+        task_id_to_get = goal_request_body["id"]
+
+        task_response_body = get_one_task(task_id_to_get)
+
+    # return format_response_body(task_response_body), 200
+        # pass
+
+
+    # Get the tasks associated with that one goal
+
+
+# def get_one_goal(goal_id):
+
+    # # Check if goal_id is a valid integer
+    # try:
+    #     goal_id = int(goal_id)
+    # except:
+    #     # If it's not, 400 response code
+    #     abort(make_response({"message" : f"Goal ID is invalid."}, 400))
+
+    # # Search for this goal_id in the Goal Blueprint
+    # goal = Goal.query.get(goal_id)
+
+
+
+    # # If this specific goal isn't found, 404 response code
+    # if not goal:
+    #     abort(make_response({"details" : f"Invalid data"}, 404))
+
+    
+
+
