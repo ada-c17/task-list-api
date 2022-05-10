@@ -415,11 +415,11 @@ def delete_goal(goal_id):
         goal_id = int(goal_id)
     except:
         # If it's not, 400 response code
-        abort(make_response({"message" : f"Task {goal_id} is invalid."}, 400))
+        abort(make_response({"message" : f"Goal ID is invalid."}, 400))
 
     # Search for this task_id in the Task Blueprint
     goal = Goal.query.get(goal_id)
 
     # If this specific task isn't found, 404 response code
     if not goal:
-        abort(make_response({"message" : f"This task is not found."}, 404))
+        abort(make_response({"message" : f"This goal is not found."}, 404))
