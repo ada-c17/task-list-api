@@ -50,8 +50,12 @@ def handle_task(task_id):
     task = valid_task(task_id)
 
     if request.method == "GET":
+        res = display_task(task)
+        if task.goal_id:
+            res["goal_id"] = task.goal_id 
+
         return make_response(
-            jsonify({"task":display_task(task)}), 200
+            jsonify({"task":res}), 200
         )
 
     elif request.method == "PUT":
@@ -142,3 +146,33 @@ def handle_goal(goal_id):
         return make_response(
             jsonify({"details": f"Goal {goal_id} \"{goal.title}\" successfully deleted"}), 200
         )
+
+@goals_bp.route("/<goal_id>/tasks", methods = ["POST", "GET"])
+def handle_goal_tasks(goal_id):
+    goal = valid_goal(goal_id)
+
+    if request.method == "POST":
+        request_body = request.get_json()
+        for task_id in request_body["task_ids"]:
+            task = valid_task(task_id)
+            task.goal = goal
+
+        db.session.commit()
+            
+        return jsonify({
+                "id": goal.goal_id,
+                "task_ids": [task.task_id for task in goal.tasks]
+        }), 200
+        
+    if request.method == "GET":
+        tasks = []
+        for task in goal.tasks:
+            task_str = display_task(task)
+            task_str["goal_id"] = goal.goal_id
+            tasks.append(task_str)
+
+        return jsonify({
+            "id":goal.goal_id,
+            "title":goal.title,
+            "tasks": tasks
+        })
