@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify, abort, make_response, request
 from app.models.goal import Goal
 from app.models.task import Task
-
 from app import db
 
 
@@ -68,10 +67,6 @@ def link_task_child_to_goal(goal_id):
 
     for n in request_body["task_ids"]:
         goal.tasks.append(Task.query.get(n))
-
-    ##! if not content:
-    #?         flash('Content is required!')
-    #?        return redirect(url_for('index'))
 
     db.session.commit()
     return {"id":goal.goal_id,
