@@ -116,6 +116,20 @@ def replace_task(task_id):
     })
     return response, 200
 
+token = os.environ.get("SLACK_TOKEN")
+def send_slack_notifications(chosen_task):
+    #have info be able to send to slack channel
+    #make a post request from our routes to slack
+    slack_post_message = "https://slack.com/api/chat.postMessage"
+    headers = {"Authorization": f"Bearer {token}"} 
+    data = {
+        "channel": "task-notifications",
+        "text": f"Someone just completed the task {chosen_task.title}"
+
+    }
+    requests.post(slack_post_message, headers=headers, params=data)
+
+
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_complete_task(task_id):
     chosen_task = get_task_or_abort(task_id)
@@ -123,6 +137,8 @@ def mark_complete_task(task_id):
     chosen_task.completed_at = datetime.utcnow()
 
     db.session.commit()
+
+    send_slack_notifications(chosen_task)
 
     response = jsonify({"task": {
         "id": chosen_task.task_id,
@@ -137,9 +153,8 @@ def mark_complete_task(task_id):
     # what are client and logger here? 
     # SLACK_TOKEN = os.environ["SLACK_TOKEN"]
     # channel_id = "C03EK1KKL6P"
-    # headers = {"Authorization": f"Bearer {SLACK_TOKEN}"}
-    
-    ###sends a meesage to a channel https://api.slack.com/methods/chat.postMessage/code
+    # headers = {"Authorization": f"Bearer {SLACK_TOKEN}"}https://api.slack.com/methods/chat.postMessage/code
+    ###sends a meesage to a channel 
     # try:
     #     result = client.chat_postMessage(
     #         channel=channel_id,
@@ -155,9 +170,6 @@ def mark_complete_task(task_id):
     # print('response from server:',resquest.text)
     # dictFromServer = resquest.json()
     
-
-
-
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_incomplete_task(task_id):
     chosen_task = get_task_or_abort(task_id)
