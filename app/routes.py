@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify, make_response, request, abort
 from app import db
 from app.models.task import Task
+from datetime import datetime
+import sys
 # from os import abort
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
@@ -23,7 +25,16 @@ def validate_task_id(task_id):
 
 @tasks_bp.route("", methods=["GET"])
 def get_tasks():
-    tasks = Task.query.all()
+    sort_query = request.args.get("sort")
+    title_query = request.args.get("title")
+    if title_query:
+        tasks = Task.query.filter_by(title=title_query)
+    elif sort_query == "desc":
+        tasks = Task.query.order_by(Task.title.desc()).all()
+    elif sort_query == "asc":
+        tasks = Task.query.order_by(Task.title.asc()).all()
+    else:
+        tasks = Task.query.all()
     tasks_response = []
     for task in tasks:
         tasks_response.append({
@@ -53,6 +64,9 @@ def create_task():
     except KeyError:
         return make_response({"details": "Invalid data"}, 400)
 
+    if "completed_at" in request_body:
+        new_task.completed_at = request_body["completed_at"]
+
     db.session.add(new_task)
     db.session.commit()
 
@@ -71,6 +85,37 @@ def update_task(task_id):
 
     found_task.title = request_body["title"]
     found_task.description = request_body["description"]
+    if "completed_at" in request_body:
+        found_task.completed_at = request_body["completed_at"]
+    db.session.commit()
+
+    return jsonify({"task":
+                    {"id": found_task.task_id,
+                     "title": found_task.title,
+                     "description": found_task.description,
+                     "is_complete": bool(found_task.completed_at)}}), 200
+
+
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def update_task_status(task_id):
+    found_task = validate_task_id(task_id)
+
+    found_task.completed_at = datetime.now()
+
+    db.session.commit()
+
+    return make_response(jsonify({"task":
+                                  {"id": found_task.task_id,
+                                   "title": found_task.title,
+                                   "description": found_task.description,
+                                   "is_complete": bool(found_task.completed_at)}}), 200)
+
+
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def incomplete_task_status(task_id):
+    found_task = validate_task_id(task_id)
+
+    found_task.completed_at = None
 
     db.session.commit()
 
