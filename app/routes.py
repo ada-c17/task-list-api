@@ -77,19 +77,6 @@ def format_response_body(task):
     return response_body
 
 
-def format_goal_response_body(goal):
-
-    
-    response_body = jsonify({"goal" : 
-        {
-            "id" : goal.goal_id,
-            "title" : goal.title,
-        }
-    })
-
-    return response_body
-
-
 
 # ------------------------ TASKS ------------------------ #
 
@@ -297,6 +284,19 @@ def delete_one_task(task_id):
 
 
 # ------------------------ GOALS ------------------------ #
+
+def format_goal_response_body(goal):
+
+    
+    response_body = jsonify({"goal" : 
+        {
+            "id" : goal.goal_id,
+            "title" : goal.title,
+        }
+    })
+
+    return response_body
+    
 # ------------------------ GET REQUESTS ------------------------ #
 
 # ---- GET ALL GOALS ---- #
