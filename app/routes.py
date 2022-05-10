@@ -355,6 +355,11 @@ def create_goal():
 
     request_body = request.get_json()
 
+    if not request_body:
+        abort(make_response({"details" : f"Invalid data"}, 400))
+
+
+
     new_goal = Goal(title=request_body["title"])
 
     response_body = jsonify({ "goal" : 
