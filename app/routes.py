@@ -204,7 +204,7 @@ def slack_api_call(task):
     requests.post(SLACK_PATH, params=PARAMS, headers=HEADERS)
     
     
-    """Wave05"""
+"""Wave05"""
 @goal_bp.route("", methods=["POST"])
 def create_goals():
     resquest_body = request.get_json()
