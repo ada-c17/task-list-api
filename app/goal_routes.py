@@ -5,8 +5,7 @@ from .goal_routes_helper import try_to_make_goal, check_goal_exists
 
 goals_bp = Blueprint("goals", __name__, url_prefix = "/goals")
 
-
-# Create a Task
+# Create a Goal
 @goals_bp.route("", methods = ["POST"])
 def create_goal():
     request_body = request.get_json()
@@ -33,7 +32,7 @@ def get_one_task(goal_id):
 
     return make_response(jsonify({"goal": goal.to_json()}), 200)
 
-# Update Task
+# Update Goal
 @goals_bp.route("/<goal_id>", methods = ["PUT"])
 def update_task(goal_id):
     goal = check_goal_exists(goal_id)
@@ -44,7 +43,7 @@ def update_task(goal_id):
 
     return make_response(jsonify({"goal": goal.to_json()}), 200)
 
-# Delete Task
+# Delete Goal
 @goals_bp.route("/<goal_id>", methods = ["DELETE"])
 def delete_goal(goal_id):
     goal = check_goal_exists(goal_id)
