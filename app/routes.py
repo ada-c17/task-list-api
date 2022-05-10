@@ -353,8 +353,6 @@ def get_one_goal(goal_id):
 
 # ---- CREATE A GOAL ---- #
 
-# NEED TO FIX THIS! FAILING TEST 5
-
 @goals_bp.route("", methods=["POST"])
 def create_goal():
 
@@ -392,27 +390,33 @@ def update_goal(goal_id):
     # Search for this goal_id in the Goal Blueprint
     goal_to_update = Goal.query.get(goal_id)
 
+    request_body = request.get_json()
+
     # If this specific goal isn't found, 404 response code
     if not goal_to_update:
         abort(make_response({"message" : f"This goal is not found."}, 404))
 
+    if "title" not in goal_to_update:
+        return {
+            "details" : "Invalid data"
+        }, 400
 
-    request_body = request.get_json()
+
     goal_to_update = request_body["title"]
 
     # db.session.add(goal_to_update)
     db.session.commit()
 
-    return format_goal_response_body(goal_to_update), 200
+    # return format_goal_response_body(goal_to_update), 200
 
-    # response_body = jsonify({"goal" : 
-    #     {
-    #         "id" : goal_to_update.goal_id,
-    #         "title" : goal_to_update.title
-    #     }
-    # })
+    response_body = jsonify({"goal" : 
+        {
+            "id" : goal_to_update.goal_id,
+            "title" : goal_to_update.title
+        }
+    })
 
-    # return response_body, 200
+    return response_body, 200
 
 
 # ---- DELETE GOAL ---- #

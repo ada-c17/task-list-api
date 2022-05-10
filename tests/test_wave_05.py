@@ -99,7 +99,7 @@ def test_create_goal(client):
 
 # FAILING: AttributeError: 'str' object has no attribute 'goal_id'
 
-@pytest.mark.skip(reason="test to be completed by student")
+# @pytest.mark.skip(reason="test to be completed by student")
 def test_update_goal(client, one_goal):
 
     # Act
