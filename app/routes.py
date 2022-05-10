@@ -3,6 +3,7 @@ from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, abort, make_response, request
 from datetime import datetime, timezone
+import requests 
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -123,6 +124,8 @@ def mark_task_complete(task_id):
     task_dict = {"task": make_task_dict(task)}
 
     db.session.commit()
+    # send message to task-notifications channel
+    # text = "Someone just completed the task <task["title"]"
 
     return jsonify(task_dict), 200
 
