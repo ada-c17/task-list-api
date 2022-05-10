@@ -282,7 +282,7 @@ def delete_one_task(task_id):
 @goals_bp.route("", methods=["GET"])
 def get_all_goals():
     
-    params = request.args
+    # params = request.args
 
     all_goals = Goal.query.all()
 
@@ -313,16 +313,6 @@ def get_all_goals():
 def create_goal():
 
     request_body = request.get_json()
-
-    # # Title or Description is not in request body, return 400 response
-    # if "title" not in request_body or "description" not in request_body:
-    #     return jsonify({
-    #         "details" : "Invalid data"
-    #     }), 400
-
-
-
-    # if "completed_at" in request_body:
 
     new_goal = Goal(title=request_body["title"])
 
