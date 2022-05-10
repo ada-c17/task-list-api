@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request, make_response, abort
 from app.models.task import Task
 from app import db
+from datetime import datetime
 
 task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 
@@ -18,23 +19,40 @@ def validate_task(task_id):
 
     return task
 
+def is_complete(task):
+    '''Checks whether a task is incomplete or complete.'''
+    if task.completed_at:
+        return True
+    else:
+        return False
+
 @task_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
     try:
-        new_task = Task(title=request_body["title"], 
-                        description=request_body["description"])
+        new_task = Task(
+            title=request_body["title"], 
+            description=request_body["description"],
+            completed_at=request_body["completed_at"]
+            )
     except KeyError:
-        return {"details": "Invalid data"}, 400
+        try:
+            new_task = Task(
+                title=request_body["title"], 
+                description=request_body["description"],
+                )
+        except KeyError:
+            return {"details": "Invalid data"}, 400
 
     db.session.add(new_task)
     db.session.commit()
+
     return {
         "task": {
             "id": new_task.task_id,
             "title": new_task.title,
             "description": new_task.description,
-            "is_complete": False
+            "is_complete": is_complete(new_task)
         }
     }, 201
 
@@ -55,7 +73,7 @@ def get_all_tasks():
         "id": task.task_id,
         "title": task.title,
         "description": task.description,
-        "is_complete": False
+        "is_complete": is_complete(task)
         })
     return jsonify(tasks_response)
 
@@ -68,7 +86,7 @@ def get_one_task(task_id):
             "id": task.task_id,
             "title": task.title,
             "description": task.description,
-            "is_complete": False
+            "is_complete": is_complete(task)
         }
     }
 
@@ -77,9 +95,13 @@ def update_task(task_id):
     task = validate_task(task_id)
     request_body = request.get_json()
 
-    task.title = request_body["title"]
-    task.description = request_body["description"]
-    # task.completed_at = request_body["is_complete"]
+    try:
+        task.title = request_body["title"]
+        task.description = request_body["description"]
+        task.completed_at = request_body["completed_at"]
+    except KeyError:
+        task.title = request_body["title"]
+        task.description = request_body["description"]
     
     db.session.commit()
     
@@ -88,7 +110,39 @@ def update_task(task_id):
             "id": task.task_id,
             "title": task.title,
             "description": task.description,
-            "is_complete": False
+            "is_complete": is_complete(task)
+        }
+    }
+
+@task_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def mark_complete(task_id):
+    task = validate_task(task_id)
+    task.completed_at = datetime.utcnow()
+    
+    db.session.commit()
+    
+    return { 
+        "task": {
+            "id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": is_complete(task)
+        }
+    }
+
+@task_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def mark_incomplete(task_id):
+    task = validate_task(task_id)
+    task.completed_at = None
+    
+    db.session.commit()
+    
+    return { 
+        "task": {
+            "id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": is_complete(task)
         }
     }
 
