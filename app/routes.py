@@ -54,9 +54,8 @@ GET ROUTES
 @task_bp.route("", methods=["GET"])
 def read_saved_tasks():
 
-
-    # query params
     title_sort_query = request.args.get("sort")
+
     if title_sort_query == "asc":
         print("hello")
         tasks = Task.query.order_by(asc(Task.title)).all()
@@ -67,7 +66,7 @@ def read_saved_tasks():
 
     tasks_response = []
 
-    for task_dict in tasks:   # tasks in line 29
+    for task_dict in tasks:
         # since we use jsonify, i wonder if I omit the dictionary part
         # if it will still turn it into a dict, but we are in a loop
         tasks_response.append(
@@ -134,7 +133,7 @@ def update_task(task_id):
     return make_response(jsonify({"task": task_response_body}), 200)
 
 '''
-PATCH ROUTE
+PATCH ROUTES
 '''
 
 # PATCH ONE TASK - MARK COMPLETE
@@ -192,13 +191,16 @@ def delete_one_task(task_id):
 
     return make_response(jsonify({"details": delete_response}), 200)
 
+
 # =========
+
 
 # Hello TASK JUST TO CHECK
 @task_bp.route("", methods=["GET"])
 def say_hello_task():
     response_body = "THIS IS OUR TASK!"
     return response_body, 200
+
 
 # Hello TASK JSON JUST TO CHECK
 @task_bp.route("/JSON", methods=["GET"])
