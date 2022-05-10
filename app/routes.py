@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request 
 from app import db
 from app.models.task import Task
+from app.models.goal import Goal
 from sqlalchemy import desc, asc
 from datetime import datetime
 import requests
@@ -9,6 +10,7 @@ import os
 
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
+goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
 def validate_task(task_id):
     try:
@@ -21,7 +23,7 @@ def validate_task(task_id):
         return jsonify({"message" : f"Could not find '{task_id}'"}), 404
     return task
 
-def format_as_dict(task):
+def format_task(task):
     response = {
     "task" : 
         {
@@ -33,6 +35,15 @@ def format_as_dict(task):
     }
     return response
 
+def format_goal(goal):
+    return {
+        "goal": {
+            "id" : goal.goal_id,
+            "title" : goal.title
+                }
+        }
+
+
 def push_complete_to_slack(task):
     bot_token = os.environ.get("SLACK_BOT_TOKEN")
     params = {
@@ -41,6 +52,7 @@ def push_complete_to_slack(task):
         }
     headers = {"authorization" : "Bearer " + bot_token}
     requests.post("https://slack.com/api/chat.postMessage", params=params, headers=headers)
+
 
 @tasks_bp.route('', methods=['POST'])
 def create_task():
@@ -51,7 +63,7 @@ def create_task():
             "details" : "Invalid data"
         }, 400
 
-    new_task = Task (
+    new_task = Task(
         description = request_body['description'],
         title = request_body['title']
     )
@@ -62,7 +74,7 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
     
-    return format_as_dict(new_task), 201
+    return format_task(new_task), 201
 
 
 @tasks_bp.route('', methods=['GET'])
@@ -93,7 +105,7 @@ def get_one_task(task_id):
     task = validate_task(task_id)
 
     if isinstance(task, Task):
-        return format_as_dict(task), 200
+        return format_task(task), 200
     return task
 
 
@@ -110,7 +122,7 @@ def update_task(task_id):
         if "completed_at" in request_body:
             task.completed_at = request_body['completed_at']
 
-        return format_as_dict(task), 200
+        return format_task(task), 200
     return task
 
 @tasks_bp.route('/<task_id>', methods=['DELETE'])
@@ -133,7 +145,7 @@ def mark_complete(task_id):
         task.completed_at = datetime.utcnow()
         db.session.commit()
         push_complete_to_slack(task)
-        return format_as_dict(task), 200
+        return format_task(task), 200
     return task
 
 @tasks_bp.route('/<task_id>/mark_incomplete', methods=['PATCH'])
@@ -143,6 +155,37 @@ def mark_incomplete(task_id):
     if isinstance(task, Task):
         task.completed_at = None
         db.session.commit()
-        return format_as_dict(task), 200
+        return format_task(task), 200
     return task
 
+@goals_bp.route('', methods=['POST'])
+def create_goal():
+    request_body = request.get_json()
+
+    if "title" not in request_body:
+        return {
+            "details" : "Invalid data"
+        }, 400
+
+    new_goal = Goal(
+        title = request_body['title']
+    )
+
+    db.session.add(new_goal)
+    db.session.commit()
+
+    return format_goal(new_goal), 201
+
+@goals_bp.route('', methods=['GET'])
+def get_goals():
+    goals = Goal.query.order_by(asc(Goal.title)).all()
+    goals_response = []
+
+    for goal in goals:
+        goals_response.append(
+            {
+            "id" : goal.goal_id,
+            "title" : goal.title
+            }
+        )
+    return jsonify(goals_response), 200
