@@ -43,7 +43,7 @@ The following are required routes for wave 1. Feel free to implement the routes 
 ### Tips
 
 - Pay attention to the exact shape of the expected JSON. Double-check nested data structures and the names of the keys for any mispellings.
-  - That said, remember that dictionaries do not have an implied order. This is still true in JSON with objects. When you make Postman requests, the order of the key/value pairings within the response JSON object does not need to match the order specified in this document. (The term "object" in JSON is analagous to "dictionary" in Python.)
+  - That said, remember that dictionaries do not have an implied order. This is still true in JSON with objects. When you make Postman requests, the order of the key/value pairings within the response JSON object does not need to match the order specified in this document. (The term "object" in JSON is analogous to "dictionary" in Python.)
 - Use the tests in `tests/test_wave_01.py` to guide your implementation.
 - You may feel that there are missing tests and missing edge cases considered in this wave. This is intentional.
   - You have fulfilled wave 1 requirements if all of the wave 1 tests pass.
