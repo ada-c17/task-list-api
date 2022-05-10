@@ -1,15 +1,19 @@
 from flask import Blueprint, jsonify, request, abort, make_response
 from pytest import param
 from app.models.task import Task
+from app.models.goal import Goal
 from app import db
 import datetime
 import os
 from slack_sdk import WebClient
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
+goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 client = WebClient(token=os.environ['SLACK_BOT_TOKEN'])
 
-def validate_id(task_id):
+#TASK ROUTES
+
+def validate_task_id(task_id):
     try:
         task_id =  int(task_id)
     except:
@@ -24,9 +28,7 @@ def validate_id(task_id):
 def create_one_task():
     request_body = request.get_json()
     if 'title' not in request_body or 'description' not in request_body:
-        return {
-            "details": "Invalid data"
-        }, 400
+        return {"details": "Invalid data"}, 400
 
     if 'completed_at' in request_body:
         new_task = Task(title=request_body["title"],
@@ -52,15 +54,10 @@ def get_all_tasks():
     task_response = []
 
     if "sort" in params:
-    # if "sort" in params and params["sort"] == "asc":
         sort_order = request.args.get('sort')
         if sort_order == "asc":
-        # task_response = sorted(task_response, key=lambda d: d['title']) 
-        # task_response = select(Task.query.all()).order_by(asc(Task.title))
             tasks = Task.query.order_by(Task.title.asc())
-    # elif "sort" in params and params["sort"] == "desc":
         elif sort_order =="desc":
-    #     task_response = sorted(task_response, key=lambda d: d['title'], reverse=True) 
             tasks = Task.query.order_by(Task.title.desc())
     
     else:
@@ -78,7 +75,7 @@ def get_all_tasks():
 
 @tasks_bp.route('/<task_id>', methods=['GET'])
 def get_one_task(task_id):
-    one_task = validate_id(task_id)
+    one_task = validate_task_id(task_id)
     response = {
             "id": one_task.task_id,
             "title": one_task.title,
@@ -89,7 +86,7 @@ def get_one_task(task_id):
 
 @tasks_bp.route('/<task_id>', methods=['PUT'])
 def put_one_task(task_id):
-    one_task = validate_id(task_id)
+    one_task = validate_task_id(task_id)
     request_body = request.get_json()
     if 'title' not in request_body or 'description' not in request_body:
         return {
@@ -111,7 +108,7 @@ def put_one_task(task_id):
 
 @tasks_bp.route('/<task_id>', methods=['DELETE'])
 def delete_one_task(task_id):
-    one_task = validate_id(task_id)
+    one_task = validate_task_id(task_id)
     db.session.delete(one_task)
     db.session.commit()
 
@@ -119,7 +116,7 @@ def delete_one_task(task_id):
 
 @tasks_bp.route('/<task_id>/<mark>', methods=['PATCH'])
 def patch_one_task(task_id, mark=None):
-    one_task = validate_id(task_id)
+    one_task = validate_task_id(task_id)
 
     if mark == "mark_complete":
         one_task.completed_at = datetime.datetime.now()
@@ -140,6 +137,74 @@ def patch_one_task(task_id, mark=None):
 
 ########################################################
 ########################################################
+#GOAL ROUTES
+def validate_goal_id(goal_id):
+    try:
+        goal_id =  int(goal_id)
+    except:
+        return abort(make_response(jsonify({'message': f"Invalid task: {goal_id}"}), 400))
+    goal = Goal.query.get(goal_id)
+
+    if goal is None:
+        return abort(make_response(jsonify({'message': f"Could not find task with id {goal_id}"}), 404))
+    return goal     
 
 
+@goals_bp.route('', methods=['POST'])
+def create_one_goal():
+    request_body = request.get_json()
+    if "title" not in request_body:
+        return {"details": "Invalid data"}, 400
+    new_goal = Goal(title=request_body['title'])
+    db.session.add(new_goal)
+    db.session.commit()
 
+    return {"goal": {
+        "id": new_goal.goal_id,
+        "title": new_goal.title
+    }}, 201
+
+@goals_bp.route("", methods=["GET"])
+def get_all_goals():
+    goal_response = []
+    goals = Goal.query.all()
+
+    for goal in goals:
+        goal_response.append({
+            "id": goal.goal_id,
+            "title": goal.title
+        })
+    return jsonify(goal_response), 200
+
+@goals_bp.route("<goal_id>", methods=['GET'])
+def get_one_goal(goal_id):
+    one_goal = validate_goal_id(goal_id)
+    response = {
+        "id": one_goal.goal_id,
+        "title": one_goal.title
+    }
+    return jsonify({"goal": response}), 200
+
+@goals_bp.route("<goal_id>", methods=['PUT'])
+def put_one_goal(goal_id):
+    one_goal = validate_goal_id(goal_id)
+    request_body = request.get_json()
+    if "title" not in request_body:
+        return {"details": "Invalid data"}, 400
+
+    one_goal.title = request_body["title"]
+    db.session.commit()
+
+    response = {
+        "id": one_goal.goal_id,
+        "title": one_goal.title
+    }
+    return jsonify({"goal": response}), 200
+
+@goals_bp.route('/<goal_id>', methods=['DELETE'])
+def delete_one_goal(goal_id):
+    one_goal = validate_goal_id(goal_id)
+    db.session.delete(one_goal)
+    db.session.commit()
+
+    return {"details": f'Goal {one_goal.goal_id} "{one_goal.title}" successfully deleted'}, 200
