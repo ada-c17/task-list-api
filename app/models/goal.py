@@ -13,3 +13,6 @@ class Goal(db.Model):
     def to_json(self):
         return {"id": self.goal_id, 
                 "title": self.title}
+    
+    def update_goal(self, request_body):
+        self.title = request_body["title"]

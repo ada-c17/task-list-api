@@ -33,37 +33,16 @@ def get_one_task(goal_id):
 
     return make_response(jsonify({"goal": goal.to_json()}), 200)
 
-# # Update Task
-# @goals_bp.route("/<goal_id>", methods = ["PUT"])
-# def update_task(goal_id):
-#     task = check_task_exists(goal_id)
-#     request_body = request.get_json()
+# Update Task
+@goals_bp.route("/<goal_id>", methods = ["PUT"])
+def update_task(goal_id):
+    goal = check_goal_exists(goal_id)
+    request_body = request.get_json()
 
-#     task.update_task(request_body)
-#     db.session.commit()
+    goal.update_goal(request_body)
+    db.session.commit()
 
-#     return make_response(jsonify({"task": task.to_json()}), 200)
-
-# @goals_bp.route("/<goal_id>/mark_complete", methods = ["PATCH"])
-# def mark_task_complete(goal_id):
-#     task = check_task_exists(goal_id)
-
-#     task.completed_at = datetime.utcnow()
-#     db.session.commit()
-
-#     post_task_to_slack(task)
-
-#     return make_response(jsonify({"task": task.to_json()}), 200)
-
-# @goals_bp.route("/<goal_id>/mark_incomplete", methods = ["PATCH"])
-# def mark_task_incomplete(goal_id):
-#     task = check_task_exists(goal_id)
-
-#     task.completed_at = None
-
-#     db.session.commit()
-
-#     return make_response(jsonify({"task": task.to_json()}), 200)
+    return make_response(jsonify({"goal": goal.to_json()}), 200)
 
 # # Delete Task
 # @goals_bp.route("/<goal_id>", methods = ["DELETE"])
