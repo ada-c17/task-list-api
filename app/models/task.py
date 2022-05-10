@@ -7,3 +7,6 @@ class Task(db.Model):
     description = db.Column(db.String, nullable=False)
     completed_at = db.Column(db.DateTime, nullable=True, default=None)
 
+    def is_complete(self):
+        return self.completed_at != None
+
