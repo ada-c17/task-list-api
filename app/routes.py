@@ -300,8 +300,6 @@ def delete_one_task(task_id):
 # ---- GET ALL GOALS ---- #
 @goals_bp.route("", methods=["GET"])
 def get_all_goals():
-    
-    # params = request.args
 
     all_goals = Goal.query.all()
 
@@ -349,9 +347,9 @@ def get_one_goal(goal_id):
 
 
 # ---- CREATE A GOAL ---- #
-@goals_bp.route("", methods=["POST"])
-def create_goal():
-    pass
+# @goals_bp.route("", methods=["POST"])
+# def create_goal():
+#     # pass
 
 #     request_body = request.get_json()
 
@@ -374,14 +372,8 @@ def create_goal():
 
 
 # ---- UPDATE GOAL ---- #
-@goals_bp.route("/<goal_id>", methods=["GET"])
+@goals_bp.route("/<goal_id>", methods=["PUT"])
 def update_goal(goal_id):
-    # Check if task_id is a valid integer
-    try:
-        goal_id = int(goal_id)
-    except:
-        # If it's not, 400 response code
-        abort(make_response({"message" : f"Goal is invalid."}, 400))
 
     # Search for this goal_id in the Task Blueprint
     goal_to_update = Goal.query.get(goal_id)
@@ -391,14 +383,21 @@ def update_goal(goal_id):
         abort(make_response({"message" : f"This goal is not found."}, 404))
 
 
-
-
     request_body = request.get_json()
-
     goal_to_update = request_body["title"]
 
-
+    # db.session.add(goal_to_update)
     db.session.commit()
 
-    return format_goal_response_body(goal_to_update), 200
+    # return format_goal_response_body(goal_to_update), 200
+
+    response_body = jsonify({"goal" : 
+        {
+            "id" : goal_to_update.goal_id,
+            "title" : goal_to_update.title
+        }
+    })
+
+    return response_body, 200
+
 
