@@ -166,7 +166,7 @@ def update_task_mark_complete(task_id):
             "channel": "task-notifications",
             "text": f"Someone just completed the task {task.title}"
         }
-        requests.get(SLACK_PATH, headers=headers, params=query_params)
+        requests.post(SLACK_PATH, headers=headers, params=query_params)
 
     response = {
         "task": {
@@ -283,4 +283,24 @@ def delete_one_route(goal_id):
     db.session.commit()
 
     response = {"details": f'Goal {goal.goal_id} "{goal.title}" successfully deleted'}
+    return jsonify(response), 200
+
+#---------------------TASKS-&&-GOALS----------------------------
+@goals_bp.route("/<goal_id>/tasks", methods=["POST"])
+def create_one_goal_tasks_list(goal_id):
+    goal = validate_goal(goal_id)
+
+    request_body = request.get_json()
+    tasks = Task.query.all()
+    for task in tasks:
+        if task.task_id in request_body["task_ids"]:
+            task.goal_id = goal.goal_id
+
+    db.session.commit()
+
+    response = {
+        "id": goal.goal_id,
+        "task_ids": request_body["task_ids"]
+    }
+
     return jsonify(response), 200
