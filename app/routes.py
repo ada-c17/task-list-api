@@ -301,7 +301,7 @@ def get_all_goals():
         goal_response.append(
             {
                 "id" : goal.goal_id,
-                "title" : f"Example Goal Title {goal.title}"
+                "title" : f"{goal.title}"
             }
         )
 
@@ -310,24 +310,24 @@ def get_all_goals():
 # ------------------------ POST REQUESTS ------------------------ #
 
 
-# ---- CREATE A TASK ---- #
-@goals_bp.route("", methods=["POST"])
-def create_goal():
+# # ---- CREATE A TASK ---- #
+# @goals_bp.route("", methods=["POST"])
+# def create_goal():
 
-    request_body = request.get_json()
+#     request_body = request.get_json()
 
-    new_goal = Goal(title=request_body["title"])
+#     new_goal = Goal(title=request_body["title"])
 
-    response_body = jsonify({ "goal" : 
-        {
-            "id" : new_goal.goal_id,
-            "title" : new_goal.title
-        }
-    })
+#     response_body = jsonify({ "goal" : 
+#         {
+#             "id" : new_goal.goal_id,
+#             "title" : new_goal.title
+#         }
+#     })
 
 
-    # Add new task and commit change
-    db.session.add(new_goal)
-    db.session.commit()
+#     # Add new task and commit change
+#     db.session.add(new_goal)
+#     db.session.commit()
 
-    return response_body, 201
+#     return response_body, 201
