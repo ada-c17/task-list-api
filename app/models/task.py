@@ -14,13 +14,20 @@ class Task(db.Model):
         #     description=self.description,
         #     is_complete=False if self.completed_at == None else self.completed_at
         # )
-        completed_at = True if self.completed_at else False
-        return {
-            "id": self.task_id,
-            "title": self.title,
-            "description": self.description,
-            "is_complete": completed_at
-        }
+        return dict(
+            id=self.task_id,
+            title=self.title,
+            description=self.description,
+            is_complete=True if self.completed_at else False
+        )
+
+        # completed_at = True if self.completed_at else False
+        # return {
+        #     "id": self.task_id,
+        #     "title": self.title,
+        #     "description": self.description,
+        #     "is_complete": completed_at
+        # }
         
     def override_task(self, data_dict):
         self.title = data_dict["title"]

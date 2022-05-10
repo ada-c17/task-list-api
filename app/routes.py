@@ -1,3 +1,4 @@
+from asyncio import tasks
 from flask import Blueprint, jsonify, make_response, request, abort
 from app.models.task import Task
 from app import db
@@ -9,6 +10,9 @@ bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 @bp.route("", methods=("POST",))
 def create_task():
     request_body = request.get_json()
+    if "title" not in request_body or "description" not in request_body:
+        abort(make_response({"details": "Invalid data"}, 400))
+
     task = Task(title=request_body["title"], description=request_body["description"])
 
     db.session.add(task)
@@ -18,13 +22,16 @@ def create_task():
 
 
 @bp.route("/<task_id>", methods=("GET",))
-def read_tasks(task_id):
-    if not task_id:
-        tasks = Task.query.all()
-        return jsonify([task.to_dict() for task in tasks])
-
+def read_one_task(task_id):
     task = validate_task_id(task_id)
     return make_response(jsonify({"task": task.to_dict()}), 200)
+
+
+@bp.route("", methods=("GET",))
+def read_all_tasks():
+    tasks = Task.query.all()
+    tasks_response = [task.to_dict() for task in tasks]
+    return make_response(jsonify(tasks_response), 200)
 
 
 @bp.route("/<task_id>", methods=("PUT",))
@@ -52,10 +59,10 @@ def validate_task_id(task_id):
     try:
         task_id = int(task_id)
     except:
-        abort(make_response({"message": "Invalid data"}, 400))
+        abort(make_response({"details": "Invalid data"}, 400))
 
     task = Task.query.get(task_id)
 
     if not task:
-        abort(make_response({"message": "Task 1 not found"}, 404))
+        abort(make_response({"details": "Task 1 not found"}, 404))
     return task
