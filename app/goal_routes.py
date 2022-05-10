@@ -44,12 +44,12 @@ def update_task(goal_id):
 
     return make_response(jsonify({"goal": goal.to_json()}), 200)
 
-# # Delete Task
-# @goals_bp.route("/<goal_id>", methods = ["DELETE"])
-# def delete_task(goal_id):
-#     task = check_task_exists(goal_id)
+# Delete Task
+@goals_bp.route("/<goal_id>", methods = ["DELETE"])
+def delete_goal(goal_id):
+    goal = check_goal_exists(goal_id)
 
-#     db.session.delete(task)
-#     db.session.commit()
+    db.session.delete(goal)
+    db.session.commit()
 
-#     return jsonify({"details": f'Task {task.goal_id} "{task.title}" successfully deleted'}), 200
+    return jsonify({"details": f'Goal {goal.goal_id} "{goal.title}" successfully deleted'}), 200

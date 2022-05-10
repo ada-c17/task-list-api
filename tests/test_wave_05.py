@@ -1,7 +1,6 @@
 import pytest
 from app.models.goal import Goal
 
-
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_goals_no_saved_goals(client):
     # Act
@@ -46,7 +45,6 @@ def test_get_goal(client, one_goal):
         }
     }
 
-
 # @pytest.mark.skip(reason="test to be completed by student")
 def test_get_goal_not_found(client):
     pass
@@ -75,7 +73,6 @@ def test_create_goal(client):
             "title": "My New Goal"
         }
     }
-
 
 # @pytest.mark.skip(reason="test to be completed by student")
 def test_update_goal(client, one_goal):
@@ -109,8 +106,7 @@ def test_update_goal_not_found(client):
     assert response.status_code == 404
     assert response_body == {"error": "Goal 1 does not exist"}
 
-
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_delete_goal(client, one_goal):
     # Act
     response = client.delete("/goals/1")
@@ -125,27 +121,17 @@ def test_delete_goal(client, one_goal):
 
     # Check that the goal was deleted
     response = client.get("/goals/1")
+    response_body = response.get_json()
     assert response.status_code == 404
+    assert response_body == {"error": "Goal 1 does not exist"}
 
-    raise Exception("Complete test with assertion about response body")
-    # *****************************************************************
-    # **Complete test with assertion about response body***************
-    # *****************************************************************
-
-
-@pytest.mark.skip(reason="test to be completed by student")
+# @pytest.mark.skip(reason="test to be completed by student")
 def test_delete_goal_not_found(client):
-    raise Exception("Complete test")
+    response = client.delete("goals/1")
+    response_body = response.get_json()
 
-    # Act
-    # ---- Complete Act Here ----
-
-    # Assert
-    # ---- Complete Assertions Here ----
-    # assertion 1 goes here
-    # assertion 2 goes here
-    # ---- Complete Assertions Here ----
-
+    assert response.status_code == 404
+    assert response_body == {"error": "Goal 1 does not exist"}
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_goal_missing_title(client):
