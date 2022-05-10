@@ -14,7 +14,7 @@ def create_goal():
     db.session.add(new_goal)
     db.session.commit()
 
-    return jsonify({"Goal": new_goal.to_json()}), 201
+    return jsonify({"goal": new_goal.to_json()}), 201
 
 
 @goals_bp.route("", methods=["GET"])
@@ -50,7 +50,7 @@ def delete_goal(goal_id):
     db.session.delete(goal)
     db.session.commit()
 
-    return jsonify({"details":f'Task {goal_id} "{goal.title}" successfully deleted'} ), 200
+    return jsonify({"details":f'Goal {goal_id} "{goal.title}" successfully deleted'} ), 200
 
         
 
