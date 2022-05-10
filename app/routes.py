@@ -27,7 +27,12 @@ def add_task():
     if "title" not in request_body or "description" not in request_body:
         return {"details": "Invalid data"}, 400
 
-    new_task = Task(title = request_body["title"],
+    if "completed_at" in request_body:
+        new_task = Task(title = request_body["title"],
+                    description = request_body["description"],
+                    completed_at = datetime.utcnow())
+    else: 
+        new_task = Task(title = request_body["title"],
                     description = request_body["description"])
 
     db.session.add(new_task)
@@ -37,12 +42,16 @@ def add_task():
         "id":new_task.id,
         "title": new_task.title,
         "description": new_task.description,
-        "is_complete": False
         }
+
+    if "completed_at" in request_body:
+        rsp["is_complete"] = True
+    else:
+        rsp["is_complete"] = False
     
     return make_response({"task":rsp}, 201)
 
-# As a client, I want to be able to make a GET request to /tasks when there are zero saved tasks
+
 @tasks_bp.route("", methods = ["GET"])
 def get_all_tasks():
     sort_query = request.args.get("sort")
@@ -78,17 +87,27 @@ def update_task(task_id):
     task = validate_task(task_id)
 
     request_body = request.get_json()
-
-    task.title = request_body["title"]
-    task.description = request_body["description"]
+    if "completed_at" in request_body:
+        task.title = request_body["title"]
+        task.description = request_body["description"]
+        task.completed_at = datetime.utcnow()
+    else:
+        task.title = request_body["title"]
+        task.description = request_body["description"]
 
     db.session.commit()
+    
+    rsp = {
+        "id":task.id,
+        "title": task.title,
+        "description": task.description}
 
-    return make_response({"task":{"id":task.id,
-                                "title": task.title,
-                                "description": task.description,
-                                "is_complete": False
-                                }}, 200)
+    if "completed_at" in request_body:
+        rsp["is_complete"] = True
+    else:
+        rsp["is_complete"] = False
+        
+    return make_response({"task":rsp}, 200)
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
@@ -103,7 +122,7 @@ def delete_task(task_id):
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_complete(task_id):
     task = validate_task(task_id)
-    task.completed_at = datetime.now()
+    task.completed_at = datetime.utcnow()
     db.session.commit()
 
     return make_response({"task":{"id":task.id,
