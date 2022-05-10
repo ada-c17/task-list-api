@@ -326,10 +326,16 @@ def create_goal():
 
     new_goal = Goal(title=request_body["title"])
 
+    response_body = jsonify({ "goal" : 
+        {
+            "id" : new_goal.goal_id,
+            "title" : new_goal.title
+        }
+    })
 
 
     # Add new task and commit change
     db.session.add(new_goal)
     db.session.commit()
 
-    # return format_response_body(new_task), 201
+    return response_body, 201
