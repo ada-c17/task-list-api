@@ -70,7 +70,7 @@ def create_tasks(goal_id):
 
     return jsonify({"id": goal.goal_id, "task_ids": request_body["task_ids"]}), 200
 
-# Create Tasks belonging to one Goal
+# Get Tasks belonging to one Goal
 @goals_bp.route("/<goal_id>/tasks", methods = ["GET"])
 def get_tasks(goal_id):
     goal = check_goal_exists(goal_id)
