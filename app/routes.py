@@ -26,6 +26,9 @@ def create_task():
 
     new_task = Task(title=request_body["title"], description=request_body["description"])
 
+    if "completed_at" in request_body:
+        new_task.completed_at = datetime.utcnow()
+
     db.session.add(new_task)
     db.session.commit()
 
@@ -154,23 +157,23 @@ def patch_task_complete(task_id):
     return make_response(jsonify({"task": task_response_body}), 200)
 
 # PATCH ONE TASK - MARK INCOMPLETE
-# @task_bp.route("/<task_id>/mark_incomplete", methods = ["PATCH"])
-# def patch_task_complete(task_id):
-#     task = validate_task(task_id)
+@task_bp.route("/<task_id>/mark_incomplete", methods = ["PATCH"])
+def patch_task_incomplete(task_id):
+    task = validate_task(task_id)
 
-#     task.completed_at = None
+    task.completed_at = None
 
-#     # task.update(request_body)
-#     db.session.commit()
+    # task.update(request_body)
+    db.session.commit()
 
-#     task_response_body = {
-#             "id": task.task_id,
-#             "title": task.title,
-#             "description": task.description,
-#             "is_complete": bool(task.completed_at),
-#     }
+    task_response_body = {
+            "id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": bool(task.completed_at),
+    }
 
-#     return make_response(jsonify({"task": task_response_body}), 200)
+    return make_response(jsonify({"task": task_response_body}), 200)
 
 
 '''
