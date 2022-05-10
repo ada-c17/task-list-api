@@ -2,9 +2,11 @@ from app import db
 from app.models.task import Task
 from flask import Blueprint, request, make_response, jsonify, abort
 from sqlalchemy import asc,desc
-from datetime import datetime, date
+from datetime import date
+import os
+import requests
 
-task_bp = Blueprint("task", __name__, url_prefix="/tasks")
+tasks_bp = Blueprint("task", __name__, url_prefix="/tasks")
 
 # helper function to validate
 def validate_task(id):
@@ -20,7 +22,7 @@ def validate_task(id):
     return task
 
 # Get all tasks
-@task_bp.route("", methods=["GET"])
+@tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
     sort_query = request.args.get("sort")
 
@@ -42,7 +44,7 @@ def get_all_tasks():
     return make_response(jsonify(tasks_response), 200)
 
 # Get one task
-@task_bp.route("/<id>", methods=["GET"])
+@tasks_bp.route("/<id>", methods=["GET"])
 def get_one_task(id):
     task = validate_task(id)
     response_body = {}
@@ -56,7 +58,7 @@ def get_one_task(id):
     
     return make_response(jsonify(response_body), 200)
 
-@task_bp.route("", methods=["POST"])
+@tasks_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
 
@@ -86,7 +88,7 @@ def create_task():
 
     return make_response(jsonify(response_body), 201)
 
-@task_bp.route("/<id>", methods=["PUT"])
+@tasks_bp.route("/<id>", methods=["PUT"])
 def update_task(id):
     task = validate_task(id)
     request_body = request.get_json()
@@ -115,7 +117,7 @@ def update_task(id):
     return make_response(jsonify(response_body), 200)
 
 # PATCH REQUEST - MARK COMPLETE
-@task_bp.route("/<id>/mark_complete", methods=["PATCH"])
+@tasks_bp.route("/<id>/mark_complete", methods=["PATCH"])
 def mark_complete(id):
     task = validate_task(id)
 
@@ -129,12 +131,28 @@ def mark_complete(id):
             "title":task.title,
             "description":task.description,
             "is_complete": True if task.completed_at else False
-            }
-    
+            }    
+
+    # endpoint for slack bot to post message
+    SLACK_POST_PATH = "https://slack.com/api/chat.postMessage"
+
+    # slack bot message
+    slack_message = f"Someone just completed the task {task.title}"
+
+    # headers
+    headers = {"Authorization": os.environ.get("SLACK_BOT_KEY")}
+
+    # query_params
+    query_params = {
+        "channel":"task-notifications",
+        "text": slack_message}
+
+    response_bot = requests.post(SLACK_POST_PATH, params=query_params, headers=headers)
+
     return make_response(jsonify(response_body), 200)
 
 # PATCH REQUEST - MARK INCOMPLETE
-@task_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
+@tasks_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
 def mark_incomplete(id):
     task = validate_task(id)
 
@@ -153,7 +171,7 @@ def mark_incomplete(id):
     return make_response(jsonify(response_body), 200)
 
 # DELETE
-@task_bp.route("/<id>", methods=["DELETE"])
+@tasks_bp.route("/<id>", methods=["DELETE"])
 def delete_task(id):
     task = validate_task(id)
 
