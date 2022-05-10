@@ -10,7 +10,6 @@ SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix = "/tasks")
 
-
 @tasks_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
