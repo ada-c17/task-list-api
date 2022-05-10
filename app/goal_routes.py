@@ -2,6 +2,7 @@ from app import db
 from flask import Blueprint, jsonify, request, make_response
 from app.models.goal import Goal
 from .goal_routes_helper import try_to_make_goal, check_goal_exists
+from .routes_helper import check_task_exists
 
 goals_bp = Blueprint("goals", __name__, url_prefix = "/goals")
 
@@ -52,3 +53,19 @@ def delete_goal(goal_id):
     db.session.commit()
 
     return jsonify({"details": f'Goal {goal.goal_id} "{goal.title}" successfully deleted'}), 200
+
+# Create Tasks belonging to one Goal
+@goals_bp.route("/<goal_id>/tasks", methods = ["POST"])
+def create_tasks(goal_id):
+    goal = check_goal_exists(goal_id)
+    request_body = request.get_json()
+
+    goal.tasks = []
+
+    for id in request_body["task_ids"]:
+        task = check_task_exists(id)
+        goal.tasks.append(task)
+
+    db.session.commit()
+
+    return jsonify({"id": goal.goal_id, "task_ids": request_body["task_ids"]}), 200
