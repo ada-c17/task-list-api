@@ -326,17 +326,17 @@ def get_all_goals():
 @goals_bp.route("/<goal_id>", methods=["GET"])
 def get_one_goal(goal_id):
 
-#     # goal = validate_task(goal_id)
-
     # Check if goal_id is a valid integer
     try:
         goal_id = int(goal_id)
     except:
         # If it's not, 400 response code
-        abort(make_response({"message" : f"Goal is invalid."}, 400))
+        abort(make_response({"message" : f"Goal ID is invalid."}, 400))
 
     # Search for this goal_id in the Task Blueprint
     goal = Goal.query.get(goal_id)
+
+
 
     # If this specific goal isn't found, 404 response code
     if not goal:
