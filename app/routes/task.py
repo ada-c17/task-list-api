@@ -22,8 +22,8 @@ def validate_task_or_abort(task_id):
 
 @tasks_bp.route("", methods=["GET"])
 def get_saved_tasks():
-
     sort_query = request.args.get("sort")
+
     if sort_query == "asc":
         tasks = Task.query.order_by(Task.title.asc()).all()
     elif sort_query == "desc":
@@ -33,12 +33,7 @@ def get_saved_tasks():
 
     task_list = []
     for task in tasks:
-        task_list.append({
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": bool(task.completed_at)
-        })
+        task_list.append(task.append_task_dict())
     
     return jsonify(task_list), 200
 
@@ -64,9 +59,9 @@ def create_task():
         completed_status = None
 
     new_task = Task(
-        title=request_body["title"],
-        description=request_body["description"],
-        completed_at=completed_status
+        title = request_body["title"],
+        description = request_body["description"],
+        completed_at = completed_status
     )
 
     db.session.add(new_task)
@@ -99,7 +94,7 @@ def delete_task(task_id):
     db.session.delete(task)
     db.session.commit()
 
-    return jsonify({"details": f"Task {task_id} \"{task.title}\" successfully deleted"})
+    return jsonify({"details": f"Task {task_id} \"{task.title}\" successfully deleted"}), 200
 
 
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
@@ -111,7 +106,7 @@ def mark_task_complete(task_id):
 
     slackbot.post_to_slack(task)
 
-    return make_response(jsonify(task.return_task_dict()), 200)
+    return jsonify(task.return_task_dict()), 200
 
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
@@ -119,7 +114,6 @@ def mark_task_incomplete(task_id):
     task = validate_task_or_abort(task_id)
 
     task.completed_at = None
-
     db.session.commit()
     
     return jsonify(task.return_task_dict()), 200
