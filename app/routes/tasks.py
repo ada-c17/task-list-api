@@ -1,7 +1,9 @@
+from unittest.mock import patch
 from flask import Blueprint, jsonify, request, make_response, abort
 from pytest import param
 from app.models.task import Task
 from app import db
+import datetime
 
 
 tasks_bp = Blueprint('tasks_bp', __name__, url_prefix='/tasks')
@@ -9,9 +11,17 @@ tasks_bp = Blueprint('tasks_bp', __name__, url_prefix='/tasks')
 @tasks_bp.route('', methods=['POST'])
 def create_a_task():
     request_body = request.get_json()
+
+    if "completed_at" in request_body:
+        completed_at = request_body["completed_at"]
+    else:
+        completed_at = None
+
     try:
         new_task = Task(title=request_body["title"],
-                        description=request_body["description"])
+                        description=request_body["description"],
+                        completed_at=completed_at)
+
     except:
         return {"details": "Invalid data"}, 400
     
@@ -23,38 +33,13 @@ def create_a_task():
             "id": new_task.task_id,
             "title": new_task.title,
             "description": new_task.description,
-            "is_complete": False
+            "is_complete": bool(new_task.completed_at)
         }
     }), 201
 
-    
-    # request_body = request.get_json()
-    # new_task = Task(title, description)
-    # try:
-    #     new_task.title = request_body["title"]
-    # except KeyError:
-    #     return {"details": "Invalid data"}, 400
-    # try:
-    #     new_task.description = request_body["description"]
-    # except KeyError:
-    #         return {"details": "Invalid data"}, 400
-
-    # db.session.commit()
-
-    # if not new_task.completed_at:
-    #     is_complete = False
-
-    # rsp = {
-    #     'id': chosen_task.title_id,
-    #     'title': chosen_task.title,
-    #     'description': chosen_task.description,
-    #     'is_complete': is_complete
-    # }
-    # return jsonify(rsp), 201
 
 @tasks_bp.route('', methods=['GET'])
 def get_all_tasks():
-    params = request.args
     if request.args.get("sort") == "asc":
         tasks = Task.query.order_by(Task.title.asc())
     elif request.args.get("sort") == "desc":
@@ -68,7 +53,7 @@ def get_all_tasks():
                 'id': task.task_id,
                 'title': task.title,
                 'description': task.description,
-                'is_complete': False
+                'is_complete': bool(task.completed_at)
             })
 
     return jsonify(tasks_response), 200
@@ -97,7 +82,7 @@ def get_one_task(task_id):
             'id': chosen_task.task_id,
             'title': chosen_task.title,
             'description': chosen_task.description,
-            'is_complete': False
+            'is_complete': bool(chosen_task.completed_at)
             }
         }), 200
 
@@ -110,7 +95,6 @@ def put_one_task(task_id):
     try:
         chosen_task.title = request_body["title"]
         chosen_task.description = request_body["description"]
-        # chosen_task.completed_at = request_body["completed_at"]
     except KeyError:
         return jsonify({"details": "Request must include both title and description"}), 400
     
@@ -121,9 +105,44 @@ def put_one_task(task_id):
             'id': chosen_task.task_id,
             'title': chosen_task.title,
             'description': chosen_task.description,
-            'is_complete': False
+            'is_complete': bool(chosen_task.completed_at)
             }
         }), 200
+
+
+@tasks_bp.route('/<task_id>/mark_complete', methods=['PATCH'])
+def patch_completed_task(task_id):
+    validated_task = get_task_or_abort(task_id)
+    
+    validated_task.completed_at = datetime.datetime.now()
+    db.session.commit()
+
+    return jsonify({
+        "task": {
+            'id': validated_task.task_id,
+            'title': validated_task.title,
+            'description': validated_task.description,
+            'is_complete': bool(validated_task.completed_at)
+            }
+        }), 200
+
+
+@tasks_bp.route('/<task_id>/mark_incomplete', methods=['PATCH'])
+def patch_incomplete_task(task_id):
+    validated_task = get_task_or_abort(task_id)
+
+    validated_task.completed_at = None
+    db.session.commit()
+
+    return jsonify({
+        "task": {
+            'id': validated_task.task_id,
+            'title': validated_task.title,
+            'description': validated_task.description,
+            'is_complete': bool(validated_task.completed_at)
+            }
+        }), 200
+
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
