@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
 def validate_task(task_id):
@@ -27,7 +26,7 @@ def validate_task(task_id):
     return task
 
 def check_is_complete(task):
-    '''Takes in one instance of task object, returns the value that should be assigned to is_complete for that object'''
+    '''Takes in one instance of task object, returns the value that should be assigned to is_complete for that object.'''
     if task.completed_at is None:
         return False
     return True
@@ -60,7 +59,6 @@ def get_one_task(task_id):
     task = validate_task(task_id)
     body = {"task": make_task_dict(task)}
     return body
-
 
 @tasks_bp.route("", methods=["POST"])
 def handle_tasks():
@@ -153,6 +151,10 @@ def validate_goal(goal_id):
 
     return goal
 
+def make_goal_dict(goal):
+    '''Takes in one instance of goal object, returns its attributes in a dict.'''
+    goal_dict = {"id": goal.goal_id, "title": goal.title}
+    return goal_dict
 
 @goals_bp.route("", methods=["GET"])
 def get_goals():
@@ -160,7 +162,7 @@ def get_goals():
     goals = Goal.query.all()
     goals_response = []
     for goal in goals:
-        goals_response.append({"id": goal.goal_id, "title": goal.title})
+        goals_response.append(make_goal_dict(goal))
     
     sort_query = request.args.get("sort")
     if sort_query == "asc":
@@ -172,7 +174,7 @@ def get_goals():
 @goals_bp.route("/<goal_id>", methods =["GET"])
 def get_one_goal(goal_id):
     goal = validate_goal(goal_id)
-    return {"goal": {"id": goal.goal_id, "title": goal.title}}
+    return {"goal": make_goal_dict(goal)}
 
 
 @goals_bp.route("", methods=["POST"])
@@ -187,12 +189,7 @@ def handle_goals():
     db.session.add(new_goal)
     db.session.commit()
     
-    body = {
-        "goal": {
-            "id": new_goal.goal_id,
-            "title": new_goal.title
-        }
-    }
+    body = {"goal": make_goal_dict(new_goal)}
 
     return make_response(jsonify(body), 201)
 
@@ -209,14 +206,7 @@ def update_goal(goal_id):
 
     db.session.commit() 
 
-    body = {
-        "goal": {
-            "id": goal.goal_id,
-            "title": goal.title
-        }
-    }
-
-    return make_response(body)
+    return {"goal": make_goal_dict(goal)}
 
 
 
@@ -253,14 +243,7 @@ def get_tasks_by_goal(goal_id):
     goal = validate_goal(goal_id)
     tasks_response = []
     for task in goal.tasks:
-        is_complete = check_is_complete(task)
-        tasks_response.append({
-            "id": task.task_id,
-            "goal_id": task.goal_id,
-            "title": task.title ,
-            "description": task.description,
-            "is_complete": is_complete
-        })
+        tasks_response.append(make_task_dict(task))
     
     body = {"id": int(goal_id), "title": goal.title, "tasks": tasks_response}
     return make_response(body)
