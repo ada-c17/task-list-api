@@ -1,8 +1,9 @@
-# from xmlrpc.client import _datetime
 import datetime
 from flask import Blueprint, jsonify, request, abort, make_response
 from .models.task import Task
 from app import db
+import os
+import requests
 
 task_bp = Blueprint("task_bp",__name__, url_prefix="/tasks" )
 
@@ -29,7 +30,7 @@ def validate_task(task_id):
 def create_one_task():
     request_body = request.get_json()
     try: 
-        if 'completed_at' in request_body: # if request_body.get('completed_at') or  # Dictionary method to get value of attribute; or return None
+        if 'completed_at' in request_body: # alternate: if request_body.get('completed_at')  # Dictionary method to get value of attribute; or return None
             new_task = Task(title=request_body['title'], description=request_body['description'], completed_at=request_body['completed_at'])
         else:
             new_task = Task(title=request_body['title'], description=request_body['description'])
@@ -111,6 +112,10 @@ def update_one_task(task_id):
 # request body will have { 'id': 1, 'is_complete' = false}
 # completed_at = db.Column(db.DateTime, default=None) 
 
+
+
+# request_body { 'id': 1, 'is_complete' = false, 'title': 'My Beautiful Task'}
+
 @task_bp.route("/<task_id>/mark_complete", methods=['PATCH'])
 def mark_task_completed(task_id):
     task = validate_task(task_id)
@@ -125,9 +130,20 @@ def mark_task_completed(task_id):
     {   "id": task.task_id,
         "title": task.title ,
         "description": task.description,
-        "is_complete": is_complete } 
+        "is_complete": is_complete }
         }
+    bot_token = 'Bearer '+ os.environ.get('SLACK_BOT_TOKEN')
+    print(bot_token)
+    slack = requests.post('https://slack.com/api/chat.postMessage', headers={'Authorization': bot_token}, params={'channel': 'task-notifications', 'text':f'Someone just completed the task {task.title}', 'format': 'json'})
+    print(slack)
+    print(slack.content)
+    print('*****')
     return jsonify(response), 200
+
+
+    # requests.patch(url, data=None, **kwargs)[source]
+
+    # 'message': f"Someone just completed the task {task.title}"
 
 @task_bp.route("/<task_id>/mark_incomplete", methods=['PATCH'])
 def mark_task_incomplete(task_id):
