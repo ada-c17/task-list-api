@@ -289,18 +289,42 @@ def delete_one_route(goal_id):
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
 def create_one_goal_tasks_list(goal_id):
     goal = validate_goal(goal_id)
-
     request_body = request.get_json()
-    tasks = Task.query.all()
-    for task in tasks:
-        if task.task_id in request_body["task_ids"]:
-            task.goal_id = goal.goal_id
 
+    # tasks = []
+    # add in some checks?
+    for id in request_body["task_ids"]:
+        task = Task.query.get(id)
+        task.goal_id = goal.goal_id
+    #    tasks.append(task)
     db.session.commit()
 
     response = {
         "id": goal.goal_id,
-        "task_ids": request_body["task_ids"]
+        "task_ids": request_body["task_ids"] # is this the best way?
     }
+
+    return jsonify(response), 200
+
+@goals_bp.route("/<goal_id>/tasks")
+def get_tasks_for_one_goal(goal_id):
+    goal = validate_goal(goal_id)
+
+    goal_tasks = goal.tasks
+
+    response = {
+        "id": goal.goal_id,
+        "title": goal.title,
+        "tasks": []
+    }
+
+    for task in goal_tasks:
+        response["tasks"].append({
+            "id": task.task_id,
+            "goal_id": task.goal_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": bool(task.completed_at)
+        })
 
     return jsonify(response), 200
