@@ -67,3 +67,7 @@ class Task(db.Model):
             remaining_keys= set(data_dict.keys())-set(cls.required_attributes.keys())
             response=list(remaining_keys)
             raise ValueError(response)
+
+    @classmethod
+    def return_class_name(cls):
+        return "Task"
