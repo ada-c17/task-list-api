@@ -3,6 +3,9 @@ from flask import Blueprint, make_response, request,jsonify, abort
 from app import db
 from app.models.task import Task
 from datetime import datetime
+import os
+import requests
+SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 
 
 task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
@@ -117,6 +120,14 @@ def patch_task(task_id, mark):
 
     if mark == "mark_complete":
         task.completed_at = datetime.now()
+        query_params = {
+            "channel": "task-notifications",
+            "text": f'Someone just completed the task {task.title}'
+        }
+        header = {"Authorization": SLACK_BOT_TOKEN}
+
+        url = 'https://slack.com/api/chat.postMessage'
+        requests.post(url, params=query_params, headers=header)
     else:
         task.completed_at = None
 
