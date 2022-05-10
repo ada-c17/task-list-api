@@ -1,10 +1,12 @@
 import json, os, requests
-from datetime import datetime
-from attr import validate
-from sqlalchemy import true
+
 from app import db
 from app.models.task import Task
 from app.models.goal import Goal
+
+from datetime import datetime
+from attr import validate
+from sqlalchemy import true
 from flask import Blueprint, jsonify, abort, make_response, request
 from tests.conftest import one_task
 
@@ -286,9 +288,6 @@ def get_all_goals():
 
     all_goals = Goal.query.all()
 
-    if not all_goals:
-        return 404
-
     # Create the response body
     goal_response = []
 
@@ -297,15 +296,14 @@ def get_all_goals():
 
         goal_response.append(
             {
-                "id" : 1, 
-                "title" : f"Example Goal Title {goal.goal_id}"
+                "id" : goal.goal_id,
+                "title" : f"Example Goal Title {goal.title}"
             }
         )
 
-    return goal_response, 200
+    return jsonify(goal_response), 200
 
-
-# ------------------------ PUT REQUESTS ------------------------ #
+# ------------------------ POSTREQUESTS ------------------------ #
 
 
 # ---- CREATE A TASK ---- #
