@@ -229,3 +229,40 @@ def delete_one_goal(goal_id):
 
     rsp = {"details": f'Goal {goal_id} "{goal.title}" successfully deleted'}
     return jsonify(rsp), 200
+
+
+@goals_bp.route("/<goal_id>/tasks", methods=["POST"])
+def create_task_for_specific_goal(goal_id):
+    goal = validate_goal(goal_id)
+    request_body = request.get_json()
+
+    task_ids = request_body["task_ids"]
+
+    for id in task_ids:
+        task = Task.query.get(id)
+        if not id in goal.tasks:
+            task.goal = goal
+
+    db.session.commit()
+    
+    rsp = { "id": goal.goal_id, "task_ids": task_ids}
+    return jsonify(rsp), 200
+
+
+@goals_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_tasks_from_goal(goal_id):
+    goal = validate_goal(goal_id)
+
+    all_tasks = []
+
+    for task in goal.tasks:
+        all_tasks.append(task.get_dict())
+
+    rsp = {
+        "id" : goal.goal_id,
+        "title" : goal.title,
+        "tasks": all_tasks
+    }
+
+    return jsonify(rsp), 200
+    
