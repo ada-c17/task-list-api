@@ -287,7 +287,6 @@ def delete_one_task(task_id):
 
 def format_goal_response_body(goal):
 
-    
     response_body = jsonify({"goal" : 
         {
             "id" : goal.goal_id,
@@ -362,7 +361,6 @@ def get_one_goal(goal_id):
     if not goal:
         abort(make_response({"details" : f"Invalid data"}, 404))
 
-
     return format_goal_response_body(goal), 200
 
 
@@ -380,7 +378,6 @@ def create_goal():
 
     if not request_body:
         abort(make_response({"details" : f"Invalid data"}, 400))
-
 
 
     new_goal = Goal(title=request_body["title"])
@@ -402,21 +399,8 @@ def create_goal():
 
 # ---- UPDATE GOAL ---- #
 
-# NEED TO FIX THIS! FAILING TEST 6
-
 @goals_bp.route("/<goal_id>", methods=["PUT"])
 def update_goal(goal_id):
-
-    # # Check if task_id is a valid integer
-    # try:
-    #     goal_id = int(goal_id)
-    # except:
-    #     # If it's not, 400 response code
-    #     abort(make_response({"message" : f"Goal ID is invalid."}, 400))
-
-    # # If this specific goal isn't found, 404 response code
-    # if not goal_id:
-    #     abort(make_response({"message" : f"This goal is not found."}, 404))
 
     goal_to_update = validate_goal(goal_id)
 
@@ -433,37 +417,14 @@ def update_goal(goal_id):
 
     db.session.commit()
 
-    # return format_goal_response_body(goal_to_update), 200
-
-    # response_body = jsonify({"goal" : 
-    #     {
-    #         "id" : goal_to_update.goal_id,
-    #         "title" : goal_to_update.title
-    #     }
-    # })
-
-    # return response_body, 200
-
     return format_goal_response_body(goal_to_update), 200
 
 
 # ---- DELETE GOAL ---- #
 @goals_bp.route("/<goal_id>", methods=["DELETE"])
 def delete_goal(goal_id):
-    
-    # Check if goal_id is a valid integer
-    try:
-        goal_id = int(goal_id)
-    except:
-        # If it's not, 400 response code
-        abort(make_response({"message" : f"Goal ID is invalid."}, 400))
 
-    # Search for this goal_id in the Goal Blueprint
-    goal_to_delete = Goal.query.get(goal_id)
-
-    # If this specific goal isn't found, 404 response code
-    if not goal_to_delete:
-        abort(make_response({"message" : f"This goal is not found."}, 404))
+    goal_to_delete = validate_goal(goal_id)
 
 
     db.session.delete(goal_to_delete)
