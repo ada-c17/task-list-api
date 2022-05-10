@@ -7,6 +7,14 @@ import requests
 
 goal_bp = Blueprint("", __name__, url_prefix="/goals" )
 
+
+# helper function:
+def validate_goal(goal_id):
+    goal = Goal.query.get(goal_id)
+    if not goal:
+        abort(make_response({"message":f"task {goal_id} not found"}, 404))
+    return goal
+
 # CREATE (CRUD)
 # POST request to /goals
 # request_body = {"title": "My New Goal"}
@@ -31,12 +39,35 @@ def get_all_goals():
     goals = Goal.query.all()
     goal_list = []
     for goal in goals:
-        goal_list.append({
+        goal_list.append( {
             "id": goal.goal_id,
             "title": goal.title
         })
     return jsonify(goal_list), 200
 
+@goal_bp.route("/<goal_id>",methods=["GET"])
+def get_goal_by_id(goal_id):
+    goal = validate_goal(goal_id)
+    response = { 'goal':
+            {"id": goal.goal_id,
+            "title": goal.title}
+            }
+    return jsonify(response), 200
+
 # UPDATE(CRUD): aka PATCH/PUT
+@goal_bp.route("/<goal_id>",methods=["PUT"])
+def update_goal(goal_id):
+    goal = validate_goal(goal_id)
+    request_body = request.get_json()
+    goal.title = request_body['title']
+    db.session.commit()
+
+    response = {
+        "goal": {
+            "goal_id": goal.goal_id,
+            "title": goal.title,
+        }
+    }
+    return jsonify(response), 200
 
 # DELETE (CRUD)
