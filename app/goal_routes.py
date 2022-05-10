@@ -1,7 +1,7 @@
 from app import db
 from flask import Blueprint, jsonify, request, make_response
 from app.models.goal import Goal
-from .goal_routes_helper import try_to_make_goal
+from .goal_routes_helper import try_to_make_goal, check_goal_exists
 
 goals_bp = Blueprint("goals", __name__, url_prefix = "/goals")
 
@@ -26,12 +26,12 @@ def get_all_goals():
 
     return jsonify(goals_response), 200
 
-# # Get a single Task
-# @goals_bp.route("/<goal_id>", methods = ["GET"])
-# def get_one_task(goal_id):
-#     task = check_task_exists(goal_id)
+# Get a single Goal
+@goals_bp.route("/<goal_id>", methods = ["GET"])
+def get_one_task(goal_id):
+    goal = check_goal_exists(goal_id)
 
-#     return make_response(jsonify({"task": task.to_json()}), 200)
+    return make_response(jsonify({"goal": goal.to_json()}), 200)
 
 # # Update Task
 # @goals_bp.route("/<goal_id>", methods = ["PUT"])
