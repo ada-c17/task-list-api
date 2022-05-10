@@ -1,4 +1,3 @@
-from email.policy import default
 from app import db
 
 
@@ -8,3 +7,11 @@ class Task(db.Model):
     description = db.Column(db.String)
     completed_at = db.Column(db.DateTime, nullable=True)
     is_complete = db.Column(db.Boolean, default=False)
+
+    # def to_dict(self):
+    #     return {
+    #         "id": self.task_id, 
+    #         "title": self.title, 
+    #         "description": self.description, 
+    #         "is_complete": self.is_complete
+    #     }

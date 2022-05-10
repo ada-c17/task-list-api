@@ -1,10 +1,17 @@
-from operator import is_
-from xmlrpc.client import ResponseError
 from flask import Blueprint, request, make_response, jsonify, abort
-from sqlalchemy import null
 from app import db
 from app.models.task import Task 
 import datetime
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
+import os
+import ssl
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def validate_task_id(task_id):
     try: 
@@ -60,7 +67,6 @@ def get_all_tasks():
         tasks = Task.query.order_by(Task.title.desc())
     else:
         tasks = Task.query.all()
-
     tasks_response = []
     for task in tasks:
         tasks_response.append({
@@ -69,7 +75,7 @@ def get_all_tasks():
             "description": task.description, 
             "is_complete": task.is_complete
         })
-
+    # review 5/10 HR for to_dict helper
     return jsonify(tasks_response)
 
 # GET one task 
@@ -99,11 +105,11 @@ def update_task(task_id):
     db.session.commit()
 
     return jsonify({'task':
-        {'id':task.task_id, 
-        'title':task.title, 
-        'description':task.description, 
-        'is_complete':task.is_complete}
-        })
+    {'id':task.task_id, 
+    'title':task.title, 
+    'description':task.description, 
+    'is_complete':task.is_complete}
+    })
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
@@ -113,7 +119,6 @@ def delete_task(task_id):
 
     return make_response({"details": f"Task {task_id} \"{task.title}\" successfully deleted"})
 
-
 # Note - potentially refactor mark_complete and mark_imcomplete routes into one? 
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_task_complete(task_id):
@@ -122,8 +127,26 @@ def mark_task_complete(task_id):
 # mark completed HF?
     task.completed_at = datetime.datetime.now()
     task.is_complete = True
-
     db.session.commit()
+
+# create requests.post(slack api)
+
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+
+    slack_token = os.environ['SLACK_BOT_TOKEN']
+    client = WebClient(token=slack_token, 
+                        ssl=ssl_context)
+    task_title = task_id.title
+    try:
+        response = client.chat_postMessage(
+            channel="task-list-api", 
+            text=f"Someone just completed the task {task_title}"
+        )
+    except SlackApiError as e:
+        assert e.response["error"]
+
     return jsonify({'task':
         {'id':task.task_id, 
         'title':task.title, 
@@ -146,3 +169,7 @@ def mark_task_incomplete(task_id):
         'description':task.description, 
         'is_complete':task.is_complete}
         })
+
+#PSE review 1-6 for mock interview - str manipulation, nested listed(traversing), mostly algorithm questions, algorithm practice 
+# --> will typically be asked about big O 
+#"functional programming"-recursions/lots of immutable , resource==leet code
