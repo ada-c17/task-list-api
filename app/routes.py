@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, make_response, abort, request
 from app.models.task import Task
 from app import db
 # helper function file import
+from sqlalchemy import asc, desc
 
 task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")  # what is string "task_bp", why do we need
 
@@ -16,6 +17,12 @@ POST ROUTE
 @task_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()  # this is from request pckg
+
+    if "title" not in request_body:
+        return make_response(jsonify({"details": "Invalid data"}), 400)
+    if "description" not in request_body:
+        return make_response(jsonify({"details": "Invalid data"}), 400)
+
     new_task = Task(title=request_body["title"], description=request_body["description"])
 
     db.session.add(new_task)
@@ -34,15 +41,25 @@ def create_task():
 GET ROUTES
 '''
 
+# def sort_ascending(listofdicts, key):
+#     sorted_dict = sorted(listofdicts, key=lambda d: d[key])
+#     return sorted_dict
+
+
 # GET SAVED TASKS - (all)
 @task_bp.route("", methods=["GET"])
 def read_saved_tasks():
-    # if we have query parameters
-    # title_query = request.args.get("title")
-    # if title_query:
-    #     tasks = Task.query.filter_by(title=title_query)
-    # else:
-    tasks = Task.query.all()
+
+
+    # query params
+    title_sort_query = request.args.get("sort")
+    if title_sort_query == "asc":
+        print("hello")
+        tasks = Task.query.order_by(asc(Task.title)).all()
+    elif title_sort_query == "desc":
+        tasks = Task.query.order_by(desc(Task.title)).all()
+    else:
+        tasks = Task.query.all()
 
     tasks_response = []
 
@@ -64,11 +81,11 @@ def validate_task(task_id):
     try:
         task_id = int(task_id)
     except:
-        abort(make_response({"message":f"task {task_id} invalid"}, 400))
+        abort(make_response({"details":f"task {task_id} invalid"}, 400))
 
     task = Task.query.get(task_id)
     if not task:
-        return abort(make_response({"message": f"Task {task_id} not found"}, 404))
+        return abort(make_response({"details": f"Task {task_id} not found"}, 404))
 
     return task
 
@@ -125,15 +142,9 @@ def delete_one_task(task_id):
     db.session.delete(task)
     db.session.commit()
 
-    delete_response = {
-        "details": f"Task {task.task_id} \"{task.title}\" successfully deleted'"
-    }
+    delete_response = f"Task {task.task_id} \"{task.title}\" successfully deleted"
 
     return make_response(jsonify({"details": delete_response}), 200)
-
-    return make_response(jsonify({"task": task_response_body}), 200)
-
-
 
 # =========
 
