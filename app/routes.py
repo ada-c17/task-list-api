@@ -3,6 +3,10 @@ from flask import Blueprint, jsonify, request, abort, make_response
 from app.models.task import Task
 from app import db
 from datetime import datetime
+import requests
+import os
+
+
 
 
 task_list_bp = Blueprint("task_list", __name__, url_prefix='/tasks')
@@ -12,8 +16,8 @@ def create_one_task():
     request_body = request.get_json()
 
     if "description" not in request_body or "title" not in request_body:
-        rsp = {"details": "Invalid data"}
-        abort(make_response(jsonify(rsp), 400))
+        response = {"details": "Invalid data"}
+        abort(make_response(jsonify(response), 400))
 
     if "completed_at" in request_body:
         new_task = Task(title=request_body['title'], 
@@ -22,33 +26,33 @@ def create_one_task():
         new_task = Task(title=request_body['title'], 
                     description=request_body['description'])
 
-    is_complete = check_is_completed(new_task)
+    # is_complete = check_is_completed(new_task)
     db.session.add(new_task)
     db.session.commit()
-    rsp = {
-        "task":{
-        "id": new_task.task_id,
-        "title": new_task.title,
-        "description":new_task.description,
-        "is_complete": is_complete
-        }
-    }
-
-    return jsonify(rsp), 201
+    # response = {
+    #     "task":{
+    #     "id": new_task.task_id,
+    #     "title": new_task.title,
+    #     "description":new_task.description,
+    #     "is_complete": is_complete
+    #     }
+    # }
+    response = make_task_response(new_task)
+    return jsonify(response), 201
 
 
 def get_task_or_abort(task_id):
     try:
         task_id = int(task_id)
     except ValueError:
-        rsp = {"msg":f"Invalid id: {task_id}"}
-        abort(make_response(jsonify(rsp), 400))
+        response = {"msg":f"Invalid id: {task_id}"}
+        abort(make_response(jsonify(response), 400))
     chosen_task = Task.query.get(task_id)
 
     if chosen_task is None:
         #rsp = {"msg": f"Could not find task with id {task_id}"}
-        rsp =  {"msg": "Task not found"}
-        abort(make_response(jsonify(rsp), 404))
+        response =  {"msg": "Task not found"}
+        abort(make_response(jsonify(response), 404))
     return chosen_task
 
 #helper function, checks if task is complete
@@ -60,20 +64,33 @@ def check_is_completed(task):
     
     return is_complete
 
+#helper function, makes responses
+def make_task_response(task):
+    is_complete = check_is_completed(task)
+    response = {
+        "task": {
+            'id': task.task_id,
+            'title': task.title,
+            'description': task.description,
+            'is_complete': is_complete
+        }
+    }
+    return response
 
 
 @task_list_bp.route('/<task_id>', methods = ['GET'])
 def get_one_task(task_id):
     chosen_task = get_task_or_abort(task_id)
-    is_complete = check_is_completed(chosen_task)
+    #is_complete = check_is_completed(chosen_task)
 
-    rsp = {'task':{
-        'id': chosen_task.task_id,
-        'title': chosen_task.title,
-        'description': chosen_task.description,
-        'is_complete': is_complete
-    }}
-    return jsonify(rsp), 200
+    # rsp = {'task':{
+    #     'id': chosen_task.task_id,
+    #     'title': chosen_task.title,
+    #     'description': chosen_task.description,
+    #     'is_complete': is_complete
+    # }}
+    response = make_task_response(chosen_task)
+    return jsonify(response), 200
 
 
 @task_list_bp.route('', methods = ['GET'])
@@ -110,43 +127,73 @@ def get_all_tasks():
     
     return jsonify(tasks_response)
 
+#SLACK API 
+def message_slack(task):
+
+    SLACK_TOKEN = os.environ.get('SLACK_TOKEN')
+    PATH = 'https://slack.com/api/chat.postMessage'
+    query_params = {
+        "channel":"task-notifications",
+        "text":f"Someone just completed the task {task.title}"
+    }
+    header = {
+        "Authorization" : f"Bearer {SLACK_TOKEN}"
+    }
+
+    response = requests.post(PATH, params=query_params, headers=header)
+
+
+    return response
+
+
+
 
 @task_list_bp.route('/<task_id>/mark_complete', methods = ['PATCH'])
 def mark_complete(task_id):
     chosen_task = get_task_or_abort(task_id)
 
+    #check if task was already completed, if not send message to slack
+    if not check_is_completed(chosen_task):
+        message_slack(chosen_task)
+
+
     chosen_task.completed_at = datetime.utcnow()
-    is_complete = check_is_completed(chosen_task)
+    
+    #is_complete = check_is_completed(chosen_task)
 
     db.session.commit()
 
-    rsp = {
-        "task": {
-            'id': chosen_task.task_id,
-            'title': chosen_task.title,
-            'description': chosen_task.description,
-            'is_complete': is_complete
-        }
-    }
-    return jsonify(rsp), 200
+    # response = {
+    #     "task": {
+    #         'id': chosen_task.task_id,
+    #         'title': chosen_task.title,
+    #         'description': chosen_task.description,
+    #         'is_complete': is_complete
+    #     }
+    # }
+    response = make_task_response(chosen_task)
+
+    return jsonify(response), 200
 
 @task_list_bp.route('/<task_id>/mark_incomplete', methods = ['PATCH'])
 def mark_incomplete(task_id):
     chosen_task = get_task_or_abort(task_id)
     chosen_task.completed_at = None
-    is_complete = check_is_completed(chosen_task)
+    #is_complete = check_is_completed(chosen_task)
     
     db.session.commit()
 
-    rsp = {
-        "task": {
-            'id': chosen_task.task_id,
-            'title': chosen_task.title,
-            'description': chosen_task.description,
-            'is_complete': is_complete
-        }
-    }
-    return jsonify(rsp), 200
+    response = make_task_response(chosen_task)
+
+    # rsp = {
+    #     "task": {
+    #         'id': chosen_task.task_id,
+    #         'title': chosen_task.title,
+    #         'description': chosen_task.description,
+    #         'is_complete': is_complete
+    #     }
+    # }
+    return jsonify(response), 200
 
 
 @task_list_bp.route('/<task_id>', methods = ['PUT'])
@@ -163,20 +210,20 @@ def update_task(task_id):
             "msg": "title and description are required"
         }, 400
     
-    is_complete = check_is_completed(chosen_task)
+    # is_complete = check_is_completed(chosen_task)
 
     db.session.commit()
 
-    rsp = {
-        "task": {
-        'id': chosen_task.task_id,
-        'title': chosen_task.title,
-        'description': chosen_task.description,
-        'is_complete': is_complete
-        }
-        #"msg": f"task #{chosen_task.id} successfully replaced"
-    }
-    return jsonify(rsp), 200
+    # rsp = {
+    #     "task": {
+    #     'id': chosen_task.task_id,
+    #     'title': chosen_task.title,
+    #     'description': chosen_task.description,
+    #     'is_complete': is_complete
+    #     }
+    # }
+    response = make_task_response(chosen_task)
+    return jsonify(response), 200
 
 @task_list_bp.route('/<task_id>', methods = ['DELETE'])
 def delete_task(task_id):
