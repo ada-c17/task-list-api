@@ -297,6 +297,26 @@ def format_goal_response_body(goal):
 
     return response_body
 
+
+def validate_goal(goal_id):
+    # Check if task_id is a valid integer
+    try:
+        goal_id = int(goal_id)
+    except:
+        # If it's not, 400 response code
+        abort(make_response({"message" : f"Goal ID is invalid."}, 400))
+
+
+    validated_goal = Goal.query.get(goal_id)
+
+    # If this specific goal isn't found, 404 response code
+    if not validated_goal:
+        abort(make_response({"message" : f"This goal is not found."}, 404))
+    
+    return validated_goal
+
+
+
 # ------------------------ GET REQUESTS ------------------------ #
 
 # ---- GET ALL GOALS ---- #
@@ -387,22 +407,18 @@ def create_goal():
 @goals_bp.route("/<goal_id>", methods=["PUT"])
 def update_goal(goal_id):
 
-    # Check if task_id is a valid integer
-    try:
-        goal_id = int(goal_id)
-    except:
-        # If it's not, 400 response code
-        abort(make_response({"message" : f"Goal ID is invalid."}, 400))
+    # # Check if task_id is a valid integer
+    # try:
+    #     goal_id = int(goal_id)
+    # except:
+    #     # If it's not, 400 response code
+    #     abort(make_response({"message" : f"Goal ID is invalid."}, 400))
 
-    # If this specific goal isn't found, 404 response code
-    if not goal_id:
-        abort(make_response({"message" : f"This goal is not found."}, 404))
+    # # If this specific goal isn't found, 404 response code
+    # if not goal_id:
+    #     abort(make_response({"message" : f"This goal is not found."}, 404))
 
-
-
-
-    # Search for this goal_id in the Goal Blueprint
-    goal_to_update = Goal.query.get(goal_id)
+    goal_to_update = validate_goal(goal_id)
 
     request_body = request.get_json()
 
@@ -415,19 +431,20 @@ def update_goal(goal_id):
 
     goal_to_update.title = request_body["title"]
 
-    # db.session.add(goal_to_update)
     db.session.commit()
 
     # return format_goal_response_body(goal_to_update), 200
 
-    response_body = jsonify({"goal" : 
-        {
-            "id" : goal_to_update.goal_id,
-            "title" : goal_to_update.title
-        }
-    })
+    # response_body = jsonify({"goal" : 
+    #     {
+    #         "id" : goal_to_update.goal_id,
+    #         "title" : goal_to_update.title
+    #     }
+    # })
 
-    return response_body, 200
+    # return response_body, 200
+
+    return format_goal_response_body(goal_to_update), 200
 
 
 # ---- DELETE GOAL ---- #
