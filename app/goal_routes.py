@@ -124,8 +124,20 @@ def create_task(goal_id):
 
     return make_response(jsonify(response), 200)
 
-@goals_bp.route("<goal_id/tasks", methods=["GET"])
-def 
+@goals_bp.route("<goal_id>/tasks", methods=["GET"])
+def read_tasks_for_one_goal(goal_id): 
+    goal = validate_goal(goal_id)
+    
+    response = {
+        "id": goal.goal_id, 
+        "title": goal.title, 
+        "tasks": []
+    }
+
+    for task in goal.tasks: 
+        response["tasks"].append(task.to_dict())
+    return response
+    
 
 
 

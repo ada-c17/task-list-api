@@ -83,16 +83,9 @@ def read_all_tasks():
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def read_one_task(task_id):
     task = validate_task(task_id)
-    task = Task.query.get(task_id)
+    # task = Task.query.get(task_id)
 
-    response = {
-            "id": task.id, 
-            "title": task.title,
-            "description": task.description, 
-            "is_complete": isinstance(task.completed_at, datetime)
-    }
-
-    return make_response(jsonify({"task": response}))
+    return make_response(jsonify({"task": task.to_dict()}))
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
@@ -113,21 +106,18 @@ def update_task(task_id):
 
     return make_response(jsonify({"task": response}))
 
-@tasks_bp.route("/<task_id>/<mark_complete>", methods=["PATCH"])
-def update_is_complete(task_id, mark_complete=None): 
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def update_is_complete(task_id): 
     channel_id = "task-notifications"
     slack_key = os.environ.get('SLACKBOT_API_KEY')
     client = WebClient(token=slack_key)
 
     task = validate_task(task_id)
 
-    if mark_complete == "mark_complete":
-        task.completed_at = datetime.now()
-        response = client.chat_postMessage(
+    task.completed_at = datetime.now()
+    response = client.chat_postMessage(
                 channel=channel_id, 
                 text=(f"Someone just completed the task {task.title}"))
-    else:
-        task.completed_at = None
     
     db.session.commit()
 
@@ -140,6 +130,21 @@ def update_is_complete(task_id, mark_complete=None):
 
     return make_response(jsonify({"task": response}))
 
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def update_is_not_complete(task_id): 
+    task = validate_task(task_id)
+
+    task.completed_at = None
+    db.session.commit()
+
+    response = {
+            "id": task.id, 
+            "title": task.title,
+            "description": task.description, 
+            "is_complete": isinstance(task.completed_at, datetime)
+    }
+
+    return make_response(jsonify({"task": response}))
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_one_task(task_id):
