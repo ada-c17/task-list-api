@@ -11,4 +11,4 @@ class Task(db.Model):
     completed_at = db.Column(db.DateTime, nullable=True)
     goal_id = db.Column(db.Integer, db.ForeignKey("goal.goal_id"))
     # Need to match the class name
-    goal = db.relationship("Goal", back_populates="tasks")
+    # goal = db.relationship("Goal", backref="tasks")
