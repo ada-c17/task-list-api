@@ -15,14 +15,14 @@ class Task(db.Model):
             is_complete=False if self.completed_at == None else self.completed_at
         )
         
-    def override_task(self, data_dict):
-        pass
+    # def override_task(self, data_dict):
+    #     pass
 
-    @classmethod
-    def from_dict(cls, data_dict):
-        return cls(
-            dict(
-                title=data_dict["title"],
-                description=data_dict["description"],
-                completed_at=data_dict["completed_at"])
-        )
+    # @classmethod
+    # def from_dict(cls, data_dict):
+    #     return cls(
+    #         dict(
+    #             title=data_dict["title"],
+    #             description=data_dict["description"],
+    #             completed_at=data_dict["completed_at"])
+    #     )
