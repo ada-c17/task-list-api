@@ -111,7 +111,7 @@ PUT ROUTES
 
 # UPDATE ONE TASK
 # without update function in task.py
-@task_bp.route("/<task_id>", methods = ["PUT"])
+@task_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
     task = validate_task(task_id)
 
@@ -156,7 +156,7 @@ def patch_task_complete(task_id):
     return make_response(jsonify({"task": task_response_body}), 200)
 
 # PATCH ONE TASK - MARK INCOMPLETE
-@task_bp.route("/<task_id>/mark_incomplete", methods = ["PATCH"])
+@task_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def patch_task_incomplete(task_id):
     task = validate_task(task_id)
 
@@ -180,7 +180,7 @@ DELETE ROUTE
 '''
 
 # DELETE ONE TASK
-@task_bp.route("/<task_id>", methods = ["DELETE"])
+@task_bp.route("/<task_id>", methods=["DELETE"])
 def delete_one_task(task_id):
     task = validate_task(task_id)
 
