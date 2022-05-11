@@ -45,8 +45,6 @@ def get_one_tasks(id):
     print(task)
     return jsonify({"task": task.to_json()}), 200
 
-# CREATE PLANET
-
 
 @tasks_bp.route("", methods=["POST"])
 def create_task():
