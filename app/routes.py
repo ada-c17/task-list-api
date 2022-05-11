@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, make_response, request, abort
 from app.models.task import Task
 from app import db
+import datetime
 
 
 bp = Blueprint("tasks", __name__, url_prefix="/tasks")
@@ -11,7 +12,7 @@ def create_task():
     request_body = request.get_json()
     if "title" not in request_body or "description" not in request_body:
         create_message("Invalid data", 400)
-
+    # could change the above to a try and except
     task = Task.from_dict(request_body)
 
     db.session.add(task)
@@ -46,9 +47,7 @@ def read_all_tasks():
 def replace_task(task_id):
     task = validate_task_id(task_id)
     request_body = request.get_json()
-
-    # task.title = request_body["title"]
-    # task.description = request_body["description"]
+    # might want to put this into a try and except
     task.override_task(request_body)
     
     db.session.commit()
@@ -64,10 +63,22 @@ def delete_task(task_id):
     create_message(f"Task {task_id} \"{task.title}\" successfully deleted", 200)
 
 
-@bp.route("/<task_id>", methods=("PATCH",))
+@bp.route("/<task_id>/mark_complete", methods=("PATCH",))
 def update_task(task_id):
     task = validate_task_id(task_id)
-    pass
+    request_body = request.get_json()
+    task_keys = request_body.keys()
+
+    if "name" in task_keys:
+        task.name = request_body["name"]
+
+    if "description" in task_keys:
+        task.description = request_body["description"]
+
+    task.completed_at = datetime.datetime.now()
+
+    db.session.commit()
+    return jsonify({"task": task.to_dict()}), 200
 
 
 def validate_task_id(task_id):
