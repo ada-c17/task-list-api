@@ -21,12 +21,6 @@ class Task(db.Model):
             task_dictionary["goal_id"] = self.goal_id
 
         return task_dictionary
-        # return {
-        #     "id": self.task_id,
-        #     "title": self.title,
-        #     "description": self.description,
-        #     "is_complete": True if self.completed_at else False
-        # }
 
     def update(self, request_body):
         self.title = request_body["title"]
