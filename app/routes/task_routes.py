@@ -1,8 +1,17 @@
-import datetime
-from app import db
+import slack
+from pathlib import Path
+from dotenv import load_dotenv
 from app.models.task import Task
+from app import db
+import os
+import datetime
+
+from ..helpers import validate_task
 from flask import Blueprint, request, jsonify, make_response, abort
-from .helpers import validate_task
+
+env_path = Path('.') / '.env'
+load_dotenv(dotenv_path=env_path)
+client = slack.WebClient(token=os.environ['SLACK_TOKEN'])
 
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
@@ -63,7 +72,14 @@ def update_task(task_id):
 
     task.title = request_body["title"]
     task.description = request_body["description"]
+    # Task.update(request_body)
     db.session.commit()
+
+    # try:
+    #     Task.update(request_body)
+    #     db.session.commit()
+    # except KeyError:
+    #     return abort(make_response(jsonify("Missing information")), 400)
 
     return make_response(jsonify(task.to_json()), 200)
 
@@ -85,6 +101,9 @@ def complete_update(task_id):
         task.completed_at = datetime.datetime.now()
 
     db.session.commit()
+    client.chat_postMessage(channel='#task-notifications',
+                            text=f"task: '{task.title}' is complete")
+
     return make_response(jsonify(task.to_json()), 200)
 
 
