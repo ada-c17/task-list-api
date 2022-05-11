@@ -1,3 +1,4 @@
+from turtle import title
 from flask import Blueprint, jsonify, abort, make_response, request
 from app.models.task import Task 
 from app import db
@@ -28,7 +29,7 @@ def create_task():
 
     try:
         task = Task.from_dict(request_body)
-    except KeyError as error:
+    except KeyError:
         error_message(f"Invalid data", 400)
 
     db.session.add(task)
@@ -36,13 +37,20 @@ def create_task():
 
     return jsonify({"task": task.make_dict()}), 201
 
-# GET /tasks
+# GET /tasks?sort=
 @bp.route("", methods=["GET"])
 def list_tasks():
-    tasks = Task.query.all()
+    sort_param = request.args.get("sort")
+    if sort_param == "asc":
+        tasks = Task.query.order_by(Task.title).all()
+    elif sort_param == "desc":
+        tasks = Task.query.order_by(Task.title.desc()).all()
+    else:
+        tasks = Task.query.all()
     list_of_tasks = [task.make_dict() for task in tasks]
 
     return jsonify(list_of_tasks)
+
 
 # GET /tasks/<task_id>
 @bp.route("/<task_id>", methods=["GET"])
@@ -64,7 +72,29 @@ def replace_task_by_id(task_id):
 
     db.session.commit()
 
-    return jsonify(task.make_dict())
+    return jsonify({"task": task.make_dict()})
+
+# PATCH  /tasks/<task_id>/mark_complete
+@bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def mark_complete_task_by_id(task_id):
+    task = get_task_record_by_id(task_id)
+
+    task.mark_complete()
+
+    db.session.commit()
+
+    return jsonify({"task": task.make_dict()})
+
+# PATCH  /tasks/<task_id>/mark_incomplete
+@bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def mark_incomplete_task_by_id(task_id):
+    task = get_task_record_by_id(task_id)
+
+    task.mark_incomplete()
+
+    db.session.commit()
+
+    return jsonify({"task": task.make_dict()})
 
 # DELETE /tasks/<task_id>
 @bp.route("/<task_id>", methods=["DELETE"])
@@ -75,4 +105,4 @@ def delete_task_by_id(task_id):
     db.session.commit()
 
     task = task.make_dict()
-    return make_response(f"Task {task_id} \ {task['title']} \ successfully deleted")
+    return jsonify({'details': f'Task {task_id} "{task["title"]}" successfully deleted'})

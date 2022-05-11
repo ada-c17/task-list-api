@@ -1,4 +1,5 @@
 from app import db
+from datetime import datetime
 
 
 class Task(db.Model):
@@ -6,27 +7,37 @@ class Task(db.Model):
     title = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=False)
     completed_at = db.Column(db.DateTime, default=None)
-    is_completed = db.Column(db.Boolean, default=False)
+    is_complete = db.Column(db.Boolean, nullable=False, default=False)
 
     def make_dict(self):
-        data_dict= dict(
+        data_dict=dict(
                 id=self.task_id,
                 title=self.title,
-                description=self.description,  
+                description=self.description, 
+                is_complete = self.is_complete
             )
-        if self.is_completed == False: 
-            data_dict["is_completed"] = self.is_completed
-        else: 
-            data_dict["completed_at"] = self.completed_at
+
         return data_dict
     
     def replace_all_details(self, data_dict):
         self.title = data_dict["title"]
         self.description = data_dict["description"]
+        if "completed_at" in data_dict:
+            self.completed_at = data_dict["completed_at"]
+            self.is_complete = True
     
+    def mark_complete(self):
+        self.is_complete = True
+        self.completed_at = datetime.utcnow()
+    
+    def mark_incomplete(self):
+        self.is_complete = False
+        self.completed_at = None
+
     @classmethod
     def from_dict(cls, data_dict):
-        return cls(
-            title = data_dict["title"], 
-            description = data_dict["description"],
-            )
+        is_complete = "completed_at" in data_dict
+        return cls(is_complete=is_complete,
+                   title=data_dict["title"], 
+                   description=data_dict["description"],
+                   completed_at=data_dict.get("completed_at"))
