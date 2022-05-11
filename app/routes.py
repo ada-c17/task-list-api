@@ -3,9 +3,14 @@ from app import db
 from app.models.task import Task
 from datetime import datetime
 import sys
-# from os import abort
+import os
+import requests
+from dotenv import load_dotenv
+load_dotenv()
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
+
+SLACK_TOKEN = os.environ.get("SLACK_TOKEN")
 
 
 def validate_task_id(task_id):
@@ -103,6 +108,14 @@ def update_task_status(task_id):
     found_task.completed_at = datetime.now()
 
     db.session.commit()
+
+    message = f"Someone just completed task {found_task.title}"
+
+    headers = {"Authorization": "Bearer " + SLACK_TOKEN}
+    params = {"channel": "task-notifications", "text": message}
+
+    requests.post('https://slack.com/api/chat.postMessage',
+                  data=params, headers=headers)
 
     return make_response(jsonify({"task":
                                   {"id": found_task.task_id,
