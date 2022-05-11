@@ -5,7 +5,8 @@ class Task(db.Model):
     title = db.Column(db.String, nullable=False)
     description = db.Column(db.String)
     completed_at = db.Column(db.DateTime) 
-    # `db.DateTime` thought this should be None...
+    goal = db.relationship("Goal", back_populates="tasks")
+    goal_id = db.Column(db.Integer, db.ForeignKey("goal.goal_id"), nullable=True)
 
     def to_dict(self):
         status = True if self.completed_at is not None else False
@@ -15,3 +16,4 @@ class Task(db.Model):
                 "description": self.description,
                 "is_complete": status
                 }
+

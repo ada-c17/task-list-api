@@ -14,15 +14,6 @@ goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
 # VALIDATE ID
 def validate_id(id):
-    if "/tasks" in request.path:
-        try:
-            task_id = int(id)
-        except ValueError:
-            abort(make_response(jsonify(f"Task {task_id} is invalid"), 400))
-        task = Task.query.get(task_id)
-        if not task:
-            abort(make_response(jsonify(f"Task {task_id} not found"), 404))
-        return task
     if "/goals" in request.path or "/goals/<goal_id>" in request.path:
         try:
             goal_id = int(id)
@@ -32,11 +23,27 @@ def validate_id(id):
         if not goal:
             abort(make_response(jsonify(f"Goal {goal_id} not found"), 404))
         return goal
+    if "/tasks" in request.path:
+        try:
+            task_id = int(id)
+        except ValueError:
+            abort(make_response(jsonify(f"Task {task_id} is invalid"), 400))
+        task = Task.query.get(task_id)
+        if not task:
+            abort(make_response(jsonify(f"Task {task_id} not found"), 404))
+        return task
 
 # VALIDATE REQUEST
 def validate_request(request):
     request_body = request.get_json()
-    if "/goals" in request.path:
+    
+    if "/goals" in request.path and "/tasks" in request.path:
+        try:
+            request_body["task_ids"]
+        except KeyError:
+            abort(make_response({"details": "Invalid data"}, 400)) 
+        return request_body
+    elif "/goals" in request.path:
         try:
             request_body["title"]
         except KeyError:
@@ -193,10 +200,33 @@ def update_goal(goal_id):
     db.session.commit()
     return make_response(jsonify({"goal": goal.to_dict()}))
 
-# DELETE /<task_id>
+# DELETE /<goal_id>
 @goals_bp.route("/<goal_id>", methods=["DELETE"])
 def delete_goal(goal_id):
     goal = validate_id(goal_id)
     db.session.delete(goal)
     db.session.commit()
     return make_response({"details": f'Goal {goal_id} "{goal.title}" successfully deleted'})
+
+# Gather all tasks of one goal
+@goals_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_tasks_from_one_goal():
+    pass
+
+# Gather all tasks of one goal
+@goals_bp.route("/<goal_id>/tasks", methods=["POST"])
+def connect_tasks_to_goal(goal_id):
+    goal = validate_id(goal_id)
+    request_body = validate_request(request)
+    for task_id in request_body["task_ids"]:
+        goal.tasks.append(Task.query.get(task_id))
+    list_of_task_ids_added = []
+    for task_instance in goal.tasks:
+        list_of_task_ids_added.append(task_instance.task_id)
+    db.session.commit()
+    return make_response({
+        "id": goal.goal_id,
+        "task_ids": list_of_task_ids_added
+    })
+
+    # for task in tasks
