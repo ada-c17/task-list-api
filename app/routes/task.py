@@ -1,4 +1,4 @@
-from flask import Blueprint, request,jsonify, make_response
+from flask import Blueprint, request, jsonify, make_response
 from app.models.task import Task
 from app import db 
 from sqlalchemy import desc, asc
@@ -37,8 +37,6 @@ def mark_complete(task_id):
     task.completed_at = datetime.utcnow()
     db.session.commit()
     
-    # headers = { "Authorization": "Bearer " + os.environ.get(
-    #         "SLACK_API_TOKEN") }
     headers = { "Authorization": "Bearer " + os.environ.get("SLACK_API_TOKEN", "") }
     
     requests.post(PATH + f"Someone just completed the task {task.title}", headers=headers)
@@ -82,16 +80,27 @@ def get_all_tasks():
             tasks = Task.query.order_by(asc(Task.title)).all()
         elif sort.lower() == "desc":
             tasks = Task.query.order_by(desc(Task.title)).all()
+        elif sort == "id-asc":
+            tasks = Task.query.order_by(asc(Task.task_id)).all()
+        elif sort == "id-desc":
+            tasks = Task.query.order_by(desc(Task.task_id)).all()
     else:    
         tasks = Task.query.all()
 
-    tasks_response = []
+    if "title" in params:
+        title = params["title"]
+        tasks = Task.query.filter_by(title=title)
+    
+    # before list comprehension 
+    # tasks_response = []
 
-    if len(tasks) == 0:
-        return jsonify(tasks_response), 200
+    # if len(tasks) == 0:
+    #     return jsonify(tasks_response), 200
 
-    for task in tasks:
-        tasks_response.append(task.to_json())
+    # for task in tasks:
+    #     tasks_response.append(task.to_json())
+
+    tasks_response = [task.to_json() for task in tasks]
     
     return jsonify(tasks_response), 200
 

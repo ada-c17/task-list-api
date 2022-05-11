@@ -15,13 +15,18 @@ class Task(db.Model):
         else:
             return True 
     
-    def to_json(task):
-        return {
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": task.is_complete()
+    def to_json(self):
+        json = {
+            "id": self.task_id,
+            "title": self.title,
+            "description": self.description,
+            "is_complete": self.is_complete()
         }
+
+        if self.goal_id:
+            json["goal_id"] = self.goal_id
+
+        return json 
 
     def validate_task(task_id):
         try:
@@ -37,5 +42,11 @@ class Task(db.Model):
         return task 
 
     @classmethod
-    def from_json(cls):
-        pass 
+    def from_json(cls, task_json):
+        title = task_json["title"]
+        description = task_json["description"]
+        completed_at = task_json["completed_at"]
+
+        task = cls(title, description, completed_at)
+
+        return task

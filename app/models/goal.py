@@ -20,5 +20,18 @@ class Goal(db.Model):
 
         return goal 
 
-    def to_json(goal):
-        pass 
+    def to_json(self):
+        # json = {
+        #     "id": self.goal_id,
+        #     "title": self.title
+        # }
+
+        # if self.tasks:
+        #     json["tasks"] = [task.to_json() for task in self.tasks]
+
+        # return json
+            
+        return {
+            "id": self.goal_id,
+            "title": self.title
+        }
