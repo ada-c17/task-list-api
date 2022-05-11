@@ -1,15 +1,38 @@
+'''
+ROUTES
+-------------------------
+Defines endpoints for *tasks* and *goals* for the Task List API.
+
+TABLE OF CONTENTS:
+    [0] Imports
+    [1] Helper Functions
+    [2] Blueprints
+    [3] *TASK* endpoints
+    [4] *GOAL* endpoints
+'''
+
+
+
+##### IMPORTS #################################################################
+
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, make_response, request, abort
 import datetime
 import requests
 import os
-#from sqlalchemy import asc, desc
+
+
+
+
+##### HELPER FUNCTIONS ########################################################
 
 def validate_object(object_id, object_type):
     '''
-    object_id:  id of a task or goal
-    object_type: "goal" or "task" depending on endpoint
+    Validates the goal or task based on ID and fetches the object from the database.
+        *object_id:  id of a task or goal
+        *object_type: "goal" or "task" depending on endpoint
+        OUTPUT: goal or task object fetched from database.
     '''
     try:
         object_id = int(object_id)
@@ -25,27 +48,39 @@ def validate_object(object_id, object_type):
 
     return goal_or_task
 
+def post_to_slack(title):
+    '''
+    This function posts a completion method to slack with a slackbot when the
+    patch command "complete_task" is run.
+        *title: title of the task or goal (e.g. task.title)
+        OUTPUT: None (run in place)
+    '''
+    PATH = "https://api.slack.com/api/chat.postMessage"
+    SLACK_AUTH_TOKEN = os.environ.get("SLACK_TOKEN")
 
-tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
+    query_params = {
+        "channel":"task-list",
+        "text":f'Someone just completed the task {title}'
+    }
+    header = {"Authorization":SLACK_AUTH_TOKEN}
+    requests.post(PATH, params=query_params, headers=header)
 
-
-@tasks_bp.route("", methods=["GET"])
-def get_tasks():
-    order_by_query = request.args.get("sort")
-    if order_by_query == "asc":
+def ordered_tasks_query(sort_method):
+    '''
+    Determines the order_by type (if any) for GET all tasks when called.
+        *sort_method: Evaluates to "asc" or "desc".
+            ALWAYS pass in request.args.get("sort") when calling
+        OUTPUT: returns the ordered tasks.
+    '''
+    if sort_method == "asc":
         tasks = Task.query.order_by(Task.title.asc())
-    elif order_by_query == "desc":
+    elif sort_method == "desc":
         tasks = Task.query.order_by(Task.title.desc())
     else:
         tasks = Task.query.all()
+    return tasks
 
-    return jsonify([task.to_dict() for task in tasks])
-
-
-@tasks_bp.route("", methods=["POST"])
-def post_task():
-    request_body = request.get_json()
-
+def validate_task_request_body(request_body):
     if "title" in request_body and "description" in request_body:
         new_task = Task(title=request_body["title"],
                     description=request_body["description"])
@@ -53,7 +88,36 @@ def post_task():
             new_task.completed_at = request_body["completed_at"]
     else:
         abort(make_response({"details": "Invalid data"}, 400))
+    return task
 
+
+
+##### BLUEPRINTS ##############################################################
+
+tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
+goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
+
+
+
+
+##### TASK ENDPOINTS ##########################################################
+
+@tasks_bp.route("", methods=["GET"])
+def get_tasks():
+    tasks = ordered_tasks_query(request.args.get("sort"))
+    return jsonify([task.to_dict() for task in tasks])
+
+
+@tasks_bp.route("", methods=["POST"])
+def post_task():
+    request_body = request.get_json()
+    if "title" in request_body and "description" in request_body:
+        new_task = Task(title=request_body["title"],
+                    description=request_body["description"])
+        if "completed_at" in request_body:
+            new_task.completed_at = request_body["completed_at"]
+    else:
+        abort(make_response({"details": "Invalid data"}, 400))
 
     db.session.add(new_task)
     db.session.commit()
@@ -104,17 +168,7 @@ def complete_task(task_id):
     task.completed_at = datetime.datetime.utcnow()
     db.session.commit()
 
-    #Post message to slack
-    PATH = "https://api.slack.com/api/chat.postMessage"
-    SLACK_AUTH_TOKEN = os.environ.get("SLACK_TOKEN")
-
-    query_params = {
-        "channel":"task-list",
-        "text":f'Someone just completed the task {task.title}'
-    }
-    header = {"Authorization":SLACK_AUTH_TOKEN}
-    x = requests.post(PATH, params=query_params, headers=header)
-    #end post
+    post_to_slack(task.title)
 
     return make_response({"task":task.to_dict()})
 
@@ -131,6 +185,8 @@ def incomplete_task(task_id):
 
 
 
+
+##### GOAL ENDPOINTS ##########################################################
 
 
 
