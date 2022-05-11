@@ -1,3 +1,6 @@
+import os
+
+import requests
 from flask import Blueprint, jsonify, make_response, request, abort
 from app import db
 from app.models.task import Task
@@ -46,8 +49,8 @@ def validate_task(task_id):
     abort(make_response({"details": "Item not found"}, 404))
 
 
-def update_completed_at(task_id, completed_at):
-    task = validate_task(task_id)
+def update_completed_at(task, completed_at):
+
     task.completed_at = completed_at
     db.session.commit()
     return jsonify(
@@ -118,11 +121,22 @@ def delete_one_task(task_id):
         {"details": f'Task {task_id} "{task.title}" successfully deleted'}), 200
 
 
+def send_notification(title):
+    message = f'Someone just completed the task {title}'
+    query = {"channel": "task-notifications", "text": f'"{message}"'}
+    headers = {"Authorization": os.environ.get("SLACK_TOKEN")}
+    requests.get(os.environ.get("SLACK_URL"), headers=headers, params=query)
+
+
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def update_completed_at_attribute(task_id):
-    return update_completed_at(task_id, datetime.utcnow())
+    task = validate_task(task_id)
+    rs = update_completed_at(task, datetime.utcnow())
+    send_notification(task.title)
+    return rs
 
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def update_incompleted_tasks(task_id):
-    return update_completed_at(task_id, None)
+    task = validate_task(task_id)
+    return update_completed_at(task, None)
