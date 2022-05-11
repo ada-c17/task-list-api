@@ -59,7 +59,7 @@ def slack_notification(task_to_notify):
 
 
 
-def format_response_body(task):
+def format_task_response_body(task):
 
     if task.completed_at:
         is_complete = True
@@ -75,6 +75,19 @@ def format_response_body(task):
         }
     })
 
+
+    if task.goal_id:
+
+        response_body = jsonify({ "task":
+                {
+                "id" : task.task_id,
+                "goal_id" : task.goal_id,
+                "title" : task.title,
+                "description": task.description,
+                "is_complete": is_complete
+                }
+            })
+    
     return response_body
 
 
@@ -93,6 +106,7 @@ def get_all_tasks():
 
     # Create the response body
     task_response = []
+
     
     for task in all_tasks:
         if task.completed_at == None:
@@ -136,7 +150,7 @@ def get_one_task(task_id):
 
     task = validate_task(task_id)
 
-    return format_response_body(task), 200
+    return format_task_response_body(task), 200
 
 
 
@@ -171,7 +185,7 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
 
-    return format_response_body(new_task), 201
+    return format_task_response_body(new_task), 201
 
 
 
@@ -194,7 +208,7 @@ def update_task(task_id):
     # Commit the change and send response body
     db.session.commit()
 
-    return format_response_body(task_to_update), 200
+    return format_task_response_body(task_to_update), 200
 
 
 
@@ -229,7 +243,7 @@ def mark_as_complete(task_id):
     db.session.commit()
     # return response_body, 200
 
-    return format_response_body(task_to_mark_complete), 200
+    return format_task_response_body(task_to_mark_complete), 200
 
 
 
@@ -253,7 +267,7 @@ def mark_as_incomplete(task_id):
     db.session.add(task_to_mark_incomplete)
     db.session.commit()
 
-    return format_response_body(task_to_mark_incomplete), 200
+    return format_task_response_body(task_to_mark_incomplete), 200
 
 
 
@@ -296,6 +310,7 @@ def format_goal_response_body(goal):
     })
 
     return response_body
+
 
 
 def validate_goal(goal_id):
@@ -355,7 +370,6 @@ def get_one_goal(goal_id):
 
     # Search for this goal_id in the Goal Blueprint
     goal = Goal.query.get(goal_id)
-
 
 
     # If this specific goal isn't found, 404 response code
@@ -421,6 +435,7 @@ def update_goal(goal_id):
     return format_goal_response_body(goal_to_update), 200
 
 
+
 # ---- DELETE GOAL ---- #
 @goals_bp.route("/<goal_id>", methods=["DELETE"])
 def delete_goal(goal_id):
@@ -441,32 +456,6 @@ def delete_goal(goal_id):
 
 ################# NESTED ROUTES #################
 
-# # ---- CREATE A GOAL ---- #
-
-# @goals_bp.route("", methods=["POST"])
-# def create_goal():
-
-#     request_body = request.get_json()
-
-#     if not request_body:
-#         abort(make_response({"details" : f"Invalid data"}, 400))
-
-
-#     new_goal = Goal(title=request_body["title"])
-
-#     # Add new task and commit change
-#     db.session.add(new_goal)
-#     db.session.commit()
-
-#     response_body = jsonify({ "goal" : 
-#         {
-#             "id" : new_goal.goal_id,
-#             "title" : new_goal.title
-#         }
-#     })
-
-#     return response_body, 201
-
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
 def post_tasks_to_goal(goal_id):
 
@@ -477,7 +466,6 @@ def post_tasks_to_goal(goal_id):
 
     # Check that "task_ids" is in the request_body
     if "task_ids" in request_body:
-        # task_ids = request_body["task_ids"]
 
         # Loop through the "task_ids"
         for task_id in request_body["task_ids"]:
@@ -497,14 +485,11 @@ def post_tasks_to_goal(goal_id):
 
 
 
-
 @goals_bp.route("/<goal_id>/tasks", methods=["GET"])
 def get_tasks_one_goal(goal_id):
     
     # Get one goal
     goal_to_get = validate_goal(goal_id)
-
-    # goal_request_body = request.get_json()
 
     tasks_response = []
 
@@ -526,7 +511,6 @@ def get_tasks_one_goal(goal_id):
                 }
             )
 
-    # return tasks_response, 200
 
     response_body = {
         "id" : goal_to_get.goal_id, 
