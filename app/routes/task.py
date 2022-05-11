@@ -64,7 +64,7 @@ def get_all_tasks():
             'description':task.description,
             'is_complete': bool(task.completed_at)
         })
-    return jsonify(task_response)
+    return jsonify(task_response),200
 
 
 def get_task_or_abort(task_id):
