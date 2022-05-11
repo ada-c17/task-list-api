@@ -1,5 +1,4 @@
-from app import db
+# from app import db
 
-
-class Goal(db.Model):
-    goal_id = db.Column(db.Integer, primary_key=True)
+# class Goal(db.Model):
+#     goal_id = db.Column(db.Integer, primary_key=True)

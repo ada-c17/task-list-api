@@ -1,11 +1,11 @@
 import pytest
 from app import create_app
 from app.models.task import Task
-from app.models.goal import Goal
+# from app.models.goal import Goal
 from app import db
 from datetime import datetime
 from flask.signals import request_finished
-
+from datetime import date
 
 @pytest.fixture
 def app():
@@ -24,7 +24,6 @@ def app():
     with app.app_context():
         db.drop_all()
 
-
 @pytest.fixture
 def client(app):
     return app.test_client()
@@ -36,11 +35,18 @@ def client(app):
 @pytest.fixture
 def one_task(app):
     new_task = Task(
-        title="Go on my daily walk 🏞", description="Notice something new every day", completed_at=None)
+        title="Go on my daily walk 🏞", description="Notice something new every day")
+    db.session.add(new_task)
+    db.session.commit()
+#------------
+@pytest.fixture
+def completed_task(app):
+    new_task = Task(
+        title="Go on my daily walk 🏞", description="Notice something new every day", completed_at = date.today())
     db.session.add(new_task)
     db.session.commit()
 
-
+    
 # This fixture gets called in every test that
 # references "three_tasks"
 # This fixture creates three tasks and saves
