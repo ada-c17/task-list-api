@@ -101,8 +101,8 @@ def test_update_goal(client, one_goal):
         "title": "Updated Goal Title"
     }
 }
-goal = Goal.query.get(1)
-assert goal.title == "Updated Goal Title"
+    goal = Goal.query.get(1)
+    assert goal.title == "Updated Goal Title"
     # ---- Complete Assertions Here ----
 
 
@@ -141,8 +141,8 @@ def test_delete_goal(client, one_goal):
     assert response.status_code == 404
 
     # raise Exception("Complete test with assertion about response body")
+    response_body = response.get_json()
     assert response_body == {"msg": f"Could not find goal with id: 1"}
-    assert Goal.query.get(1) is None
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************

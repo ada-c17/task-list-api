@@ -4,6 +4,6 @@ from datetime import datetime
 
 class Task(db.Model):
     task_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    title = db.Column(db.String(32))
+    title = db.Column(db.String(100))
     description = db.Column(db.String(280))
     completed_at = db.Column(db.DateTime, nullable=True, default=None)

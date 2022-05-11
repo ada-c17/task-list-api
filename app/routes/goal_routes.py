@@ -19,9 +19,13 @@ def validate_goal(goal_id):
 @goal_bp.route("", methods=["POST"])
 def create_goal():
     request_body = request.get_json()
-    new_goal = Goal(
-        title=request_body["title"] 
-    )
+    try:
+        new_goal = Goal(
+            title=request_body["title"] 
+        )
+    except KeyError:
+        return {"details": "Invalid data"}, 400
+    
     db.session.add(new_goal)
     db.session.commit()
 
