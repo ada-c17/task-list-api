@@ -166,7 +166,6 @@ def test_create_task_must_contain_title(client):
     assert Task.query.all() == []
 
 
-
 def test_create_task_must_contain_description(client):
     # Act
     response = client.post("/tasks", json={
@@ -181,3 +180,4 @@ def test_create_task_must_contain_description(client):
         "details": "Invalid data"
     }
     assert Task.query.all() == []
+    

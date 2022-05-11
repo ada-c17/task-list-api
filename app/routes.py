@@ -36,7 +36,7 @@ def validate_goal(goal_id):
 
 
 def format_task(task):
-    response = {
+    return {
     "task" : 
         {
             "is_complete" : bool(task.completed_at),
@@ -45,7 +45,7 @@ def format_task(task):
             "id" : task.task_id
         }
     }
-    return response
+
 
 def format_goal(goal):
     return {
@@ -209,3 +209,16 @@ def get_one_goal(goal_id):
     if isinstance(goal, Goal):
         return format_goal(goal), 200
     return goal
+
+@goals_bp.route('/<goal_id>', methods=['PUT'])
+def update_goal(goal_id):
+    goal = validate_goal(goal_id)
+    request_body = request.get_json()
+
+    if isinstance(goal, Goal):
+        goal.title = request_body["title"]
+        db.session.commit()
+        
+        return format_goal(goal), 200
+    return goal
+
