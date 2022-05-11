@@ -2,7 +2,7 @@ from asyncio import tasks
 from flask import Blueprint, jsonify,request
 from app.models.task import Task
 from app import db
-from .models.helpers import post_slack_message, validate_task 
+from ..models.helpers import post_slack_message, validate_task 
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 

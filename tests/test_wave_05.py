@@ -1,7 +1,6 @@
 import pytest
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_goals_no_saved_goals(client):
     # Act
     response = client.get("/goals")
