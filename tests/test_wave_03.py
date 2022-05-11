@@ -5,7 +5,7 @@ from app.models.task import Task
 import pytest
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_mark_complete_on_incomplete_task(client, one_task):
     # Arrange
     """

@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, make_response, request, abort
-from sqlalchemy import asc
 from app.models.task import Task
 from app import db
 
@@ -11,9 +10,8 @@ bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 def create_task():
     request_body = request.get_json()
     if "title" not in request_body or "description" not in request_body:
-        abort(make_response({"details": "Invalid data"}, 400))
+        create_message("Invalid data", 400)
 
-    # task = Task(title=request_body["title"], description=request_body["description"])
     task = Task.from_dict(request_body)
 
     db.session.add(task)
@@ -45,12 +43,13 @@ def read_all_tasks():
 
 
 @bp.route("/<task_id>", methods=("PUT",))
-def update_task(task_id):
+def replace_task(task_id):
     task = validate_task_id(task_id)
     request_body = request.get_json()
 
-    task.title = request_body["title"]
-    task.description = request_body["description"]
+    # task.title = request_body["title"]
+    # task.description = request_body["description"]
+    task.override_task(request_body)
     
     db.session.commit()
 
@@ -62,17 +61,27 @@ def delete_task(task_id):
     task = validate_task_id(task_id)
     db.session.delete(task)
     db.session.commit()
-    return {"details": f"Task {task_id} \"{task.title}\" successfully deleted"}, 200
+    create_message(f"Task {task_id} \"{task.title}\" successfully deleted", 200)
+
+
+@bp.route("/<task_id>", methods=("PATCH",))
+def update_task(task_id):
+    task = validate_task_id(task_id)
+    pass
 
 
 def validate_task_id(task_id):
     try:
         task_id = int(task_id)
     except:
-        abort(make_response({"details": "Invalid data"}, 400))
+        create_message("Invalid data", 400)
 
     task = Task.query.get(task_id)
 
     if not task:
-        abort(make_response({"details": "Task 1 not found"}, 404))
+        create_message("Task 1 not found", 404)
     return task
+
+
+def create_message(details_info, status_code):
+    abort(make_response({"details": details_info}, status_code))
