@@ -6,9 +6,9 @@ import requests
 import os
 
 tasks_bp = Blueprint('tasks', __name__, url_prefix='/tasks')
-slack_path = 'https://slack.com/api/chat.postMessage'
 
 def send_slack_notification(task):
+    slack_path = 'https://slack.com/api/chat.postMessage'
     headers = {'Authorization': f'Bearer {os.environ.get("SLACK_API_KEY")}'}
     
     query_param = {

@@ -17,21 +17,15 @@ def validate_goal(goal_id):
 
     return goal
 
-def goal_response(goal):
-    return {
-        'id': goal.goal_id,
-        'title': goal.title
-    }
-
 @goals_bp.route('', methods=['GET'])
 def get_goals():
     goals = Goal.query.all()
     goals_response = []
 
     for goal in goals:
-        goals_response.append(goal_response(goal))
+        goals_response.append(goal.get_dict())
     
-    return jsonify(goals_response)
+    return jsonify(goals_response), 200
 
 @goals_bp.route('', methods=['POST'])
 def create_goal():
@@ -45,27 +39,31 @@ def create_goal():
     db.session.add(new_goal)
     db.session.commit()
 
-    return {'goal': goal_response(new_goal)}, 201
+    return jsonify({'goal': new_goal.get_dict()}), 201
 
-@goals_bp.route('/<goal_id>', methods=['DELETE', 'PUT', 'GET'])
-def handle_one_goal(goal_id):
+@goals_bp.route('/<goal_id>', methods=['PUT'])
+def update_goal(goal_id):
     goal = validate_goal(goal_id)
-    response_body = {'goal': goal_response(goal)}
 
-    if request.method == 'DELETE':
-        response_body = jsonify({
-        'details': f'Goal {goal_id} "{goal.title}" successfully deleted'
-        })
-        db.session.delete(goal)
-        
-    elif request.method == 'PUT':
+    if request.method == 'PUT':
         request_body = request.get_json()
         goal.title = request_body['title']
-        response_body = {'goal': goal_response(goal)}
-    
-    elif request.method == 'GET':
-        return response_body
         
+    db.session.commit()
+    return jsonify({'goal': goal.get_dict()}), 200
+
+@goals_bp.route('<goal_id>', methods=['GET'])
+def get_one_goal(goal_id):
+    goal = validate_goal(goal_id)
+    return jsonify({'goal':goal.get_dict()}), 200
+
+@goals_bp.route('<goal_id>', methods=['DELETE'])
+def delete_goal(goal_id):
+    goal = validate_goal(goal_id)
+    response_body = jsonify({
+        'details': f'Goal {goal_id} "{goal.title}" successfully deleted'
+        })
+    db.session.delete(goal)
     db.session.commit()
     return response_body
 
@@ -81,10 +79,10 @@ def create_task_for_goal(goal_id):
         
     db.session.commit()
 
-    return {
+    return jsonify({
         'id': goal.goal_id,
         'task_ids': request_body['task_ids']
-        }
+        }), 200
 
 @goals_bp.route('/<goal_id>/tasks', methods=['GET'])
 def get_tasks_for_goal(goal_id):
@@ -93,8 +91,6 @@ def get_tasks_for_goal(goal_id):
     for task in goal.tasks:
         tasks_response.append(task.get_dict())
     
-    return {
-        'id': goal.goal_id,
-        'title': goal.title,
-        'tasks': tasks_response
-        }
+    response_body = goal.get_dict()
+    response_body['tasks'] = tasks_response
+    return jsonify(response_body), 200
