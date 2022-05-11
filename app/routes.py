@@ -89,7 +89,8 @@ def get_one_task(taskID):
     #     "is_complete": false,
     #     "title": "A Brand New Task"
     # }
-
+    
+"""date"""
 @task_bp.route("/<taskID>", methods=["PUT"])
 def update_task(taskID):
     task = id_validation(taskID)
@@ -120,6 +121,7 @@ def delete_task(taskID):
     
 """Wave03"""
 """Wave04"""
+"works but slack bot doesn't post msg"
 @task_bp.route("/<taskID>/mark_complete", methods=["PATCH"])
 def update_tasks_with_completed(taskID):
     task = id_validation(taskID)
@@ -143,7 +145,7 @@ def slack_api_call(task):
     }
     requests.post(SLACK_PATH, params=PARAMS, headers=HEADERS)
     
-    
+"works in postmant not in heroku web url"
 @task_bp.route("/<taskID>/mark_incomplete", methods=["PATCH"])
 def update_tasks_with_not_completed(taskID):
     task = id_validation(taskID)

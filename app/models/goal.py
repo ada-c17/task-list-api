@@ -30,7 +30,7 @@ class Goal(db.Model):
         #         "description": task.description,
         #         "is_complete": task.completed_at
         # }]
-             goal_dict["tasks"] = [task.to_json()]
+                goal_dict["tasks"] = [task.to_json()]
              
         return goal_dict
         
