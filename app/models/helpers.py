@@ -1,5 +1,6 @@
 from flask import abort, make_response
 from .task import Task
+from .goal import Goal
 import os, requests
 
 def validate_task(id):
@@ -14,6 +15,20 @@ def validate_task(id):
 		abort(make_response({"message": f"task {id} not found"}, 404))
 
 	return task
+
+
+def validate_goal(id):
+	try:
+		id = int(id)
+	except:
+		return abort(make_response({"message": f"goal {id} is invalid"}, 400))
+
+	goal = Goal.query.get(id)
+
+	if not goal:
+		abort(make_response({"message": f"goal {id} not found"}, 404))
+
+	return goal
 
 def post_slack_message(message):
 	url = "https://slack.com/api/chat.postMessage"
