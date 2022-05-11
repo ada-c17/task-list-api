@@ -63,6 +63,10 @@ def get_one_task(task_id):
         }
     }
 
+    # Add check to pass Wave 6's last test
+    if task.goal_id:
+        response["task"]["goal_id"] = task.goal_id
+
     return jsonify(response), 200
 
 
