@@ -1,8 +1,5 @@
-from xml.dom.minidom import Identified
-from urllib3 import connection_from_url
 from app import db
 from flask import Blueprint, jsonify, abort, make_response, request
-from datetime import date
 from app.models.goal import Goal
 from app.models.task import Task
 
@@ -99,7 +96,7 @@ def get_task_list_by_goal_id(id):
     #request_body = check_complete_request_body(request)
     active_goal = handle_id_request(id)
     response_body = active_goal.make_response_dict()
-    
+
     task_list = []
     for task in active_goal.tasks:
         task_list.append(task.make_response_dict())
