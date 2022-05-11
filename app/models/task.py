@@ -1,6 +1,4 @@
 from app import db
-from .common import validate_id_by_model
-
 
 class Task(db.Model):
     task_id = db.Column(db.Integer, primary_key=True)
@@ -8,6 +6,7 @@ class Task(db.Model):
     description = db.Column(db.String, nullable=False)
     completed_at = db.Column(db.DateTime, nullable=True)
     goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'), nullable=True)
+    goal = db.relationship('Goal', back_populates='tasks')
 
     def to_json(self):
         details = {
@@ -33,24 +32,3 @@ class Task(db.Model):
             description = task_details['description'],
             completed_at = task_details['completed_at']
         )
-    
-    @classmethod
-    def get_filtered_and_sorted(cls, request_args):
-        params = dict(request_args)  # Conversion to make args object mutable
-        sort_style = params.pop('sort', None)
-        # TODO: Check behavior of filter_by() when supplied parameter not in model
-        if sort_style and len(params) > 0:
-            tasks = [task.to_json() for task in 
-                        Task.query.filter_by(**params)
-                                .order_by(getattr(Task.title,sort_style)())]
-        elif sort_style:
-            tasks = [task.to_json() for task in 
-                        Task.query.order_by(getattr(Task.title,sort_style)())]
-        else:
-            tasks = [task.to_json() for task in Task.query.filter_by(**params)]
-
-        return tasks
-
-    @classmethod
-    def validate_id(cls, target_id):
-        return validate_id_by_model(cls, target_id)
