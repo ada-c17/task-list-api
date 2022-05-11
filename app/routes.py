@@ -31,10 +31,18 @@ def validate_request(request):
 @tasks_bp.route("", methods=["POST"])
 def create_new_task():
     request_body = validate_request(request)
-    new_task = Task(
-        title=request_body["title"],
-        description=request_body["description"]
-    )
+    try:
+        completion_time = request_body["completed_at"]
+        new_task = Task(
+            title=request_body["title"],
+            description=request_body["description"],
+            completed_at = completion_time
+        )
+    except KeyError:
+        new_task = Task(
+            title=request_body["title"],
+            description=request_body["description"]
+        )
     db.session.add(new_task)
     db.session.commit()
     return make_response({"task": new_task.to_dict()}, 201)
@@ -97,5 +105,13 @@ def delete_task(task_id):
 def mark_complete(task_id):
     task = validate_id(task_id)
     task.completed_at = date.today()
+    db.session.commit()
+    return make_response({"task": task.to_dict()})
+
+# MARK INCOMPLETE
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def mark_incomplete(task_id):
+    task = validate_id(task_id)
+    task.completed_at = None
     db.session.commit()
     return make_response({"task": task.to_dict()})
