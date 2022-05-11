@@ -1,8 +1,14 @@
 from crypt import methods
 from datetime import datetime
 from flask import Blueprint, jsonify, request, abort, make_response
+from pytest import param
 from app import db
 from app.models.task import Task
+import requests
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -103,9 +109,6 @@ def update_task(task_id):
         }, 400
     
     db.session.commit()
-    # check valid input after commits
-    task = get_task_or_abort(task_id)
-
     return jsonify(
         {
             "task": to_dict(task)
@@ -126,10 +129,22 @@ def delete_one_task(task_id):
 
 @tasks_bp.route('/<task_id>/mark_complete', methods=['PATCH'])
 def mark_as_complete_one_task(task_id):
+    
+    body = {
+        "channel" : "task-list-api-project",
+        "text" : "Wow, it's almost your birthday!"}
+
+    header = {
+        "Authorization" : os.environ.get("API_KEY")}
+
+    requests.post(
+        url = "https://slack.com/api/chat.postMessage", 
+        params=body,
+        headers=header)
+
     return mark_completed_at(task_id, datetime.utcnow())
 
 
 @tasks_bp.route('/<task_id>/mark_incomplete', methods=['PATCH'])
 def mark_as_incomplete_one_task(task_id):
     return mark_completed_at(task_id, None)
-    
