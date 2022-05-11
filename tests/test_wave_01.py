@@ -130,7 +130,7 @@ def test_update_task_not_found(client):
     #print(response_body)
     # Assert
     assert response.status_code == 404
-    assert len(response_body) == 1 #WHY DOES THIS WORK??
+    assert len(response_body) == 1
     assert response_body['message'] == 'Task 1 not found'
 
 
