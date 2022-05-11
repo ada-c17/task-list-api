@@ -1,8 +1,9 @@
 from app import db
 
-
 class Task(db.Model):
+    ## class variables
     expected_elements = {"title":str, "description":str}
+    db_name = "Task"
 
     task_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String)

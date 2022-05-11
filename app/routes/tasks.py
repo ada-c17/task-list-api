@@ -3,35 +3,37 @@ import requests
 import os
 from dotenv import load_dotenv
 from app import db
-from flask import Blueprint, jsonify, abort, make_response, request
+from flask import Blueprint, jsonify, make_response, request
 from datetime import date
 from app.models.task import Task
+from app.routes.request_helpers import handle_id_request, check_complete_request_body
 
 load_dotenv()
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
 
-def handle_id_request(id):
-    try:
-        id = int(id)
-    except:
-        abort(make_response({"msg": f"Invalid Task ID '{id}'."}, 400))
+# def handle_id_request(id, database):
+    
+#     try:
+#         id = int(id)
+#     except:
+#         abort(make_response({"msg": f"Invalid {database.db_name} ID '{id}'."}, 400))
 
-    task = Task.query.get(id)
+#     query = database.query.get(id)
 
-    if not task:
-        abort(make_response({"msg": f"Task ID '{id}' does not exist."}, 404))
+#     if not query:
+#         abort(make_response({"msg": f"{database.db_name} ID '{id}' does not exist."}, 404))
 
-    return task
+#     return query
 
-def check_complete_request_body(request):
-    request_body = request.get_json()
-    if all(element in request_body for element in Task.expected_elements):
-        if all(type(request_body[element]) == Task.expected_elements[element] \
-                    for element in Task.expected_elements):
-                        return request_body
-    abort(make_response({"details": "Invalid data"}, 400))
+# def check_complete_request_body(request, database):
+#     request_body = request.get_json()
+#     if all(element in request_body for element in database.expected_elements):
+#         if all(type(request_body[element]) == database.expected_elements[element] \
+#                     for element in database.expected_elements):
+#                         return request_body
+#     abort(make_response({"details": "Invalid data"}, 400))
 
 def slack_complete(task):
     url = "https://slack.com/api/chat.postMessage"
@@ -71,7 +73,7 @@ def get_all_tasks():
 
 @tasks_bp.route("", methods=["POST"])
 def create_new_task():
-    request_body = check_complete_request_body(request)
+    request_body = check_complete_request_body(request, Task)
     new_task = Task(
         title = request_body["title"],
         description = request_body["description"]
@@ -89,14 +91,14 @@ def create_new_task():
 
 @tasks_bp.route("/<id>", methods=["GET"])
 def get_task_by_id(id):
-    task = handle_id_request(id)
+    task = handle_id_request(id, Task)
     confirmation_msg = {"task": task.make_response_dict()}
     return make_response(jsonify(confirmation_msg), 200)
 
 @tasks_bp.route("/<id>", methods=["PUT"])
 def update_task_by_id(id):
-    request_body = check_complete_request_body(request)
-    task_to_update = handle_id_request(id)
+    request_body = check_complete_request_body(request, Task)
+    task_to_update = handle_id_request(id, Task)
 
     task_to_update.title = request_body["title"]
     task_to_update.description = request_body["description"]
@@ -111,7 +113,7 @@ def update_task_by_id(id):
 
 @tasks_bp.route("/<id>", methods=["DELETE"])
 def delete_task_by_id(id):
-    task = handle_id_request(id)
+    task = handle_id_request(id, Task)
     db.session.delete(task)
     db.session.commit()
 
@@ -122,7 +124,7 @@ def delete_task_by_id(id):
 
 @tasks_bp.route("/<id>/mark_complete", methods=["PATCH"])
 def mark_task_complete(id):
-    task = handle_id_request(id)
+    task = handle_id_request(id, Task)
     task.completed_at = date.today()
     db.session.commit()
 
@@ -137,7 +139,7 @@ def mark_task_complete(id):
 
 @tasks_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
 def mark_task_incomplete(id):
-    task = handle_id_request(id)
+    task = handle_id_request(id, Task)
     task.completed_at = None
     db.session.commit()
 

@@ -1,30 +1,10 @@
 from app import db
-from flask import Blueprint, jsonify, abort, make_response, request
+from flask import Blueprint, jsonify, make_response, request
 from app.models.goal import Goal
 from app.models.task import Task
+from app.routes.request_helpers import handle_id_request, check_complete_request_body
 
 goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
-
-def handle_id_request(id):
-    try:
-        id = int(id)
-    except:
-        abort(make_response({"msg": f"Invalid Goal ID '{id}'."}, 400))
-
-    goal = Goal.query.get(id)
-
-    if not goal:
-        abort(make_response({"msg": f"Goal ID '{id}' does not exist."}, 404))
-
-    return goal
-
-def check_complete_request_body(request):
-    request_body = request.get_json()
-    if all(element in request_body for element in Goal.expected_elements):
-        if all(type(request_body[element]) == Goal.expected_elements[element] \
-                    for element in Goal.expected_elements):
-                        return request_body
-    abort(make_response({"details": "Invalid data"}, 400))
 
 @goals_bp.route("", methods=["GET"])
 def get_all_goals():
@@ -38,16 +18,15 @@ def get_all_goals():
     return make_response(jsonify(goals_list), 200)
 
 
-
 @goals_bp.route("/<id>", methods=["GET"])
 def get_goal_by_id(id):
-    goal = handle_id_request(id)
+    goal = handle_id_request(id, Goal)
     return make_response(jsonify({"goal": goal.make_response_dict()}), 200)
 
 
 @goals_bp.route("", methods=["POST"])
 def create_new_goal():
-    request_body = check_complete_request_body(request)
+    request_body = check_complete_request_body(request, Goal)
     new_goal = Goal(title=request_body["title"])
 
     db.session.add(new_goal)
@@ -58,8 +37,8 @@ def create_new_goal():
 
 @goals_bp.route("/<id>", methods=["PUT"])
 def update_goal_by_id(id):
-    request_body = check_complete_request_body(request)
-    active_goal = handle_id_request(id)
+    request_body = check_complete_request_body(request, Goal)
+    active_goal = handle_id_request(id, Goal)
 
     active_goal.title = request_body["title"]
 
@@ -69,7 +48,7 @@ def update_goal_by_id(id):
 
 @goals_bp.route("/<id>", methods=["DELETE"])
 def delete_goal_by_id(id):
-    goal_to_delete = handle_id_request(id)
+    goal_to_delete = handle_id_request(id, Goal)
 
     db.session.delete(goal_to_delete)
     db.session.commit()
@@ -79,7 +58,6 @@ def delete_goal_by_id(id):
 
 @goals_bp.route("/<id>/tasks", methods=["POST"])
 def add_list_of_tasks_to_goal(id):
-    #request_body = check_complete_request_body(request)
     task_ids = request.get_json()["task_ids"]
     id = int(id)
     for task in task_ids:
@@ -93,8 +71,7 @@ def add_list_of_tasks_to_goal(id):
 
 @goals_bp.route("/<id>/tasks", methods=["GET"])
 def get_task_list_by_goal_id(id):
-    #request_body = check_complete_request_body(request)
-    active_goal = handle_id_request(id)
+    active_goal = handle_id_request(id, Goal)
     response_body = active_goal.make_response_dict()
 
     task_list = []

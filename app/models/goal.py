@@ -2,7 +2,9 @@ from app import db
 
 
 class Goal(db.Model):
+    #class variables
     expected_elements = {"title":str}
+    db_name = "Goal"
 
     goal_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String)
