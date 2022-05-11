@@ -1,4 +1,4 @@
-from cgitb import text
+# from cgitb import text
 from app import db
 
 
@@ -7,3 +7,4 @@ class Task(db.Model):
     title = db.Column(db.String)
     description = db.Column(db.String)
     completed_at = db.Column(db.DateTime, default=None)
+    

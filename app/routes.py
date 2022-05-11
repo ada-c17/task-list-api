@@ -4,6 +4,7 @@ from app import db
 from flask import Blueprint, jsonify, abort, make_response, request
 from app.models.task import Task
 from sqlalchemy import asc, desc
+import datetime
 
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix = "/tasks")
@@ -22,10 +23,15 @@ def create_one_task():
             "details": "Invalid data"
         }, 400
 
+    if "completed_at" not in request_body:
+        completed_at = None
+    else:
+        completed_at = request_body["completed_at"]
+    
     new_task = Task(
-        title=request_body["title"],
-        description=request_body["description"]
-    )
+                title=request_body["title"],
+                description=request_body["description"],
+                completed_at=completed_at)
 
 
     db.session.add(new_task)
@@ -36,7 +42,7 @@ def create_one_task():
             "id": new_task.task_id,
             "title": new_task.title,
             "description": new_task.description,
-            "is_complete": False
+            "is_complete": bool(new_task.completed_at)
         }
     }, 201 
 
@@ -60,7 +66,7 @@ def read_all_tasks():
                 "id": task.task_id,
                 "title": task.title,
                 "description": task.description,
-                "is_complete": False
+                "is_complete": bool(task.completed_at)
             }
         )
 
@@ -76,7 +82,7 @@ def read_one_task(task_id):
                 "id" : chosen_task.task_id,
                 "title": chosen_task.title,
                 "description": chosen_task.description,
-                "is_complete": False
+                "is_complete": bool(chosen_task.completed_at)
                 }
             }
     return jsonify(response), 200
@@ -104,10 +110,63 @@ def replace_one_task(task_id):
                 "id" : chosen_task.task_id,
                 "title": chosen_task.title,
                 "description": chosen_task.description,
-                "is_complete": False
+                "is_complete": bool(chosen_task.completed_at)
                 }
             }
     return jsonify(response), 200
+
+
+
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def completed_task(task_id):
+    chosen_task = get_task_or_abort(task_id)
+    # request_body = request.get_json()
+
+    # chosen_task.title = request_body["title"]
+    # chosen_task.description = request_body["description"]
+    # chosen_task.completed_at = request_body["is_complete"]
+
+    chosen_task.completed_at = datetime.datetime.utcnow()
+# 
+    db.session.add(chosen_task)
+    db.session.commit()
+
+
+    return { "task": {
+                "id" : chosen_task.task_id,
+                "title": chosen_task.title,
+                "description": chosen_task.description,
+                "is_complete": bool(chosen_task.completed_at)
+                }
+            }
+    return jsonify(response), 200
+
+
+
+
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def incompleted_task(task_id):
+    chosen_task = get_task_or_abort(task_id)
+    # request_body = request.get_json()
+
+    # chosen_task.title = request_body["title"]
+    # chosen_task.description = request_body["description"]
+    # chosen_task.completed_at = request_body["is_complete"]
+    chosen_task.completed_at = None
+
+    db.session.add(chosen_task)
+    db.session.commit()
+
+    return { "task": {
+                "id" : chosen_task.task_id,
+                "title": chosen_task.title,
+                "description": chosen_task.description,
+                "is_complete": bool(chosen_task.completed_at)
+                }
+            }
+    return jsonify(response), 200
+
+
 
 
 
