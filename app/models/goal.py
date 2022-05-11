@@ -22,7 +22,7 @@ class Goal(db.Model):
         }
         
         if self.tasks:
-            for task in self.tasks:
+            #for task in self.tasks:
         #         goal_dict["tasks"] = [{
         #         "id": task.task_id,
         #         "goal_id": task.goal_id,
@@ -30,7 +30,7 @@ class Goal(db.Model):
         #         "description": task.description,
         #         "is_complete": task.completed_at
         # }]
-                goal_dict["tasks"] = [task.to_json()]
+            goal_dict["tasks"] = [task.to_json() for task in self.tasks]
              
         return goal_dict
         
