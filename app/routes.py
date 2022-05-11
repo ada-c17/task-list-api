@@ -17,6 +17,7 @@ TABLE OF CONTENTS:
 
 from app import db
 from app.models.task import Task
+from app.models.goal import Goal
 from flask import Blueprint, jsonify, make_response, request, abort
 import datetime
 import requests
@@ -80,17 +81,21 @@ def ordered_tasks_query(sort_method):
         tasks = Task.query.all()
     return tasks
 
-def validate_task_request_body(request_body):
-    if "title" in request_body and "description" in request_body:
-        new_task = Task(title=request_body["title"],
-                    description=request_body["description"])
-        if "completed_at" in request_body:
-            new_task.completed_at = request_body["completed_at"]
+
+def ordered_goals_query(sort_method):
+    '''
+    Determines the order_by type (if any) for GET all goals when called.
+        *sort_method: Evaluates to "asc" or "desc".
+            ALWAYS pass in request.args.get("sort") when calling
+        OUTPUT: returns the ordered tasks.
+    '''
+    if sort_method == "asc":
+        goals = Goal.query.order_by(Goal.title.asc())
+    elif sort_method == "desc":
+        goals = Goal.query.order_by(Goal.title.desc())
     else:
-        abort(make_response({"details": "Invalid data"}, 400))
-    return task
-
-
+        goals = Goal.query.all()
+    return goals
 
 ##### BLUEPRINTS ##############################################################
 
@@ -187,6 +192,36 @@ def incomplete_task(task_id):
 
 
 ##### GOAL ENDPOINTS ##########################################################
+
+
+@goals_bp.route("", methods=["GET"])
+def get_goals():
+    goals = ordered_goals_query(request.args.get("sort"))
+    return jsonify([goal.to_dict() for goal in goals])
+
+
+@goals_bp.route("", methods=["POST"])
+def post_goal():
+    request_body = request.get_json()
+    if "title" in request_body:
+        new_goal = Goal(title=request_body["title"])
+    else:
+        abort(make_response({"details": "Invalid data"}, 400))
+
+    db.session.add(new_goal)
+    db.session.commit()
+
+    return make_response({"goal": new_goal.to_dict()}, 201)
+
+
+@goals_bp.route("/<goal_id>", methods=["GET"])
+def get_one_goal(goal_id):
+    goal = validate_object(goal_id, "goal")
+    return jsonify({"goal":goal.to_dict()})
+
+
+
+
 
 
 
