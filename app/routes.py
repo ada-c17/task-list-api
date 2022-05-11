@@ -3,11 +3,18 @@ from os import abort
 from app import db
 from flask import Blueprint, jsonify, abort, make_response, request
 from app.models.task import Task
+from app.models.goal import Goal
 from sqlalchemy import asc, desc
 import datetime
+import requests
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix = "/tasks")
+goals_bp = Blueprint("goals_bp", __name__, url_prefix = "/goals")
 
 #CREATE 
 @tasks_bp.route("", methods=["POST"])
@@ -120,16 +127,22 @@ def replace_one_task(task_id):
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def completed_task(task_id):
     chosen_task = get_task_or_abort(task_id)
-    # request_body = request.get_json()
-
-    # chosen_task.title = request_body["title"]
-    # chosen_task.description = request_body["description"]
-    # chosen_task.completed_at = request_body["is_complete"]
-
+    
     chosen_task.completed_at = datetime.datetime.utcnow()
-# 
+
     db.session.add(chosen_task)
     db.session.commit()
+
+    post_message = "Someone just completed the task" + chosen_task.title
+
+    path = "https://slack.com/api/chat.postMessage"
+    key = os.environ.get('SLACK_TOKEN_KEY')
+    data = {"channel": "task-notifications", "text": post_message }
+    headers = {"Authorization": "Bearer" + key}
+
+    response = requests.post(path, params=data, headers=headers)
+    response_body = response.json()
+    print(response_body)
 
 
     return { "task": {
@@ -138,8 +151,8 @@ def completed_task(task_id):
                 "description": chosen_task.description,
                 "is_complete": bool(chosen_task.completed_at)
                 }
-            }
-    return jsonify(response), 200
+            }, 200
+    # return jsonify(response), 200
 
 
 
@@ -147,11 +160,7 @@ def completed_task(task_id):
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def incompleted_task(task_id):
     chosen_task = get_task_or_abort(task_id)
-    # request_body = request.get_json()
 
-    # chosen_task.title = request_body["title"]
-    # chosen_task.description = request_body["description"]
-    # chosen_task.completed_at = request_body["is_complete"]
     chosen_task.completed_at = None
 
     db.session.add(chosen_task)
@@ -163,8 +172,8 @@ def incompleted_task(task_id):
                 "description": chosen_task.description,
                 "is_complete": bool(chosen_task.completed_at)
                 }
-            }
-    return jsonify(response), 200
+            }, 200
+    # return jsonify(response), 200
 
 
 
