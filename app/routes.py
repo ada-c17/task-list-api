@@ -1,10 +1,15 @@
 from flask import Blueprint, request, make_response, abort, jsonify
+import requests
 from sqlalchemy import asc
 from app.models.task import Task
 from app import db
 from datetime import date
+import os
+import requests
+import json
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
+goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
 # VALIDATE ID
 def validate_id(task_id):
@@ -106,6 +111,14 @@ def mark_complete(task_id):
     task = validate_id(task_id)
     task.completed_at = date.today()
     db.session.commit()
+
+    # Sends message to channel to congratulate on task completion
+    channel_name = "task-notifications"
+    headers = {"Authorization": os.environ.get("SLACK_AUTHORIZATION")}
+    text = f"Someone just completed the task {task.title}"
+    url = f"https://slack.com/api/chat.postMessage?channel={channel_name}&text={text}&pretty=1"
+    response = requests.post(url, headers=headers)
+
     return make_response({"task": task.to_dict()})
 
 # MARK INCOMPLETE
