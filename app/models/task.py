@@ -8,6 +8,8 @@ class Task(db.Model):
     title = db.Column(db.String)
     description = db.Column(db.String)
     completed_at = db.Column(db.DateTime, default=None)
+    goal_id = db.Column(db.Integer, db.ForeignKey("goal.goal_id")) #note: need to make nullable? or that way by default?
+    goal = db.relationship("Goal", back_populates="tasks") #lazy=select/True is default
 
     def make_response_dict(self):
         if self.completed_at:
@@ -20,5 +22,6 @@ class Task(db.Model):
             "description": self.description,
             "is_complete": completed
         }
-        return task_dict #if i put functions in the class, do I 
-        #have to do a db migration?
+        if self.goal_id:
+            task_dict["goal_id"] = self.goal_id
+        return task_dict 
