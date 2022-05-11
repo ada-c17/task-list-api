@@ -16,17 +16,11 @@ class Task(db.Model):
         )
     @classmethod
     def from_dict(cls, data_dict):
-        # if "mark_complete" in data_dict:
-        #     return cls(
-        #         #id = data_dict["id"],
-        #         title = data_dict["title"],
-        #         description = data_dict["description"],
-        #         is_complete = data_dict["is_complete"]
-        #     )
-        # else:
+        completed_time = data_dict["completed_at"] if "completed_at" in data_dict else None
         return cls(
                 title = data_dict["title"],
-                description = data_dict["description"]
+                description = data_dict["description"],
+                completed_at = completed_time
             )
 
     def replace_details(self, data_dict):

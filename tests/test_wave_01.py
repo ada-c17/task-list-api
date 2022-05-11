@@ -1,4 +1,5 @@
 from app.models.task import Task
+from datetime import datetime
 import pytest
 
 
@@ -70,6 +71,7 @@ def test_create_task(client):
     response = client.post("/tasks", json={
         "title": "A Brand New Task",
         "description": "Test Description",
+
     })
     response_body = response.get_json()
 
