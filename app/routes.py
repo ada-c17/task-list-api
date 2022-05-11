@@ -2,6 +2,7 @@ import json
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, abort, make_response, request
+from datetime import datetime
 
 from app.routes_helper import validate_task
 
@@ -16,6 +17,9 @@ def create_task():
                         description=request_body["description"])
     except KeyError:
         abort(make_response(jsonify(dict(details="Invalid data")), 400))
+
+    if "completed_at" in request_body:
+        new_task.completed_at = request_body["completed_at"]
     
     db.session.add(new_task)
     db.session.commit()
@@ -52,8 +56,7 @@ def update_task(task_id):
     task_data.description = request_body["description"]
 
     db.session.commit()
-    updated_task_data = Task.query.get(task_id)
-    return make_response(jsonify(dict(task=updated_task_data.to_dict())))
+    return make_response(jsonify(dict(task=task_data.to_dict())))
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
@@ -61,4 +64,22 @@ def delete_task(task_id):
 
     db.session.delete(task_data)
     db.session.commit()
-    return make_response(jsonify(dict(details=f'Task {task_data.task_id} "{task_data.title}" successfully deleted'))) 
+    return make_response(jsonify(dict(details=f'Task {task_data.task_id} "{task_data.title}" successfully deleted')))
+
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def mark_task_complete(task_id):
+    task_data = validate_task(task_id)
+    
+    task_data.completed_at = datetime.utcnow()
+
+    db.session.commit()
+    return make_response(jsonify(dict(task=task_data.to_dict())))
+
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def mark_task_incomplete(task_id):
+    task_data = validate_task(task_id)
+    
+    task_data.completed_at = None
+
+    db.session.commit()
+    return make_response(jsonify(dict(task=task_data.to_dict())))
