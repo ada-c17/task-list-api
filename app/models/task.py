@@ -10,20 +10,29 @@ class Task(db.Model):
     goal = db.relationship("Goal", back_populates="tasks")
     
     #depends on None(code)/null(db)
-    def completed(self):
-        if not self.completed_at:
-            return False
-        else:
-            return True
+    # def completed(self):
+    #     if not self.completed_at:
+    #         return False
+    #     else:
+    #         return True
     
     #display jsonify dict
+    
+        
     def to_json(self):
-        satus = self.completed()
-        return {
-            #"task": {
+        task_dict = {
                 "id": self.task_id,
                 "title": self.title,
                 "description": self.description,
-                "is_complete": satus
-            #}
         }
+        
+        if self.completed_at:
+            task_dict["is_complete"] = True
+        else:
+            task_dict["is_complete"] = False
+        
+        if self.goal_id:
+            task_dict["goal_id"] = self.goal_id
+       
+            
+        return task_dict
