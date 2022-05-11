@@ -59,7 +59,7 @@ def slack_notification(task_to_notify):
 
 
 
-def format_response_body(task):
+def format_task_response_body(task):
 
     if task.completed_at:
         is_complete = True
@@ -136,7 +136,7 @@ def get_one_task(task_id):
 
     task = validate_task(task_id)
 
-    return format_response_body(task), 200
+    return format_task_response_body(task), 200
 
 
 
@@ -171,7 +171,7 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
 
-    return format_response_body(new_task), 201
+    return format_task_response_body(new_task), 201
 
 
 
@@ -194,7 +194,7 @@ def update_task(task_id):
     # Commit the change and send response body
     db.session.commit()
 
-    return format_response_body(task_to_update), 200
+    return format_task_response_body(task_to_update), 200
 
 
 
@@ -229,7 +229,7 @@ def mark_as_complete(task_id):
     db.session.commit()
     # return response_body, 200
 
-    return format_response_body(task_to_mark_complete), 200
+    return format_task_response_body(task_to_mark_complete), 200
 
 
 
@@ -253,7 +253,7 @@ def mark_as_incomplete(task_id):
     db.session.add(task_to_mark_incomplete)
     db.session.commit()
 
-    return format_response_body(task_to_mark_incomplete), 200
+    return format_task_response_body(task_to_mark_incomplete), 200
 
 
 
