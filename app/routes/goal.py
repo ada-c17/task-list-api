@@ -60,11 +60,11 @@ def update_saved_goal(goal_id):
     return jsonify({"goal": goal.return_goal_dict()}), 200
 
 
-# @goals_bp.route("/<goal_id>", methods=["DELETE"])
-# def delete_goal(goal_id):
-#     goal = validate_goal_or_abort(goal_id)
+@goals_bp.route("/<goal_id>", methods=["DELETE"])
+def delete_goal(goal_id):
+    goal = validate_goal_or_abort(goal_id)
 
-#     db.session.delete(goal)
-#     db.session.commit()
+    db.session.delete(goal)
+    db.session.commit()
 
-#     return jsonify({"details": f"Goal {goal_id} \"{goal.title}\" successfully deleted"}), 200
+    return jsonify({"details": f"Goal {goal_id} \"{goal.title}\" successfully deleted"}), 200
