@@ -34,19 +34,37 @@ def validate_input(item_id, model_name):
 def create_task_dictionary(chosen_task):
     task_dict= {}
     if chosen_task.completed_at is None:
-        task_dict["task"] = {
+        if chosen_task.goal_id:
+            task_dict["task"] = {
+                "id": chosen_task.task_id,
+                "goal_id": chosen_task.goal_id,
+                "title": chosen_task.title,
+                "description": chosen_task.description,
+                "is_complete": False
+            }
+        else:
+            task_dict["task"] = {
             "id": chosen_task.task_id,
             "title": chosen_task.title,
             "description": chosen_task.description,
             "is_complete": False
         }
     else:
-        task_dict["task"] = {
-            "id": chosen_task.task_id,
-            "title": chosen_task.title,
-            "description": chosen_task.description,
-            "is_complete": True
-        }
+        if chosen_task.goal_id:
+            task_dict["task"] = {
+                "id": chosen_task.task_id,
+                "goal_id":chosen_task.goal_id,
+                "title": chosen_task.title,
+                "description": chosen_task.description,
+                "is_complete": True
+            }
+        else:
+            task_dict["task"] = {
+                "id": chosen_task.task_id,
+                "title": chosen_task.title,
+                "description": chosen_task.description,
+                "is_complete": True
+            }
     return task_dict
 
 def create_goal_dictionary(chosen_goal):
@@ -223,3 +241,53 @@ def delete_one_goal(goal_id):
     return {
         "details": f'Goal {goal_id} "{chosen_goal.title}" successfully deleted'
     }, 200
+
+@goals_bp.route("/<goal_id>/tasks", methods=["POST"])
+def place_tasks_on_goal(goal_id):
+    goal = validate_input(goal_id, Goal)
+    request_body = request.get_json()
+    found_tasks= []
+
+    for task in request_body["task_ids"]:
+        found_task = validate_input(task, Task)
+        if found_task:
+            found_tasks.append(found_task)
+    goal.tasks = found_tasks
+    db.session.commit()
+
+    return {
+        "id": goal.goal_id,
+        "task_ids": request_body["task_ids"]
+        }, 200
+
+@goals_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_tasks_from_goal(goal_id):
+    goal = validate_input(goal_id, Goal)
+    task_response = []
+    for task in goal.tasks:
+        if task.completed_at is None:
+            if task.goal_id:
+                task_response.append(
+                    {
+                        "id": task.task_id,
+                        "goal_id": goal.goal_id,
+                        "title": task.title,
+                        "description": task.description,
+                        "is_complete": False
+                    }
+                )
+        else:
+            task_response.append(
+                {
+                    "id": task.task_id,
+                    "goal_id": goal.goal_id,
+                    "title": task.title,
+                    "description": task.description,
+                    "is_complete": True
+                }
+            )
+    return jsonify({"id": goal.goal_id,
+                    "title": goal.title,
+                    "tasks": task_response
+    }), 200
+    
