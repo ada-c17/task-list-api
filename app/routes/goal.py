@@ -25,10 +25,7 @@ def create_goal():
     db.session.add(goal)
     db.session.commit()
 
-    response = {
-        "id": goal.goal_id,
-        "title": goal.title
-        }
+    response = goal.goal_response()
     
     return jsonify({"goal": response}), 201
 
@@ -45,10 +42,7 @@ def get_goals():
         goals = Goal.query.all()
 
     for goal in goals:
-        response.append({
-            'id': goal.goal_id,
-            'title': goal.title,
-        })
+        response.append(goal.goal_response())
     return jsonify(response)
 
 
@@ -70,10 +64,7 @@ def validate_goal(goal_id):
 def get_one_goal(goal_id):
     goal = validate_goal(goal_id)
 
-    response = {
-        "id": goal.goal_id,
-        "title": goal.title
-        }
+    response = goal.goal_response()
 
     return jsonify({"goal": response}), 200
 
@@ -87,10 +78,7 @@ def update_goal(goal_id):
 
     db.session.commit()
 
-    response = {
-        "id": goal.goal_id,
-        "title": goal.title,
-        }
+    response = goal.goal_response()
 
     return make_response({"goal": response})
 
