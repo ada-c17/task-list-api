@@ -27,7 +27,6 @@ def send_slack_completed_message(task):
 
     query_params = {"channel" : "task-notifications", "text": f'Someone just completed the task {task.title}' }
     headers = {"authorization" : BEARER_TOKEN}
-    # data = {"data": "f'Someone just completed the task {task.title}"}
     
     response_body = requests.get(PATH, params=query_params, headers=headers)
 

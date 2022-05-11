@@ -1,9 +1,11 @@
 from app import db
 from flask import make_response, abort 
+# from app.routes.helpers import validate_task
 
 class Goal(db.Model):
     goal_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String, nullable=False)
+    tasks = db.relationship("Task", back_populates = "goal", lazy = True)
 
     def to_json(self):
         
@@ -13,6 +15,13 @@ class Goal(db.Model):
 
     def update_goal(self, update_body):
             self.title = update_body["title"]
+
+    # def link_tasks_to_goal(self, request_body):
+    #     task_list = []
+    #     for task_id in request_body["task_ids"]:
+    #         task = validate_task(task_id)
+    #         task_list.append(task)
+    #     return task_list
 
 
     @classmethod
