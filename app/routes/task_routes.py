@@ -1,5 +1,6 @@
 from app import db
 from app.models.task import Task
+from .helpers import validate_id
 from flask import Blueprint, request, make_response, jsonify, abort
 from sqlalchemy import asc,desc
 from datetime import date
@@ -7,19 +8,6 @@ import os
 import requests
 
 tasks_bp = Blueprint("task", __name__, url_prefix="/tasks")
-
-# helper function to validate
-def validate_task(id):
-    try:
-        task_id = int(id)
-    except:
-        return abort(make_response(jsonify("Task is invalid"), 400))
-
-    task = Task.query.get(task_id)
-
-    if not task:
-        return abort(make_response(jsonify(f"Task {id} does not exist"), 404))
-    return task
 
 # Get all tasks
 @tasks_bp.route("", methods=["GET"])
@@ -33,37 +21,16 @@ def get_all_tasks():
     else:
         tasks = Task.query.all() 
 
-    tasks_response = []
-    for task in tasks:
-        tasks_response.append({
-            "id":task.id,
-            "title":task.title,
-            "description":task.description,
-            "is_complete": True if task.completed_at else False
-            })
+    tasks_response = [task.to_json() for task in tasks]
+
     return make_response(jsonify(tasks_response), 200)
 
 # Get one task
 @tasks_bp.route("/<id>", methods=["GET"])
 def get_one_task(id):
-    task = validate_task(id)
+    task = validate_id("Task", id)
     response_body = {}
-
-    if task.goal_id:
-        response_body["task"] = {
-            "id":task.id,
-            "goal_id": task.goal_id,
-            "title":task.title,
-            "description":task.description,
-            "is_complete": True if task.completed_at else False
-            }
-    else:
-        response_body["task"] = {
-            "id":task.id,
-            "title":task.title,
-            "description":task.description,
-            "is_complete": True if task.completed_at else False
-            }
+    response_body["task"] = task.to_json()
     
     return make_response(jsonify(response_body), 200)
 
@@ -88,59 +55,40 @@ def create_task():
     db.session.commit()
 
     response_body = {}
-    response_body["task"] = {
-            "id":new_task.id,
-            "title":new_task.title,
-            "description":new_task.description,
-            "is_complete": True if new_task.completed_at else False
-            }
+    response_body["task"] = new_task.to_json()
 
     return make_response(jsonify(response_body), 201)
 
+# Update Task
 @tasks_bp.route("/<id>", methods=["PUT"])
 def update_task(id):
-    task = validate_task(id)
+    task = validate_id("Task", id)
     request_body = request.get_json()
 
     try:
-        if 'completed_at' in request_body:
-            task.title = request_body["title"]
-            task.description = request_body["description"]
-            task.completed_at = request_body["completed_at"]
-        else:
-            task.title = request_body["title"]
-            task.description = request_body["description"]
+        task.update(request_body)
     except KeyError:
         return abort(make_response(jsonify({"details":"Invalid data"}), 400))
+
 
     db.session.commit()
     
     response_body = {}
-    response_body["task"] = {
-            "id":task.id,
-            "title":task.title,
-            "description":task.description,
-            "is_complete": True if task.completed_at else False
-            }
-    
+    response_body["task"] = task.to_json()
+
     return make_response(jsonify(response_body), 200)
 
 # PATCH REQUEST - MARK COMPLETE
 @tasks_bp.route("/<id>/mark_complete", methods=["PATCH"])
 def mark_complete(id):
-    task = validate_task(id)
+    task = validate_id("Task", id)
 
     task.completed_at = date.today()
 
     db.session.commit()
 
     response_body = {}
-    response_body["task"] = {
-            "id":task.id,
-            "title":task.title,
-            "description":task.description,
-            "is_complete": True if task.completed_at else False
-            }    
+    response_body["task"] = task.to_json()
 
     # endpoint for slack bot to post message
     SLACK_POST_PATH = "https://slack.com/api/chat.postMessage"
@@ -156,35 +104,30 @@ def mark_complete(id):
         "channel":"task-notifications",
         "text": slack_message}
 
-    response_bot = requests.post(SLACK_POST_PATH, params=query_params, headers=headers)
+    requests.post(SLACK_POST_PATH, params=query_params, headers=headers)
 
     return make_response(jsonify(response_body), 200)
 
 # PATCH REQUEST - MARK INCOMPLETE
 @tasks_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
 def mark_incomplete(id):
-    task = validate_task(id)
+    task = validate_id("Task", id)
 
     task.completed_at = None
 
     db.session.commit()
 
     response_body = {}
-    response_body["task"] = {
-            "id":task.id,
-            "title":task.title,
-            "description":task.description,
-            "is_complete": True if task.completed_at else False
-            }
+    response_body["task"] = task.to_json()
     
     return make_response(jsonify(response_body), 200)
 
 # DELETE
 @tasks_bp.route("/<id>", methods=["DELETE"])
 def delete_task(id):
-    task = validate_task(id)
+    task = validate_id("Task", id)
 
     db.session.delete(task)
     db.session.commit()
 
-    return make_response(jsonify({'details':f'Task {task.id} \"{task.title}\" successfully deleted'}), 200)
+    return make_response(jsonify({'details':f'Task {task.id} "{task.title}" successfully deleted'}), 200)
