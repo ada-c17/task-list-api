@@ -66,14 +66,14 @@ def format_task_response_body(task):
     else:
         is_complete = False
     
-    response_body = jsonify({"task" : 
-        {
-            "id" : task.task_id,
-            "title" : task.title,
-            "description" : task.description,
-            "is_complete" : is_complete
-        }
-    })
+    return(jsonify({"task" : 
+            {
+                "id" : task.task_id,
+                "title" : task.title,
+                "description" : task.description,
+                "is_complete" : is_complete
+            }
+        }))
 
     # {
     #     "id" : task.task_id,
@@ -110,7 +110,7 @@ def format_task_response_body(task):
 #                 }
 #             )
 
-    return response_body
+    # return response_body
 
 
 
