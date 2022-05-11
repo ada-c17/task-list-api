@@ -2,6 +2,7 @@ from app.models.goal import Goal
 import pytest
 
 # ----- TEST ONE ----- #
+# ----- PASSED ----- #
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_post_task_ids_to_goal(client, one_goal, three_tasks):
     # Act
@@ -23,7 +24,8 @@ def test_post_task_ids_to_goal(client, one_goal, three_tasks):
     assert len(Goal.query.get(1).tasks) == 3
 
 # ----- TEST TWO ----- #
-@pytest.mark.skip(reason="No way to test this feature yet")
+# ----- PASSED ----- #
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_post_task_ids_to_goal_already_with_goals(client, one_task_belongs_to_one_goal, three_tasks):
     # Act
     response = client.post("/goals/1/tasks", json={
