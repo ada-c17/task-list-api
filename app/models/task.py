@@ -1,29 +1,37 @@
 from app import db
+from flask import make_response
+from sqlalchemy import asc
 
 
 class Task(db.Model):
     task_id = db.Column(db.Integer, primary_key=True, autoincrement = True)
     title = db.Column(db.String)
     description = db.Column(db.String)
-    completed_at = db.Column(db.DateTime, default = False)
+    completed_at = db.Column(db.DateTime, nullable = True, default = None,)
+    # is_complete = db.Column(db.Boolean, default = False)
 
     def to_json(self):
-        return {
-            "id": self.id,
+        json_response = {
+            "id": self.task_id,
             "title": self.title,
             "description":self.description,
-            "completed_at": self.completed_at
         }
+        if self.completed_at:
+            json_response["is_complete"] = True
+        else:
+            json_response["is_complete"] = False
+        return json_response
 
     def update_task(self, request_body):
         self.title = request_body["title"]
         self.description = request_body["description"]
-        self.completed_at = request_body["completed at"]
-
+        
 
     @classmethod
     def create_task(cls, request_body):
-        new_task = cls(title = ["title"],
-            description = ["description"],
-            completed_at = ["completed"])
+        # data_valid= validate_data(request_body)
+        new_task = cls(title = request_body["title"],
+                        description = request_body["description"]
+            )
+        
         return new_task
