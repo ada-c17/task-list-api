@@ -54,19 +54,10 @@ def create_task():
 
 @task_bp.route("", methods=["GET"])
 def read_all_tasks():
-    # title_param = request.args.get("title")
-    # description_param = request.args.get("description")
-    # completed_param = request.args.get("mark_complete")
     sort_param = request.args.get("sort")
 
     tasks = Task.query
 
-    # if title_param:
-    #     tasks = tasks.filter_by(title=title_param)
-    # if description_param:
-    #     tasks = tasks.filter_by(description=description_param)
-    # if completed_param:
-    #     tasks = tasks.filter_by(mark_complete=completed_param)
     if sort_param:
         if sort_param == 'asc':
             tasks = Task.query.order_by(asc(Task.title))
@@ -87,8 +78,19 @@ def read_all_tasks():
 def get_one_task(task_id):
     task = validate_task(task_id)
     is_complete = bool(task.completed_at)
-    
-    return {"task": task.to_dict(is_complete)}
+
+    if task.goal_id:
+            return {
+        "task": {
+            "id": task.task_id,
+            "goal_id": task.goal_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": is_complete
+        }
+            }
+    else:
+        return {"task": task.to_dict(is_complete)}
 
 @task_bp.route("/<task_id>", methods=["PUT"])
 def replace_task(task_id):
@@ -121,21 +123,6 @@ def complete_task(task_id):
 
     if title:
         task.title = request_body["title"]
-        
-        # #Call to Slack API
-        # auth_token = os.environ.get("Authorization")
-        # headers = {
-        #     "Authorization": auth_token,
-        #     "Content-Type": "application/json; charset=utf-8"
-        #     }
-
-        # data = {
-        #     "channel": 'test-channel',
-        #     "text": f"Someone just completed the task {title}"
-        # }
-
-        # slack_response = requests.post("https://slack.com/api/chat.postMessage", headers=headers, json=data)
-        # # End of Slack API call
 
     db.session.commit()
     
