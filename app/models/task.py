@@ -8,18 +8,8 @@ class Task(db.Model):
 
     def return_task_dict(self):
         return {
-            "task": {
-                "id": self.task_id,
-                "title": self.title,
-                "description": self.description,
-                "is_complete": bool(self.completed_at)
-                }
+            "id": self.task_id,
+            "title": self.title,
+            "description": self.description,
+            "is_complete": bool(self.completed_at)
             }
-
-    def append_task_dict(self):
-        return {
-                "id": self.task_id,
-                "title": self.title,
-                "description": self.description,
-                "is_complete": bool(self.completed_at)
-                }

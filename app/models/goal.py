@@ -7,14 +7,6 @@ class Goal(db.Model):
 
     def return_goal_dict(self):
         return {
-            "goal": {
-                "id": self.goal_id,
-                "title": self.title
-                }
+            "id": self.goal_id,
+            "title": self.title
             }
-
-    def append_goal_dict(self):
-        return {
-                "id": self.goal_id,
-                "title": self.title
-        }

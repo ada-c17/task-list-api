@@ -24,7 +24,7 @@ def get_saved_goals():
 
     goal_list = []
     for goal in goals:
-        goal_list.append(goal.append_goal_dict())
+        goal_list.append(goal.return_goal_dict())
     
     return jsonify(goal_list), 200
 
@@ -33,32 +33,19 @@ def get_saved_goals():
 def get_one_saved_goal(goal_id):
     goal = validate_goal_or_abort(goal_id)
 
-    return jsonify(goal.return_goal_dict()), 200
+    return jsonify({"goal": goal.return_goal_dict()}), 200
 
 
-# @goals_bp.route("", methods=["POST"])
-# def create_goal():
-#     request_body = request.get_json()
+@goals_bp.route("", methods=["POST"])
+def create_goal():
+    request_body = request.get_json()
 
-#     if "title" not in request_body or\
-#         "description" not in request_body:
-#         return jsonify({"details": "Invalid data"}), 400        
+    new_goal = Goal(title = request_body["title"])
 
-#     if "completed_at" in request_body:
-#         completed_status = request_body["completed_at"]
-#     else:
-#         completed_status = None
+    db.session.add(new_goal)
+    db.session.commit()
 
-#     new_goal = Goal(
-#         title = request_body["title"],
-#         description = request_body["description"],
-#         completed_at = completed_status
-#     )
-
-#     db.session.add(new_goal)
-#     db.session.commit()
-
-#     return jsonify(new_goal.return_goal_dict()), 201
+    return jsonify({"goal": new_goal.return_goal_dict()}), 201
 
 
 # @goals_bp.route("/<goal_id>", methods=["PUT"])

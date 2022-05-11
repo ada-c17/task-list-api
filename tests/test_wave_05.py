@@ -58,7 +58,6 @@ def test_get_goal_not_found(client):
 
 
 # Wave 5 / Test 5
-@pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_goal(client):
     # Act
     response = client.post("/goals", json={
