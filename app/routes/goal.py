@@ -2,6 +2,7 @@ from flask import Blueprint, request,jsonify
 from app.models.goal import Goal 
 from app.models.task import Task 
 from app import db 
+from sqlalchemy import desc, asc
 
 goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 
@@ -18,23 +19,30 @@ def create_goal():
     db.session.commit()
 
     return {
-        "goal": {
-            "id": new_goal.goal_id,
-            "title": new_goal.title
-        }
+        "goal": new_goal.to_json()
     }, 201
 
 
 @goals_bp.route("", methods=["GET"])
 def get_goals():
     goals = Goal.query.all()
-    goals_response = []
 
-    for goal in goals:
-        goals_response.append({
-            "id": goal.goal_id,
-            "title": goal.title,
-        })
+    params = request.args 
+    if "sort" in params:
+        sort = params["sort"]
+        if sort.lower() == "asc":
+            goals = Goal.query.order_by(asc(Goal.title)).all()
+        elif sort.lower() == "desc":
+            goals = Goal.query.order_by(desc(Goal.title)).all()
+    else:    
+        goals = Goal.query.all()
+
+    # before list comprehension
+    # goals_response = []
+    # for goal in goals:
+    #     goals_response.append(goal.to_json())
+
+    goals_response = [goal.to_json() for goal in goals]
     
     return jsonify(goals_response), 200
     
@@ -44,10 +52,7 @@ def get_goal(goal_id):
     goal = Goal.validate_goal(goal_id)
 
     return {
-        "goal": {
-            "id": goal.goal_id,
-            "title": goal.title 
-        }
+        "goal": goal.to_json()
     }, 200
 
 
@@ -64,10 +69,7 @@ def update_goal(goal_id):
     db.session.commit()
 
     return {
-        "goal": {
-            "id": goal.goal_id,
-            "title": goal.title,
-        }
+        "goal": goal.to_json()
     }, 200
 
 
@@ -86,17 +88,20 @@ def delete_goal(goal_id):
 @goals_bp.route("/<goal_id>/tasks", methods = ["POST"])
 def create_tasks_for_goal(goal_id):
     goal = Goal.validate_goal(goal_id)
-    tasks = []
-    retrieved_tasks = []
     request_body = request.get_json()
 
     if "task_ids" in request_body:
         tasks = request_body["task_ids"]
 
-    for task in tasks:
-        task = Task.validate_task(task)
-        if task:
-            retrieved_tasks.append(task)
+    retrieved_tasks = [Task.validate_task(task) for task in tasks if task]
+
+    # before list comprehension
+    # retrieved_tasks = []
+
+    # for task in tasks:
+    #     task = Task.validate_task(task)
+    #     if task:
+    #         retrieved_tasks.append(task)
     
     goal.tasks = retrieved_tasks
     db.session.commit()
@@ -110,21 +115,28 @@ def create_tasks_for_goal(goal_id):
 @goals_bp.route("/<goal_id>/tasks", methods = ["GET"])
 def get_tasks_for_goal(goal_id):
     goal = Goal.validate_goal(goal_id)
-    tasks_response = []
-
     tasks = goal.tasks 
-    for task in tasks:
-        tasks_response.append({
-            "id": task.task_id, 
-            "goal_id": task.goal_id,
-            "title": task.title, 
-            "description": task.description, 
-            "is_complete": task.is_complete()
-        })
+
+    # before list comprehension 
+    # tasks_response = []
+
+    # for task in tasks:
+    #     tasks_response.append({
+    #         "id": task.task_id, 
+    #         "goal_id": task.goal_id,
+    #         "title": task.title, 
+    #         "description": task.description, 
+    #         "is_complete": task.is_complete()
+    #     })
+
+    tasks_response = [task.to_json() for task in tasks]
+    # goal.tasks = tasks_response
     
     return {
         "id": goal.goal_id,
         "title": goal.title,
         "tasks": tasks_response
     }, 200
+
+    # return goal.to_json(), 200
 
