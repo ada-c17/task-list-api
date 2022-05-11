@@ -283,4 +283,7 @@ def delete_goal(goal_id):
 
     return (make_response({"details":f'Goal {goal_id} "{goal.title}" successfully deleted'}), 200)    
 
-#\"{goal.title}\"
+
+
+
+
