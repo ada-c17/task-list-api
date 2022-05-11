@@ -28,7 +28,8 @@ def create_one_task():
 
     if new_task.completed_at is None:
         new_task.completed_at = False
-
+    else:
+        new_task
     rsp = {"task": {
         "id": new_task.task_id,
         "title": new_task.title,
@@ -52,14 +53,19 @@ def validate_task(task_id):
 
     return selected_task    
 
+def boolean_completed_task(task):
+    if task.completed_at is None:
+        task.completed_at = False
+    else:
+        task.completed_at = True
+
 
 @task_bp.route('/<task_id>', methods=['GET'])
 def get_or_update_one_task(task_id):
     selected_task = validate_task(task_id)
 
-    if selected_task.completed_at is None:
-        selected_task.completed_at = False
-
+    boolean_completed_task(selected_task)
+    
     rsp = {
         "task": {
             "id": selected_task.task_id,
@@ -74,15 +80,14 @@ def get_or_update_one_task(task_id):
 @task_bp.route('', methods=['GET'])
 def get_all_tasks():
     sort_tasks = request.args.get("sort")
-    
+
     tasks = Task.query.all()
     tasks_response = []
 
     
 
     for task in tasks:
-        if task.completed_at is None:
-            task.completed_at = False
+        boolean_completed_task(task)  
         tasks_response.append({
             "id": task.task_id,
             "title": task.title,
@@ -107,9 +112,7 @@ def update_one_task(task_id):
         return {"details": "Invalid data"}, 400   
     db.session.commit()
 
-    if selected_task.completed_at is None:
-        selected_task.completed_at = False
-
+    boolean_completed_task(selected_task)
     rsp = {
         "task": {
             "id": selected_task.task_id,
@@ -130,3 +133,9 @@ def delete_one_task(task_id):
     return {
         "details": 
         f'Task {selected_task.task_id} \"{selected_task.title}" successfully deleted'}, 200
+
+@task_bp.route('/<task_id>', methods=['PATCH'])
+def patch_one_task(task_id):
+    selected_task = validate_task(task_id)
+    pass
+

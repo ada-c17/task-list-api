@@ -4,7 +4,7 @@ from datetime import datetime
 from app.models.task import Task
 import pytest
 
-
+# Test 1
 @pytest.mark.skip(reason="No way to test this feature yet")
 def test_mark_complete_on_incomplete_task(client, one_task):
     # Arrange
@@ -41,7 +41,7 @@ def test_mark_complete_on_incomplete_task(client, one_task):
     }
     assert Task.query.get(1).completed_at
 
-
+# Test 2
 @pytest.mark.skip(reason="No way to test this feature yet")
 def test_mark_incomplete_on_complete_task(client, completed_task):
     # Act
@@ -61,7 +61,7 @@ def test_mark_incomplete_on_complete_task(client, completed_task):
     }
     assert Task.query.get(1).completed_at == None
 
-
+# Test 3
 @pytest.mark.skip(reason="No way to test this feature yet")
 def test_mark_complete_on_completed_task(client, completed_task):
     # Arrange
@@ -98,7 +98,7 @@ def test_mark_complete_on_completed_task(client, completed_task):
     }
     assert Task.query.get(1).completed_at
 
-
+# Test 4
 @pytest.mark.skip(reason="No way to test this feature yet")
 def test_mark_incomplete_on_incomplete_task(client, one_task):
     # Act
@@ -118,7 +118,7 @@ def test_mark_incomplete_on_incomplete_task(client, one_task):
     }
     assert Task.query.get(1).completed_at == None
 
-
+# Test 5
 @pytest.mark.skip(reason="No way to test this feature yet")
 def test_mark_complete_missing_task(client):
     # Act
@@ -133,7 +133,7 @@ def test_mark_complete_missing_task(client):
     # **Complete test with assertion about response body***************
     # *****************************************************************
 
-
+# Test 6
 @pytest.mark.skip(reason="No way to test this feature yet")
 def test_mark_incomplete_missing_task(client):
     # Act
@@ -149,6 +149,7 @@ def test_mark_incomplete_missing_task(client):
     # *****************************************************************
 
 
+# Test 7
 # Let's add this test for creating tasks, now that
 # the completion functionality has been implemented
 @pytest.mark.skip(reason="No way to test this feature yet")
@@ -178,7 +179,7 @@ def test_create_task_with_valid_completed_at(client):
     assert new_task.description == "Test Description"
     assert new_task.completed_at
 
-
+# Test 8
 # Let's add this test for updating tasks, now that
 # the completion functionality has been implemented
 @pytest.mark.skip(reason="No way to test this feature yet")
