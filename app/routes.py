@@ -149,26 +149,6 @@ def mark_complete_task(task_id):
 
     return response, 200
 
-    ###wave04 how to implement token into request? 
-    # what are client and logger here? 
-    # SLACK_TOKEN = os.environ["SLACK_TOKEN"]
-    # channel_id = "C03EK1KKL6P"
-    # headers = {"Authorization": f"Bearer {SLACK_TOKEN}"}https://api.slack.com/methods/chat.postMessage/code
-    ###sends a meesage to a channel 
-    # try:
-    #     result = client.chat_postMessage(
-    #         channel=channel_id,
-    #         text= f"Someone just completed the task {chosen_task.title}"
-    #     )
-    #     logger.info(result)
-
-    # except SlackApiError as e:
-    #     logger.error(f"Error posting message:{e}")
-
-    ###googled from stackoverflow
-    # resquest = requests.post('https://slack.com/api/chat.postMessage', json=response)
-    # print('response from server:',resquest.text)
-    # dictFromServer = resquest.json()
     
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_incomplete_task(task_id):
