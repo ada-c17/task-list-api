@@ -13,7 +13,8 @@ def create_task():
     if "title" not in request_body or "description" not in request_body:
         abort(make_response({"details": "Invalid data"}, 400))
 
-    task = Task(title=request_body["title"], description=request_body["description"])
+    # task = Task(title=request_body["title"], description=request_body["description"])
+    task = Task.from_dict(request_body)
 
     db.session.add(task)
     db.session.commit()
@@ -33,10 +34,8 @@ def read_all_tasks():
 
     if title_query == "asc":
         tasks = Task.query.order_by(Task.title.asc())
-
     elif title_query == "desc":
         tasks = Task.query.order_by(Task.title.desc())
-
     else:
         tasks = Task.query.all()
     
