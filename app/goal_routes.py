@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, abort, make_response, request
-from app.models.task import Task
 from app.models.goal import Goal
+from app.task_routes import validate_task
 from app import db
 
 goals_bp = Blueprint('goals', __name__, url_prefix='/goals')
@@ -20,10 +20,7 @@ def validate_goal(goal_id):
 @goals_bp.route('', methods=['GET'])
 def get_goals():
     goals = Goal.query.all()
-    goals_response = []
-
-    for goal in goals:
-        goals_response.append(goal.get_dict())
+    goals_response = [goal.get_dict() for goal in goals]
     
     return jsonify(goals_response), 200
 
@@ -71,10 +68,16 @@ def delete_goal(goal_id):
 def create_task_for_goal(goal_id):
     goal = validate_goal(goal_id)
     request_body = request.get_json()
-    task_ids = request_body['task_ids']
+    
+    #check that the request body includes key-value pair where value is a list
+    try:
+        task_ids = request_body['task_ids']
+    except KeyError:
+        abort(make_response({'details': 'Request body must include a list of task ids'}, 400))
     
     for task_id in task_ids:   
-        task = Task.query.get(task_id)
+        #check that each task_id is valid and task exists in database
+        task = validate_task(task_id)
         task.goal_id = goal.goal_id
         
     db.session.commit()
@@ -87,9 +90,7 @@ def create_task_for_goal(goal_id):
 @goals_bp.route('/<goal_id>/tasks', methods=['GET'])
 def get_tasks_for_goal(goal_id):
     goal = validate_goal(goal_id)
-    tasks_response = []
-    for task in goal.tasks:
-        tasks_response.append(task.get_dict())
+    tasks_response = [task.get_dict() for task in goal.tasks]
     
     response_body = goal.get_dict()
     response_body['tasks'] = tasks_response

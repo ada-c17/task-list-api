@@ -37,17 +37,16 @@ def get_tasks():
     query_params = request.args
     if 'sort' in query_params:
         sort_order = request.args.get('sort')
-        if sort_order == 'asc':
-            tasks = Task.query.order_by(Task.title.asc())
-        elif sort_order == 'desc':
+        if sort_order == 'desc':
             tasks = Task.query.order_by(Task.title.desc())
+        else:
+            tasks = Task.query.order_by(Task.title)
     else:
         tasks = Task.query.all()
-    tasks_response = []
     
-    for task in tasks:
-        tasks_response.append(task.get_dict())
-    return jsonify(tasks_response)
+    tasks_response = [task.get_dict() for task in tasks]
+    
+    return jsonify(tasks_response), 200
 
 @tasks_bp.route('', methods=['POST'])
 def create_task():
@@ -60,7 +59,7 @@ def create_task():
                     description=request_body['description'])
     
     if 'completed_at' in request_body:
-        new_task.completed_at=datetime.utcnow()
+        new_task.completed_at=request_body['completed_at']
     
     db.session.add(new_task)
     db.session.commit()
