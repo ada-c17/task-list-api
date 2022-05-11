@@ -1,5 +1,5 @@
-from asyncio import tasks
 from flask import Blueprint, jsonify, make_response, request, abort
+from sqlalchemy import asc
 from app.models.task import Task
 from app import db
 
@@ -29,8 +29,19 @@ def read_one_task(task_id):
 
 @bp.route("", methods=("GET",))
 def read_all_tasks():
-    tasks = Task.query.all()
+    title_query = request.args.get("sort")
+
+    if title_query == "asc":
+        tasks = Task.query.order_by(Task.title.asc())
+
+    elif title_query == "desc":
+        tasks = Task.query.order_by(Task.title.desc())
+
+    else:
+        tasks = Task.query.all()
+    
     tasks_response = [task.to_dict() for task in tasks]
+
     return make_response(jsonify(tasks_response), 200)
 
 

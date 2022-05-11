@@ -21,6 +21,7 @@ class Task(db.Model):
             is_complete=True if self.completed_at else False
         )
 
+
         # completed_at = True if self.completed_at else False
         # return {
         #     "id": self.task_id,
