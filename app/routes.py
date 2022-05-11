@@ -75,6 +75,41 @@ def format_task_response_body(task):
         }
     })
 
+    # {
+    #     "id" : task.task_id,
+    #     "goal_id" : task.goal_id,
+    #     "title" : task.title,
+    #     "description": task.description,
+    #     "is_complete": task.completed_at,
+    # }
+
+
+# @goals_bp.route("/<goal_id>/tasks", methods=["GET"])
+# def get_tasks_one_goal(goal_id):
+    
+#     # Get one goal
+#     goal_to_get = validate_goal(goal_id)
+
+#     tasks_response = []
+
+
+#     if goal_to_get.tasks:
+
+#         for task in goal_to_get.tasks:
+
+#             if not task.completed_at:
+#                 task.completed_at = False
+
+#             tasks_response.append(
+#                 {
+#                 "id" : task.task_id,
+#                 "goal_id" : task.goal_id,
+#                 "title" : task.title,
+#                 "description": task.description,
+#                 "is_complete": task.completed_at,
+#                 }
+#             )
+
     return response_body
 
 
