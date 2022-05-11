@@ -23,3 +23,45 @@ def get_all_goals():
 		goals_response.append(goal.to_json())
 
 	return jsonify(goals_response), 200
+
+
+@goals_bp.route("/<id>", methods=["GET"])
+def get_one_goals(id):
+    goal = validate_goal(id)
+    print(goal)
+    return jsonify({"goal": goal.to_json()}), 200
+
+
+@goals_bp.route("", methods=["POST"])
+def create_goal():
+	request_body = request.get_json()
+
+	new_goal = Goal.create(request_body)
+
+	db.session.add(new_goal)
+	db.session.commit()
+
+	return jsonify({"goal": new_goal.to_json()}), 201
+
+
+@goals_bp.route("/<id>", methods=["PUT"])
+def update_goal(id):
+    goal = validate_goal(id)
+
+    request_body = request.get_json()
+
+    goal.update(request_body)
+
+    db.session.commit()
+
+    return jsonify({"goal": goal.to_json()}), 200
+
+
+@goals_bp.route("/<id>", methods=["DELETE"])
+def delete_one_goal(id):
+    goal = validate_goal(id)
+
+    db.session.delete(goal)
+    db.session.commit()
+
+    return jsonify({"details": f'Goal {id} "{goal.title}" successfully deleted'}), 200
