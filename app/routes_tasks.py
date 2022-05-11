@@ -34,6 +34,9 @@ def get_all_tasks():
             tasks = Task.query.order_by(Task.title.asc()).all()
         elif params["sort"] == "desc":
             tasks = Task.query.order_by(Task.title.desc()).all()
+        else:
+            response = {"details": "Invalid data"}
+            abort(make_response(jsonify(response), 400))
         # add else if value for sort is invalid
     else:
         tasks = Task.query.all()
