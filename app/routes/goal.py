@@ -40,6 +40,9 @@ def get_one_saved_goal(goal_id):
 def create_goal():
     request_body = request.get_json()
 
+    if "title" not in request_body:
+        return jsonify({"details": "Invalid data"}), 400
+
     new_goal = Goal(title = request_body["title"])
 
     db.session.add(new_goal)
