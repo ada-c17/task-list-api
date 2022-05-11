@@ -48,21 +48,16 @@ def create_goal():
     return jsonify({"goal": new_goal.return_goal_dict()}), 201
 
 
-# @goals_bp.route("/<goal_id>", methods=["PUT"])
-# def update_saved_goal(goal_id):
-#     goal = validate_goal_or_abort(goal_id)
+@goals_bp.route("/<goal_id>", methods=["PUT"])
+def update_saved_goal(goal_id):
+    goal = validate_goal_or_abort(goal_id)
     
-#     request_body = request.get_json()
+    request_body = request.get_json()
 
-#     goal.title = request_body["title"]
-#     goal.description = request_body["description"]
+    goal.title = request_body["title"]
+    db.session.commit()
 
-#     if "completed_at" in request_body:
-#         goal.completed_at = request_body["completed_at"]
-
-#     db.session.commit()
-
-#     return jsonify(goal.return_goal_dict()), 200
+    return jsonify({"goal": goal.return_goal_dict()}), 200
 
 
 # @goals_bp.route("/<goal_id>", methods=["DELETE"])
