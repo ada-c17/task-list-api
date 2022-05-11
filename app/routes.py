@@ -1,4 +1,5 @@
 from crypt import methods
+from datetime import datetime
 from flask import Blueprint, jsonify, request, abort, make_response
 from app import db
 from app.models.task import Task
@@ -19,6 +20,24 @@ def get_task_or_abort(task_id):
         abort(make_response(jsonify(rsp), 404))
     return task
 
+def mark_completed_at(task_id, completed_at):
+    task = get_task_or_abort(task_id)
+    task.completed_at = completed_at
+    db.session.commit()
+    return jsonify(
+        {
+            "task": to_dict(task)
+        }
+    ), 200
+
+def to_dict(task):
+    return {
+        "id": task.id,
+        "title": task.title,
+        "description": task.description,
+        "is_complete": task.is_complete()
+    }
+
 # routes
 @tasks_bp.route("", methods=['POST'])
 def create_one_task():
@@ -27,27 +46,22 @@ def create_one_task():
     try:
         new_task = Task(
             title = request_body["title"],
-            description = request_body["description"])
+            description = request_body["description"],
+            completed_at = request_body.get("completed_at"))
     except KeyError:
         return {"details" : "Invalid data"}, 400
 
     db.session.add(new_task)
     db.session.commit()
-    return {
-        "task":
+    return jsonify(
         {
-            "id": new_task.id,
-            "title": new_task.title,
-            "description": new_task.description,
-            "is_complete": False
-            }
-    }, 201
+            "task": to_dict(new_task)
+        }
+    ), 201
 
 
 @tasks_bp.route("", methods=['GET'])
 def get_all_task():
-
-    # ###
     params = request.args
     if "sort" in params and "asc" == params["sort"]:
         tasks = Task.query.order_by(Task.title.asc()).all()
@@ -58,26 +72,20 @@ def get_all_task():
 
     tasks_response = []
     for task in tasks:
-        tasks_response.append({
-            "id": task.id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": False
-        })
+        tasks_response.append(to_dict(task))
+
     return jsonify(tasks_response), 200
+
 
 @tasks_bp.route('/<task_id>', methods=['GET'])
 def get_one_task(task_id):
     task = get_task_or_abort(task_id)
-    return {
-        "task":
+    return jsonify(
         {
-            "id": task.id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": False
-            }
-    }, 200
+            "task": to_dict(task)
+        }
+    ), 200
+
 
 @tasks_bp.route('/<task_id>', methods=['PUT'])
 def update_task(task_id):
@@ -87,7 +95,7 @@ def update_task(task_id):
     try:
         task.title = request_body["title"]
         task.description = request_body["description"]
-        task.is_complete = False
+        task.completed_at = request_body.get("completed_at")
     
     except KeyError:
         return {
@@ -97,15 +105,13 @@ def update_task(task_id):
     db.session.commit()
     # check valid input after commits
     task = get_task_or_abort(task_id)
-    return {
-        "task":
+
+    return jsonify(
         {
-            "id": task.id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": False
-            }
-    }, 200
+            "task": to_dict(task)
+        }
+    ), 200
+
 
 @tasks_bp.route('/<task_id>', methods=['DELETE'])
 def delete_one_task(task_id):
@@ -116,3 +122,14 @@ def delete_one_task(task_id):
     return {
         "details" : f'Task {task.id} "{task.title}" successfully deleted'
     }, 200
+
+
+@tasks_bp.route('/<task_id>/mark_complete', methods=['PATCH'])
+def mark_as_complete_one_task(task_id):
+    return mark_completed_at(task_id, datetime.utcnow())
+
+
+@tasks_bp.route('/<task_id>/mark_incomplete', methods=['PATCH'])
+def mark_as_incomplete_one_task(task_id):
+    return mark_completed_at(task_id, None)
+    

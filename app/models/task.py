@@ -6,3 +6,6 @@ class Task(db.Model):
     title = db.Column(db.String, nullable=False)
     description = db.Column(db.String)
     completed_at = db.Column(db.DateTime, nullable=True)
+
+    def is_complete(self):
+        return self.completed_at is not None
