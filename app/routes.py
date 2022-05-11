@@ -2,6 +2,7 @@ from flask import Blueprint, request, make_response, abort, jsonify
 import requests
 from sqlalchemy import asc
 from app.models.task import Task
+from app.models.goal import Goal
 from app import db
 from datetime import date
 import os
@@ -25,6 +26,13 @@ def validate_id(task_id):
 # VALIDATE REQUEST
 def validate_request(request):
     request_body = request.get_json()
+    if request.path == "/goals":
+        try:
+            request_body["title"]
+        except KeyError:
+            abort(make_response({"details": "Invalid data"}, 400)) 
+        return request_body
+    # if request.path == "/goals":
     try:
         request_body["title"]
         request_body["description"]
@@ -128,3 +136,16 @@ def mark_incomplete(task_id):
     task.completed_at = None
     db.session.commit()
     return make_response({"task": task.to_dict()})
+
+# ------- GOALS ROUTES -------
+
+# POST /goals
+@goals_bp.route("", methods=["POST"])
+def create_new_goal():
+    request_body = validate_request(request)
+    new_goal = Goal(
+        title=request_body["title"],
+    )
+    db.session.add(new_goal)
+    db.session.commit()
+    return make_response({"goal": new_goal.to_dict()}, 201)
