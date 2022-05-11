@@ -220,9 +220,30 @@ def get_one_goal(goal_id):
     return jsonify({"goal":goal.to_dict()})
 
 
+@goals_bp.route("/<goal_id>", methods=["PUT"])
+def update_goal(goal_id):
+    goal = validate_object(goal_id, "goal")
+
+    request_body = request.get_json()
+
+    if "title" in request_body:
+        goal.title = request_body["title"]
+    else:
+        abort(make_response({"details": "Invalid data"}, 400))
+
+    db.session.commit()
+
+    return make_response({"goal":goal.to_dict()})
 
 
+@goals_bp.route("/<goal_id>", methods=["DELETE"])
+def delete_goal(goal_id):
+    goal = validate_object(goal_id, "goal")
 
+    db.session.delete(goal)
+    db.session.commit()
+
+    return make_response({"details": f'Goal {goal.goal_id} "{goal.title}" successfully deleted'})
 
 
 
