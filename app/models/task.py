@@ -25,7 +25,6 @@ class Task(db.Model):
         #     )
         # else:
         return cls(
-                #id = data_dict["id"],
                 title = data_dict["title"],
                 description = data_dict["description"]
             )

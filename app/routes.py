@@ -26,12 +26,12 @@ def get_task_record_by_id(id):
         error_message(f"Invalid id {id}", 400)
 
     task = Task.query.get(id)
-
     if task:
         return task
     
     error_message(f"No task with id {id} found", 404)
 
+# POST /tasks
 @tasks_bp.route("", methods = ["POST"])
 def create_task():
     request_body = request.get_json()
@@ -42,10 +42,10 @@ def create_task():
 
     return jsonify({"task": new_task.to_dict()}), 201
 
+# GET /tasks
 @tasks_bp.route("", methods=["GET"])
 def read_all_tasks():
     sort_param = request.args.get("sort")
-    print(sort_param)
 
     if sort_param == 'asc':
         tasks = Task.query.order_by(Task.title.asc())
@@ -58,27 +58,13 @@ def read_all_tasks():
 
     return jsonify(result_list)
 
+# GET /tasks/<task_id>
 @tasks_bp.route("/<task_id>", methods=["Get"])
 def read_task_by_id(task_id):
     task = get_task_record_by_id(task_id)
     return jsonify({"task":task.to_dict()})
 
-# @tasks_bp.route("/<task_id>", methods=["PATCH"])
-# def update_task_by_id(task_id):
-#     task = get_task_record_by_id(task_id)
-#     request_body = request.get_json()
-#     task_keys = request_body.keys()
-
-#     if "title" in task_keys:
-#         task.title = request_body["title"]
-#     if "description" in task_keys:
-#         task.description = request_body["description"]
-#     if "is_complete" in task_keys:
-#         task.completed_at = request_body["is_complete"] 
-
-#     db.session.commit()
-#     return jsonify({"task":task.to_dict()})
-
+# PUT /tasks/<task_id>
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def replace_task_by_id(task_id):
     request_body = request.get_json()
@@ -91,6 +77,7 @@ def replace_task_by_id(task_id):
 
     return jsonify({"task":task.to_dict()})
 
+# DELETE /tasks/<task_id>
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task_by_id(task_id):
     task = get_task_record_by_id(task_id)
@@ -100,4 +87,16 @@ def delete_task_by_id(task_id):
 
     return jsonify({"details": f'Task {task.task_id} "{task.title}" successfully deleted'})
 
+# PATCH /tasks/<task_id>/mark_complete
+@tasks_bp.route("/<task_id>/<mark_complete>", methods=["PATCH"])
+def update_task_by_id(task_id, completed_at):
+    task = get_task_record_by_id(task_id)
+    request_body = request.get_json()
+    print(request_body)
+
+    # if "is_complete" in task_keys:
+    #     task.completed_at = request_body["mark_complete"] 
+
+    db.session.commit()
+    return jsonify({"task":task.to_dict()})
 
