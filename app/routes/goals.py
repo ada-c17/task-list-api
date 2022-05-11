@@ -62,7 +62,11 @@ def update_one_goal(goal_id):
     goal = validate_goal_id(goal_id)
     request_body = request.get_json()
 
-    goal.title = request_body['title']
+    try:
+        goal.title = request_body['title']
+    except KeyError:
+        return {"details": "Invalid data"}, 400
+        
     db.session.commit()
 
     rsp = {'goal': {
