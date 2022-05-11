@@ -1,8 +1,7 @@
 
 
-from email import header
+
 import os, requests, json
-from pytest import param
 from datetime import date, datetime
 from requests import request
 from sqlalchemy import desc
@@ -61,14 +60,7 @@ def read_task():
     
     tasks_response = []
     for task in tasks:
-        tasks_response.append(
-            {
-                "id": task.task_id,
-                "title": task.title,
-                "description": task.description,
-                "is_complete": False
-            }
-        )
+        tasks_response.append(task.to_json())
     return jsonify(tasks_response), 200
 
 # GET one Task
@@ -76,12 +68,7 @@ def read_task():
 def read_one_task(task_id):
     task = validate_task(task_id)
 
-    return { "task": {
-        "id": task.task_id,
-        "title": task.title,
-        "description": task.description,
-        "is_complete": False
-    }}, 200
+    return { "task": task.to_json()}, 200
 
 # UPDATE one Task
 @tasks_bp.route("/<task_id>", methods=["PUT"])
@@ -133,7 +120,7 @@ def patch_complete_task(task_id):
         "text": f"Someone just completed the task {task.title}"
     }
     slack_response = requests.post(url, params=params, headers=header)
-    
+
     return {"task": {
         "id": task.task_id,
         "title": task.title,
