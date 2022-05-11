@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Blueprint, jsonify, request, make_response
 from app import db
 from app.models.task import Task
@@ -51,7 +52,7 @@ def create_one_task():
     #     return  {"details": "Invalid data"}, 400
     
 
-#Update one
+#Update one - PUT
 @tasks_bp.route("/<id>", methods=["PUT"])
 def update_one_task(id):
     task = validate_task(id)
@@ -70,3 +71,14 @@ def delete_one_task(id):
     return {"details": f'Task {id} "Go on my daily walk 🏞" successfully deleted'}
 
 
+#Update - Patch
+@tasks_bp.route("/<id>/mark_complete", methods=["PATCH"])
+def patch_one_taskl(id):
+    
+    
+    task = validate_task(id)
+    complete_query = request.args.get("mark_complete")
+    if complete_query is True:
+        task.is_complete = True
+        task.complete_at = datetime.date.todday()
+        return {"task": task.to_json()}, 200
