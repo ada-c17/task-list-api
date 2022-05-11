@@ -1,9 +1,11 @@
 import json
+import datetime
 from urllib import response
 from flask import Blueprint, jsonify, abort, make_response, request
 from sqlalchemy import desc
 from app import db
 from app.models.task import Task
+
 
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
@@ -14,6 +16,7 @@ def manage_post_tasks():
     request_body = request.get_json()
     title = request_body.get("title")
     description = request_body.get("description")
+    completed_at = request_body.get("completed_at", None)
     # print(title)
     # print(description)
     # print(request_body)
@@ -22,11 +25,12 @@ def manage_post_tasks():
         # print("inside if statement")
         # print(response_body)
         return response_body
-        
+    
+
     new_task = Task(
-        title = request_body.get("title"),
-        description = request_body.get("description")
-        # completed_at = request_body["completed_at"]
+        title = title,
+        description = description,
+        completed_at = completed_at
         )
 
     db.session.add(new_task)
@@ -41,16 +45,7 @@ def manage_post_tasks():
 @tasks_bp.route("", methods=["GET"])
 def manage_get_tasks():
     sort_param = request.args.get("sort")
-    # print(sort_param)
-    # asc or desc
 
-    # order ascending:
-    # need request to have asc
-    # tasks_asc = Task.query.order_by(Task.title).all()
-    # order descending:
-    # need req to have desc
-    # tasks_desc = Task.query.order_by(desc(Task.title)).all()
-    
     if sort_param == "asc":
         tasks = Task.query.order_by(Task.title).all()
     elif sort_param == "desc":
@@ -58,23 +53,13 @@ def manage_get_tasks():
     else:
         tasks = Task.query.all()
 
-    ### this might query titles and need a change in task_response
-    #   title_query = request.args.get("title")
-    ### this might be an alternative
-    # tasks = Task.query.all()
-    
-    # if title_query:
-    #     tasks = Task.query.order_by(Task.title).all()
-    # else:
-    #     tasks = Task.query.all()
-
     tasks_response = [task.to_dictionary() for task in tasks]
     # print(tasks_response)
 
     return jsonify(tasks_response)
 
-def sort_task_by_title(title):
-    pass
+# def sort_task_by_title(title):
+#     pass
 
 
 @tasks_bp.route("/<id>", methods=["GET"])
@@ -108,6 +93,53 @@ def delete_task_by_id(id):
     db.session.commit()
 
     return make_response(jsonify({"details": f"Task {task.id} \"{task.title}\" successfully deleted"}), 200)
+
+@tasks_bp.route("/<id>/mark_complete", methods=["PATCH"])
+def update_task_mark_complete_by_id(id):
+    task = get_task(id)
+
+    task.completed_at = datetime.date.today()
+    
+    db.session.commit()
+
+    response_body = {"task":task.to_dictionary()}
+
+    return response_body
+# "completed"
+# create a patch route to tasks/<task_id>/mark_complete
+# request body has an id and a completed_at 'null' value
+# resposnse body is dictionary with task: as key and tasks as values
+# > nested dictionary is_complete key == true
+
+# PATCH on tasks/<task_id>/mark_complete
+# "complete" on "completed task"
+# request is ID and completed_at with a datetime value
+# response is dictionary with key task and value tasks
+# > nested dictionary is_complete == true
+
+
+# if it is " not completed"
+# > patch route to tasks/<task_id>/mark_incomplete 
+# ** noticce how there are two routes, make two routes
+# request body has an id and a "completed_at" attribute with datetime
+# update makes response body:
+# dictionary with task as key and tasks as values
+# >nested dictionary is_complete == false
+# completed_at (which is in the methods) is null/None
+
+# patch on tasks/<task_id>/mark_incomplete
+@tasks_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
+def update_task_mark_incomplete_by_id(id):
+    task = get_task(id)
+
+    task.completed_at = None
+    
+    db.session.commit()
+
+    response_body = {"task":task.to_dictionary()}
+
+    return response_body
+
 
 
 def get_task(id):

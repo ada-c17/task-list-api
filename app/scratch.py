@@ -22,6 +22,30 @@
     #         Task.completed_at == is_complete
     #         task["completed_at"] == task["is_complete"]
 
+######WAVE_2########
+######routes########
+## in get ##
+    # print(sort_param)
+    # asc or desc
+
+    # order ascending:
+    # need request to have asc
+    # tasks_asc = Task.query.order_by(Task.title).all()
+    # order descending:
+    # need req to have desc
+    # tasks_desc = Task.query.order_by(desc(Task.title)).all()
+
+
+    ### this might query titles and need a change in task_response
+    #   title_query = request.args.get("title")
+    ### this might be an alternative
+    # tasks = Task.query.all()
+    
+    # if title_query:
+    #     tasks = Task.query.order_by(Task.title).all()
+    # else:
+    #     tasks = Task.query.all()
+
 
 ####################
 ########END#########
