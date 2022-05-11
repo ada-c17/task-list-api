@@ -53,6 +53,30 @@ def create_one_task():
         }
     }, 201 
 
+
+@goals_bp.route("", methods=["POST"])
+def create_one_goal():
+    request_body = request.get_json()
+
+    if "title" not in request_body:
+        return {
+            "details": "Invalid data"
+        }, 400
+    
+    new_goal = Goal(
+                title=request_body["title"])
+
+
+    db.session.add(new_goal)
+    db.session.commit()
+
+    return {
+        "goal": {
+            "id": new_goal.goal_id,
+            "title": new_goal.title
+        }
+    }, 201 
+
 #READ
 
 @tasks_bp.route("", methods=["GET"])
@@ -96,6 +120,44 @@ def read_one_task(task_id):
 
 
 
+@goals_bp.route("", methods=["GET"])
+def read_all_goals():
+    # param = request.args
+    # if "sort" in param:
+    #     if param["sort"] == "asc":
+    #         tasks = Task.query.order_by(Task.title.asc())
+    #     elif param["sort"] == "desc":
+    #         tasks = Task.query.order_by(Task.title.desc())
+    # else:
+    goals = Goal.query.all()
+
+    goals_response = []
+    for goal in goals:
+        goals_response.append(
+            {
+                "id": goal.goal_id,
+                "title": goal.title
+            }
+        )
+
+    return jsonify(goals_response), 200
+
+
+
+@goals_bp.route("/<goal_id>", methods=["GET"])
+def read_one_goal(goal_id):
+    chosen_goal = get_goal_or_abort(goal_id)
+    
+    response = { 
+        "goal": {
+                "id" : chosen_goal.goal_id,
+                "title": chosen_goal.title
+                }
+            }
+    return jsonify(response), 200
+
+
+
 #UPDATE
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def replace_one_task(task_id):
@@ -118,6 +180,28 @@ def replace_one_task(task_id):
                 "title": chosen_task.title,
                 "description": chosen_task.description,
                 "is_complete": bool(chosen_task.completed_at)
+                }
+            }
+    return jsonify(response), 200
+
+@goals_bp.route("/<goal_id>", methods=["PUT"])
+def replace_one_goal(goal_id):
+    chosen_goal = get_goal_or_abort(goal_id)
+    request_body = request.get_json()
+
+    try:
+        chosen_goal.title = request_body["title"]
+        
+    except KeyError:
+        return {
+            "details": "Invalid data"
+        } , 400
+
+    db.session.commit()
+
+    return { "task": {
+                "id" : chosen_goal.goal_id,
+                "title": chosen_goal.title
                 }
             }
     return jsonify(response), 200
@@ -189,6 +273,15 @@ def delete_task(task_id):
     return {
         "details": f"Task {chosen_task.task_id} \"Go on my daily walk 🏞\" successfully deleted" }, 200
 
+@goals_bp.route("/<goal_id>", methods = ["DELETE"])
+def delete_task(goal_id):
+    chosen_goal = get_goal_or_abort(goal_id)
+    db.session.delete(chosen_goal)
+    db.session.commit()
+
+    return {
+        "details": f"Goal {chosen_goal.goal_id} \"Build a habit of going outside daily\" successfully deleted"}, 200
+
 
 
 #helper function to handle invalid task id and no task in DB
@@ -205,3 +298,18 @@ def get_task_or_abort(task_id):
         response = {"message":f"Could not find task with id {task_id}"}
         abort(make_response(jsonify(response),404))
     return chosen_task
+
+
+def get_goal_or_abort(goal_id):
+    try:
+        goal_id = int(goal_id)
+    except ValueError:
+        response = {"details": "Invalid data"}
+        abort(make_response(jsonify(response),400))
+
+    chosen_goal = Goal.query.get(goal_id)
+
+    if chosen_goal is None:
+        response = {"message":f"Could not find goal with id {goal_id}"}
+        abort(make_response(jsonify(response),404))
+    return chosen_goal
