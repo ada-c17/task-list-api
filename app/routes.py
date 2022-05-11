@@ -38,7 +38,7 @@ def create_one_task():
     return jsonify(rsp), 201
 
 
-def get_task_or_abort(task_id):
+def validate_task(task_id):
     try:
         task_id = int(task_id)
     except ValueError:
@@ -55,7 +55,7 @@ def get_task_or_abort(task_id):
 
 @task_bp.route('/<task_id>', methods=['GET'])
 def get_or_update_one_task(task_id):
-    selected_task = get_task_or_abort(task_id)
+    selected_task = validate_task(task_id)
 
     if selected_task.completed_at is None:
         selected_task.completed_at = False
@@ -73,8 +73,12 @@ def get_or_update_one_task(task_id):
 
 @task_bp.route('', methods=['GET'])
 def get_all_tasks():
+    sort_tasks = request.args.get("sort")
+    
     tasks = Task.query.all()
     tasks_response = []
+
+    
 
     for task in tasks:
         if task.completed_at is None:
@@ -85,12 +89,16 @@ def get_all_tasks():
             "description": task.description,
             "is_complete": task.completed_at
         })
-
+    if sort_tasks:
+        if sort_tasks == "asc":
+            return jsonify(sorted(tasks_response, key=lambda a: a["title"])), 200
+        elif sort_tasks == "desc":
+            return jsonify(sorted(tasks_response, key=lambda a: a["title"], reverse=True)), 200
     return jsonify(tasks_response), 200    
 
 @task_bp.route('/<task_id>', methods=['PUT'])
 def update_one_task(task_id):
-    selected_task = get_task_or_abort(task_id)
+    selected_task = validate_task(task_id)
     request_body = request.get_json()
     try:
         selected_task.title = request_body["title"]
@@ -114,7 +122,7 @@ def update_one_task(task_id):
 
 @task_bp.route('/<task_id>', methods=['DELETE'])
 def delete_one_task(task_id):
-    selected_task = get_task_or_abort(task_id)
+    selected_task = validate_task(task_id)
 
     db.session.delete(selected_task)
     db.session.commit()
