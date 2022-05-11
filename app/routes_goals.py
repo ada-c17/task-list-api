@@ -22,7 +22,10 @@ def validate_goal(goal_id):
 @goal_bp.route("", methods=['POST'])
 def create_one_goal():
     request_body = request.get_json()
-    new_goal = Goal(title=request_body['title'])
+    try:
+        new_goal = Goal(title=request_body['title'])
+    except:
+        return jsonify({"details": "Invalid data"}), 400
     db.session.add(new_goal)
     db.session.commit()
     response = {
@@ -30,6 +33,7 @@ def create_one_goal():
         {"id": new_goal.goal_id,
         "title": new_goal.title}
         }
+    
     return jsonify(response), 201
 
 
@@ -71,3 +75,12 @@ def update_goal(goal_id):
     return jsonify(response), 200
 
 # DELETE (CRUD)
+@goal_bp.route("/<goal_id>", methods=["DELETE"])
+def delete_one_goal(goal_id):
+    goal = validate_goal(goal_id)
+    db.session.delete(goal)
+    db.session.commit()
+    response = {
+        "details": f'Goal {goal.goal_id} "{goal.title}" successfully deleted'
+    }
+    return jsonify(response), 200

@@ -132,9 +132,9 @@ def mark_task_completed(task_id):
     bot_token = 'Bearer '+ os.environ.get('SLACK_BOT_TOKEN')
     print(bot_token)
     slack = requests.post('https://slack.com/api/chat.postMessage', headers={'Authorization': bot_token}, params={'channel': 'task-notifications', 'text':f'Someone just completed the task {task.title}', 'format': 'json'})
-    # print(slack)
-    # print(slack.content)
-    # print('*****')
+    print(slack)
+    print(slack.content)
+    print('*****')
     return jsonify(response), 200
 
 
