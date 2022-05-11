@@ -83,3 +83,25 @@ def delete_one_goal(goal_id):
         "details": f'Goal {goal.goal_id} "{goal.title}" successfully deleted'
     }
     return jsonify(response), 200
+
+# adding tasks to a goal: CREATE (CRUD) aka POST
+# request body: {"task_ids": [1, 2, 3]}  These are the tasks to add to the goal_id
+# response expected: { "id": 1,"task_ids": [1, 2, 3]} where id is goal_id
+
+@goal_bp.route("/goals/<goal_id>/tasks", methods = ["POST"])
+def add_task_to_goal(goal_id):
+    request_body = request.get_json()
+
+    task_id_list = request_body['task_ids']
+    for task_id in task_id_list:
+        try:
+            task_id = Task(task_id=task_id)
+        except:
+            return jsonify({"details": "Invalid data"}), 400
+
+    response = {
+        'id' = goal.goal_id,
+        'task_ids' = 
+    }
+
+    return jsonify(response), 201
