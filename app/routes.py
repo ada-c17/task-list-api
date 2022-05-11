@@ -460,7 +460,6 @@ def get_tasks_one_goal(goal_id):
     tasks_response = []
 
 
-
     if goal_to_get.tasks:
 
         for task in goal_to_get.tasks:
