@@ -1,5 +1,3 @@
-from asyncio import tasks
-from turtle import back
 from app import db
 
 #parent class
