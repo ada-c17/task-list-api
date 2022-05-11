@@ -64,7 +64,6 @@ def get_all_tasks():
             response["is_complete"] = False
         response_body.append(response)
         
-    print(response_body)
 
     return jsonify(response_body), 200
 
@@ -135,8 +134,9 @@ def mark_task_complete(task_id):
         "text": f"Someone just completed the task {task_dict['task']['title']}"
         }
     headers = {
-        "Authorization": f"Bearer {os.environ.get(API_KEY)}"
+        "Authorization": f"Bearer {API_KEY}"
     }
+    print(headers)
     bot_request = requests.post("https://slack.com/api/chat.postMessage", headers=headers, params=payload)
 
     return jsonify(task_dict), 200
