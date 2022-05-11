@@ -16,7 +16,7 @@ class Task(db.Model):
         )
     @classmethod
     def from_dict(cls, data_dict):
-        # if "is_complete" in data_dict:
+        # if "mark_complete" in data_dict:
         #     return cls(
         #         #id = data_dict["id"],
         #         title = data_dict["title"],
