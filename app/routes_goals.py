@@ -2,8 +2,7 @@ from flask import Blueprint, jsonify, request, abort, make_response
 from .models.task import Task
 from .models.goal import Goal
 from app import db
-import os
-import requests
+
 
 goal_bp = Blueprint("", __name__, url_prefix="/goals" )
 
