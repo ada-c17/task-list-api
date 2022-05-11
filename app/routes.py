@@ -440,8 +440,9 @@ def delete_goal(goal_id):
 
 
 ################# NESTED ROUTES #################
+
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
-def post_goals_to_tasks(goal_id, task_id):
+def post_goals_to_tasks():
     
     request_body = request.get_json()
 
