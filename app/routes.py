@@ -23,6 +23,18 @@ def validate_task(task_id):
         return jsonify({"message" : f"Could not find '{task_id}'"}), 404
     return task
 
+def validate_goal(goal_id):
+    try:
+        goal_id = int(goal_id)
+    except ValueError:
+        return jsonify({"msg" : f"'{goal_id}' is invalid"}), 400
+
+    goal = Goal.query.get(goal_id)
+    if not goal:
+        return jsonify({"message" : f"Could not find '{goal_id}'"}), 404
+    return goal
+
+
 def format_task(task):
     response = {
     "task" : 
@@ -189,3 +201,11 @@ def get_goals():
             }
         )
     return jsonify(goals_response), 200
+
+@goals_bp.route('/<goal_id>', methods=['GET'])
+def get_one_goal(goal_id):
+    goal = validate_goal(goal_id)
+
+    if isinstance(goal, Goal):
+        return format_goal(goal), 200
+    return goal
