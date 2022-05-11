@@ -298,6 +298,7 @@ def format_goal_response_body(goal):
     return response_body
 
 
+
 def validate_goal(goal_id):
     # Check if task_id is a valid integer
     try:
@@ -355,7 +356,6 @@ def get_one_goal(goal_id):
 
     # Search for this goal_id in the Goal Blueprint
     goal = Goal.query.get(goal_id)
-
 
 
     # If this specific goal isn't found, 404 response code
@@ -421,6 +421,7 @@ def update_goal(goal_id):
     return format_goal_response_body(goal_to_update), 200
 
 
+
 # ---- DELETE GOAL ---- #
 @goals_bp.route("/<goal_id>", methods=["DELETE"])
 def delete_goal(goal_id):
@@ -441,32 +442,6 @@ def delete_goal(goal_id):
 
 ################# NESTED ROUTES #################
 
-# # ---- CREATE A GOAL ---- #
-
-# @goals_bp.route("", methods=["POST"])
-# def create_goal():
-
-#     request_body = request.get_json()
-
-#     if not request_body:
-#         abort(make_response({"details" : f"Invalid data"}, 400))
-
-
-#     new_goal = Goal(title=request_body["title"])
-
-#     # Add new task and commit change
-#     db.session.add(new_goal)
-#     db.session.commit()
-
-#     response_body = jsonify({ "goal" : 
-#         {
-#             "id" : new_goal.goal_id,
-#             "title" : new_goal.title
-#         }
-#     })
-
-#     return response_body, 201
-
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
 def post_tasks_to_goal(goal_id):
 
@@ -477,7 +452,6 @@ def post_tasks_to_goal(goal_id):
 
     # Check that "task_ids" is in the request_body
     if "task_ids" in request_body:
-        # task_ids = request_body["task_ids"]
 
         # Loop through the "task_ids"
         for task_id in request_body["task_ids"]:
@@ -497,14 +471,11 @@ def post_tasks_to_goal(goal_id):
 
 
 
-
 @goals_bp.route("/<goal_id>/tasks", methods=["GET"])
 def get_tasks_one_goal(goal_id):
     
     # Get one goal
     goal_to_get = validate_goal(goal_id)
-
-    # goal_request_body = request.get_json()
 
     tasks_response = []
 
@@ -526,7 +497,6 @@ def get_tasks_one_goal(goal_id):
                 }
             )
 
-    # return tasks_response, 200
 
     response_body = {
         "id" : goal_to_get.goal_id, 
