@@ -168,12 +168,14 @@ def get_tasks_for_goal(goal_id):
 def post_task_to_goal(goal_id):
     tasks_response = []
     request_body = request.get_json()
-
+    
+    search_key = 'task'
+    key_name = ([key for key in request_body.keys() if search_key in key])
+    task_ids = ([val for key, val in request_body.items() if search_key in key])
     goal = validate_goal(goal_id)
-    task_ids = request_body["task_ids"]
 
-    for i in range(len(task_ids)):
-        task_id = task_ids[i]
+    for i in range(len(task_ids[0])):
+        task_id = task_ids[0][i]
 
         task = Task.query.get(int(task_id))
         
@@ -184,7 +186,9 @@ def post_task_to_goal(goal_id):
                 task_id
             )
 
+    ret_key = key_name[0]
+
     return make_response(jsonify({
         "id": goal.goal_id,
-        "task_ids": tasks_response
+        ret_key: tasks_response
     }), 200)
