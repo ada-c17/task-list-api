@@ -319,4 +319,4 @@ def get_goal_or_abort(goal_id):
     return chosen_goal
 
 
-@goals_bp.route("/<goal_id>/tasks", methods = ["POST"])
+# @goals_bp.route("/<goal_id>/tasks", methods = ["POST"])
