@@ -12,6 +12,7 @@ class Task(db.Model):
     def to_json(self):
         # change name to_dict(self):
         is_complete = False
+        # if (self.completed_at is not None):
         if (self.completed_at is not None):
             is_complete = True
         return {
@@ -30,8 +31,15 @@ class Task(db.Model):
 
     @classmethod
     def create(cls, req_body):
-        new_task = cls(
+        if "completed_at" in req_body:
+            new_task = cls(
                     title=req_body["title"],
-                    description=req_body["description"]
+                    description=req_body["description"],
+                    completed_at=req_body["completed_at"]
                     )
+        else:
+            new_task = cls(
+                        title=req_body["title"],
+                        description=req_body["description"]
+                        )
         return new_task

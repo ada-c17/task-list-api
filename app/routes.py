@@ -2,6 +2,8 @@ from flask import Blueprint, make_response, request, jsonify, abort
 from app.models.task import Task
 from app import db
 from flask import request
+from datetime import datetime
+# datetime.datetime.utcnow()
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix = "/tasks")
 
@@ -40,6 +42,38 @@ def create_task():
 
     # return make_response(jsonify(f"Task {new_task.title} successfully created"), 201)
     return make_response(jsonify({"task": new_task.to_json()}), 201)
+
+
+@tasks_bp.route("/<tasks_id>/mark_complete", methods=["PATCH"])
+def mark_task_complete(tasks_id):
+    task = validate_task(tasks_id)
+    
+    # request_body = request.get_json()
+    # task.completed_at = request_body["completed_at"]
+    task.completed_at = datetime.utcnow()
+    
+    # request_body = request.get_json()
+    # task.completed_at = response_body["completed_at"]
+    # task.update(response_body)
+
+    db.session.commit()
+
+    return make_response(jsonify({"task": task.to_json()}), 200)
+
+@tasks_bp.route("/<tasks_id>/mark_incomplete", methods=["PATCH"])
+def mark_task_incomplete(tasks_id):
+    task = validate_task(tasks_id)
+   
+    task.completed_at = None
+
+    # request_body = request.get_json()
+    # task.completed_at = response_body["completed_at"]
+    # task.update(response_body)
+
+    db.session.commit()
+
+    return make_response(jsonify({"task": task.to_json()}), 200)
+
 
 @tasks_bp.route("", methods=["GET"])
 def get_tasks():
