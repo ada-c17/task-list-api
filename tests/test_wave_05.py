@@ -133,7 +133,7 @@ def test_create_goal(client):
 
 pytest.mark.skip(reason="test to be completed by student")
 def test_update_goal(client, one_goal):
-    #raise Exception("Complete test")
+
     # Act
     response = client.put("/goals/1", json={
         "title": "Updated Goal Title"})
@@ -150,6 +150,17 @@ def test_update_goal(client, one_goal):
     }
 
 pytest.mark.skip(reason="test to be completed by student")
+def test_update_goal_with_missing_title(client, one_goal):
+    # Act
+    response = client.put("/goals/1", json={})
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    assert "details" in response_body
+    assert response_body["details"] == "Invalid data"
+
+pytest.mark.skip(reason="test to be completed by student")
 def test_update_goal_not_found(client):
     #raise Exception("Complete test")
     # Act
@@ -160,7 +171,7 @@ def test_update_goal_not_found(client):
     # Assert
     assert response.status_code == 404
     assert "details" in response_body
-    assert response_body == {"details": "Not found"}
+    assert response_body["details"] == "Not found"
     assert Goal.query.get(1) == None
 
 
@@ -178,11 +189,7 @@ def test_delete_goal(client, one_goal):
     }
 
     # Check that the goal was deleted
-    new_response = client.get("/goals/1")
-    # new_response_body = response.get_json()
-    #assert new_response.status_code == 404
-    # assert new_response_body == {"details": "Not found"}
-    # assert Goal.query.all() == []
+    response_body = client.get("/goals/1")
 
     #raise Exception("Complete test with assertion about response body")
     # *****************************************************************
