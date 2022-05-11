@@ -90,13 +90,14 @@ def mark_complete(id):
     slack_message = f"Someone just completed the task {task.title}"
 
     # headers
-    headers = {"Authorization": os.environ.get("SLACK_BOT_KEY")}
+    headers = {"Authorization": os.environ.get("SLACK_OATH_TOKEN")}
 
     # query_params
     query_params = {
         "channel":"task-notifications",
         "text": slack_message}
 
+    print()
     requests.post(SLACK_POST_PATH, params=query_params, headers=headers)
 
     return make_response(jsonify(response_body), 200)
