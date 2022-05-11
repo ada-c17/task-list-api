@@ -441,42 +441,59 @@ def delete_goal(goal_id):
 
 ################# NESTED ROUTES #################
 
+# # ---- CREATE A GOAL ---- #
+
+# @goals_bp.route("", methods=["POST"])
+# def create_goal():
+
+#     request_body = request.get_json()
+
+#     if not request_body:
+#         abort(make_response({"details" : f"Invalid data"}, 400))
+
+
+#     new_goal = Goal(title=request_body["title"])
+
+#     # Add new task and commit change
+#     db.session.add(new_goal)
+#     db.session.commit()
+
+#     response_body = jsonify({ "goal" : 
+#         {
+#             "id" : new_goal.goal_id,
+#             "title" : new_goal.title
+#         }
+#     })
+
+#     return response_body, 201
+
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
 def post_tasks_to_goal(goal_id):
 
     # Get the goal to post the tasks to
-    goal_to_post = validate_goal(goal_id)
+    goal_for_post = validate_goal(goal_id)
     
     request_body = request.get_json()
 
     # Check that "task_ids" is in the request_body
-    # Loop through the "task_ids"
+    if "task_ids" in request_body:
+        # task_ids = request_body["task_ids"]
+
+        # Loop through the "task_ids"
+        for task_id in request_body["task_ids"]:
+            task = Task.query.get(task_id)
+            task.goal_id = goal_for_post.goal_id
+
+
+    db.session.commit()
+
     # Add to Goal's task_id's list
+    response_body = {
+        "id" : goal_for_post.goal_id, 
+        "task_ids" : request_body["task_ids"]
+    }
 
-
-
-
-# @goals_bp.route("/<goal_id>", methods=["GET"])
-# def get_one_goal(goal_id):
-
-#     # Check if goal_id is a valid integer
-#     try:
-#         goal_id = int(goal_id)
-#     except:
-#         # If it's not, 400 response code
-#         abort(make_response({"message" : f"Goal ID is invalid."}, 400))
-
-#     # Search for this goal_id in the Goal Blueprint
-#     goal = Goal.query.get(goal_id)
-
-
-
-#     # If this specific goal isn't found, 404 response code
-#     if not goal:
-#         abort(make_response({"details" : f"Invalid data"}, 404))
-
-#     return format_goal_response_body(goal), 200
-
+    return response_body, 200
 
 
 
