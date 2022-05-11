@@ -1,4 +1,6 @@
 
+from datetime import date, datetime
+from wsgiref.util import request_uri
 from sqlalchemy import desc
 from app import db
 from app.models.task import Task
@@ -15,10 +17,21 @@ def create_task():
         return {"details": "Invalid data"}, 400
     elif "description" not in request_body.keys():
         return {"details": "Invalid data"}, 400
+    elif "completed_at" in request_body.keys():
+        new_task = Task(title=request_body["title"],
+                    description=request_body["description"],
+                    completed_at=request_body["completed_at"])
+        db.session.add(new_task)
+        db.session.commit()
+        return { "task": {
+            "id": new_task.task_id,
+            "title": new_task.title,
+            "description": new_task.description,
+            "is_complete": True
+        }}, 201
     else:
         new_task = Task(title=request_body["title"],
                     description=request_body["description"])
-
         db.session.add(new_task)
         db.session.commit()
 
@@ -73,14 +86,24 @@ def update_task(task_id):
     request_body = request.get_json()
     task.title = request_body["title"]
     task.description = request_body["description"]
-    db.session.commit()
-    
-    return { "task": {
-        "id": task.task_id,
-        "title": task.title,
-        "description": task.description,
-        "is_complete": False
-    }}, 200
+
+    if "completed_at" in request_body.keys():
+        task.completed_at = request_body["completed_at"]
+        db.session.commit()
+        return { "task": {
+            "id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": True
+        }}, 200
+    else:
+        db.session.commit()
+        return { "task": {
+            "id": task.task_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": False
+        }}, 200
 
 # DELETE one Task
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
@@ -90,3 +113,34 @@ def delete_task(task_id):
     db.session.delete(task)
     db.session.commit()
     return make_response({"details": f'Task {task.task_id} "{task.title}" successfully deleted'}), 200
+
+# PATCH 
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def patch_complete_task(task_id):
+    task = validate_task(task_id)
+    
+    task.completed_at = datetime.utcnow()
+    db.session.commit()
+    return { "task": {
+        "id": task.task_id,
+        "title": task.title,
+        "description": task.description,
+        "is_complete": True
+    }}, 200
+
+
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def patch_incomplete_task(task_id):
+    task = validate_task(task_id)
+
+    task.completed_at = None
+    db.session.commit()
+    return { "task": {
+        "id": task.task_id,
+        "title": task.title,
+        "description": task.description,
+        "is_complete": False
+    }}, 200
+
+        
+    
