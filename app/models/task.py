@@ -10,6 +10,7 @@ class Task(db.Model):
     completed_at = db.Column(db.DateTime, nullable = True)
 
     def to_json(self):
+        # change name to_dict(self):
         is_complete = False
         if (self.completed_at is not None):
             is_complete = True
