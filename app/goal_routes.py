@@ -21,8 +21,9 @@ goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
 @goals_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
-    # if "title" not in request_body:
-    #     return make_response({"details": "Invalid data"}), 400
+    
+    if "title" not in request_body:
+        return make_response({"details": "Invalid data"}), 400
 
     new_goal = Goal(
         title=request_body["title"]
