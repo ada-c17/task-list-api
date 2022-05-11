@@ -43,10 +43,3 @@ class Task(db.Model):
         )
         
         return new_task
-        
-        # new_task = cls(
-        #     title=request_body["title"],
-        #     description=request_body["description"]
-            
-        # )
-        # return new_task

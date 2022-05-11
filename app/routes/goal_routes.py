@@ -1,14 +1,8 @@
-# from requests import request
-# import requests
 from app import db
 from app.models.task import Task
 from app.models.goal import Goal
 from flask import Blueprint, jsonify, abort, make_response, request
 from .helper import validate_task, validate_goal
-from sqlalchemy import asc, desc
-from datetime import datetime, date
-from dotenv import load_dotenv
-# import os
 
 goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 
@@ -79,8 +73,8 @@ def delete_goal(goal_id):
 
     return make_response(jsonify({"details":f'Goal {goal.goal_id} "{goal.title}" successfully deleted'})), 200
 
-
-@goals_bp.route("/<goal_id>/tasks", methods=["POST"])  # do we need /goals/<goal_id>/tasks or /<goal_id>/tasks
+# Create list of tasks of one goal
+@goals_bp.route("/<goal_id>/tasks", methods=["POST"])
 def create_list_tasks_to_goal(goal_id):
     goal = validate_goal(goal_id)
 
@@ -90,7 +84,6 @@ def create_list_tasks_to_goal(goal_id):
         validate_task(id)
         task = Task.query.get(id)
         task.goal_id = goal.goal_id
-        # goal.tasks.append(task)
 
     db.session.commit()
 
@@ -101,32 +94,17 @@ def create_list_tasks_to_goal(goal_id):
     }
     return make_response(jsonify(response), 200)
 
-
+# Get all tasks of one goal
 @goals_bp.route("/<goal_id>/tasks", methods=["GET"])
 def read_tasks_of_one_goal(goal_id):
 
     goal = validate_goal(goal_id)
     tasks_response = []
 
-    if goal.tasks == []:
-            response_body = {
-                "id": goal.goal_id,
-                "title": goal.title,
-                "tasks": tasks_response
-            }
-            return make_response(jsonify(response_body), 200)
-    
     for task in goal.tasks:
-        tasks_response.append(
-            {
-                "id": task.task_id,
-                "goal_id": goal.goal_id,
-                "title": task.title,
-                "description": task.description,
-                "is_complete": True if task.completed_at else False
-            }
-        )
+        tasks_response.append(task.to_json())
 
+    # response_body = goal.to_json()
     response_body = {
         "id": goal.goal_id,
         "title": goal.title,
