@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, make_response, abort
 from app import db
 from app.models.task import Task
 from datetime import datetime
+import requests
 
 
 
@@ -133,6 +134,14 @@ def mark_complete(task_id):
 
     db.session.commit()
     
+    requests.post(
+        "https://slack.com/api/chat.postMessage",
+        data={
+            "channel":"general",
+            "text": f'Someone just completed the task {task.title}'},
+        headers={"Authorization": "Bearer }
+        )
+
     task_updated = {"task": {
     "id": task.task_id,
     "title": task.title,
