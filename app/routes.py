@@ -459,16 +459,21 @@ def get_tasks_one_goal(goal_id):
 
     tasks_response = []
 
-    for task in goal_to_get.tasks:
 
-        tasks_response.append({
-            "id" : task.task_id,
-            "goal_id" : task.goal_id,
-            "title" : task.title,
-            "description": task.description,
-            "is_complete": task.completed_at,
-        }
-        )
+
+    if goal_to_get.tasks:
+
+        for task in goal_to_get.tasks:
+
+            tasks_response.append(
+                {
+                "id" : task.task_id,
+                "goal_id" : task.goal_id,
+                "title" : task.title,
+                "description": task.description,
+                "is_complete": task.completed_at,
+                }
+            )
 
     # return tasks_response, 200
 
@@ -478,7 +483,7 @@ def get_tasks_one_goal(goal_id):
         "tasks" : tasks_response
     }
 
-    return response_body
+    return response_body, 200
 
 
 
