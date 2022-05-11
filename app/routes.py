@@ -1,6 +1,10 @@
 
+
+from email import header
+import os, requests, json
+from pytest import param
 from datetime import date, datetime
-from wsgiref.util import request_uri
+from requests import request
 from sqlalchemy import desc
 from app import db
 from app.models.task import Task
@@ -118,10 +122,19 @@ def delete_task(task_id):
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def patch_complete_task(task_id):
     task = validate_task(task_id)
-    
     task.completed_at = datetime.utcnow()
     db.session.commit()
-    return { "task": {
+
+    url = "https://slack.com/api/chat.postMessage"
+    token = os.environ.get("SLACK_API_KEY")
+    header = {'Authorization': f'Bearer {token}'}
+    params = {
+        "channel": "C03F50XDCDA",
+        "text": f"Someone just completed the task {task.title}"
+    }
+    slack_response = requests.post(url, params=params, headers=header)
+    
+    return {"task": {
         "id": task.task_id,
         "title": task.title,
         "description": task.description,
