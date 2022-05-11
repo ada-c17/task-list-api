@@ -17,6 +17,7 @@ tasks_bp = Blueprint("tasks_bp", __name__, url_prefix = "/tasks")
 goals_bp = Blueprint("goals_bp", __name__, url_prefix = "/goals")
 
 #CREATE 
+#task post route
 @tasks_bp.route("", methods=["POST"])
 def create_one_task():
     request_body = request.get_json()
@@ -53,7 +54,7 @@ def create_one_task():
         }
     }, 201 
 
-
+#goal post route
 @goals_bp.route("", methods=["POST"])
 def create_one_goal():
     request_body = request.get_json()
@@ -78,7 +79,7 @@ def create_one_goal():
     }, 201 
 
 #READ
-
+#task get routes
 @tasks_bp.route("", methods=["GET"])
 def read_all_tasks():
     param = request.args
@@ -119,7 +120,7 @@ def read_one_task(task_id):
     return jsonify(response), 200
 
 
-
+#goal get routes
 @goals_bp.route("", methods=["GET"])
 def read_all_goals():
     # param = request.args
@@ -159,6 +160,7 @@ def read_one_goal(goal_id):
 
 
 #UPDATE
+#task update route
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def replace_one_task(task_id):
     chosen_task = get_task_or_abort(task_id)
@@ -184,6 +186,8 @@ def replace_one_task(task_id):
             }
     return jsonify(response), 200
 
+
+#goal update route
 @goals_bp.route("/<goal_id>", methods=["PUT"])
 def replace_one_goal(goal_id):
     chosen_goal = get_goal_or_abort(goal_id)
@@ -207,7 +211,8 @@ def replace_one_goal(goal_id):
     return jsonify(response), 200
 
 
-
+#PATCH
+#task patch routes
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def completed_task(task_id):
     chosen_task = get_task_or_abort(task_id)
@@ -239,8 +244,6 @@ def completed_task(task_id):
     # return jsonify(response), 200
 
 
-
-
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def incompleted_task(task_id):
     chosen_task = get_task_or_abort(task_id)
@@ -257,13 +260,11 @@ def incompleted_task(task_id):
                 "is_complete": bool(chosen_task.completed_at)
                 }
             }, 200
-    # return jsonify(response), 200
-
-
 
 
 
 #DELETE
+#task delete route
 @tasks_bp.route("/<task_id>", methods = ["DELETE"])
 def delete_task(task_id):
     chosen_task = get_task_or_abort(task_id)
@@ -272,6 +273,8 @@ def delete_task(task_id):
 
     return {
         "details": f"Task {chosen_task.task_id} \"Go on my daily walk 🏞\" successfully deleted" }, 200
+
+#goal delete route
 
 @goals_bp.route("/<goal_id>", methods = ["DELETE"])
 def delete_task(goal_id):
@@ -285,6 +288,7 @@ def delete_task(goal_id):
 
 
 #helper function to handle invalid task id and no task in DB
+#task input validation helper function
 def get_task_or_abort(task_id):
     try:
         task_id = int(task_id)
@@ -299,7 +303,7 @@ def get_task_or_abort(task_id):
         abort(make_response(jsonify(response),404))
     return chosen_task
 
-
+#goal input validation helper function
 def get_goal_or_abort(goal_id):
     try:
         goal_id = int(goal_id)
@@ -313,3 +317,6 @@ def get_goal_or_abort(goal_id):
         response = {"message":f"Could not find goal with id {goal_id}"}
         abort(make_response(jsonify(response),404))
     return chosen_goal
+
+
+@goals_bp.route("/<goal_id>/tasks", methods = ["POST"])
