@@ -37,7 +37,6 @@ def get_all_tasks():
         else:
             response = {"details": "Invalid data"}
             abort(make_response(jsonify(response), 400))
-        # add else if value for sort is invalid
     else:
         tasks = Task.query.all()
     
@@ -89,16 +88,14 @@ def create_one_task():
             # Example:
             # From datetime class- 2022-05-07 18:48:06.598253
             # To string class- 'Sat, 07 May 2022 23:59:31 GMT' 
-            completed_at = request_body["completed_at"] 
             # I want my endpoint to accepted completed_at in either format
+            completed_at = request_body["completed_at"] 
             # Converted string format will always start with a letter that is the day of the week
             if completed_at[0].isalpha():
                 finished = datetime.strptime(completed_at, 
                     '%a, %d %B %Y %H:%M:%S %Z')
             else:
-                # completed_at is passed in as (example): '2022-05-07 18:48:06.598253'
-                # This is one way I tested in Postman, so I wanted it to work too
-                # It will never start with a letter
+                # '2022-05-07 18:48:06.598253' format will never start with a letter
                 finished = datetime.strptime(completed_at, 
                     '%Y-%m-%d %H:%M:%S.%f')
             new_task.completed_at = finished
