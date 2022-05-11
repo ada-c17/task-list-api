@@ -90,7 +90,7 @@ def mark_complete(id):
     slack_message = f"Someone just completed the task {task.title}"
 
     # headers
-    headers = {"Authorization": os.environ.get("SLACK_OATH_TOKEN")}
+    headers = {"Authorization": os.environ.get("SLACK_OAUTH_TOKEN")}
 
     # query_params
     query_params = {
