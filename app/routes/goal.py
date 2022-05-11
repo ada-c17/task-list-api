@@ -2,6 +2,9 @@
 from flask import Blueprint, jsonify, make_response, request, abort
 from app import db
 from app.models.goal import Goal
+from app.models.task import Task
+from app.routes.task import tasks_bp
+
 from datetime import datetime
 import os
 import requests
@@ -103,3 +106,33 @@ def delete_goal(goal_id):
     }
 
     return jsonify(response), 200
+
+def validate_task(task_id):
+    try:
+        task_id = int(task_id)
+    except:
+        abort(make_response({"message":f"Task id '{task_id}' is invalid"}, 400))
+
+    task = Task.query.get(task_id)
+
+    if not task:
+        abort(make_response({"message":f"Task id '{task_id}' not found"}, 404))
+
+    return task
+
+@goals_bp.route("/<goal_id>/tasks", methods=["POST"])
+def add_tasks_to_goals(goal_id):
+    goal = validate_goal(goal_id)
+    request_body = request.get_json()
+
+    task_ids = request_body["task_ids"]
+    for task in task_ids:
+        chosen_task = validate_task(task)
+        chosen_task.goal_id = goal.goal_id
+    
+    db.session.commit()
+
+    return {
+    "id": goal.goal_id,
+    "task_ids": task_ids
+}
