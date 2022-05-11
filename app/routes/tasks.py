@@ -43,7 +43,7 @@ def create_one_task():
     db.session.commit()
 
     rsp = {'task': {
-            'id': new_task.task_id,
+            'id': new_task.id,
             'title': new_task.title,
             'description': new_task.description,
             'is_complete': is_complete
@@ -68,7 +68,7 @@ def get_all_tasks():
         if task.completed_at:
             is_complete = True
         tasks_response.append({
-                'id': task.task_id,
+                'id': task.id,
                 'title': task.title,
                 'description': task.description,
                 'is_complete': is_complete
@@ -85,7 +85,7 @@ def get_one_task(task_id):
         is_complete = True
 
     rsp = {"task": {
-        'id': task.task_id,
+        'id': task.id,
         'title': task.title,
         'description': task.description,
         'is_complete': is_complete
@@ -98,7 +98,7 @@ def delete_one_task(task_id):
     db.session.delete(task)
     db.session.commit()
 
-    return jsonify({'details': f'Task {task.task_id} \"{task.title}\" successfully deleted'}), 200
+    return jsonify({'details': f'Task {task.id} \"{task.title}\" successfully deleted'}), 200
 
 @tasks_bp.route('/<task_id>', methods=['PUT'])
 def update_one_task(task_id):
@@ -119,7 +119,7 @@ def update_one_task(task_id):
     db.session.commit()
 
     rsp = {"task": {
-        'id': task.task_id,
+        'id': task.id,
         'title': task.title,
         'description': task.description,
         'is_complete': is_complete
@@ -148,7 +148,7 @@ def mark_task_complete(task_id):
 
     rsp = {
         'task': {
-            'id': task.task_id,
+            'id': task.id,
             'title': task.title,
             'description': task.description,
             'is_complete': True
@@ -166,7 +166,7 @@ def mark_task_incomplete(task_id):
 
     rsp = {
         'task': {
-            'id': task.task_id,
+            'id': task.id,
             'title': task.title,
             'description': task.description,
             'is_complete': False

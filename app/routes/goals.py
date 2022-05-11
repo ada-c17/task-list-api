@@ -17,6 +17,7 @@ def validate_goal_id(goal_id):
 
     return goal
 
+
 @goals_bp.route('', methods=['POST'])
 def create_one_goal():
     request_body = request.get_json()
@@ -28,11 +29,12 @@ def create_one_goal():
     db.session.commit()
 
     rsp = {'goal': {
-        'id': new_goal.goal_id,
+        'id': new_goal.id,
         'title': new_goal.title
         }}
     
     return jsonify(rsp), 201
+
 
 @goals_bp.route('', methods=['GET'])
 def get_all_goals():
@@ -41,21 +43,23 @@ def get_all_goals():
 
     for goal in goals:
         response_body.append({
-            'id': goal.goal_id,
+            'id': goal.id,
             'title': goal.title
         })
     
     return jsonify(response_body), 200
 
+
 @goals_bp.route('/<goal_id>', methods=['GET'])
 def get_one_goal(goal_id):
     goal = validate_goal_id(goal_id)
     rsp = {'goal': {
-        'id': goal.goal_id,
+        'id': goal.id,
         'title': goal.title
         }}
 
     return jsonify(rsp), 200
+
 
 @goals_bp.route('/<goal_id>', methods=['PUT'])
 def update_one_goal(goal_id):
@@ -70,10 +74,11 @@ def update_one_goal(goal_id):
     db.session.commit()
 
     rsp = {'goal': {
-        'id': goal.goal_id,
+        'id': goal.id,
         'title': goal.title
         }}
     return jsonify(rsp), 200
+
 
 @goals_bp.route('/<goal_id>', methods=['DELETE'])
 def delete_one_goal(goal_id):
@@ -81,4 +86,19 @@ def delete_one_goal(goal_id):
     db.session.delete(goal)
     db.session.commit()
 
-    return jsonify({"details": f"Goal {goal.goal_id} \"{goal.title}\" successfully deleted"}), 200
+    return jsonify({"details": f"Goal {goal.id} \"{goal.title}\" successfully deleted"}), 200
+
+
+@goals_bp.route('/<goal_id>, tasks', methods=['GET'])
+def get_tasks_list(goal_id):
+    goal = validate_goal_id(goal_id)
+    request_body = request.get_json()
+
+    for id in request_body['task_ids']:
+        goal.tasks.append(id)
+    
+    rsp = {
+        'id': goal.id,
+        'task_id': goal.tasks
+    }
+    return jsonify(rsp), 200
