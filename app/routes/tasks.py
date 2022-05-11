@@ -63,15 +63,17 @@ def validate_task_id(task_id):
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def read_task_by_id(task_id):
     chosen_task = validate_task_id(task_id)
-    response_body = {
-        "task": {
-            "id": chosen_task.id,
-            "title": chosen_task.title,
-            "description": chosen_task.description,
-            "is_complete": bool(chosen_task.completed_at)
-        }
-    }
-    return jsonify(response_body), 200
+    # response_body = {
+    #     "task": {
+    #         "id": chosen_task.id,
+    #         "title": chosen_task.title,
+    #         "description": chosen_task.description,
+    #         "is_complete": bool(chosen_task.completed_at)
+    #     }
+    # }
+    
+    return jsonify({"task": chosen_task.task_response_body()}), 200
+    # return chosen_task.task_response_body(), 200
 
 
 # helper function to check key dictionary exist or not
