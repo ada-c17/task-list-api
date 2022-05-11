@@ -6,17 +6,24 @@ import requests
 import os
 #from sqlalchemy import asc, desc
 
-def validate_task(task_id):
+def validate_object(object_id, object_type):
+    '''
+    object_id:  id of a task or goal
+    object_type: "goal" or "task" depending on endpoint
+    '''
     try:
-        task_id = int(task_id)
+        object_id = int(object_id)
     except:
-        abort(make_response({"message":f"task {task_id} invalid"}, 400))
+        abort(make_response({"message":f"Object {object_id} invalid"}, 400))
 
-    task = Task.query.get(task_id)
-    if not task:
-        abort(make_response({"message":f"task {task_id} not found"}, 404))
+    if object_type == "task":
+        goal_or_task = Task.query.get(object_id)
+    elif object_type == "goal":
+        goal_or_task = Goal.query.get(object_id)
+    if not goal_or_task:
+        abort(make_response({"message":f"Object {object_id} not found"}, 404))
 
-    return task
+    return goal_or_task
 
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
@@ -56,13 +63,13 @@ def post_task():
 
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
-    task = validate_task(task_id)
+    task = validate_object(task_id, "task")
     return jsonify({"task":task.to_dict()})
 
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
-    task = validate_task(task_id)
+    task = validate_object(task_id, "task")
 
     request_body = request.get_json()
 
@@ -81,7 +88,7 @@ def update_task(task_id):
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
-    task = validate_task(task_id)
+    task = validate_object(task_id, "task")
 
     db.session.delete(task)
     db.session.commit()
@@ -91,7 +98,7 @@ def delete_task(task_id):
 
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def complete_task(task_id):
-    task = validate_task(task_id)
+    task = validate_object(task_id, "task")
     request_body = request.get_json()
 
     task.completed_at = datetime.datetime.utcnow()
@@ -114,7 +121,7 @@ def complete_task(task_id):
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def incomplete_task(task_id):
-    task = validate_task(task_id)
+    task = validate_object(task_id, "task")
     request_body = request.get_json()
 
     task.completed_at = None
