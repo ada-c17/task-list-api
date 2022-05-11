@@ -1,6 +1,5 @@
 from app import db
 
-
 class Task(db.Model):
     task_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String, nullable=False)
@@ -20,11 +19,20 @@ class Task(db.Model):
         self.title = request_body["title"]
         self.description = request_body["description"]
 
-@classmethod
-def from_dict(cls, data_dict):
-    return cls(
-        title=data_dict["title"],
-        description=data_dict["description"],
-        completed_at=data_dict["completed_at"]
-)
+    @classmethod
+    def from_dict(cls, request_body):
+        new_task = cls(
+            title=request_body["title"],
+            description=request_body["description"],
+            # is_complete=request_body["completed_at"]
+        )
+        return new_task
 
+    # @classmethod
+    # def create(cls, request_body):
+    #     new_task = cls(
+    #     title=request_body["title"],
+    #     description=request_body["description"],
+    #     completed_at=request_body["completed_at"]
+    #     )
+    #     return new_task

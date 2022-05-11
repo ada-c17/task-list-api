@@ -7,59 +7,57 @@ tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 # CREATE aka POST new task at endpoint: /tasks
 @tasks_bp.route("", methods=["POST"])
 def create_task():
-    #This will take the contents of the request body and turn it 
-    # into lists and dictionaries and give you the return value.
     request_body = request.get_json()
     if "title" not in request_body or "description" not in request_body:
         return make_response(jsonify(dict(details="Invalid data")), 400)
 
-    new_task = Task(
-        title = request_body["title"],
-        description = request_body["description"])
+    new_task = Task.from_dict(request_body)
 
     db.session.add(new_task)
     db.session.commit()
-
-# How can I avoid repeating this response body over and over? 
-# Use a method to turn the response into a dictionary then jsonify. 
-# SEE to_dict() method in task.py ...confused about to_json()...same thing?
-    response_body = {
-        "task":
-            {
-            "id": new_task.task_id,
-            "title": new_task.title,
-            "description": new_task.description,
-            "is_complete": False if new_task.completed_at == None else True  ##Confused about what this should be...False?? It is optional
-            }
-        }
     
     #COMPARE these return statement options...significance of make_response (something to do with headers but importance?)
     # return make_response(jsonify(response_body), 201)
     # return make_response(jsonify({"task": new_task.to_dict()}), 201)
     return jsonify({"task": new_task.to_dict()}), 201   #Although you need to include "task" in the respond per the tests. 
+# SEE to_dict() method in task.py ...confused about to_json()...same thing? I keep seeing it in other examples. 
 
 # GET ALL TASKS aka READ at endpoint /tasks
 @tasks_bp.route("", methods=["GET"])
 def read_all_tasks():
-    tasks_list = []
+    tasks_response = []
+    title_query = request.args.get("sort")
+
+    if title_query == "asc":
+        tasks = Task.query.order_by(Task.title.asc())
+
+    elif title_query == "desc":
+        tasks = Task.query.order_by(Task.title.desc())
+    
+    else:
+        tasks = Task.query.all()
+
+    tasks_response = [task.to_dict() for task in tasks]
+
+    return make_response(jsonify(tasks_response), 200)
     #Because our Task Model is derived from db.Model we inherit some 
     #functionality such as a helper function/method called query:
-    tasks = Task.query.all()
+    # tasks = Task.query.all()
 
 #ALTERNATIVE APPROACH TO LIST COMPREHENSION ACTUALLY USED FURTHER BELOW. 
-    for task in tasks:  # We iterate over all tasks in tasks so we can collect their data and format it into a response
-        # tasks_list.append(
-        #     {
-        #         "id": task.task_id, 
-        #         "title": task.title,
-        #         "description": task.description,x
-        #         "is_complete": False if task.completed_at == None else True  ##Confused about what this should be...False?? It is optional
-        # }
-        # )
-    # A more streamlined approach is to use class method to_dict() from task.py:
-        tasks_list.append(task.to_dict())
+    # for task in tasks:  # We iterate over all tasks in tasks so we can collect their data and format it into a response
+    #     # tasks_list.append(
+    #     #     {
+    #     #         "id": task.task_id, 
+    #     #         "title": task.title,
+    #     #         "description": task.description,x
+    #     #         "is_complete": False if task.completed_at == None else True  ##Confused about what this should be...False?? It is optional
+    #     # }
+    #     # )
+    # # A more streamlined approach is to use class method to_dict() from task.py:
+    #     tasks_list.append(task.to_dict())
 
-    return jsonify(tasks_list) # By default, a response with no specified status code returns 200 OK
+    # return jsonify(tasks_list) # By default, a response with no specified status code returns 200 OK
 
     #tasks_list contains a list of task dictionaries. 
     # To turn it into a Response object, we pass it into jsonify(). 
@@ -72,18 +70,9 @@ def read_all_tasks():
 def get_task_by_id(id):
     task = validate_task(id)
 
-    # Initial approach:
-    # return {"task":{
-    #         "id": task.task_id,
-    #         "title": task.title,
-    #         "description": task.description,
-    #         "is_complete": False if task.completed_at == None else True  ##Confused about what this should be...False?? It is optional
-    #     }}
     # NOTE: Flask will automatically convert a dictionary into an HTTP response body. 
     # If we don't want to remember this exception, we can call jsonify() with the dictionary as an argument to return the result
-    #So alternatively:
-    # return jsonify(task.to_dict())
-    return jsonify({"task": task.to_dict()}), 201
+    return jsonify({"task": task.to_dict()}), 200
     # return make_response(jsonify({"task": task.to_dict()}), 201)
 
 # *************Could alternatively use a hash to look things up by id.  ...need to practice this later. 
@@ -111,7 +100,7 @@ def delete_one_task(id):
     # return make_response(f"Task #{task.task_id} successfully deleted"), 200  #Do I need to jsonify this?
     # return jsonify(dict(details= f"Task {id} {task.to_dict()["title"]})), 200
     return jsonify({'details': f'Task {id} "{task.title}" successfully deleted'}), 200
-#####
+
 
 
 #QUALITY CONTROL HELPER FUNCTION
