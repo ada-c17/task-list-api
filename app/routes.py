@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+SLACK_OAUTH_TOKEN = os.environ.get("SLACK_OAUTH_TOKEN")
+
 task_bp = Blueprint("task", __name__, url_prefix="/tasks")
 
 def validate_task(id):
@@ -109,7 +111,7 @@ def complete_task(task_id):
     message = "Someone just completed the task " + task.title
 
     path = "https://slack.com/api/chat.postMessage"
-    headers = {'Authorization': f'Bearer {os.environ.get("SLACK_OAUTH_TOKEN")}'}
+    headers = {'Authorization': f'Bearer {SLACK_OAUTH_TOKEN}'}
     params = {"channel": "task-notifications", "text": message}
 
     requests.post(path,data=params,headers=headers)
