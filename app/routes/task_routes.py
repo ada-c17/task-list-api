@@ -34,7 +34,7 @@ def get_all_tasks():
 	for task in tasks:
 		tasks_response.append(task.to_json())
 
-	return jsonify(tasks_response)
+	return jsonify(tasks_response), 200
 
 # GET ONE TASK
 
