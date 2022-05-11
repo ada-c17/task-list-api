@@ -11,13 +11,14 @@ import os
 task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 goal_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
-def completed_or_not(response_body):
-    # [response] iterage in list of object, otherwise, TypeError
-    if response_body and "completed_at" in [response_body]:
-        completed_status = True
-    else:
-        completed_status = False
-    return completed_status
+# Non Object Oriented design, should go inside of class method
+# def completed_or_not(response_body):
+#     # [response] iterage in list of object, otherwise, TypeError
+#     if response_body and "completed_at" in [response_body]:
+#         completed_status = True
+#     else:
+#         completed_status = False
+#     return completed_status
 
 @task_bp.route("", methods=["POST"])
 def create_tasks():
@@ -77,10 +78,18 @@ def id_validation(input_id):
 @task_bp.route("/<taskID>", methods=["GET"])
 def get_one_task(taskID):
     task_exist = id_validation(taskID)
-
+    
     return {
         "task": 
         task_exist.to_json() }, 200
+#   if post /goals/goal_id/tasks { "task_ids" : [3,6,7,9,10]}
+#   get tasks/task_id=3 , goal_id is displayed accordingly
+    # { "description": "Test Description",
+    #     "goal_id": 1,
+    #     "id": 3,
+    #     "is_complete": false,
+    #     "title": "A Brand New Task"
+    # }
 
 @task_bp.route("/<taskID>", methods=["PUT"])
 def update_task(taskID):
@@ -241,8 +250,7 @@ def create_tasks_for_one_goal(goal_id):
         #build relationship between goal and task here
         task = Task.query.get(task_id)
         goal.tasks.append(task)
-    
-    #db.session.add(task)
+ 
     db.session.commit()
     #goal.tasks = [<Task1>, <Task 2>, <Task 3>]
     
@@ -274,9 +282,14 @@ database visualization
        3 | Build a habit of getting up at 7 am
 """
 
-"""test_get_tasks_for_specific_goal """
+
 @goal_bp.route("/<goal_id>/tasks", methods=["GET"])
 def get_tasks_for_one_goal(goal_id):
     goal = goal_id_validation(goal_id)
 
     return make_response(jsonify(goal.to_json2()), 200)
+
+
+
+# @goal_bp.route("/tasks", methods=["GET"])
+# def get_tasks_for_one_goal(goal_id):
