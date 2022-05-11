@@ -5,7 +5,7 @@ from app import db
 from sqlalchemy import asc, desc
 from datetime import datetime
 
-task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")  # what is string "task_bp", why do we need
+task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 
 
 '''
@@ -184,26 +184,3 @@ def delete_one_task(task_id):
     delete_response = f"Task {task.task_id} \"{task.title}\" successfully deleted"
 
     return make_response(jsonify({"details": delete_response}), 200)
-
-
-# =========
-
-
-# Hello TASK JUST TO CHECK
-@task_bp.route("", methods=["GET"])
-def say_hello_task():
-    response_body = "THIS IS OUR TASK!"
-    return response_body, 200
-
-
-# Hello TASK JSON JUST TO CHECK
-@task_bp.route("/JSON", methods=["GET"])
-def hello_task_json():
-    task = {
-        "task_id": 1,
-        "title": "Clean dishes",
-        "description": "We want all dishes cleaned, dishwasher started",
-        "completed_at": True
-    }
-
-    return task, 200
