@@ -466,7 +466,7 @@ def get_tasks_one_goal(goal_id):
         for task in goal_to_get.tasks:
 
             if not task.completed_at:
-                task.co
+                task.completed_at = False
 
             tasks_response.append(
                 {
