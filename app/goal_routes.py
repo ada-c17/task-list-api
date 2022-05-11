@@ -122,16 +122,11 @@ def read_tasks_from_goal(id_of_goal):
 
     tasks_response = []
     for task in goal.tasks:
-        tasks_response.append({
-                "id": task.task_id,
-                "goal_id": task.goal_id,
-                "title": task.title,
-                "description": task.description,
-                "is_complete": bool(task.completed_at)
-            })
+        tasks_response.append(task.to_dict())
         
     return jsonify({
         "id": goal.goal_id,
         "title": goal.title,
         "tasks": tasks_response
     })
+    
