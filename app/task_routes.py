@@ -30,22 +30,7 @@ def validate_task(task_id):
     if not task:
         abort(make_response({'details': 'Task id not found.'}, 404))
 
-    return task    
-
-def task_response(task):
-    is_complete = False
-    if task.completed_at:
-        is_complete = True
-
-    response_dict = {'task':
-            {'id': task.task_id,
-            'title': task.title,
-            'description': task.description,
-            'is_complete': is_complete}
-        }
-    if task.goal_id:
-        response_dict['task']['goal_id'] = task.goal_id
-    return jsonify(response_dict)
+    return task
 
 @tasks_bp.route('', methods=['GET'])
 def get_tasks():
@@ -61,15 +46,7 @@ def get_tasks():
     tasks_response = []
     
     for task in tasks:
-        is_complete = False
-        if task.completed_at:
-            is_complete = True
-        tasks_response.append({
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": is_complete
-        })
+        tasks_response.append(task.get_dict())
     return jsonify(tasks_response)
 
 @tasks_bp.route('', methods=['POST'])
@@ -88,39 +65,41 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
 
-    return task_response(new_task), 201
+    return jsonify({'task': new_task.get_dict()}), 201
 
-@tasks_bp.route('/<task_id>', methods=['DELETE', 'PUT', 'GET'])
-def handle_one_task(task_id):
+@tasks_bp.route('/<task_id>', methods=['GET'])
+def get_one_task(task_id):
     task = validate_task(task_id)
-    response_body = task_response(task)
-    if request.method == 'DELETE':
-        task = validate_task(task_id)
 
-        response_body = jsonify({
-            'details': f'Task {task_id} "{task.title}" successfully deleted'
-        }), 200
-        db.session.delete(task)
-    elif request.method == 'PUT':
-        request_body = request.get_json()
+    return jsonify({'task': task.get_dict()})
 
-        if 'title' not in request_body or\
-            'description' not in request_body:
-            return jsonify({'msg': f'Request must include title and description'}), 400
+@tasks_bp.route('/<task_id>', methods=['PUT'])
+def update_task(task_id):
+    task = validate_task(task_id)
+    request_body = request.get_json()
 
-        task.title = request_body['title']
-        task.description = request_body['description']
+    if 'title' not in request_body or\
+        'description' not in request_body:
+        return jsonify({'msg': f'Request must include title and description'}), 400
 
-        if 'completed_at' in request_body:
-            task.completed_at = datetime.utcnow()
+    task.title = request_body['title']
+    task.description = request_body['description']
 
-        response_body = task_response(task)
-    elif request.method == 'GET':
-        return response_body
+    if 'completed_at' in request_body:
+        task.completed_at = datetime.utcnow()
 
     db.session.commit()
-    return response_body
+    return jsonify({'task': task.get_dict()})
 
+@tasks_bp.route('/<task_id>', methods=['DELETE'])
+def delete_task(task_id):
+    task = validate_task(task_id)
+    response_body = jsonify({
+            'details': f'Task {task_id} "{task.title}" successfully deleted'
+        }), 200
+    db.session.delete(task)
+    db.session.commit()
+    return response_body
 
 @tasks_bp.route('/<task_id>/mark_complete', methods=['PATCH'])
 def mark_complete(task_id):
@@ -130,14 +109,14 @@ def mark_complete(task_id):
 
     db.session.commit()
     send_slack_notification(task.title)
-    return task_response(task)
+    return jsonify({'task': task.get_dict()})
 
 @tasks_bp.route('/<task_id>/mark_incomplete', methods=['PATCH'])
 def mark_incomplete(task_id):
     task = validate_task(task_id)
-
+    
     task.completed_at = None
 
     db.session.commit()
 
-    return task_response(task)
+    return jsonify({'task': task.get_dict()})

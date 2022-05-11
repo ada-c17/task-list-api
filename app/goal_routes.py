@@ -91,16 +91,7 @@ def get_tasks_for_goal(goal_id):
     goal = validate_goal(goal_id)
     tasks_response = []
     for task in goal.tasks:
-        is_complete = False
-        if task.completed_at:
-            is_complete = True
-        tasks_response.append({
-            "id": task.task_id,
-            "goal_id": task.goal_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": is_complete
-        })
+        tasks_response.append(task.get_dict())
     
     return {
         'id': goal.goal_id,
