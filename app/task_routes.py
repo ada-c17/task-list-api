@@ -5,7 +5,7 @@ from app.models.goal import Goal
 from flask import Blueprint, abort, jsonify, make_response, request
 import datetime
 from sqlalchemy.sql.functions import now 
-import requests
+import requests, os
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -101,6 +101,18 @@ def update_task_complete(id_of_task):
     task.completed_at = datetime.datetime.now()
 
     db.session.commit()
+
+    SLACK_API_URL = "https://slack.com/api/chat.postMessage"
+    SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
+
+    query_params = {
+        "channel": "task-notifications",
+        "text": f"Someone just completed the task {task.title}"
+    }
+
+    headers={"Authorization": SLACK_BOT_TOKEN}
+
+    url = requests.post(SLACK_API_URL, headers=headers, params=query_params)
 
     return jsonify({
         "task": task.to_dict()
