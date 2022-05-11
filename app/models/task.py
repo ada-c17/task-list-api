@@ -12,6 +12,3 @@ class Task(db.Model):
     goal_id = db.Column(db.Integer, db.ForeignKey("goal.goal_id"), nullable=True)
     # Need to match the class name
     # goal = db.relationship("Goal", backref="tasks")
-
-
-# https://stackoverflow.com/questions/60864838/flask-sqlalchemy-get-column-in-parent-table-as-child-model-attribute-by-one-to
