@@ -7,15 +7,22 @@ from .helper import validate_client_requests, validate_task
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
-#Get all
+#Get all 
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
-    tasks = Task.query.all()
+    title_sorted_query = request.args.get("sort")
+    if title_sorted_query == "asc":
+        tasks = Task.query.order_by(Task.title.asc()).all()
+    elif title_sorted_query == "desc":
+        tasks = Task.query.order_by(Task.title.desc()).all()
+    else:
+        tasks = Task.query.all()
     tasks_response = []
     for task in tasks:
         tasks_response.append(task.to_json())
 
     return jsonify(tasks_response),200
+
 
 #Get one
 @tasks_bp.route("/<id>", methods=["GET"])
@@ -23,6 +30,7 @@ def get_one_task(id):
     task = validate_task(id)
 
     return {"task": task.to_json()}, 200
+
 
 #Create one
 @tasks_bp.route("", methods=["POST"])
@@ -52,6 +60,7 @@ def update_one_task(id):
     db.session.commit()
     return {"task": task.to_json()}, 200
 
+
 #Delete one
 @tasks_bp.route("/<id>", methods=["DELETE"])
 def delete_one_task(id):
@@ -59,3 +68,5 @@ def delete_one_task(id):
     db.session.delete(task)
     db.session.commit()
     return {"details": f'Task {id} "Go on my daily walk 🏞" successfully deleted'}
+
+
