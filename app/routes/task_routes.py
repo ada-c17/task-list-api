@@ -1,10 +1,12 @@
 from app import db
 from flask import Blueprint, jsonify, make_response, request, abort
-from .models.task import Task
+from ..models.task import Task
 from datetime import datetime
 import requests, os
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
+
+#helper functions
 
 def validate_task(task_id):
     try:
@@ -19,31 +21,7 @@ def validate_task(task_id):
     else:
         return task
 
-@tasks_bp.route("", methods=["GET"])
-def get_tasks():
-    
-    sort_param = request.args.get("sort")
-
-    if sort_param:
-        if sort_param == "asc":
-            tasks = Task.query.order_by(Task.title).all()
-        elif sort_param == "desc":
-            tasks = Task.query.order_by(Task.title.desc()).all()
-    else:
-        tasks = Task.query.all()
-
-    tasks_response = [task.to_dict() for task in tasks]
-    return make_response(jsonify(tasks_response), 200)
-
-
-@tasks_bp.route("/<task_id>", methods=["GET"])
-def get_task(task_id):
-    task = validate_task(task_id)
-
-    response_body = {"task": task.to_dict()}
-
-    return make_response(jsonify(response_body), 200)
-
+#routes
 
 @tasks_bp.route("", methods=["POST"])
 def create_task():
@@ -63,6 +41,32 @@ def create_task():
     response_body = {"task": new_task.to_dict()}
 
     return make_response(jsonify(response_body), 201)
+
+
+@tasks_bp.route("", methods=["GET"])
+def get_tasks():
+    
+    sort_param = request.args.get("sort")
+
+    if sort_param:
+        if sort_param == "asc":
+            tasks = Task.query.order_by(Task.title).all()
+        elif sort_param == "desc":
+            tasks = Task.query.order_by(Task.title.desc()).all()
+    else:
+        tasks = Task.query.all()
+
+    tasks_response = [task.to_dict() for task in tasks]
+    return make_response(jsonify(tasks_response), 200)
+
+
+@tasks_bp.route("/<task_id>", methods=["GET"])
+def get_task_by_id(task_id):
+    task = validate_task(task_id)
+
+    response_body = {"task": task.to_dict_with_goal()}
+
+    return make_response(jsonify(response_body), 200)
 
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
