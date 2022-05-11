@@ -1,7 +1,7 @@
 from app import db
 from app.models.task import Task
-from .routes_helpers import validate_id, error_message, send_msg_to_channel
-from flask import Blueprint, request, make_response, jsonify, abort
+from .routes_helpers import validate_id, error_message, send_msg_to_channel, sort_records
+from flask import Blueprint, request, make_response, jsonify
 from sqlalchemy import asc,desc
 from datetime import date
 
@@ -10,12 +10,9 @@ tasks_bp = Blueprint("task", __name__, url_prefix="/tasks")
 # Get all tasks
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
-    sort_query = request.args.get("sort")
-
-    if sort_query == "asc":
-        tasks = Task.query.order_by(asc(Task.title))
-    elif sort_query == "desc":
-        tasks = Task.query.order_by(desc(Task.title))
+    if request.args.get("sort"):
+        sort_query = request.args.get("sort")
+        tasks = sort_records(Task, sort_query)
     else:
         tasks = Task.query.all() 
 

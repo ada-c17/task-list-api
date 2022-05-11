@@ -49,7 +49,7 @@ def test_get_task(client, one_task):
             "is_complete": False
         }
     }
-
+    
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_task_not_found(client):
@@ -63,8 +63,6 @@ def test_get_task_not_found(client):
     # **Complete test with assertion about response body***************
     # *****************************************************************
     assert response_body == {"details": "Task 1 does not exist"}
-    # assert response_body == 'Task 1 does not exist'
-
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_task(client):

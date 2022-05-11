@@ -1,6 +1,7 @@
 from app.models.task import Task
 from app.models.goal import Goal
 from flask import make_response, jsonify, abort
+from sqlalchemy import asc,desc
 import os
 import requests
 
@@ -36,3 +37,15 @@ def send_msg_to_channel(task):
         "Authorization": os.environ.get("SLACK_OAUTH_TOKEN")
         }
     requests.post(send_msg_path, params=query_params, headers=headers)
+
+def sort_records(model, sort_query):
+    sort_selection = ["asc", "desc"]
+    
+    if sort_query not in sort_selection:
+        message = "Our sort selection is limited to: asc and desc"
+        return error_message(message, 400)
+    elif sort_query == "asc":
+        records = model.query.order_by(asc(model.title))
+    elif sort_query == "desc":
+        records = model.query.order_by(desc(model.title))
+    return records
