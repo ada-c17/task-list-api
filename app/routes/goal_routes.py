@@ -1,7 +1,7 @@
 from app import db
 from app.models.goal import Goal
 from app.models.task import Task 
-from app.routes.helpers import validate_id
+from .routes_helpers import validate_id, error_message
 from flask import Blueprint, request, make_response, jsonify, abort
 
 goals_bp = Blueprint("goal", __name__, url_prefix="/goals")
@@ -30,7 +30,8 @@ def create_goal():
     try:
         new_goal = Goal(title=request_body["title"])
     except KeyError:
-        return abort(make_response(jsonify({"details":"Invalid data"}), 400))
+        message = "Invalid data"
+        return error_message(message, 400)
 
     db.session.add(new_goal)
     db.session.commit()
@@ -49,7 +50,8 @@ def update_goal(id):
     try:
         goal.title = request_body["title"]
     except KeyError:
-        return abort(make_response(jsonify({"details":"Invalid data"}), 400))
+        message = "Invalid data"
+        return error_message(message, 400)
 
     db.session.commit()
     

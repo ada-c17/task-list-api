@@ -56,7 +56,7 @@ def test_get_goal_not_found(client):
     # Assert
     # ---- Complete Test ----
     assert response.status_code == 404
-    assert response_body == "Goal 1 does not exist"
+    assert response_body == {"details": "Goal 1 does not exist"}
     # ---- Complete Test ----
 
 
@@ -111,7 +111,7 @@ def test_update_goal_not_found(client):
     # Assert
     # ---- Complete Assertions Here ----
     assert response.status_code == 404
-    assert response_body == "Goal 1 does not exist"
+    assert response_body == {"details": "Goal 1 does not exist"}
     # ---- Complete Assertions Here ----
 
 
@@ -135,7 +135,7 @@ def test_delete_goal(client, one_goal):
     # **Complete test with assertion about response body***************
     # *****************************************************************
     response_body = response.get_json()
-    assert response_body == "Goal 1 does not exist"
+    assert response_body == {"details": "Goal 1 does not exist"}
 
 
 # @pytest.mark.skip(reason="test to be completed by student")
@@ -147,7 +147,7 @@ def test_delete_goal_not_found(client):
     # ---- Complete Assertions Here ----
     assert response.status_code == 404
     assert Goal.query.get(1) == None
-    assert response_body == "Goal 1 does not exist"
+    assert response_body == {"details": "Goal 1 does not exist"}
     # ---- Complete Assertions Here ----
 
 

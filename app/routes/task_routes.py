@@ -1,6 +1,6 @@
 from app import db
 from app.models.task import Task
-from .helpers import validate_id
+from .routes_helpers import validate_id, error_message
 from flask import Blueprint, request, make_response, jsonify, abort
 from sqlalchemy import asc,desc
 from datetime import date
@@ -39,17 +39,10 @@ def create_task():
     request_body = request.get_json()
 
     try:
-        if 'completed_at' in request_body:
-            new_task = Task(
-                title=request_body["title"],
-                description=request_body["description"],
-                completed_at=request_body["completed_at"])
-        else:
-            new_task = Task(
-                title=request_body["title"],
-                description=request_body["description"])
+        new_task = Task.create(request_body)
     except KeyError:
-        return abort(make_response(jsonify({"details":"Invalid data"}), 400))
+        message = "Invalid data"
+        return error_message(message, 400)
 
     db.session.add(new_task)
     db.session.commit()
@@ -68,8 +61,8 @@ def update_task(id):
     try:
         task.update(request_body)
     except KeyError:
-        return abort(make_response(jsonify({"details":"Invalid data"}), 400))
-
+        message = "Invalid data"
+        return error_message(message, 400)
 
     db.session.commit()
     

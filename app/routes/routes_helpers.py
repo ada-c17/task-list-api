@@ -7,13 +7,18 @@ def validate_id(model, id):
     try:
         id = int(id)
     except:
-        return abort(make_response(jsonify(f"{model} is invalid"), 400))
-
+        message = f"{model} is invalid"
+        return error_message(message, 400)
+        
     if model == "Task":
         record = Task.query.get(id)
     elif model == "Goal":
         record = Goal.query.get(id)
 
     if not record:
-        return abort(make_response(jsonify(f"{model} {id} does not exist"), 404))
+        message = f"{model} {id} does not exist"
+        return error_message(message, 404)
     return record
+
+def error_message(message, status_code):
+    abort(make_response(jsonify({"details":f"{message}"}), status_code))

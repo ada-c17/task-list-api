@@ -131,7 +131,7 @@ def test_mark_complete_missing_task(client):
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
-    assert response_body == "Task 1 does not exist"
+    assert response_body == {"details": "Task 1 does not exist"}
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_mark_incomplete_missing_task(client):
@@ -145,7 +145,7 @@ def test_mark_incomplete_missing_task(client):
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
-    assert response_body == "Task 1 does not exist"
+    assert response_body == {"details": "Task 1 does not exist"}
 
 # Let's add this test for creating tasks, now that
 # the completion functionality has been implemented

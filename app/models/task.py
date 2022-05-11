@@ -28,5 +28,18 @@ class Task(db.Model):
 
         if self.completed_at:
             self.completed_at=request_body['completed_at']
+    
+    @classmethod
+    def create(cls, request_body):
+        if 'completed_at' in request_body:
+            new_task = Task(
+                title=request_body["title"],
+                description=request_body["description"],
+                completed_at=request_body["completed_at"])
+        else:
+            new_task = Task(
+                title=request_body["title"],
+                description=request_body["description"])
+        return new_task
 
     
