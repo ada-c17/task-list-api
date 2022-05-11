@@ -24,7 +24,7 @@ def test_post_task_ids_to_goal(client, one_goal, three_tasks):
 
 
 pytest.mark.skip(reason="No way to test this feature yet")
-def test_post_task_ids_to_goal_without_task_id(client, one_goal, three_tasks):
+def test_post_task_ids_to_goal_without_task_ids(client, one_goal, three_tasks):
     # Act
     response = client.post("/goals/1/tasks", json = {"task_ids": []})
     response_body = response.get_json()

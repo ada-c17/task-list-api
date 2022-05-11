@@ -82,12 +82,11 @@ def post_task_to_specific_goal(goal_id):
 
     if not request_body["task_ids"]:
         return make_response({"details": "Invalid data"}, 400)
-    
-    for task_id in request_body["task_ids"]:
+    goal.task_ids = request_body["task_ids"]
+
+    for task_id in goal.task_ids:
         task = validate_task(task_id)
         task.goal_id = goal_id
-    
-    goal.task_ids = request_body["task_ids"]
 
     db.session.commit()
 
