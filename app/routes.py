@@ -201,7 +201,7 @@ def update_task(task_id):
 # ------------------------ PATCH REQUESTS ------------------------ #
 
 # ---- INCOMPLETED TASK, MARK IT AS COMPLETE ---- #
-# ---- ALSO INCOMPLETED TASK, MARK IT AS COMPLETE ---- #
+# ---- ALSO COMPLETED TASK, MARK IT AS COMPLETE ---- #
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_as_complete(task_id):
 
@@ -459,16 +459,24 @@ def get_tasks_one_goal(goal_id):
 
     tasks_response = []
 
-    for task in goal_to_get.tasks:
 
-        tasks_response.append({
-            "id" : task.task_id,
-            "goal_id" : task.goal_id,
-            "title" : task.title,
-            "description": task.description,
-            "is_complete": task.completed_at,
-        }
-        )
+
+    if goal_to_get.tasks:
+
+        for task in goal_to_get.tasks:
+
+            if not task.completed_at:
+                task.co
+
+            tasks_response.append(
+                {
+                "id" : task.task_id,
+                "goal_id" : task.goal_id,
+                "title" : task.title,
+                "description": task.description,
+                "is_complete": task.completed_at,
+                }
+            )
 
     # return tasks_response, 200
 
@@ -478,9 +486,7 @@ def get_tasks_one_goal(goal_id):
         "tasks" : tasks_response
     }
 
-    return response_body
-
-
+    return response_body, 200
 
 
     # Get the tasks associated with that one goal
