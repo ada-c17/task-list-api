@@ -67,7 +67,7 @@ def make_goal_response(goal):
     response = {
         "goal":{
             "id": goal.goal_id,
-            "title": goal.title,
+            "title": goal.title
             }
         }
     return response
@@ -281,3 +281,25 @@ def delete_goal(goal_id):
     return {
         "details": f"Goal {chosen_goal.goal_id} \"{chosen_goal.title}\" successfully deleted"
     }, 200
+
+
+#**********************************************
+# NESTED ROUTES
+
+@goals_bp.route('/<goal_id>/tasks', methods = ['POST'])
+def send_tasks_to_goal(goal_id):
+    chosen_goal = validate(goal_id, "goal")
+
+    request_body = request.get_json()
+
+    for task in request_body["task_ids"]:
+        chosen_task = validate(task, "task")
+        chosen_task.goal_id = chosen_goal.goal_id
+
+    db.session.commit()
+    response = {
+        "id": chosen_goal.goal_id,
+        "task_ids":request_body["task_ids"]
+    }
+
+    return jsonify(response), 200
