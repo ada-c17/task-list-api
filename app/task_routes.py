@@ -46,14 +46,6 @@ def create_task_dictionary(chosen_task):
 
     return task_dict
 
-def create_goal_dictionary(chosen_goal):
-    goal_dict= {}
-    goal_dict["goal"] = {
-            "id": chosen_goal.goal_id,
-            "title": chosen_goal.title,
-        }
-    return goal_dict
-
 def create_slack_api_request(chosen_task):
     params = {
         "text": f"Someone just completed the task {chosen_task.title}",

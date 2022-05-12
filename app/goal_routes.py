@@ -37,14 +37,6 @@ def task_body(task):
                 "is_complete": bool(task.completed_at)
             }
 
-def create_task_dictionary(chosen_task):
-    task_dict= {}
-    task_dict["task"] = task_body(chosen_task)
-    if chosen_task.goal_id:
-            task_dict["task"].update({"goal_id": chosen_task.goal_id})
-
-    return task_dict
-
 def create_goal_dictionary(chosen_goal):
     goal_dict= {}
     goal_dict["goal"] = {
@@ -52,17 +44,6 @@ def create_goal_dictionary(chosen_goal):
             "title": chosen_goal.title,
         }
     return goal_dict
-
-def create_slack_api_request(chosen_task):
-    params = {
-        "text": f"Someone just completed the task {chosen_task.title}",
-        "channel": "task-notifications"
-        }
-    hdrs = {
-        "Authorization": f"Bearer {API_KEY}"
-    }
-    r = requests.post(PATH, data = params, headers = hdrs)
-    return r
 
 @goals_bp.route("", methods = ["GET"])
 def get_all_goals():
