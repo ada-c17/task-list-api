@@ -11,7 +11,7 @@ class Task(db.Model):
     goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'), nullable=True)
     goal = db.relationship("Goal", back_populates="tasks")
 
-    def return_response_body(self):
+    def to_json(self):
 
         response_body = {
             "id": self.task_id,
@@ -26,7 +26,7 @@ class Task(db.Model):
         return response_body
     
     @staticmethod
-    def validate_request_body():
+    def from_json():
         request_body = request.get_json()
 
         if "title" not in request_body or "description" not in request_body:

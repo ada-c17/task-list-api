@@ -13,5 +13,3 @@ def validate(model, item_id):
         abort(make_response({"message":f"item {item_id} not found"}, 404))
     
     return item
-
-# get request body

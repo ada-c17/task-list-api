@@ -17,14 +17,12 @@ task_bp = Blueprint("task", __name__, url_prefix="/tasks")
 
 @task_bp.route("", methods=["POST"])
 def create_task():
-
-    new_task = Task.validate_request_body()
+    new_task = Task.from_json()
 
     db.session.add(new_task)
     db.session.commit()
 
-    response = {"task": new_task.return_response_body()}
-
+    response = {"task": new_task.to_json()}
     return jsonify(response), 201
 
 @task_bp.route("", methods=["GET"])
@@ -37,15 +35,13 @@ def get_tasks():
             tasks = Task.query.order_by(Task.title)
     else:
         tasks = Task.query.all()
-    response = []
-    for task in tasks:
-        response.append(task.return_response_body())
+    response = [task.to_json() for task in tasks]
     return jsonify(response)
 
 @task_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = validate(Task, task_id)
-    response = {"task": task.return_response_body()}
+    response = {"task": task.to_json()}
     return jsonify(response)
 
 @task_bp.route("/<task_id>", methods=["PUT"])
@@ -59,7 +55,7 @@ def update_task(task_id):
 
     db.session.commit()
 
-    response = {"task": task.return_response_body()}
+    response = {"task": task.to_json()}
 
     return make_response(jsonify(response), 200)
 
@@ -89,7 +85,7 @@ def complete_task(task_id):
     requests.post(path,data=params,headers=headers)
     
 
-    response = {"task": task.return_response_body()}
+    response = {"task": task.to_json()}
 
     return make_response(jsonify(response), 200)
 
@@ -100,6 +96,6 @@ def mark_incomplete(task_id):
     task.completed_at = None
     db.session.commit()
 
-    response = {"task": task.return_response_body()}
+    response = {"task": task.to_json()}
 
     return make_response(jsonify(response), 200)
