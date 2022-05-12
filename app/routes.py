@@ -187,7 +187,7 @@ def mark_task_complete(task_id):
 
     # Slack bot message posting
     channel_id = "C03FG8SA2LR"
-    api_key = "Bearer " + os.environ.get("SLACK_BOT_API_KEY")
+    api_key = os.environ.get("SLACK_BOT_API_KEY")
     post_message_url = "https://slack.com/api/chat.postMessage"
     post_message_params = {
         "channel": channel_id, 
