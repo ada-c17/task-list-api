@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request, make_response, abort
 from app import db
 from app.models.task import Task
 from app.models.goal import Goal
-from .helper import validate_task, validate_goal
+from .helper import validate_task, validate_goal, call_slack
 from datetime import datetime
 
 task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
@@ -47,8 +47,6 @@ def read_one_task(task_id):
     return {"task": task.to_json()}, 200
 
 # UPDATE task
-
-
 @task_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
     task = validate_task(task_id)
@@ -61,34 +59,28 @@ def update_task(task_id):
     return {"task": task.to_json()}, 200
 
 # Update: Mark Incomplete on a Completed Task
-
-
-@task_bp.route("/<task_id>/mark_incomplete", methods=["PUT"])
+@task_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_incomplete(task_id):
     task = validate_task(task_id)
     if task.completed_at:
         task.completed_at = None
         db.session.commit()
 
-    return read_one_task(task_id), 200
+    return read_one_task(task_id)
 
 # Update: Mark Complete on an Incompleted Task
-
-
-@task_bp.route("/<task_id>/mark_complete", methods=["PUT"])
+@task_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_complete(task_id):
     task = validate_task(task_id)
     if not task.completed_at:
+        
+        call_slack(task.title)
         task.completed_at = datetime.utcnow()
         db.session.commit()
-        # @slack_bp.route("/slack.com/api/chat.postMessage", methods=["POST"])
-        # def send_slack(task_id):
-        #     return {f"Someone just completed the task {task.title}"}
-    return read_one_task(task_id), 200
+    return read_one_task(task_id)
+
 
 # DELETE Task
-
-
 @task_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
     task = validate_task(task_id)
@@ -144,8 +136,6 @@ def update_goal(goal_id):
 
     return {"goal": goal.to_json()}, 200
 
-
-
 # DELETE goal
 @goal_bp.route("/<goal_id>", methods=["DELETE"])
 def delete_goal(goal_id):
@@ -155,3 +145,44 @@ def delete_goal(goal_id):
     db.session.commit()
 
     return {"details": f'Goal {goal_id} "{goal.title}" successfully deleted'}
+
+#%%%%%%%%%%%%%%%%%%%%%%%%%wave 6 starts here
+@goal_bp.route("/<goal_id>/tasks", methods=["POST"])
+def assign_tasks_to_goal(goal_id):
+    goal_id = int(goal_id)
+    goal=validate_goal(goal_id)
+    request_body=request.get_json()
+    
+    for task_id in request_body["task_ids"]:
+        new_task=validate_task(task_id)
+        new_task.goal=goal   # this is very easy to miss out!!!
+    db.session.commit()
+    tasks = goal.tasks
+    my_task_list=[task.task_id for task in tasks]
+    
+    return {"id":goal_id, 
+            "task_ids": my_task_list}, 200
+
+
+@goal_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_tasks_by_goal(goal_id):
+    goal_id = int(goal_id)
+    goal=validate_goal(goal_id)
+    task_list=[]
+    tasks = Task.query.filter_by(goal_id=goal_id)
+    for task in tasks:
+        task_list.append(task.to_json())
+        
+    return {"id": goal_id,
+            "title": goal.title,
+            "tasks": task_list}, 200
+    
+
+@goal_bp.route("/tasks/<goal_id>", methods=["GET"])
+def get_tasks_includes_goal_ID(goal_idd):
+    goal = validate_goal(goal_idd)
+    # goalID_query = request.args.get("goal_id")
+    tasks = Task.query.filter_by(goal_id=goal_idd)
+    
+
+    return {"task": tasks.to_json()}, 200
