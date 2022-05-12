@@ -22,7 +22,7 @@ def create_goal():
     response_body = {}
     response_body['goal'] = new_goal.to_json()
 
-    return make_response(jsonify(response_body), 201)
+    return jsonify(response_body), 201
 
 
 # GET ALL goals
@@ -30,9 +30,7 @@ def create_goal():
 def read_all_goals():
     goals = Goal.query.all()
 
-    goals_response = []
-    for goal in goals:
-        goals_response.append(goal.to_json())
+    goals_response = [goal.to_json() for goal in goals]
 
     return jsonify(goals_response), 200
 
@@ -61,7 +59,7 @@ def update_goal(goal_id):
     response_body = {}
     response_body['goal'] = goal.to_json()
 
-    return make_response(jsonify(response_body), 200)
+    return jsonify(response_body), 200
 
 # DELETE one goal
 @goals_bp.route("/<goal_id>", methods=["DELETE"])
@@ -71,7 +69,7 @@ def delete_goal(goal_id):
     db.session.delete(goal)
     db.session.commit()
 
-    return make_response(jsonify({"details":f'Goal {goal.goal_id} "{goal.title}" successfully deleted'})), 200
+    return jsonify({"details":f'Goal {goal.goal_id} "{goal.title}" successfully deleted'}), 200
 
 # Create list of tasks of one goal
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
@@ -92,23 +90,22 @@ def create_list_tasks_to_goal(goal_id):
         "id": goal.goal_id,
         "task_ids": request_body["task_ids"]
     }
-    return make_response(jsonify(response), 200)
+   
+    return jsonify(response), 200
 
 # Get all tasks of one goal
 @goals_bp.route("/<goal_id>/tasks", methods=["GET"])
 def read_tasks_of_one_goal(goal_id):
 
     goal = validate_goal(goal_id)
-    tasks_response = []
 
-    for task in goal.tasks:
-        tasks_response.append(task.to_json())
+    tasks_response = [task.to_json() for task in goal.tasks]
 
-    # response_body = goal.to_json()
     response_body = {
         "id": goal.goal_id,
         "title": goal.title,
         "tasks": tasks_response
     }
+    
 
-    return make_response(jsonify(response_body), 200)
+    return jsonify(response_body), 200

@@ -30,7 +30,7 @@ def create_task():
     response_body = {}
     response_body['task'] = new_task.to_json()
 
-    return make_response(jsonify(response_body), 201)
+    return jsonify(response_body), 201
 
 
 # GET ALL tasks
@@ -45,9 +45,7 @@ def read_all_tasks():
     else:
         tasks = Task.query.all()
 
-    tasks_response = []
-    for task in tasks:
-        tasks_response.append(task.to_json())
+    tasks_response = [task.to_json() for task in tasks]
 
     return jsonify(tasks_response), 200
 
@@ -55,7 +53,7 @@ def read_all_tasks():
 @tasks_bp.route("/<task_id>", methods=["GET"])  
 def read_one_task(task_id):
     task = validate_task(task_id)
-    return make_response({"task": task.to_json()}, 200)
+    return jsonify({"task": task.to_json()}), 200
 
 # UPDATE one task
 @tasks_bp.route("/<task_id>", methods=["PUT"])
@@ -73,7 +71,7 @@ def update_task(task_id):
     response_body = {}
     response_body['task'] = task.to_json()
 
-    return make_response(jsonify(response_body), 200)
+    return jsonify(response_body), 200
     
 
 # DELETE one task
@@ -83,7 +81,7 @@ def delete_task(task_id):
     db.session.delete(task)
     db.session.commit()
 
-    return make_response(jsonify({"details":f'Task {task.task_id} "{task.title}" successfully deleted'})), 200
+    return jsonify({"details":f'Task {task.task_id} "{task.title}" successfully deleted'}), 200
     
 
 # Mark task as complete
@@ -108,7 +106,7 @@ def mark_complete(task_id):
     response_body = {}
     response_body['task'] = task.to_json()
 
-    return make_response(jsonify(response_body), 200)
+    return jsonify(response_body), 200
 
 # Mark task as incomplete
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
@@ -122,7 +120,7 @@ def mark_incomplete(task_id):
     response_body = {}
     response_body['task'] = task.to_json()
 
-    return make_response(jsonify(response_body), 200)
+    return jsonify(response_body), 200
 
     
 
