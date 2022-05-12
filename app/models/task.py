@@ -43,10 +43,7 @@ class Task(db.Model):
     def update(self, request_body):
         self.title = request_body["title"]
         self.description = request_body["description"]
-        try:
-            self.completed_at = request_body["completed_at"]
-        except KeyError:
-            self.completed_at = None
+        self.completed_at = request_body.get("completed_at")
     
     def mark_complete(self):
         self.completed_at = datetime.now()
