@@ -18,9 +18,3 @@ class Task(db.Model):
             "is_complete": False
         }
         return task_list_dict
-
-    def to_dict_2(self):
-        task_list_dict = {
-            "goal_id": self.goal_id
-        }
-        return task_list_dict

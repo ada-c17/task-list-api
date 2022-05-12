@@ -33,7 +33,7 @@ def create_goal():
 
         response_body = {"goal":
             {
-                "id": new_goal.goal_id,
+            "id": new_goal.goal_id,
             "title": new_goal.title
             }
         }
@@ -89,18 +89,18 @@ def delete_one_goal(goal_id):
 
     return make_response(jsonify({"details":response_body}))
 
-def get_task_or_abort(task_id):
+def get_task_or_abort(list_of_task_id):
     try:
-        task_id = int(task_id)
+        list_of_task_id = int(list_of_task_id)
     except ValueError:
-        abort(make_response({"message":f"Task {task_id} invalid"}, 400))
+        abort(make_response({"message":f"Task {list_of_task_id} invalid"}, 400))
 
-    task = Task.query.get(task_id)
+    task_id = Task.query.get(list_of_task_id)
 
-    if not task:
-        abort(make_response({"message":f"Task {task_id} not found"}, 404))
+    if not task_id:
+        abort(make_response({"message":f"Task {list_of_task_id} not found"}, 404))
 
-    return task
+    return task_id
 
 
 @goal_bp.route("/<goal_id>/tasks", methods=["POST"])
@@ -110,17 +110,16 @@ def create_tasks_to_goal(goal_id):
 
     request_body = request.get_json()
     try:
-        task_id = request_body["task_ids"]
+        list_of_task_id = request_body["task_ids"]
     except ValueError:
-        return jsonify({"message": "Missing task_id in request body"}, 400)
+        return jsonify({"message": "Missing list_of_task_id in request body"}, 400)
 
-    if not isinstance(task_id,list): #check to see if this isn't a list
-        return jsonify({'msg': "Expected list of task IDs"}), 400
+    if not isinstance(list_of_task_id,list):
+        return jsonify({'msg': "Expected list of task_id IDs"}), 400
 
-    for task in task_id:
-        tasks = get_task_or_abort(task)
-        if tasks.id == task: #??
-            tasks.goal_id = goal.goal_id
+    for task_id in list_of_task_id:
+        task = get_task_or_abort(task_id)
+        task.goal_id = goal.goal_id
 
     db.session.commit()
     return make_response(jsonify({
@@ -128,7 +127,7 @@ def create_tasks_to_goal(goal_id):
         "task_ids": request_body["task_ids"]
     }))
 
-@goal_bp.route("/<goal_id>/tasks", methods=["GET"]) #CHECK AND REDO
+@goal_bp.route("/<goal_id>/tasks", methods=["GET"])
 def get_tasks_to_goal(goal_id):
     goal = validate_goal(goal_id)
 
@@ -139,8 +138,8 @@ def get_tasks_to_goal(goal_id):
         "tasks": []
     }
 
-    for task in tasks:
-        if task.goal_id == goal.goal_id: #333 == 333
-            response_body["tasks"].append(task.to_dict())
+    for task_id in tasks:
+        if task_id.goal_id == goal.goal_id: #333 == 333
+            response_body["tasks"].append(task_id.to_dict())
     db.session.commit()
     return jsonify(response_body), 200
