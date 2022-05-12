@@ -1,4 +1,3 @@
-from re import A
 from flask import Blueprint, jsonify, request, abort, make_response
 from app.models.task import Task
 from app import db
@@ -14,10 +13,10 @@ tasks_bp = Blueprint("tasks_bp", __name__, url_prefix='/tasks')
 goals_bp = Blueprint("goals_bp",  __name__, url_prefix='/goals')
 
 load_dotenv()
-#*************************************************
+
+
 # HELPER FUNCTIONS
 
-#def validate_task(task_id):
 def validate(id, type):
     try:
         id = int(id)
@@ -37,7 +36,6 @@ def validate(id, type):
             response =  {"msg": "Goal not found"}
 
         abort(make_response(jsonify(response), 404))
-
     return chosen
 
 #helper function, checks if TASK is complete
@@ -46,7 +44,6 @@ def check_if_completed(task):
         is_complete = False
     else:
         is_complete = True
-    
     return is_complete
 
 #helper function, makes TASK responses
@@ -73,7 +70,7 @@ def make_goal_response(goal):
         }
     return response
 
-#*************************************************
+
 # TASKS
 
 @tasks_bp.route('', methods = ['POST'])
@@ -132,10 +129,10 @@ def get_all_tasks():
             sort_type = "D"
 
     if sort_type == "A":
-        tasks_response = (sorted(tasks_response, key=lambda i: i['title']))
+        tasks_response = (sorted(tasks_response, key=lambda task: task['title']))
 
     elif sort_type == "D":
-        tasks_response = (sorted(tasks_response, key=lambda i: i['title'], reverse = True))
+        tasks_response = (sorted(tasks_response, key=lambda task: task['title'], reverse = True))
   
     return jsonify(tasks_response)
 
@@ -148,7 +145,7 @@ def message_slack(task):
         "channel":"task-notifications",
         "text":f"Someone just completed the task {task.title}"
     }
-    header = { "Authorization" : f"Bearer {SLACK_TOKEN}"}
+    header = {"Authorization" : f"Bearer {SLACK_TOKEN}"}
 
     response = requests.post(PATH, params=query_params, headers=header)
     return response
@@ -156,7 +153,6 @@ def message_slack(task):
 
 @tasks_bp.route('/<task_id>/mark_complete', methods = ['PATCH'])
 def mark_complete(task_id):
-    #chosen_task = validate_task(task_id)
     chosen_task = validate(task_id, "task")
 
     #check if task was already completed, if not send message to slack
@@ -209,7 +205,6 @@ def delete_task(task_id):
 
 
 
-#**********************************************
 # GOALS
 
 @goals_bp.route('', methods = ['POST'])
@@ -285,7 +280,6 @@ def delete_goal(goal_id):
     }, 200
 
 
-#**********************************************
 # NESTED ROUTES
 
 @goals_bp.route('/<goal_id>/tasks', methods = ['POST'])
