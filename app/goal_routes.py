@@ -35,7 +35,14 @@ def create_goal():
 
 @goals_bp.route("", methods=["GET"])
 def read_all_goals():
-    goals = Goal.query.all()
+    goal_query = request.args
+    if "sort" in goal_query:
+        if goal_query["sort"] == "title":
+            goals = Goal.query.order_by(asc(Goal.title)).all()
+    else:
+        goals = Goal.query.all()
+
+    #goals = Goal.query.all()
     goals_response = []
     for goal in goals:
         goals_response.append({

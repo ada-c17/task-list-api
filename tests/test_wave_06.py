@@ -117,3 +117,99 @@ def test_get_task_includes_goal_id(client, one_task_belongs_to_one_goal):
             "is_complete": False
         }
     }
+
+
+### Extra Tests ###
+# Test 38
+#@pytest.mark.skip(reason="test to be completed by student")
+def test_get_goal_invalid(client):
+    # Act
+    response = client.get("/goals/hello")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    assert len(response_body) == 1
+    assert response_body == {"message": "goal hello invalid"}
+    
+
+# Test 39
+#@pytest.mark.skip(reason="No way to test this feature yet")
+def test_get_task_invalid(client):
+    # Act
+    response = client.get("/tasks/hello")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    assert len(response_body) == 1
+    assert response_body == {"message": "task hello invalid"}
+
+
+# Test 40
+#@pytest.mark.skip(reason="No way to test this feature yet")
+def test_app_config_is_false(client):
+    # Act
+    response = client.get("/tasks/hello")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    assert len(response_body) == 1
+    assert response_body == {"message": "task hello invalid"}
+
+
+# Test 41
+#@pytest.mark.skip(reason="No way to test this feature yet")
+def test_get_tasks_sorted_by_id(client, three_tasks):
+    # Act
+    response = client.get("/tasks?sort=id")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert len(response_body) == 3
+    assert response_body == [
+        {  
+            "id": 1,
+            "title": "Water the garden 🌷",
+            "description": "",
+            "is_complete": False},
+        {
+            "id": 2,
+            "title": "Answer forgotten email 📧",
+            "description": "",
+            "is_complete": False},
+        {
+            "id": 3,
+            "title": "Pay my outstanding tickets 😭",
+            "description": "",
+            "is_complete": False}
+    ]
+
+
+# Test 42
+#@pytest.mark.skip(reason="No way to test this feature yet")
+def test_get_goals_filter_by_title(client, three_goals):
+    # Act
+    response = client.get("/goals?sort=title")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert len(response_body) == 3
+    assert response_body == [
+        {
+            "id": 2,  
+            "title": "Answer forgotten email 📧"
+        },
+        {
+            "id": 3,
+            "title": "Pay my outstanding tickets 😭"
+        },
+        {
+            "id": 1,
+            "title": "Water the garden 🌷"
+        }
+    ]
+

@@ -14,7 +14,7 @@ def create_app(test_config=None):
     app = Flask(__name__)
 
     #if test_config is None:
-    if not test_config:
+    if not test_config: # pragma: no cover
         app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
         app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
     else:
