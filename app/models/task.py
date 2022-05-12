@@ -6,14 +6,8 @@ class Task(db.Model):
     title = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=False)
     completed_at = db.Column(db.DateTime)
-
-
-    required_attributes = {
-        "title":True,
-        "description":True,
-        "is_complete":True,
-    }
-    # Instance methods:
+    goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'))
+    goal = db.relationship("Goal", back_populates="tasks")
 
     def self_to_dict(self):
         if self.completed_at is not None:
@@ -33,7 +27,5 @@ class Task(db.Model):
                 setattr(self, key, data_dict[key])
             else:
                 raise ValueError(key)
-
-
 
 
