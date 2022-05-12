@@ -62,10 +62,8 @@ def test_get_task_not_found(client):
     assert "message" in response_body
     assert response_body == {"message":f"Could not find task with id 1"}
     assert Task.query.get(1) == None
-    # raise Exception("Complete test with assertion about response body")
-    # *****************************************************************
-    # **Complete test with assertion about response body***************
-    # *****************************************************************
+
+
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_task(client):
@@ -132,11 +130,8 @@ def test_update_task_not_found(client):
     # Assert
     assert response.status_code == 404
     assert response_body == {"message":f"Could not find task with id 1"}
+    assert Task.query.get(1) == None
 
-    # raise Exception("Complete test with assertion about response body")
-    # *****************************************************************
-    # **Complete test with assertion about response body***************
-    # *****************************************************************
 
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
@@ -162,13 +157,11 @@ def test_delete_task_not_found(client):
 
     # Assert
     assert response.status_code == 404
+    assert response_body == {"message":f"Could not find task with id 1"}
+    assert Task.query.get(1) == None
 
-    # raise Exception("Complete test with assertion about response body")
-    # *****************************************************************
-    # **Complete test with assertion about response body***************
-    # *****************************************************************
 
-    assert Task.query.all() == []
+    # assert Task.query.all() == []
 
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
