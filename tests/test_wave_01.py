@@ -126,7 +126,7 @@ def test_update_task_not_found(client):
     # Act
     response = client.put("/tasks/1", json={
         "title": "Updated Task Title",
-        "description": "Updated Test Description",
+        "description": "Updated Test Description"
     })
     response_body = response.get_json()
 
