@@ -3,6 +3,8 @@ from app.models.task import Task
 from app import db
 from app.helper import validate_task
 import datetime
+import os
+import requests
 
 task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -75,6 +77,7 @@ def mark_complete(task_id):
     task.completed_at = datetime.datetime.now()
     db.session.commit()
 
+    post_to_slack(task)
     response = {"task": task.todict()}
     return jsonify(response), 200
 
@@ -87,3 +90,10 @@ def mark_incomplete(task_id):
 
     response = {"task": task.todict()}
     return jsonify(response), 200
+
+def post_to_slack(task):
+    url = "https://slack.com/api/chat.postMessage"
+    headers = {"Authorization": os.environ.get("SLACK_TOKEN")}
+    data = {"text": f"Someone completed the task {task.title}",
+            "channel": "C03F4FJS013"}
+    response = requests.post(url, data=data, headers=headers)
