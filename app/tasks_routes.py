@@ -11,7 +11,7 @@ load_dotenv()
 API_KEY = os.getenv('PROJECT_API_KEY')
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
-homepage_bp = Blueprint("homepage_bp", __name__, url_prefix="")
+homepage_bp = Blueprint("homepage_bp", __name__, url_prefix="/")
 
 @homepage_bp.route("", methods=["GET"])
 def welcome():
