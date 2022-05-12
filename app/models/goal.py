@@ -1,6 +1,7 @@
 from app import db
-from flask import make_response, abort 
-# from app.routes.helpers import validate_task
+from flask import make_response, abort
+from .task import Task
+from app.routes.helpers import validate_model_instance 
 
 class Goal(db.Model):
     goal_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -16,15 +17,17 @@ class Goal(db.Model):
     def update_goal(self, update_body):
             self.title = update_body["title"]
 
-    # def link_goals_to_task(self, request_body):
-    #     task_list = []
-    #     for task_id in request_body["task_ids"]:
-    #         task = validate_task(task_id)
-    #         task_list.append(task)
 
-    #     for task in task_list: 
-    #         if task not in self.tasks:
-    #             self.tasks.append(task)
+    def link_tasks_to_goal(self, request_body):
+        task_list = []
+        for task_id in request_body["task_ids"]:
+            task = validate_model_instance(Task, task_id, "task")
+            task_list.append(task)
+
+        for task in task_list: 
+            if task not in self.tasks:
+                self.tasks.append(task)
+
 
     @classmethod
     def from_json(cls, request_body):
