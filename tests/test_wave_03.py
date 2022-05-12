@@ -183,7 +183,7 @@ def test_create_task_with_valid_completed_at(client):
 
 # Let's add this test for updating tasks, now that
 # the completion functionality has been implemented
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_update_task_with_completed_at_date(client, completed_task):
     # Act
     response = client.put("/tasks/1", json={
