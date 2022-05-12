@@ -233,4 +233,20 @@ def delete_goal(goal_id):
         }
     return goal
 
+@goals_bp.route('<goal_id>/tasks', methods=['POST'])
+def assign_task_to_goal(goal_id):
+    goal = validate_goal(goal_id)
+    request_body = request.get_json()
+    tasks = []
     
+    for task_id in request_body['task_ids']:
+        task = validate_task(task_id)
+        task.goal_id = goal_id
+        tasks.append(task.task_id)
+    db.session.commit()
+
+    return {
+        "id" : goal.goal_id,
+        "task_ids" : tasks
+    }
+
