@@ -56,9 +56,8 @@ def create_one_task():
 def get_all_tasks():
     tasks = check_for_params()
 
-    tasks_response = []
-    for task in tasks:
-        tasks_response.append(task.to_json())
+    tasks_response = [task.to_json() for task in tasks]
+
     return jsonify(tasks_response), 200
 
 

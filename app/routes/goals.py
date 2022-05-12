@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, abort, make_response, request
-from app.models.task import Task
 from .tasks import validate_task_id
 from app.models.goal import Goal
 from app import db
@@ -44,10 +43,7 @@ def get_all_goals():
     else:
         goals = Goal.query.all()
 
-    response_body = []
-
-    for goal in goals:
-        response_body.append(goal.to_json())
+    response_body = [goal.to_json() for goal in goals]
     
     return jsonify(response_body), 200
 
@@ -111,9 +107,7 @@ def get_tasks_of_one_goal(goal_id):
     goal = validate_goal_id(goal_id)
     tasks = goal.tasks
     
-    tasks_list = []
-    for task in goal.tasks:
-        tasks_list.append(task.to_json())
+    tasks_list = [task.to_json() for task in goal.tasks]
 
     rsp = goal.to_json()
     rsp['tasks'] = tasks_list
