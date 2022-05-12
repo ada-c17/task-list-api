@@ -18,4 +18,4 @@ def create_goal():
     db.session.add(goal)
     db.session.commit()
 
-    return make_response(jsonify({"goal.from_dict()}), 201)
+    return make_response(jsonify(), 201)
