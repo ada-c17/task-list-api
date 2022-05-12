@@ -49,15 +49,25 @@ def check_if_completed(task):
 #helper function, makes TASK responses
 def make_task_response(task):
     is_complete = check_if_completed(task)
-    response = {
-        "task": {
-            'id': task.task_id,
-            'goal_id': task.goal_id,
-            'title': task.title,
-            'description': task.description,
-            'is_complete': is_complete
+    if task.goal_id is None:
+        response = {
+            "task": {
+                'id': task.task_id,
+                'title': task.title,
+                'description': task.description,
+                'is_complete': is_complete
+            }
         }
-    }
+    else:
+        response = {
+            "task": {
+                'id': task.task_id,
+                'goal_id': task.goal_id,
+                'title': task.title,
+                'description': task.description,
+                'is_complete': is_complete
+            }
+        }
     return response
     
 #helper function, makes GOAL responses
@@ -108,14 +118,22 @@ def get_all_tasks():
     tasks_response = []
     for task in tasks:
         is_complete = check_if_completed(task)
-
-        tasks_response.append({
+        if task.goal_id is None:
+            tasks_response.append({
             'id': task.task_id,
-            'goal_id': task.goal_id,
             'title': task.title,
             'description': task.description,
             'is_complete': is_complete
         })
+
+        else:
+            tasks_response.append({
+                'id': task.task_id,
+                'goal_id': task.goal_id,
+                'title': task.title,
+                'description': task.description,
+                'is_complete': is_complete
+            })
 
     #check params for sorting
     params = request.args
