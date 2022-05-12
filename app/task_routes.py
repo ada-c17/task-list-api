@@ -36,8 +36,7 @@ def validate_task(task_id):
 def get_tasks():
     query_params = request.args
     if 'sort' in query_params:
-        sort_order = request.args.get('sort')
-        if sort_order == 'desc':
+        if request.args.get('sort') == 'desc':
             tasks = Task.query.order_by(Task.title.desc())
         else:
             tasks = Task.query.order_by(Task.title)
@@ -54,10 +53,10 @@ def create_task():
     if 'title' not in request_body or\
         'description' not in request_body:
         return jsonify({'details': 'Invalid data'}), 400
-    
+    #creates a Task that has not been completed
     new_task = Task(title=request_body['title'], 
                     description=request_body['description'])
-    
+    #changes new_task record to include completion time if task input is already completed
     if 'completed_at' in request_body:
         new_task.completed_at=request_body['completed_at']
     
@@ -85,7 +84,7 @@ def update_task(task_id):
     task.description = request_body['description']
 
     if 'completed_at' in request_body:
-        task.completed_at = datetime.utcnow()
+        task.completed_at = request_body['completed_at']
 
     db.session.commit()
     return jsonify({'task': task.get_dict()})

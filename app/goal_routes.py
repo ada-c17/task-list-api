@@ -57,12 +57,12 @@ def get_one_goal(goal_id):
 @goals_bp.route('<goal_id>', methods=['DELETE'])
 def delete_goal(goal_id):
     goal = validate_goal(goal_id)
-    response_body = jsonify({
+    response_body = ({
         'details': f'Goal {goal_id} "{goal.title}" successfully deleted'
         })
     db.session.delete(goal)
     db.session.commit()
-    return response_body
+    return jsonify(response_body), 200
 
 @goals_bp.route('/<goal_id>/tasks', methods=['POST'])
 def create_task_for_goal(goal_id):
