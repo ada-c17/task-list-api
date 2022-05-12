@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, abort, make_response, request
 import requests
 from app import db
 from app.models.goal import Goal
+from app.models.task import Task
 from datetime import datetime
 import os 
 
@@ -88,4 +89,37 @@ def delete_goal(goal_id):
 
     return{'details':f'Goal {chosen_goal.goal_id} "{chosen_goal.title}" successfully deleted'}, 200
 
+
+@goals_bp.route("/<goal_id>/tasks", methods=['POST'])
+def create_task(goal_id):
+
+    goal = validate_input(goal_id)
+
+    request_body = request.get_json()
+    new_task = Task(
+        itle=request_body['title'],
+        description=request_body['description'],
+        completed_at = request_body['completed_at']
+    )
+    db.session.add(new_task)
+    db.session.commit()
+    return make_response(jsonify(f"Book {new_task.title} by {new_task.goal.title} successfully created"), 201)
+
+@goals_bp.route("/<goal_id>/tasks", methods=['GET'])
+def get_tasks(goal_id):
+
+    goal = validate_input(goal_id)
+
+    task_response = []
+    for task in goal.tasks:
+        task_response.append(
+            {
+            "id": task.id,
+            "title": task.title,
+            "completed at": task.completed_at,
+            "goal": goal.title
+            }
+        )
+    
+    return jsonify(task_response)
 
