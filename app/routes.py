@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, make_response
+from flask import Blueprint, jsonify, request, make_response, abort
 from app.models.task import Task
 from app import db
 from app.helper import validate_task
@@ -35,9 +35,13 @@ def get_task(task_id):
 @task_bp.route("", strict_slashes=False, methods=["POST"])
 def create_task():
     request_body = request.get_json()
-    new_task = Task(title = request_body.get("title"),
-                    description = request_body.get("description"),
+
+    try: 
+        new_task = Task(title = request_body["title"],
+                    description = request_body["description"],
                     completed_at = request_body.get("completed_at"))
+    except KeyError:
+        abort(make_response({"details": f"Invalid data"}, 400))
 
     db.session.add(new_task)
     db.session.commit()
@@ -72,7 +76,7 @@ def update_task(task_id):
 @task_bp.route("/<task_id>", strict_slashes=False, methods=["DELETE"])
 def delete_task(task_id):
     task = validate_task(task_id)
-    response = {"details": 'Task 1 "Go on my daily walk 🏞" successfully deleted'}
+    response = {"details": f'Task {task.id} "{task.title}" successfully deleted'}
     db.session.delete(task)
     db.session.commit()
     return jsonify(response), 200
