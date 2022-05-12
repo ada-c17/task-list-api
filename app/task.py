@@ -12,11 +12,8 @@ from flask import Blueprint, jsonify, abort, make_response, request
 from tests.conftest import one_task
 
 
-# ------------------------ BLUEPRINT INSTANCES ------------------------ # 
+# ------------------------ BLUEPRINT INSTANCE ------------------------ # 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
-
-# Add goal Blueprint
-goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 
 
 # ------------------------ SLACK ------------------------ # 
@@ -90,9 +87,6 @@ def format_task_response_body(task):
     
     return response_body
 
-
-
-################# TASKS #################
 
 # ------------------------ GET REQUESTS ------------------------ #
 
@@ -298,225 +292,225 @@ def delete_one_task(task_id):
 
 
 
-################# GOALS #################
+# ################# GOALS #################
 
-def format_goal_response_body(goal):
+# def format_goal_response_body(goal):
 
-    response_body = jsonify({"goal" : 
-        {
-            "id" : goal.goal_id,
-            "title" : goal.title,
-        }
-    })
+#     response_body = jsonify({"goal" : 
+#         {
+#             "id" : goal.goal_id,
+#             "title" : goal.title,
+#         }
+#     })
 
-    return response_body
-
-
-
-def validate_goal(goal_id):
-    # Check if task_id is a valid integer
-    try:
-        goal_id = int(goal_id)
-    except:
-        # If it's not, 400 response code
-        abort(make_response({"message" : f"Goal ID is invalid."}, 400))
+#     return response_body
 
 
-    validated_goal = Goal.query.get(goal_id)
 
-    # If this specific goal isn't found, 404 response code
-    if not validated_goal:
-        abort(make_response({"message" : f"This goal is not found."}, 404))
+# def validate_goal(goal_id):
+#     # Check if task_id is a valid integer
+#     try:
+#         goal_id = int(goal_id)
+#     except:
+#         # If it's not, 400 response code
+#         abort(make_response({"message" : f"Goal ID is invalid."}, 400))
+
+
+#     validated_goal = Goal.query.get(goal_id)
+
+#     # If this specific goal isn't found, 404 response code
+#     if not validated_goal:
+#         abort(make_response({"message" : f"This goal is not found."}, 404))
     
-    return validated_goal
+#     return validated_goal
 
 
 
-# ------------------------ GET REQUESTS ------------------------ #
+# # ------------------------ GET REQUESTS ------------------------ #
 
-# ---- GET ALL GOALS ---- #
-@goals_bp.route("", methods=["GET"])
-def get_all_goals():
+# # ---- GET ALL GOALS ---- #
+# @goals_bp.route("", methods=["GET"])
+# def get_all_goals():
 
-    all_goals = Goal.query.all()
+#     all_goals = Goal.query.all()
 
-    # Create the response body
-    goal_response = []
-
-
-    for goal in all_goals:
-
-        goal_response.append(
-            {
-                "id" : goal.goal_id,
-                "title" : f"{goal.title}"
-            }
-        )
-
-    return jsonify(goal_response), 200
+#     # Create the response body
+#     goal_response = []
 
 
+#     for goal in all_goals:
 
-# ---- GET ONE GOAL BY ID ---- #
-@goals_bp.route("/<goal_id>", methods=["GET"])
-def get_one_goal(goal_id):
+#         goal_response.append(
+#             {
+#                 "id" : goal.goal_id,
+#                 "title" : f"{goal.title}"
+#             }
+#         )
 
-    # Check if goal_id is a valid integer
-    try:
-        goal_id = int(goal_id)
-    except:
-        # If it's not, 400 response code
-        abort(make_response({"message" : f"Goal ID is invalid."}, 400))
-
-    # Search for this goal_id in the Goal Blueprint
-    goal = Goal.query.get(goal_id)
-
-
-    # If this specific goal isn't found, 404 response code
-    if not goal:
-        abort(make_response({"details" : f"Invalid data"}, 404))
-
-    return format_goal_response_body(goal), 200
+#     return jsonify(goal_response), 200
 
 
 
+# # ---- GET ONE GOAL BY ID ---- #
+# @goals_bp.route("/<goal_id>", methods=["GET"])
+# def get_one_goal(goal_id):
 
-# ------------------------ POST OR PUT REQUESTS ------------------------ #
+#     # Check if goal_id is a valid integer
+#     try:
+#         goal_id = int(goal_id)
+#     except:
+#         # If it's not, 400 response code
+#         abort(make_response({"message" : f"Goal ID is invalid."}, 400))
 
-
-# ---- CREATE A GOAL ---- #
-
-@goals_bp.route("", methods=["POST"])
-def create_goal():
-
-    request_body = request.get_json()
-
-    if not request_body:
-        abort(make_response({"details" : f"Invalid data"}, 400))
-
-
-    new_goal = Goal(title=request_body["title"])
-
-    # Add new task and commit change
-    db.session.add(new_goal)
-    db.session.commit()
-
-    response_body = jsonify({ "goal" : 
-        {
-            "id" : new_goal.goal_id,
-            "title" : new_goal.title
-        }
-    })
-
-    return response_body, 201
+#     # Search for this goal_id in the Goal Blueprint
+#     goal = Goal.query.get(goal_id)
 
 
+#     # If this specific goal isn't found, 404 response code
+#     if not goal:
+#         abort(make_response({"details" : f"Invalid data"}, 404))
 
-# ---- UPDATE GOAL ---- #
-
-@goals_bp.route("/<goal_id>", methods=["PUT"])
-def update_goal(goal_id):
-
-    goal_to_update = validate_goal(goal_id)
-
-    request_body = request.get_json()
-
-
-    if "title" not in request_body:
-        return {
-            "details" : "Invalid data"
-        }, 400
-
-
-    goal_to_update.title = request_body["title"]
-
-    db.session.commit()
-
-    return format_goal_response_body(goal_to_update), 200
-
-
-
-# ---- DELETE GOAL ---- #
-@goals_bp.route("/<goal_id>", methods=["DELETE"])
-def delete_goal(goal_id):
-
-    goal_to_delete = validate_goal(goal_id)
-
-
-    db.session.delete(goal_to_delete)
-    db.session.commit()
-
-    return {
-        "details" : f"Goal {goal_id} \"{goal_to_delete.title}\" successfully deleted"
-    }, 200
+#     return format_goal_response_body(goal), 200
 
 
 
 
+# # ------------------------ POST OR PUT REQUESTS ------------------------ #
 
-################# NESTED ROUTES #################
 
-@goals_bp.route("/<goal_id>/tasks", methods=["POST"])
-def post_tasks_to_goal(goal_id):
+# # ---- CREATE A GOAL ---- #
 
-    # Get the goal to post the tasks to
-    goal_for_post = validate_goal(goal_id)
+# @goals_bp.route("", methods=["POST"])
+# def create_goal():
+
+#     request_body = request.get_json()
+
+#     if not request_body:
+#         abort(make_response({"details" : f"Invalid data"}, 400))
+
+
+#     new_goal = Goal(title=request_body["title"])
+
+#     # Add new task and commit change
+#     db.session.add(new_goal)
+#     db.session.commit()
+
+#     response_body = jsonify({ "goal" : 
+#         {
+#             "id" : new_goal.goal_id,
+#             "title" : new_goal.title
+#         }
+#     })
+
+#     return response_body, 201
+
+
+
+# # ---- UPDATE GOAL ---- #
+
+# @goals_bp.route("/<goal_id>", methods=["PUT"])
+# def update_goal(goal_id):
+
+#     goal_to_update = validate_goal(goal_id)
+
+#     request_body = request.get_json()
+
+
+#     if "title" not in request_body:
+#         return {
+#             "details" : "Invalid data"
+#         }, 400
+
+
+#     goal_to_update.title = request_body["title"]
+
+#     db.session.commit()
+
+#     return format_goal_response_body(goal_to_update), 200
+
+
+
+# # ---- DELETE GOAL ---- #
+# @goals_bp.route("/<goal_id>", methods=["DELETE"])
+# def delete_goal(goal_id):
+
+#     goal_to_delete = validate_goal(goal_id)
+
+
+#     db.session.delete(goal_to_delete)
+#     db.session.commit()
+
+#     return {
+#         "details" : f"Goal {goal_id} \"{goal_to_delete.title}\" successfully deleted"
+#     }, 200
+
+
+
+
+
+# ################# NESTED ROUTES #################
+
+# @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
+# def post_tasks_to_goal(goal_id):
+
+#     # Get the goal to post the tasks to
+#     goal_for_post = validate_goal(goal_id)
     
-    request_body = request.get_json()
+#     request_body = request.get_json()
 
-    # Check that "task_ids" is in the request_body
-    if "task_ids" in request_body:
-        # could add check if "task_id" doesn't exist -->  404 
+#     # Check that "task_ids" is in the request_body
+#     if "task_ids" in request_body:
+#         # could add check if "task_id" doesn't exist -->  404 
 
-        # Loop through the "task_ids"
-        for task_id in request_body["task_ids"]:
-            task = Task.query.get(task_id)
-            task.goal_id = goal_for_post.goal_id
-
-
-    db.session.commit()
-
-    # Add to Goal's task_id's list
-    response_body = {
-        "id" : goal_for_post.goal_id, 
-        "task_ids" : request_body["task_ids"]
-    }
-
-    return response_body, 200
+#         # Loop through the "task_ids"
+#         for task_id in request_body["task_ids"]:
+#             task = Task.query.get(task_id)
+#             task.goal_id = goal_for_post.goal_id
 
 
+#     db.session.commit()
 
-@goals_bp.route("/<goal_id>/tasks", methods=["GET"])
-def get_tasks_one_goal(goal_id):
+#     # Add to Goal's task_id's list
+#     response_body = {
+#         "id" : goal_for_post.goal_id, 
+#         "task_ids" : request_body["task_ids"]
+#     }
+
+#     return response_body, 200
+
+
+
+# @goals_bp.route("/<goal_id>/tasks", methods=["GET"])
+# def get_tasks_one_goal(goal_id):
     
-    # Get one goal
-    goal_to_get = validate_goal(goal_id)
+#     # Get one goal
+#     goal_to_get = validate_goal(goal_id)
 
-    tasks_response = []
-
-
-    if goal_to_get.tasks:
-
-        for task in goal_to_get.tasks:
-
-            if not task.completed_at:
-                task.completed_at = False
-
-            tasks_response.append(
-                {
-                "id" : task.task_id,
-                "goal_id" : task.goal_id,
-                "title" : task.title,
-                "description": task.description,
-                "is_complete": task.completed_at,
-                }
-            )
+#     tasks_response = []
 
 
-    response_body = {
-        "id" : goal_to_get.goal_id, 
-        "title" : goal_to_get.title,
-        "tasks" : tasks_response
-    }
+#     if goal_to_get.tasks:
 
-    return response_body, 200
+#         for task in goal_to_get.tasks:
+
+#             if not task.completed_at:
+#                 task.completed_at = False
+
+#             tasks_response.append(
+#                 {
+#                 "id" : task.task_id,
+#                 "goal_id" : task.goal_id,
+#                 "title" : task.title,
+#                 "description": task.description,
+#                 "is_complete": task.completed_at,
+#                 }
+#             )
+
+
+#     response_body = {
+#         "id" : goal_to_get.goal_id, 
+#         "title" : goal_to_get.title,
+#         "tasks" : tasks_response
+#     }
+
+#     return response_body, 200
