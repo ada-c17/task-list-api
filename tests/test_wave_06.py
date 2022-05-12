@@ -2,7 +2,7 @@ from app.models.goal import Goal
 import pytest
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_post_task_ids_to_goal(client, one_goal, three_tasks):
     # Act
     response = client.post("/goals/1/tasks", json={
@@ -11,13 +11,14 @@ def test_post_task_ids_to_goal(client, one_goal, three_tasks):
     response_body = response.get_json()
 
     # Assert
-    assert response.status_code == 200
     assert "id" in response_body
     assert "task_ids" in response_body
     assert response_body == {
         "id": 1,
         "task_ids": [1, 2, 3]
     }
+    assert response.status_code == 200
+
 
     # Check that Goal was updated in the db
     assert len(Goal.query.get(1).tasks) == 3

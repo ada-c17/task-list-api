@@ -1,21 +1,9 @@
-from flask import Blueprint, jsonify, abort, make_response, request
-from app import db
+from flask import Blueprint, jsonify, request
+from app import db, helper_functions
 from app.models.goal import Goal
+from app.routes import goal
 
 goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
-
-def validate_goal_or_abort(goal_id):
-    # returns 400 error if invalid goal_id (alpha/non-int) 
-    try:
-        goal_id = int(goal_id)
-    except ValueError:
-        abort(make_response({"error": f"{goal_id} is an invalid goal id"}, 400))
-    
-    # returns 404 error if goal_id not found in database
-    goal = Goal.query.get(goal_id)
-    if not goal:
-        abort(make_response({"error": f"Goal {goal_id} not found"}, 404))
-    return goal
 
 
 @goals_bp.route("", methods=["GET"])
@@ -31,7 +19,7 @@ def get_saved_goals():
 
 @goals_bp.route("/<goal_id>", methods=["GET"])
 def get_one_saved_goal(goal_id):
-    goal = validate_goal_or_abort(goal_id)
+    goal = helper_functions.validate_goal_or_abort(goal_id)
 
     return jsonify({"goal": goal.return_goal_dict()}), 200
 
@@ -53,7 +41,7 @@ def create_goal():
 
 @goals_bp.route("/<goal_id>", methods=["PUT"])
 def update_saved_goal(goal_id):
-    goal = validate_goal_or_abort(goal_id)
+    goal = helper_functions.validate_goal_or_abort(goal_id)
     
     request_body = request.get_json()
 
@@ -65,9 +53,41 @@ def update_saved_goal(goal_id):
 
 @goals_bp.route("/<goal_id>", methods=["DELETE"])
 def delete_goal(goal_id):
-    goal = validate_goal_or_abort(goal_id)
+    goal = helper_functions.validate_goal_or_abort(goal_id)
 
     db.session.delete(goal)
     db.session.commit()
 
     return jsonify({"details": f"Goal {goal_id} \"{goal.title}\" successfully deleted"}), 200
+
+
+@goals_bp.route("/<goal_id>/tasks", methods=["POST"])
+def post_tasks_to_goal(goal_id):
+
+    # checks the goal_id for validity, returns the goal object
+    goal = helper_functions.validate_goal_or_abort(goal_id)
+
+    # pulls in the request dictionary
+    request_body = request.get_json()
+
+    # gets all the ids listed in thte request
+    task_ids = request_body["task_ids"]
+
+    # validates each task and puts task object back into list
+    tasks = []
+    for id in task_ids:
+        tasks.append(helper_functions.validate_task_or_abort(id))
+
+    # goes thru the incoming list of task objects
+    # gives each of those tasks a goal
+    for task in tasks:
+        task.goal = goal
+    
+    db.session.commit()
+
+    response = {
+        "id": goal.goal_id,
+        "task_ids": task_ids
+    }
+
+    return jsonify(response), 200
