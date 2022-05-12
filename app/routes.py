@@ -17,6 +17,7 @@ def get_tasks():
     
     return jsonify(response), 200
 
+
 @task_bp.route("/<task_id>", strict_slashes=False, methods=["GET"])
 def get_task(task_id):
     tasks = Task.query.all()
@@ -29,6 +30,7 @@ def get_task(task_id):
                         "is_complete": bool(task.completed_at)}
 
     return jsonify(response), 200
+
 
 @task_bp.route("", strict_slashes=False, methods=["POST"])
 def create_task():
