@@ -1,3 +1,4 @@
+from sqlalchemy import ForeignKey
 from app import db
 
 
@@ -6,6 +7,8 @@ class Task(db.Model):
     title = db.Column(db.String)
     description = db.Column(db.String)
     completed_at = db.Column(db.DateTime)
+    goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'), nullable=True)
+    goal = db.relationship("Goal", backref="tasks")
 
     def return_task_dict(self):
         if self.completed_at:

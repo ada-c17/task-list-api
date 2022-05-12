@@ -1,6 +1,7 @@
 from flask import Blueprint, request, make_response, jsonify, abort
 from app import db
 from app.models.goal import Goal
+from app.models.task import Task
 from sqlalchemy import desc
 
 
@@ -86,3 +87,4 @@ def delete_goal(goal_id):
     response = {'details': f'Goal {goal_id} "{goal.title}" successfully deleted'}
 
     return make_response(jsonify(response), 200)
+
