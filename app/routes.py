@@ -31,40 +31,20 @@ def validate_input(item_id, model_name):
         abort(make_response(jsonify(response), 404))
     return chosen_item
 
+def task_body(task):
+    return {
+                "id": task.task_id,
+                "title": task.title,
+                "description": task.description,
+                "is_complete": bool(task.completed_at)
+            }
+
 def create_task_dictionary(chosen_task):
     task_dict= {}
-    if chosen_task.completed_at is None:
-        if chosen_task.goal_id:
-            task_dict["task"] = {
-                "id": chosen_task.task_id,
-                "goal_id": chosen_task.goal_id,
-                "title": chosen_task.title,
-                "description": chosen_task.description,
-                "is_complete": False
-            }
-        else:
-            task_dict["task"] = {
-            "id": chosen_task.task_id,
-            "title": chosen_task.title,
-            "description": chosen_task.description,
-            "is_complete": False
-        }
-    else:
-        if chosen_task.goal_id:
-            task_dict["task"] = {
-                "id": chosen_task.task_id,
-                "goal_id":chosen_task.goal_id,
-                "title": chosen_task.title,
-                "description": chosen_task.description,
-                "is_complete": True
-            }
-        else:
-            task_dict["task"] = {
-                "id": chosen_task.task_id,
-                "title": chosen_task.title,
-                "description": chosen_task.description,
-                "is_complete": True
-            }
+    task_dict["task"] = task_body(chosen_task)
+    if chosen_task.goal_id:
+            task_dict["task"].update({"goal_id": chosen_task.goal_id})
+
     return task_dict
 
 def create_goal_dictionary(chosen_goal):
@@ -86,9 +66,6 @@ def create_slack_api_request(chosen_task):
     r = requests.post(PATH, data = params, headers = hdrs)
     return r
 
-
-
-
 @tasks_bp.route("", methods = ["GET"])
 def get_all_tasks():
     params = request.args
@@ -98,22 +75,8 @@ def get_all_tasks():
         tasks = Task.query.order_by(Task.title.asc()).all()
     else:
         tasks = Task.query.all()
-    task_response = []
-    for task in tasks:
-        if task.completed_at is None:
-            task_response.append({
-                "id": task.task_id,
-                "title": task.title,
-                "description": task.description,
-                "is_complete": False
-            })
-        else: 
-            task_response.append({
-                "id": task.task_id,
-                "title": task.title,
-                "description": task.description,
-                "is_complete": True
-            })
+    task_response = [task_body(task) for task in tasks]
+
     return jsonify(task_response), 200
 
 @tasks_bp.route("/<task_id>", methods = ["GET"])
@@ -125,6 +88,7 @@ def get_one_task(task_id):
 @tasks_bp.route("", methods = ["POST"])
 def create_one_task():
     request_body = request.get_json()
+
     try:
         if request_body.get("completed_at"):
             chosen_task = Task( title = request_body["title"],
@@ -246,12 +210,9 @@ def delete_one_goal(goal_id):
 def place_tasks_on_goal(goal_id):
     goal = validate_input(goal_id, Goal)
     request_body = request.get_json()
-    found_tasks= []
 
-    for task in request_body["task_ids"]:
-        found_task = validate_input(task, Task)
-        if found_task:
-            found_tasks.append(found_task)
+    found_tasks = [validate_input(task, Task) for task in request_body["task_ids"] if validate_input(task, Task)]
+
     goal.tasks = found_tasks
     db.session.commit()
 
@@ -265,27 +226,10 @@ def get_tasks_from_goal(goal_id):
     goal = validate_input(goal_id, Goal)
     task_response = []
     for task in goal.tasks:
-        if task.completed_at is None:
-            if task.goal_id:
-                task_response.append(
-                    {
-                        "id": task.task_id,
-                        "goal_id": goal.goal_id,
-                        "title": task.title,
-                        "description": task.description,
-                        "is_complete": False
-                    }
-                )
-        else:
-            task_response.append(
-                {
-                    "id": task.task_id,
-                    "goal_id": goal.goal_id,
-                    "title": task.title,
-                    "description": task.description,
-                    "is_complete": True
-                }
-            )
+        task_dict = task_body(task)
+        task_dict["goal_id"] = goal.goal_id
+        task_response.append(task_dict)
+        
     return jsonify({"id": goal.goal_id,
                     "title": goal.title,
                     "tasks": task_response
