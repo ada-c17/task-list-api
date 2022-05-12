@@ -25,18 +25,18 @@ def validate_task(task_id):
 
     return task
 
-def make_task_dict(task):
-    task_dict = {
-            "id": task.id,
-            "title": task.title,
-            "description": task.description,
-    }
-    if task.completed_at:
-        task_dict["is_complete"] = True
-    else:
-        task_dict["is_complete"] = False
+# def make_task_dict(task):
+#     task_dict = {
+#             "id": task.id,
+#             "title": task.title,
+#             "description": task.description,
+#     }
+#     if task.completed_at:
+#         task_dict["is_complete"] = True
+#     else:
+#         task_dict["is_complete"] = False
 
-    return task_dict
+#     return task_dict
 
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
@@ -52,7 +52,7 @@ def get_all_tasks():
         tasks = Task.query.all()
 
     for task in tasks: 
-        task_dict = make_task_dict(task)
+        task_dict = task.make_task_dict()
         response_body.append(task_dict)
         
     return jsonify(response_body), 200
@@ -60,7 +60,7 @@ def get_all_tasks():
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = validate_task(task_id)
-    task_dict = {"task": make_task_dict(task)}
+    task_dict = {"task": task.make_task_dict()}
     return jsonify(task_dict), 200
 
 @tasks_bp.route("", methods=["POST"])
@@ -79,7 +79,7 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
 
-    task_dict = {"task": make_task_dict(new_task)}
+    task_dict = {"task": new_task.make_task_dict()}
 
     return jsonify(task_dict), 201
 
@@ -95,7 +95,7 @@ def update_task(task_id):
 
     db.session.commit()
 
-    task_dict = {"task": make_task_dict(task)}
+    task_dict = {"task": task.make_task_dict()}
 
     return jsonify(task_dict), 200
 
@@ -115,7 +115,7 @@ def mark_task_complete(task_id):
         task.completed_at = datetime.now()
         task.completed_at = task.completed_at.replace(tzinfo=timezone.utc)
 
-    task_dict = {"task": make_task_dict(task)}
+    task_dict = {"task": task.make_task_dict()}
 
     db.session.commit()
 
@@ -137,7 +137,7 @@ def mark_task_incomplete(task_id):
     if task.completed_at != None:
         task.completed_at = None
 
-    task_dict = {"task": make_task_dict(task)}
+    task_dict = {"task": task.make_task_dict()}
 
     db.session.commit()
 

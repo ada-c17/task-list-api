@@ -24,24 +24,13 @@ def validate_goal(goal_id):
 
     return goal
 
-# def make_goal_dict(goal):
-#     goal_dict = {
-#             "id": goal.goal_id,
-#             "title": goal.title,
-#     }
-    
-#     return goal_dict
-
 @goals_bp.route("", methods=["GET"])
 def get_all_goals():
     response_body = []
     goals = Goal.query.all()
 
     for goal in goals: 
-        response = {
-            "id": goal.goal_id,
-            "title": goal.title
-        }
+        response = goal.make_goal_dict()
         response_body.append(response)
     return jsonify(response_body), 200
 
