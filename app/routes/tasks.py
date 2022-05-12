@@ -88,8 +88,13 @@ def get_one_task(task_id):
         'id': task.id,
         'title': task.title,
         'description': task.description,
-        'is_complete': is_complete
+        'is_complete': is_complete,
+        
     }}
+
+    if task.goal_id: 
+        rsp['task']['goal_id'] = task.goal_id
+
     return jsonify(rsp), 200
 
 @tasks_bp.route('/<task_id>', methods=['DELETE'])
