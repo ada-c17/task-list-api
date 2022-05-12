@@ -9,3 +9,12 @@ class Task(db.Model):
     goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'))
     goal = db.relationship("Goal", back_populates="tasks")
 
+    def to_json(self):
+        return {
+        "id":self.id,
+        "title": self.title,
+        "description": self.description,
+        "is_complete": False
+        }
+
+

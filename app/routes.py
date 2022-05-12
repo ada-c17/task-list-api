@@ -11,11 +11,11 @@ import requests
 SLACK_TOKEN = os.environ.get("SLACK_TOKEN")
 
 # initialize Blueprint instance
-# tasks blueprint
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
-# goal blueprint
 goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
+#################### routes for task model #################### 
+# helper function to filter out invalid task id
 def validate_task(task_id):
     try:
         task_id = int(task_id)
@@ -46,19 +46,11 @@ def add_task():
     db.session.add(new_task)
     db.session.commit()
 
-    rsp = {
-        "id":new_task.id,
-        "title": new_task.title,
-        "description": new_task.description,
-        }
-
+    rsp = new_task.to_json()
     if "completed_at" in request_body:
         rsp["is_complete"] = True
-    else:
-        rsp["is_complete"] = False
     
     return make_response({"task":rsp}, 201)
-
 
 @tasks_bp.route("", methods = ["GET"])
 def get_all_tasks():
@@ -69,27 +61,18 @@ def get_all_tasks():
         tasks = Task.query.order_by(Task.title.desc()).all()
     else:
         tasks = Task.query.all()
+
     tasks_response = []
     for task in tasks:
-        tasks_response.append(
-            {
-                "id":task.id,
-                "title": task.title,
-                "description": task.description,
-                "is_complete": False
-            }
-        )
+        tasks_response.append(task.to_json())
+
     return jsonify(tasks_response)
 
 @tasks_bp.route("/<task_id>", methods = ["GET"])
 def get_one_task(task_id):
     task = validate_task(task_id)
-    rsp = {
-        "id":task.id,
-        "title": task.title,
-        "description": task.description,
-        "is_complete": False
-    }
+
+    rsp = task.to_json()
     if task.goal_id:
         rsp["goal_id"] = task.goal_id
     
@@ -110,15 +93,9 @@ def update_task(task_id):
 
     db.session.commit()
     
-    rsp = {
-        "id":task.id,
-        "title": task.title,
-        "description": task.description}
-
+    rsp = task.to_json()
     if "completed_at" in request_body:
         rsp["is_complete"] = True
-    else:
-        rsp["is_complete"] = False
 
     return make_response({"task":rsp}, 200)
 
@@ -131,11 +108,11 @@ def delete_task(task_id):
 
     return make_response({"details":f"Task {task.id} \"{task.title}\" successfully deleted"})
 
-
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_complete(task_id):
     task = validate_task(task_id)
     task.completed_at = datetime.utcnow()
+
     db.session.commit()
 
     # call the Slack API and send out Slack messages
@@ -147,27 +124,24 @@ def mark_complete(task_id):
         }
     requests.post(slack_url, headers=headers, data=params)
 
-    # get the response when marking complete on a completed task
-    return make_response({"task":{"id":task.id,
-                                "title": task.title,
-                                "description": task.description,
-                                "is_complete": True
-                                }}, 200)
+    # get the response when marking complete on a task
+    rsp = task.to_json()
+    if "completed_at":
+        rsp["is_complete"] = True
+        
+    return make_response({"task":rsp}, 200)
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_incomplete(task_id):
     task = validate_task(task_id)
     task.completed_at = None
+
     db.session.commit()
-    return make_response({"task":{"id":task.id,
-                                "title": task.title,
-                                "description": task.description,
-                                "is_complete": False
-                                }}, 200)
+
+    return make_response({"task":task.to_json()}, 200)
 
 #################### routes for Goal model #################### 
 # helper function to validate goal 
-
 def validate_goal(goal_id):
     try:
         goal_id = int(goal_id)
@@ -193,32 +167,23 @@ def create_goal():
     db.session.add(new_goal)
     db.session.commit()
 
-    rsp = {
-        "id":new_goal.goal_id,
-        "title": new_goal.title
-        }
-
-    return make_response({"goal":rsp}, 201)
+    return make_response({"goal":new_goal.to_json()}, 201)
 
 @goals_bp.route("", methods = ["GET"])
 def get_all_goals():
     goals = Goal.query.all()
+
     tasks_response = []
     for goal in goals:
-        tasks_response.append(
-            {
-                "id":goal.goal_id,
-                "title": goal.title,
-            }
-        )
+        tasks_response.append(goal.to_json())
+
     return jsonify(tasks_response)
 
 @goals_bp.route("/<goal_id>", methods = ["GET"])
 def get_one_goal(goal_id):
     goal = validate_goal(goal_id)
-    return make_response({"goal":{"id":goal.goal_id,
-                                "title": goal.title
-                                }}, 200)
+
+    return make_response({"goal":goal.to_json()}, 200)
 
 @goals_bp.route("/<goal_id>", methods=["PUT"])
 def update_goal(goal_id):
@@ -230,11 +195,7 @@ def update_goal(goal_id):
 
     db.session.commit()
     
-    rsp = {
-        "id":goal.goal_id,
-        "title": goal.title}
-
-    return make_response({"goal":rsp}, 200)
+    return make_response({"goal":goal.to_json()}, 200)
 
 @goals_bp.route("/<goal_id>", methods=["DELETE"])
 def delete_goal(goal_id):
@@ -245,11 +206,12 @@ def delete_goal(goal_id):
 
     return make_response({"details":f"Goal {goal.goal_id} \"{goal.title}\" successfully deleted"})
 
-#################### connect tasks to goal #################### 
+#################### connect tasks to goals #################### 
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
 def add_tasks_to_goal(goal_id):
     goal = validate_goal(goal_id)
     request_body = request.get_json()
+
     for task_id in request_body["task_ids"]:
         task = validate_task(task_id)
         goal.tasks.append(task)
@@ -268,15 +230,13 @@ def get_tasks_of_goal(goal_id):
     tasks_response = []
 
     for task in goal.tasks:
-        tasks_response.append(
-            {
-            "id":task.id,
+        tasks_response.append({
             "goal_id":goal.goal_id,
+            "id":task.id,
             "title": task.title,
             "description": task.description,
             "is_complete": False
-            }
-        )
+            })
 
     rsp =  {
         "id":goal.goal_id,
@@ -284,13 +244,6 @@ def get_tasks_of_goal(goal_id):
         "tasks": tasks_response}
 
     return make_response(rsp)
-
-
-
-
-    
-
-
 
 
 
