@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify,request
 from app.models.task import Task
 from app import db
 from ..models.helpers import post_slack_message, validate_task 
+from datetime import datetime
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -88,7 +89,7 @@ def mark_one_task_complete(id):
 
 	post_slack_message(f"Someone just completed the task {task.title}")
 
-	task.mark_complete()
+	task.completed_at = datetime.now()
 
 	db.session.commit()
 
@@ -98,8 +99,8 @@ def mark_one_task_complete(id):
 @tasks_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
 def mark_one_task_incomplete(id):
 	task = validate_task(id)
-
-	task.mark_incomplete()
+	
+	task.completed_at = None
 
 	db.session.commit()
 
