@@ -200,7 +200,7 @@ def test_get_tasks_filter_by_title_and_description_not_found_returns_message(cli
     assert response.status_code == 404
     assert "details" in response_body
     assert response_body == {
-        "details": "Search parameter(s) 'chocolate' and/or 'honey' not found in any tasks."
+        "details": "Search parameter 'chocolate' not found in any tasks."
     }
 
 

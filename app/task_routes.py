@@ -22,7 +22,9 @@ def create_new_task():
 
     return success_message(dict(task=new_task.self_to_dict_no_goal()), 201)
 
-# Sorting helper functions
+
+
+# Query helper functions
 
 def sort_tasks(all_tasks, sort_param):
     if sort_param != "asc" and sort_param != "desc":
@@ -34,31 +36,12 @@ def sort_tasks(all_tasks, sort_param):
         sorted_tasks_desc = sorted(all_tasks, key = lambda i : i["title"], reverse=True)
         return sorted_tasks_desc
 
-def filter_tasks_by_title(all_tasks, title_filter):
-    filtered_tasks = [task for task in all_tasks if title_filter.lower() in task["title"].lower()]
+def filter_tasks_by_param(all_tasks, task_attribute, filter_param):
+    filtered_tasks = [task for task in all_tasks if filter_param.lower() in task[task_attribute].lower()]
     if filtered_tasks:
             return filtered_tasks
     else:
-        return error_message(f"Search parameter '{title_filter}' not found in any tasks.", 404)
-
-def filter_tasks_by_description(all_tasks, description_filter):
-    filtered_tasks = [task for task in all_tasks if description_filter.lower() in task["description"].lower()]
-    if filtered_tasks:
-            return filtered_tasks
-    else:
-        return error_message(f"Search parameter '{description_filter}' not found in any tasks.", 404)
-    
-
-def filter_tasks_by_title_and_description(all_tasks, title_filter, description_filter):
-    # didn't do a list comprehension for this one because there's so much going on it felt too difficult to read
-    filtered_tasks = []
-    for task in all_tasks:
-        if title_filter.lower() in task["title"].lower() and description_filter.lower() in task["description"].lower():
-            filtered_tasks.append(task)
-    if filtered_tasks:
-            return filtered_tasks
-    else:
-        return error_message(f"Search parameter(s) '{title_filter}' and/or '{description_filter}' not found in any tasks.", 404)
+        return error_message(f"Search parameter '{filter_param}' not found in any tasks.", 404)
 
 
 
@@ -70,47 +53,22 @@ def get_all_tasks():
     description_param = request.args.get("description")
     title_param = request.args.get("title")
 
-    # if no parameters
-    if not sort_param and not title_param and not description_param:
-        return return_database_info_list(all_tasks)
-
-    # if sort param only
-    elif sort_param and not description_param and not title_param:
-        sorted_tasks = sort_tasks(all_tasks, sort_param)
-        return return_database_info_list(sorted_tasks)
-
-    # if description param only
-    elif description_param and not sort_param and not title_param:
-        filtered_tasks = filter_tasks_by_description(all_tasks, description_param)
-        return return_database_info_list(filtered_tasks)
-
-    # if title param only
-    elif title_param and not sort_param and not description_param:
-        filtered_tasks = filter_tasks_by_title(all_tasks, title_param)
-        return return_database_info_list(filtered_tasks)
+    # I ended up needing to use a dictionary because I needed to specify which attribute of the task I was looking at in my filter function
+    query_params = {
+        "title" : title_param, 
+        "description" : description_param, 
+        "sorting" : sort_param
+        }
     
-    # if title and description param only
-    elif title_param and description_param and not sort_param:
-        double_filtered_tasks = filter_tasks_by_title_and_description(all_tasks, title_param, description_param)
-        return return_database_info_list(double_filtered_tasks)
-
-    # if sort and description param only
-    elif sort_param and description_param and not title_param:
-        filtered_tasks = filter_tasks_by_description(all_tasks, description_param)
-        sorted_tasks = sort_tasks(filtered_tasks, sort_param)
-        return return_database_info_list(sorted_tasks)
+    for attribute, param in query_params.items():
+        if param == None:
+            continue
+        if attribute != "sorting":
+            all_tasks = filter_tasks_by_param(all_tasks, attribute, param )
+        else:
+            all_tasks = sort_tasks(all_tasks, sort_param)
     
-    # if sort and title param only
-    elif sort_param and title_param and not description_param:
-        filtered_tasks = filter_tasks_by_title(all_tasks, title_param)
-        sorted_tasks = sort_tasks(filtered_tasks, sort_param)
-        return return_database_info_list(sorted_tasks)
-    
-    # if all parameters
-    elif sort_param and title_param and description_param:
-        double_filtered_tasks = filter_tasks_by_title_and_description(all_tasks, title_param, description_param)
-        sorted_tasks = sort_tasks(double_filtered_tasks, sort_param)
-        return return_database_info_list(sorted_tasks)
+    return return_database_info_list(all_tasks)
     
 
 @task_bp.route("/<task_id>", methods=["GET"])
