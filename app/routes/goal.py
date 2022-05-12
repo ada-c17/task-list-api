@@ -1,7 +1,6 @@
 from flask import Blueprint, jsonify, request
 from app import db, helper_functions
 from app.models.goal import Goal
-from app.routes import goal
 
 goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
@@ -63,24 +62,16 @@ def delete_goal(goal_id):
 
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
 def post_tasks_to_goal(goal_id):
-
-    # checks the goal_id for validity, returns the goal object
     goal = helper_functions.validate_goal_or_abort(goal_id)
 
-    # pulls in the request dictionary
     request_body = request.get_json()
 
-    # gets all the ids listed in thte request
+    tasks_to_assign = []
     task_ids = request_body["task_ids"]
-
-    # validates each task and puts task object back into list
-    tasks = []
     for id in task_ids:
-        tasks.append(helper_functions.validate_task_or_abort(id))
+        tasks_to_assign.append(helper_functions.validate_task_or_abort(id))
 
-    # goes thru the incoming list of task objects
-    # gives each of those tasks a goal
-    for task in tasks:
+    for task in tasks_to_assign:
         task.goal = goal
     
     db.session.commit()
@@ -88,6 +79,31 @@ def post_tasks_to_goal(goal_id):
     response = {
         "id": goal.goal_id,
         "task_ids": task_ids
+    }
+
+    return jsonify(response), 200
+
+
+@goals_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_tasks_for_goal(goal_id):
+    goal = helper_functions.validate_goal_or_abort(goal_id)
+
+    tasks_for_goal = []
+    for task in goal.tasks:
+        tasks_for_goal.append(
+            {
+            "id": task.task_id,
+            "goal_id": task.goal_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": bool(task.completed_at)
+            }
+        )
+
+    response = {
+        "id": goal.goal_id,
+        "title": goal.title,
+        "tasks": tasks_for_goal
     }
 
     return jsonify(response), 200
