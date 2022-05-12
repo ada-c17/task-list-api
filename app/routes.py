@@ -1,11 +1,11 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request, make_response
 from app.models.task import Task
 from app import db
 from app.helper import validate_task
 
 task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
-@task_bp.route("", strict_slashes=False, methods =["GET"])
+@task_bp.route("", strict_slashes=False, methods=["GET"])
 def get_tasks():
     tasks = Task.query.all()
     response = []
@@ -17,7 +17,7 @@ def get_tasks():
     
     return jsonify(response), 200
 
-@task_bp.route("/<task_id>", strict_slashes=False, methods =["GET"])
+@task_bp.route("/<task_id>", strict_slashes=False, methods=["GET"])
 def get_task(task_id):
     tasks = Task.query.all()
     response = {}
@@ -29,3 +29,20 @@ def get_task(task_id):
                         "is_complete": bool(task.completed_at)}
 
     return jsonify(response), 200
+
+@task_bp.route("", strict_slashes=False, methods=["POST"])
+def create_task():
+    request_body = request.get_json()
+    new_task = Task(title = request_body.get("title"),
+                    description = request_body.get("description"),
+                    completed_at = request_body.get("completed_at"))
+
+    db.session.add(new_task)
+    db.session.commit()
+
+    response = {}
+    response["task"] = {"id": new_task.id,
+                        "title": new_task.title,
+                        "description": new_task.description,
+                        "is_complete": bool(new_task.completed_at)}
+    return jsonify(response), 201
