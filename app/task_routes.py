@@ -7,10 +7,8 @@ from datetime import datetime
 import requests
 import os
 
-
-
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
-goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
+
 
 def validate_task(task_id):
     try:
@@ -22,18 +20,6 @@ def validate_task(task_id):
     if not task:
         return jsonify({"message" : f"Could not find '{task_id}'"}), 404
     return task
-
-def validate_goal(goal_id):
-    try:
-        goal_id = int(goal_id)
-    except ValueError:
-        return jsonify({"msg" : f"'{goal_id}' is invalid"}), 400
-
-    goal = Goal.query.get(goal_id)
-    if not goal:
-        return jsonify({"message" : f"Could not find '{goal_id}'"}), 404
-    return goal
-
 
 def format_task(task):
     return {
@@ -47,16 +33,6 @@ def format_task(task):
         }
     }
 
-
-def format_goal(goal):
-    return {
-        "goal": {
-            "id" : goal.goal_id,
-            "title" : goal.title
-                }
-        }
-
-
 def push_complete_to_slack(task):
     bot_token = os.environ.get("SLACK_BOT_TOKEN")
     params = {
@@ -65,7 +41,6 @@ def push_complete_to_slack(task):
         }
     headers = {"authorization" : "Bearer " + bot_token}
     requests.post("https://slack.com/api/chat.postMessage", params=params, headers=headers)
-
 
 @tasks_bp.route('', methods=['POST'])
 def create_task():
@@ -89,7 +64,6 @@ def create_task():
     
     return format_task(new_task), 201
 
-
 @tasks_bp.route('', methods=['GET'])
 def get_tasks():
     sort_query = request.args.get("sort")
@@ -112,7 +86,6 @@ def get_tasks():
 
     return jsonify(tasks_response), 200
 
-
 @tasks_bp.route('/<task_id>', methods=['GET'])
 def get_one_task(task_id):
     task = validate_task(task_id)
@@ -120,7 +93,6 @@ def get_one_task(task_id):
     if isinstance(task, Task):
         return format_task(task), 200
     return task
-
 
 @tasks_bp.route('/<task_id>', methods=['PUT'])
 def update_task(task_id):
@@ -171,109 +143,7 @@ def mark_incomplete(task_id):
         return format_task(task), 200
     return task
 
-@goals_bp.route('', methods=['POST'])
-def create_goal():
-    request_body = request.get_json()
 
-    if "title" not in request_body:
-        return {
-            "details" : "Invalid data"
-        }, 400
-
-    new_goal = Goal(
-        title = request_body['title']
-    )
-
-    db.session.add(new_goal)
-    db.session.commit()
-
-    return format_goal(new_goal), 201
-
-@goals_bp.route('', methods=['GET'])
-def get_goals():
-    goals = Goal.query.order_by(asc(Goal.title)).all()
-    goals_response = []
-
-    for goal in goals:
-        goals_response.append(
-            {
-            "id" : goal.goal_id,
-            "title" : goal.title
-            }
-        )
-    return jsonify(goals_response), 200
-
-@goals_bp.route('/<goal_id>', methods=['GET'])
-def get_one_goal(goal_id):
-    goal = validate_goal(goal_id)
-
-    if isinstance(goal, Goal):
-        return format_goal(goal), 200
-    return goal
-
-@goals_bp.route('/<goal_id>', methods=['PUT'])
-def update_goal(goal_id):
-    goal = validate_goal(goal_id)
-    request_body = request.get_json()
-
-    if isinstance(goal, Goal):
-        goal.title = request_body["title"]
-        db.session.commit()
-        
-        return format_goal(goal), 200
-    return goal
-
-@goals_bp.route('/<goal_id>', methods=['DELETE'])
-def delete_goal(goal_id):
-    goal = validate_goal(goal_id)
-    if isinstance(goal, Goal):
-        db.session.delete(goal)
-        db.session.commit()
-        return {
-            "details" : f'Goal {goal_id} "{goal.title}" successfully deleted'
-        }
-    return goal
-
-@goals_bp.route('/<goal_id>/tasks', methods=['POST'])
-def assign_task_to_goal(goal_id):
-    goal = validate_goal(goal_id)
-    request_body = request.get_json()
-    
-    if isinstance(goal, Goal):
-        tasks = []
-        for task_id in request_body['task_ids']:
-            task = validate_task(task_id)
-            task.goal_id = goal_id
-            tasks.append(task.task_id)
-        db.session.commit()
-
-        return {
-            "id" : goal.goal_id,
-            "task_ids" : tasks
-        }
-    return goal
-
-@goals_bp.route('/<goal_id>/tasks', methods=['GET'])
-def get_tasks_of_goal(goal_id):
-    goal = validate_goal(goal_id)
-
-    if isinstance(goal, Goal):
-        tasks = []
-        for task in goal.tasks:
-            tasks.append({
-                "id" : task.task_id,
-                "goal_id" : task.goal_id,
-                "title" : task.title,
-                "description" : task.description,
-                "is_complete" : bool(task.completed_at)
-            })
-
-        return {
-            "id" : goal.goal_id,
-            "title" : goal.title,
-            "tasks" : tasks
-        }
-    return goal
 
 
 
