@@ -2,7 +2,7 @@ from app.models.task import Task
 from app.models.goal import Goal
 from flask import make_response, abort
 
-def validate_task(id):
+def validate_task(id): # fetch_task
     try:
         id = int(id)
         

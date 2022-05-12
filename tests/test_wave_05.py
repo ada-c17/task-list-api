@@ -143,15 +143,16 @@ def test_delete_goal(client, one_goal):
 
     # # Check that the goal was deleted
     response = client.get("/goals/1")
-    # response_body = response.get_json()
+    response_body = response.get_json()
     assert response.status_code == 404
-    # # raise Exception("Complete test with assertion about response body")
+
+    # raise Exception("Complete test with assertion about response body")
     # # *****************************************************************
     # # **Complete test with assertion about response body***************
     # # *****************************************************************
-    # assert response_body == {"message":"goal 1 not found"}
+    assert response_body == {"message":"goal 1 not found"}
     # to use line 152 which is response_body, I need a line 146 because there is a new call (line 145) and a new call need a new response body to use it in an assertion. Otherwise, I have to write 154 because it means assert == True(str, not empty)
-    assert "goal 1 not found"
+    # assert "goal 1 not found"
 
 # @pytest.mark.skip(reason="test to be completed by student")
 def test_delete_goal_not_found(client):

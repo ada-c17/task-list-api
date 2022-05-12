@@ -80,17 +80,17 @@ def delete_task(id):
 @tasks_bp.route("/<id>/mark_complete", methods=["PATCH"])
 def patch_task_to_complete(id):
     task = validate_task(id)
-    request_body = request.get_json()
-    task.patch_to_complete(request_body)
+    # request_body = request.get_json()
+    task.patch_to_complete()
     db.session.commit()
-    path = "https://slack.com/api/chat.postMessage"
-    query_params = {
-        "channel": "test-channel",
-        "text": f"Someone just completed the task {task.title}"
-        }
-    headers = {"Authorization": os.environ.get("SLACK_BOT_API_KEY")}
+    # path = "https://slack.com/api/chat.postMessage"
+    # query_params = {
+    #     "channel": "test-channel",
+    #     "text": f"Someone just completed the task {task.title}"
+    #     }
+    # headers = {"Authorization": os.environ.get("SLACK_BOT_API_KEY")}
 
-    requests.post(path, params=query_params, headers=headers)
+    # requests.post(path, params=query_params, headers=headers)
     # print(response_bot)
     # requests.post(path, params=query_params, headers=headers), it might work without response_bot variable
     return jsonify({"task":task.to_json()}), 200
@@ -98,8 +98,8 @@ def patch_task_to_complete(id):
 @tasks_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
 def patch_task_to_incomplete(id):
     task = validate_task(id)
-    request_body = request.get_json()
-    task.patch_to_incomplete(request_body)
+    # request_body = request.get_json()
+    task.patch_to_incomplete()
     db.session.commit()
     return jsonify({"task":task.to_json()}), 200
 

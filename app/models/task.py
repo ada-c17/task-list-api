@@ -8,7 +8,9 @@ class Task(db.Model):
     title = db.Column(db.String)
     description = db.Column(db.String)
     completed_at = db.Column(db.DateTime, default = None, nullable=True)
-    
+    goal = db.relationship("Goal", back_populates="tasks")
+    goal_id = db.Column(db.Integer, db.ForeignKey('goal.id'), nullable=True)
+
     def to_json(self):
         # complete = None
         # if self.completed_at == None:
@@ -16,11 +18,20 @@ class Task(db.Model):
         # else:
         #     complete = True
         is_complete = True if self.completed_at else False
-        return {
+        if self.goal_id:
+            return {
                 "id":self.id,
                 "title":self.title,
                 "description":self.description,
-                "is_complete":is_complete
+                "is_complete":is_complete,
+                "goal_id":self.goal_id
+                }
+        else:
+            return {
+                "id":self.id,
+                "title":self.title,
+                "description":self.description,
+                "is_complete":is_complete,
                 }
 
     @classmethod
@@ -43,10 +54,10 @@ class Task(db.Model):
         self.title = req_body["title"]
         self.description = req_body["description"]
 
-    def patch_to_complete(self, req_body):
+    def patch_to_complete(self):
         self.completed_at = datetime.now()
        
-    def patch_to_incomplete(self, req_body):
+    def patch_to_incomplete(self):
         self.completed_at = None
 
     @classmethod
