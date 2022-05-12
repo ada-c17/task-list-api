@@ -2,6 +2,7 @@ import os
 from os import abort
 from app import db
 from app.models.goal import Goal
+from app.models.task import Task
 from flask import Blueprint, jsonify, abort, make_response, request
 from datetime import datetime, timezone
 import requests 
@@ -10,19 +11,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
-
-def validate_goal(goal_id):
-    try:
-        goal_id = int(goal_id)
-    except:
-        abort(make_response({"Message":f"Goal {goal_id} invalid"}, 400))
-
-    goal = Goal.query.get(goal_id)
-
-    if not goal:
-        abort(make_response({"Message":f"Goal {goal_id} not found"}, 404))
-
-    return goal
 
 @goals_bp.route("", methods=["GET"])
 def get_all_goals():
@@ -36,7 +24,7 @@ def get_all_goals():
 
 @goals_bp.route("/<goal_id>", methods=["GET"])
 def get_one_goal(goal_id):
-    goal = validate_goal(goal_id)
+    goal = Goal.validate_goal(goal_id)
     goal_dict = {"goal": goal.make_goal_dict()}
     return jsonify(goal_dict), 200
 
@@ -58,7 +46,7 @@ def create_goal():
 
 @goals_bp.route("/<goal_id>", methods=["PUT"])
 def update_goal(goal_id):
-    goal = validate_goal(goal_id)
+    goal = Goal.validate_goal(goal_id)
     request_body = request.get_json()
 
     goal.title = request_body["title"]
@@ -71,11 +59,30 @@ def update_goal(goal_id):
 
 @goals_bp.route("/<goal_id>", methods=["DELETE"])
 def delete_goal(goal_id):
-    goal = validate_goal(goal_id)
+    goal = Goal.validate_goal(goal_id)
 
     db.session.delete(goal)
     db.session.commit()
 
     return jsonify({"details": f'Goal {goal_id} "{goal.title}" successfully deleted'}), 200
 
-# @goals_bp.route("/<goal_id>/tasks", methods=["POST"]):
+@goals_bp.route("/<goal_id>/tasks", methods=["POST"])
+def add_tasks_to_goal(goal_id):
+    goal = Goal.validate_goal(goal_id)
+    request_body = request.get_json()
+    
+    if "task_ids" not in request_body:
+        abort(make_response({"Message": "Please give a list of task ids."}, 400))
+
+    task_id_list = []
+    for task_id in request_body["task_ids"]:
+        task = Task.validate_task(task_id)
+        task.goal_id = goal.goal_id
+        task_id_list.append(task.id)
+
+    # add task to goal.tasks
+        
+    
+    db.session.commit()
+    
+    return jsonify({"id": goal.goal_id, "task_ids": task_id_list}), 200

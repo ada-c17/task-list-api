@@ -1,4 +1,5 @@
 from app import db
+from flask import abort, make_response
 
 
 class Task(db.Model):
@@ -21,3 +22,17 @@ class Task(db.Model):
             task_dict["is_complete"] = False
 
         return task_dict
+
+    @classmethod
+    def validate_task(cls, task_id):
+        try:
+            task_id = int(task_id)
+        except:
+            abort(make_response({"Message":f"Task {task_id} invalid"}, 400))
+
+        task = Task.query.get(task_id) 
+
+        if not task:
+            abort(make_response({"Message":f"Task {task_id} not found"}, 404))
+
+        return task
