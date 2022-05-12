@@ -95,5 +95,4 @@ def get_tasks_for_goal(goal_id):
         task_dict = task.make_task_dict()
         goal_dict["tasks"].append(task_dict)
     
-
     return jsonify(goal_dict), 200
