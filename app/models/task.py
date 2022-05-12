@@ -18,11 +18,17 @@ class Task(db.Model):
         if self.completed_at:
             is_complete = True
 
-
-        return {"id" : self.task_id,
-                "title" : self.title,
-                "description" : self.description,
-                "is_complete" : is_complete}
+        if self.goal_id:
+            return {"id" : self.task_id,
+                    "title" : self.title,
+                    "description" : self.description,
+                    "is_complete" : is_complete,
+                    "goal_id": self.goal_id}
+        else:
+            return {"id" : self.task_id,
+                    "title" : self.title,
+                    "description" : self.description,
+                    "is_complete" : is_complete}
     
 
     def update_task(self, update_body):

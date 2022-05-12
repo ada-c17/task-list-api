@@ -56,15 +56,34 @@ def delete_goal(goal_id):
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
 def add_tasks_to_goal(goal_id):
     goal = validate_goal(goal_id)
+    
     request_body = request.get_json()
+
     task_list = []
     for task_id in request_body["task_ids"]:
         task = validate_task(task_id)
         task_list.append(task)
-    # task_list = link_tasks_to_goal(request_body)
-    goal.tasks = task_list
+
+    for task in task_list: 
+        if task not in goal.tasks:
+            goal.tasks.append(task)
+
+    #helper function won't work?
+    # goal.link_tasks_to_goal(request_body)
 
     db.session.commit()
-    return jsonify({"id": 1, "task_ids": [1, 2, 3]})
+    return jsonify({"id": goal.goal_id, "task_ids": request_body["task_ids"]}), 200
+
+
+@goals_bp.route("/<goal_id>/tasks", methods=["GET"])
+def read_goal_with_tasks(goal_id):
+
+    goal = validate_goal(goal_id)
+    goal_tasks = [task.to_json() for task in goal.tasks]
+
+    return jsonify({"id": goal.goal_id,
+        "title": goal.title,
+        "tasks": goal_tasks}), 200
+
 
 

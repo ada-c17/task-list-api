@@ -16,13 +16,15 @@ class Goal(db.Model):
     def update_goal(self, update_body):
             self.title = update_body["title"]
 
-    # def link_tasks_to_goal(self, request_body):
+    # def link_goals_to_task(self, request_body):
     #     task_list = []
     #     for task_id in request_body["task_ids"]:
     #         task = validate_task(task_id)
     #         task_list.append(task)
-    #     return task_list
 
+    #     for task in task_list: 
+    #         if task not in self.tasks:
+    #             self.tasks.append(task)
 
     @classmethod
     def from_json(cls, request_body):
