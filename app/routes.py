@@ -8,7 +8,7 @@ import requests
 from dotenv import load_dotenv
 load_dotenv()
 
-tasks_bp = Blueprint("bp", __name__, url_prefix="/tasks")
+tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
 def error_message(message, status_code):
         abort(make_response(jsonify(dict(details=message)), status_code))
