@@ -1,8 +1,9 @@
+import json
 from flask import Blueprint, jsonify, request, abort, make_response
 from app.models.task import Task
 from app import db
 from sqlalchemy import desc
-import datetime
+from datetime import datetime
 import requests
 import os
 from dotenv import load_dotenv
@@ -31,6 +32,16 @@ def create_one_task():
                     "description": new_task.description,
                     "is_complete": bool(new_task.completed_at)
                 }}), 201
+    
+# def get_model(id, Model):
+#     if Model == Task:
+#         model_type = "task"
+#     elif Model == Goal:
+#         model_type = "goal"
+#     model = Model.query.get(id)
+#     if not model:
+#         abort(make_response({"error": f"{model_type} {id} not found"}, 404))
+#     return model
     
 def validate_task_id(task_id):
     try:
@@ -127,3 +138,23 @@ def delete_task(task_id):
     db.session.commit()
 
     return make_response({"details": f"Task {chosen_task.task_id} \"{chosen_task.title}\" successfully deleted"}) 
+
+
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def mark_incomplete(task_id):
+    task = validate_task_id(task_id)
+    task.completed_at = None
+    db.session.commit()
+    
+    response_body = {"task" : task.get_dict()}
+    return jsonify(response_body), 200
+
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def mark_complete(task_id):
+    task = validate_task_id(task_id)
+    task.completed_at = datetime.now()
+    db.session.commit()
+    
+    rsp = {"task" : task.get_dict()}
+    return jsonify(rsp), 200
+    
