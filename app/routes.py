@@ -14,16 +14,34 @@ def make_task_safely(data_dict):
 	# except KeyError as err:
 	# 	error_message(f"Missing key: {err}", 400)
 
+
+def replace_task_safely(task, data_dict):
+    return task.replace_details(data_dict)
+    # try:
+    #     task.replace_details(data_dict)
+    # except KeyError as err:
+    #     error_message(f"Missing key: {err}", 400)
+
 @task_bp.route("", methods=["GET"])
 def get_tasks():
     tasks = Task.query.all()
+    # asc = request.args.get("sort")
+    # desc = request.args.get("sort")
+
+    response_body = [task.to_dict() for task in tasks]
+
+    # if asc: 
+    #     sorted(response_body, key = lambda i:i['title'])
+        
+  
+  
     # name_param = request.args.get("name")
     
     # if name_param:
     #     tasks = Task.query.filter_by(name=name_param)
     # else:
 
-    response_body = [task.to_dict() for task in tasks]
+    # response_body = [task.to_dict() for task in tasks]
     return jsonify(response_body) 
 
 def validate_task(id):
@@ -42,7 +60,14 @@ def validate_task(id):
 @task_bp.route("", methods=["POST"])
 def create_task(): 
     request_body = request.get_json()
+    
+
+    if "title" not in request_body or "description" not in request_body:
+        return {'details': 'Invalid data'}, 400
+
     new_task = make_task_safely(request_body)
+
+    print(new_task)
 
     db.session.add(new_task)
     db.session.commit()
@@ -54,6 +79,19 @@ def create_task():
 def get_task(id):
     task = validate_task(id)
     return jsonify(task.to_dict_one_task())
+
+
+@task_bp.route("/<id>", methods=["PUT"])
+def update_task_by_id(id):
+    request_body = request.get_json()
+    task = validate_task(id)
+
+    replace_task_safely(task, request_body)
+    db.session.commit()
+    return jsonify(task.to_dict_one_task())
+
+
+
 
 
 @task_bp.route("/<id>", methods=["DELETE"])
