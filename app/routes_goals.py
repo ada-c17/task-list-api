@@ -27,12 +27,7 @@ def create_one_goal():
         return jsonify({"details": "Invalid data"}), 400
     db.session.add(new_goal)
     db.session.commit()
-    response = {
-        "goal": 
-        {"id": new_goal.goal_id,
-        "title": new_goal.title}
-        }
-    
+    response = {"goal": new_goal.to_dict()}    
     return jsonify(response), 201
 
 
@@ -42,19 +37,13 @@ def get_all_goals():
     goals = Goal.query.all()
     goal_list = []
     for goal in goals:
-        goal_list.append( {
-            "id": goal.goal_id,
-            "title": goal.title
-        })
+        goal_list.append(goal.to_dict())
     return jsonify(goal_list), 200
 
 @goal_bp.route("/<goal_id>",methods=["GET"])
 def get_goal_by_id(goal_id):
     goal = validate_goal(goal_id)
-    response = { 'goal':
-            {"id": goal.goal_id,
-            "title": goal.title}
-            }
+    response = { 'goal': goal.to_dict()}
     return jsonify(response), 200
 
 # UPDATE(CRUD): aka PATCH/PUT
@@ -64,13 +53,7 @@ def update_goal(goal_id):
     request_body = request.get_json()
     goal.title = request_body['title']
     db.session.commit()
-
-    response = {
-        "goal": {
-            "goal_id": goal.goal_id,
-            "title": goal.title,
-        }
-    }
+    response = {"goal": goal.to_dict()}
     return jsonify(response), 200
 
 # DELETE (CRUD)
@@ -92,13 +75,11 @@ def delete_one_goal(goal_id):
 def add_task_to_goal(goal_id):
     goal = validate_goal(goal_id)
     request_body = request.get_json()
-# validate that received task_list? (ie not empty list)
     task_id_list = request_body['task_ids']
     for task_id in task_id_list:
         task = validate_task(task_id)
         task.goal_id = goal_id 
         db.session.commit()
-
     response = {
         "id": int(goal_id),
         "task_ids": task_id_list}
@@ -123,5 +104,4 @@ def get_tasks_of_goal(goal_id):
     response = { "id": int(goal_id),
     "title": goal.title,
     "tasks": task_list}
-
     return jsonify(response), 200

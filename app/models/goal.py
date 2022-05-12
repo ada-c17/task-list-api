@@ -7,16 +7,25 @@ class Goal(db.Model):
     tasks = db.relationship("Task", back_populates="goal", lazy= True)
 
     def to_dict(self):
+        return {
+                'id': self.goal_id,
+                'title': self.title}
+
         task_list = []
         for task in self.tasks:
             task_list.append(task.to_dict())
+        if self.tasks:
+            return {
+                'id': self.goal_id,
+                'title': self.title,
+                'tasks': task_list}
+        else:
+            return {
+                'id': self.goal_id,
+                'title': self.title}
 
-        return {
-            'id': self.goal_id,
-            'name': self.name,
-            'tasks': self.task_list
-        }
 
+    # Examples helper functions:
     # def to_dict(self):
     #     cars_list = []
     #     for car in self.cars:
