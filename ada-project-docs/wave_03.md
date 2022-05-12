@@ -35,7 +35,7 @@ when I send a `PATCH` request to `/tasks/1/mark_complete`,
 then the task is updated, so that its `completed_at` value is the current date, and I get this response:
 
 `200 OK`
-
+ 
 ```json
 {
   "task": {
