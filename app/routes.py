@@ -90,13 +90,13 @@ def get_one_task(taskID):
     #     "title": "A Brand New Task"
     # }
     
-"""date"""
+"""date format for updating complete status works when input: 2021-05-30-07:19:06"""
 @task_bp.route("/<taskID>", methods=["PUT"])
 def update_task(taskID):
     task = id_validation(taskID)
     response_body = request.get_json()
     if response_body and "completed_at" in response_body:
-        #update this task_id's title and description. *Forgot assign task_id*
+        
         task.completed_at = response_body["completed_at"]
         
     task.title = response_body["title"]
@@ -121,7 +121,7 @@ def delete_task(taskID):
     
 """Wave03"""
 """Wave04"""
-"works but slack bot doesn't post msg"
+
 @task_bp.route("/<taskID>/mark_complete", methods=["PATCH"])
 def update_tasks_with_completed(taskID):
     task = id_validation(taskID)
@@ -145,7 +145,6 @@ def slack_api_call(task):
     }
     requests.post(SLACK_PATH, params=PARAMS, headers=HEADERS)
     
-"works in postmant not in heroku web url"
 @task_bp.route("/<taskID>/mark_incomplete", methods=["PATCH"])
 def update_tasks_with_not_completed(taskID):
     task = id_validation(taskID)
@@ -228,9 +227,9 @@ def delete_goal(goal_id):
     goal = goal_id_validation(goal_id)
     goals = Goal.query.all()
     
-    if len(goals) < 1:
-        raise AttributeError("No object!")
-    
+    # if len(goals) < 1:
+    #     abort(make_response({"msg": "Not Found"}), 404)
+        
     db.session.delete(goal)
     db.session.commit()
     
@@ -289,8 +288,3 @@ def get_tasks_for_one_goal(goal_id):
     goal = goal_id_validation(goal_id)
 
     return make_response(jsonify(goal.to_json2()), 200)
-
-
-
-# @goal_bp.route("/tasks", methods=["GET"])
-# def get_tasks_for_one_goal(goal_id):

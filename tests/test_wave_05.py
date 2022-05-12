@@ -156,7 +156,7 @@ def test_delete_goal_not_found(client):
     response_body = response.get_json()
     # Assert
     # ---- Complete Assertions Here ----
-    assert ValueError
+    #assert response_body == {"msg": "Not Found"}
     assert response_body ==  {"msg": f"Given goal #1 is not found."}
     # ---- Complete Assertions Here ----
 
@@ -172,3 +172,4 @@ def test_create_goal_missing_title(client):
     assert response_body == {
         "details": "Invalid data"
     }
+
