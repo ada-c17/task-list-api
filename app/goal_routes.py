@@ -70,15 +70,30 @@ def add_tasks_to_goal(goal_id):
     try:
         task_ids = request_body["task_ids"]
     except KeyError:
+        return jsonify({"msg": "Missing task ids in request body"}), 400
+
+    if not isinstance(task_ids, list): 
         return jsonify({"msg": "Expected list of task ids"}), 400
 
     tasks = []
     for id in task_ids:
         tasks.append(validate_task_id(id))
 
+    response_task_ids = []
     for task in tasks:
         task.goal = goal
-    
+        response_task_ids.append(task.id)
     db.session.commit()
 
-    return jsonify({"msg": f"Added task to goal {goal_id}"}), 200
+    response = {
+        "id":goal.id, 
+        "task_ids":response_task_ids
+    }
+
+    return jsonify(response)
+
+@goals_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_task_of_one_goal(goal_id):
+    goal = validate_goal_id(goal_id)
+
+    
