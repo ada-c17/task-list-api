@@ -42,16 +42,7 @@ def create_goal():
 
 @goal_bp.route("", methods=["GET"])
 def read_all_goals():
-    sort_param = request.args.get("sort")
-
     goals = Goal.query
-
-    if sort_param:
-        if sort_param == 'asc':
-            goals = Goal.query.order_by(asc(Goal.title))
-        else:
-            goals = Goal.query.order_by(desc(Goal.title))
-    
     goals = goals.all()
 
     goals_response = []
@@ -74,30 +65,6 @@ def replace_goal(goal_id):
 
     goal.title = request_body["title"]
     
-    db.session.commit()
-
-    return {"goal": goal.to_dict()}
-
-@goal_bp.route("/<goal_id>/mark_complete", methods=["PATCH"])
-def complete_goal(goal_id):
-    goal = validate_goal(goal_id)
-    request_body = request.get_json()
-
-    title = request_body.get("title")
-
-    if title:
-        goal.title = request_body["title"]
-
-    db.session.commit()
-    
-    return {"goal": goal.to_dict()}
-
-@goal_bp.route("/<goal_id>/mark_incomplete", methods=["PATCH"])
-def incomplete_goal(goal_id):
-    goal = validate_goal(goal_id)
-    
-    goal.completed_at = None
-
     db.session.commit()
 
     return {"goal": goal.to_dict()}
@@ -132,37 +99,6 @@ def get_tasks_for_goal(goal_id):
         "id": goal.goal_id,
         "title": goal.title,
         "tasks": tasks_response})
-
-# @goal_bp.route("/<goal_id>/tasks", methods=["POST"])
-# def post_task_to_goal(goal_id):
-#     request_body = request.get_json()
-#     task_ids = request_body["task_ids"]
-#     tasks_response = []
-
-#     goal = validate_goal(goal_id)
-    
-#     for i in range(len(task_ids)):
-#         next_task = task_ids[i]
-#         goal.tasks = next_task
-
-#         new_task = Task(
-#             title = request_body["title"],
-#             description = request_body["description"],
-#             completed_at = request_body["completed_at"],
-#             goal_id = goal.goal_id
-#             )
-#         print(f"{new_task=}")
-#         db.session.add(new_task)
-#         db.session.commit()
-
-#         tasks_response.append(
-#             goal.tasks
-#         )
-
-#     return make_response(jsonify({
-#         "id": goal.goal_id,
-#         "task_ids": tasks_response
-#     }), 200)
 
 @goal_bp.route("/<goal_id>/tasks", methods=["POST"])
 def post_task_to_goal(goal_id):
