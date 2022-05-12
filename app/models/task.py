@@ -15,7 +15,7 @@ class Task(db.Model):
         if not self.completed_at:
             is_complete = False
 
-        if self.completed_at:
+        else:
             is_complete = True
 
         if self.goal_id:
@@ -32,14 +32,12 @@ class Task(db.Model):
     
 
     def update_task(self, update_body):
-        if "completed_at" in update_body:
-            self.title = update_body["title"]
-            self.description = update_body["description"]
-            self.completed_at = update_body["completed_at"]
 
-        elif "completed_at" not in update_body:
-            self.title = update_body["title"]
-            self.description = update_body["description"]
+        self.title = update_body["title"]
+        self.description = update_body["description"]
+        
+        if "completed_at" in update_body:
+            self.completed_at = update_body["completed_at"]
 
 
     @classmethod
@@ -58,7 +56,6 @@ class Task(db.Model):
             new_task = cls(
             title=request_body["title"],
             description=request_body["description"])
-
         
         return new_task
 

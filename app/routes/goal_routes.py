@@ -58,17 +58,7 @@ def add_tasks_to_goal(goal_id):
     goal = validate_model_instance(Goal, goal_id, "goal")
     
     request_body = request.get_json()
-
-    # task_list = []
-    # for task_id in request_body["task_ids"]:
-    #     task = validate_task(task_id)
-    #     task_list.append(task)
-
-    # for task in task_list: 
-    #     if task not in goal.tasks:
-    #         goal.tasks.append(task)
-
-    #helper function won't work?
+    
     goal.link_tasks_to_goal(request_body)
 
     db.session.commit()
