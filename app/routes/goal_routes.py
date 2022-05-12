@@ -1,12 +1,9 @@
 # import the necessary modules
-from datetime import datetime
 from app import db
 from app.routes.task_routes import validate_task
 from app.models.goal import Goal
 # import dependencies
 from flask import Blueprint, jsonify, make_response, request, abort
-import os
-import requests
 
 
 # initialize Blueprint instance
