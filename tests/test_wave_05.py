@@ -136,7 +136,6 @@ def test_delete_goal(client, one_goal):
 
     # Check that the goal was deleted
     response = client.get("/goals/1")
-    # ???
     response_body = response.get_json()
     assert response.status_code == 404
 

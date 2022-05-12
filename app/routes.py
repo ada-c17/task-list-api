@@ -1,5 +1,6 @@
 import json
 import os
+from xmlrpc.client import boolean
 import requests
 from crypt import methods
 from flask import Blueprint, abort, make_response, jsonify, request
@@ -82,14 +83,25 @@ def get_one_task(task_id):
 
     boolean_completed_task(selected_task)
     
-    rsp = {
-        "task": {
-            "id": selected_task.task_id,
-            "title": selected_task.title,
-            "description": selected_task.description,
-            "is_complete": selected_task.completed_at
+    if selected_task.goal_id:
+        rsp = {
+            "task": {
+                "id": selected_task.task_id,
+                "goal_id": selected_task.goal_id,
+                "title": selected_task.title,
+                "description": selected_task.description,
+                "is_complete": selected_task.completed_at
+            }
         }
-    }
+    else:
+        rsp = {
+            "task": {
+                "id": selected_task.task_id,
+                "title": selected_task.title,
+                "description": selected_task.description,
+                "is_complete": selected_task.completed_at
+            }
+        }    
     return jsonify(rsp), 200
 
 
@@ -303,3 +315,57 @@ def delete_one_goal(goal_id):
 
     return {"details": 
         f'Goal {selected_goal.goal_id} \"{selected_goal.title}" successfully deleted'}, 200
+
+
+# *******************
+# NESTED ROUTES
+# *******************
+
+@goal_bp.route('/<goal_id>/tasks', methods=['POST'])
+def post_tasks_to_goal(goal_id):
+    selected_goal = validate_goal(goal_id)
+    request_body = request.get_json()
+
+    try:
+        request_body["task_ids"] == True
+    except KeyError:
+        rsp = {"details": "Invalid data"}
+        abort(make_response(jsonify(rsp), 400))
+
+    task_list = []
+
+    for task in request_body["task_ids"]:
+        selected_task = validate_task(task)
+        selected_task.goal_id = goal_id
+        task_list.append(task)
+
+    db.session.commit()
+    rsp = {
+        "id": selected_goal.goal_id,
+        "task_ids": task_list
+    }
+    return jsonify(rsp), 200
+
+@goal_bp.route('/<goal_id>/tasks', methods=['GET'])
+def get_tasks_of_one_goal(goal_id):
+    selected_goal = validate_goal(goal_id)
+
+    task_list = []
+    for task in selected_goal.tasks:
+        selected_task = validate_task(task.task_id)
+        boolean_completed_task(selected_task)
+        task_list.append({
+            "id": selected_task.task_id,
+            "goal_id": selected_task.goal_id,
+            "title": selected_task.title,
+            "description": selected_task.description,
+            "is_complete": selected_task.completed_at
+        })
+
+    rsp = {
+        "id": selected_goal.goal_id,
+        "title": selected_goal.title,
+        "tasks": task_list
+    }
+    return jsonify(rsp), 200
+
