@@ -182,7 +182,7 @@ def post_tasks_to_goal(goal_id):
     # Verifying that the request body has a list of task ids
     try:
         task_ids = request_body["task_ids"]
-    except:
+    except KeyError:
         # Missing Task id in request body
         return jsonify(make_response({"message" : f"Missing list of task ids in request body."}, 400))
 
