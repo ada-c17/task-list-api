@@ -1,21 +1,18 @@
 from app import db
 from app.models.task import Task 
 from flask import Blueprint, jsonify, make_response, request, abort 
-# from app.routes.routes_helper import error_message
-
-def error_message(message, status_code):
-    abort(make_response(jsonify(dict(details=message)), status_code))
+from app.helper_routes import error_message
 
 
 task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
 def make_task_safely(data_dict):
-    # return Task.from_dict(data_dict)
+    return Task.from_dict(data_dict)
 
-	try:
-		return Task.from_dict(data_dict)
-	except KeyError as err:
-		error_message(f"Missing key: {err}", 400)
+	# try:
+	# 	return Task.from_dict(data_dict)
+	# except KeyError as err:
+	# 	error_message(f"Missing key: {err}", 400)
 
 @task_bp.route("", methods=["GET"])
 def get_tasks():
@@ -42,6 +39,16 @@ def validate_task(id):
 	error_message(f'task with id #{id} not found', 404)
 
 
+@task_bp.route("", methods=["POST"])
+def create_task(): 
+    request_body = request.get_json()
+    new_task = make_task_safely(request_body)
+
+    db.session.add(new_task)
+    db.session.commit()
+
+    return jsonify(new_task.to_dict_one_task()), 201 
+
 
 @task_bp.route("/<id>", methods=["GET"])
 def get_task(id):
@@ -55,15 +62,13 @@ def delete_task(id):
     task = valid_task.to_dict_one_task()
     title = task['task']['title']
     response_body = {"details": f'Task {id} "{title}" successfully deleted'}
-    
+
     db.session.delete(valid_task)
     db.session.commit()
     return response_body
 
 
-# 
-#     def error_message(message, status_code):
-#     abort(make_response(jsonify(dict(details=message)), status_code
+
   
 
 

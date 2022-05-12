@@ -24,7 +24,7 @@ class Task(db.Model):
             id=self.id,
             title=self.title,
             description=self.description,
-            is_complete=self.is_complete
+            is_complete=self.is_complete 
 
         )
 
@@ -46,7 +46,7 @@ class Task(db.Model):
         return cls(
             title=data_dict["title"],
             description=data_dict["description"],
-            is_complete=data_dict["is_complete"],
+            # is_complete=data_dict["is_complete"],
             
         )
 
