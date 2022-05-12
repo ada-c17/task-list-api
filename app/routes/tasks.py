@@ -12,6 +12,12 @@ tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 # get all task list
 @tasks_bp.route("", methods=["GET"])
 def read_all_tasts():
+    """
+        - Getting sorted tasks by title if query has "sort" key, 
+        or geting unsorted tasks otherwise
+        - Returning all tasks in json with 200
+        - Returning empty list if no task in database
+    """
     # sort all tasts by title
     params = request.args
     if "sort" in params:
@@ -21,6 +27,7 @@ def read_all_tasts():
             chosen_task = Task.query.order_by( asc(Task.title) ).all()
     else:     
         chosen_task = Task.query.all()
+
     # return empty list when no task in database
     if len(chosen_task) == 0:
         return jsonify([]), 200
@@ -28,14 +35,11 @@ def read_all_tasts():
     # return all tasts
     response_body = []
     for task in chosen_task:
-        response_body.append({
-            "id": task.id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": bool(task.completed_at)
-        })
+        # call method from Task class 
+        response_body.append(task.task_response_body_dict())
 
     return jsonify(response_body), 200
+
 
 
 # helper function to check task id
@@ -62,22 +66,13 @@ def validate_task_id(task_id):
 # get one task by id
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def read_task_by_id(task_id):
+    """Getting a task by task id and return task object in json with 200"""
     chosen_task = validate_task_id(task_id)
-    # response_body = {
-    #     "task": {
-    #         "id": chosen_task.id,
-    #         "title": chosen_task.title,
-    #         "description": chosen_task.description,
-    #         "is_complete": bool(chosen_task.completed_at)
-    #     }
-    # }
-    
-    return jsonify({"task": chosen_task.task_response_body()}), 200
-    # return chosen_task.task_response_body(), 200
+    return jsonify({"task": chosen_task.task_response_body_dict()}), 200
 
 
 # helper function to check key dictionary exist or not
-def validate_data_key_for_post_or_update():
+def validate_input_key_for_post_or_update():
     """Checking missing data key when post or update
         - raise exception if the key doesn't exist
         - return request object if the key exist
@@ -91,55 +86,47 @@ def validate_data_key_for_post_or_update():
 # create one task
 @tasks_bp.route("", methods=["POST"])
 def creat_task():
-    request_task = validate_data_key_for_post_or_update()
+    """Adding task into database and return task object in json with 201"""
+    # validating input key whether missing or not
+    request_task = validate_input_key_for_post_or_update()
+    # creating new record in task table base on input
     new_task = Task(
         title = request_task["title"],
         description = request_task["description"]
     )
+    # if input has completed_at then add it into database
     if "completed_at" in request_task:
         new_task.completed_at = request_task["completed_at"]
     db.session.add(new_task)
     db.session.commit()
 
-    response_body = {
-        "task": {
-            "id": new_task.id,
-            "title": new_task.title,
-            "description": new_task.description,
-            "is_complete": bool(new_task.completed_at)
-        }
-    }
-    return jsonify(response_body), 201
+    return jsonify({"task": new_task.task_response_body_dict()}), 201
 
 
 # update a task
 @tasks_bp.route("<task_id>", methods=["PUT"])
 def update_task(task_id):
+    """Updating task by task id"""
+    # validating task id
     chosen_task = validate_task_id(task_id)
-    request_task = validate_data_key_for_post_or_update()
+    # validating input key whether it missing or not
+    request_task = validate_input_key_for_post_or_update()
+    # if title and description key not missing then update their values to database
     chosen_task.title = request_task["title"]
     chosen_task.description = request_task["description"]
-    
+    # if the request include completed_at key then update that value to database
     if "completed_at" in request_task:
         chosen_task.completed_at = request_task["completed_at"]
 
     db.session.commit()
 
-    response_body = {
-        "task": {
-            "id": chosen_task.id,
-            "title": chosen_task.title,
-            "description": chosen_task.description,
-            "is_complete": bool(chosen_task.completed_at)
-        }
-    }
-
-    return jsonify(response_body), 200
-
+    return jsonify({"task": chosen_task.task_response_body_dict()}), 200
 
 # delete task by id
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_one_task_by_id(task_id):
+    """Removing a task by task id and return a message with 200"""
+    # validating the task id
     chosen_task = validate_task_id(task_id)
     db.session.delete(chosen_task)
     db.session.commit()
@@ -151,12 +138,12 @@ def delete_one_task_by_id(task_id):
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def update_to_mark_complete(task_id):
     chosen_task = validate_task_id(task_id)
-    request_task = request.get_json()
-    # if "completed_at" in request_task and request_task["completed_at"]:
+    # request_task = request.get_json()
+    # if "completed_at" in request_task:
     #     chosen_task.completed_at = request_task["completed_at"]
-    # else:
-    #     chosen_task.completed_at = datetime.utcnow()
+    
     chosen_task.completed_at = datetime.utcnow()
+
     db.session.commit()
 
     # post message to slack workspace
@@ -174,16 +161,7 @@ def update_to_mark_complete(task_id):
     
     slack_response = requests.post(SLACK_PATH, params=query_params, headers=header)
     
-    response_body = {
-        "task": {
-            "id": chosen_task.id,
-            "title": chosen_task.title,
-            "description": chosen_task.description,
-            "is_complete": bool(chosen_task.completed_at)
-        }
-    } 
-
-    return jsonify(response_body), 200
+    return jsonify({"task": chosen_task.task_response_body_dict()}), 200
 
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
@@ -191,13 +169,4 @@ def update_to_mark_incomplete(task_id):
     chosen_task = validate_task_id(task_id)
     chosen_task.completed_at = None
     db.session.commit()
-    response_body = {
-        "task": {
-            "id": chosen_task.id,
-            "title": chosen_task.title,
-            "description": chosen_task.description,
-            "is_complete": bool(chosen_task.completed_at)
-        }
-    } 
-
-    return jsonify(response_body), 200
+    return jsonify({"task": chosen_task.task_response_body_dict()}), 200
