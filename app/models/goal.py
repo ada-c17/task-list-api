@@ -25,3 +25,6 @@ class Goal(db.Model):
             tasks_list.append(task.to_dict_with_goal_id())
         return tasks_list
         
+    # @classmethod
+    # def __str__(self) -> str:
+    #     return "Goal"

@@ -1,53 +1,48 @@
-from flask import request, make_response, abort, jsonify
-# import requests
+from flask import make_response, abort, jsonify
 from app.models.task import Task
-from app.models.goal import Goal
-# from app import db
-# from datetime import date
-# import os
-import requests
 
 
-def validate_id(id):
-    if "/goals" in request.path or "/goals/<goal_id>" in request.path:
+def validate_id(cls, id):
         try:
-            goal_id = int(id)
+            id = int(id)
         except ValueError:
-            abort(make_response(jsonify(f"Goal {goal_id} is invalid"), 400))
-        goal = Goal.query.get(goal_id)
-        if not goal:
-            abort(make_response(jsonify(f"Goal {goal_id} not found"), 404))
-        return goal
-    if "/tasks" in request.path:
-        try:
-            task_id = int(id)
-        except ValueError:
-            abort(make_response(jsonify(f"Task {task_id} is invalid"), 400))
-        task = Task.query.get(task_id)
-        if not task:
-            abort(make_response(jsonify(f"Task {task_id} not found"), 404))
-        return task
+            abort(make_response(jsonify(f"{cls.__name__} {id} is invalid"), 400))
+        instance = cls.query.get(id)
+        if not instance:
+            abort(make_response(jsonify(f"{cls.__name__} {id} not found"), 404))
+        return instance
 
-# VALIDATE REQUEST
-def validate_request(request):
+
+def validate_request(request, *attributes):
     request_body = request.get_json()
-    
-    if "/goals" in request.path and "/tasks" in request.path:
+    for attribute in attributes:
         try:
-            request_body["task_ids"]
+            request_body[attribute]
         except KeyError:
             abort(make_response({"details": "Invalid data"}, 400)) 
-        return request_body
-    elif "/goals" in request.path:
-        try:
-            request_body["title"]
-        except KeyError:
-            abort(make_response({"details": "Invalid data"}, 400)) 
-        return request_body
-    try:
-        request_body["title"]
-        request_body["description"]
-    except KeyError:
-        abort(make_response({"details": "Invalid data"}, 400)) 
     return request_body
 
+def get_filtered_tasks(request):
+    title_param = request.args.get("title")
+    description_param = request.args.get("description")
+    is_complete_param = request.args.get("is_complete")
+    sort_param = request.args.get("sort")
+
+    tasks = Task.query
+
+    if title_param:
+        tasks = tasks.filter_by(title=title_param)
+    if description_param:
+        tasks = tasks.filter_by(description=description_param)
+    if is_complete_param == "true":
+        tasks = tasks.filter(Task.completed_at != None)
+    elif is_complete_param == "false":
+        tasks = tasks.filter_by(completed_at=None)
+    if sort_param:    
+        if sort_param == "asc":
+            tasks = tasks.order_by(Task.title.asc())
+        elif sort_param == "desc":
+            tasks = tasks.order_by(Task.title.desc())
+
+    tasks = tasks.all()
+    return tasks
