@@ -12,3 +12,15 @@ def validate_task(task_id):
     if not task:
         abort(make_response({"error_message": f"id {task_id} not found"}, 404))
     return task
+
+def validate(cls, id):
+    try:
+        id = int(id)
+    except:
+        abort(make_response({"error_message": f"ivalid id {id}"}, 400))
+
+    model = cls.query.get(id)
+
+    if not model:
+        abort(make_response({"error_message": f"id {id} not found"}, 404))
+    return model
