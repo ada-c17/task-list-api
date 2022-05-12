@@ -8,9 +8,13 @@ from app.models.task import Task
 from app import db
 
 task_bp = Blueprint('task_bp', __name__, url_prefix="/tasks")
+goal_bp = Blueprint('goal_bp', __name__, url_prefix="/goals")
+
+# *******************
+# ROUTES FOR TASK_BP
+# *******************
 
 # helper function to determine true or false
-# ....actually might need to change this once datetime comes into play
 def boolean_completed_task(task):
     if task.completed_at is None:
         task.completed_at = False
@@ -112,6 +116,7 @@ def get_all_tasks():
             return jsonify(sorted(tasks_response, key=lambda a: a["title"], reverse=True)), 200
     return jsonify(tasks_response), 200    
 
+
 @task_bp.route('/<task_id>', methods=['PUT'])
 def put_one_task(task_id):
     selected_task = validate_task(task_id)
@@ -133,6 +138,7 @@ def put_one_task(task_id):
         }
     }
     return jsonify(rsp), 200
+
 
 @task_bp.route('/<task_id>', methods=['DELETE'])
 def delete_one_task(task_id):
@@ -179,6 +185,7 @@ def mark_task_complete(task_id):
     requests.post(post_message_url, params=post_message_params, headers=post_message_headers)
     return jsonify(rsp), 200
 
+
 # ditto above
 @task_bp.route('/<task_id>/mark_incomplete', methods=['PATCH'])
 def mark_task_incomplete(task_id):
@@ -197,3 +204,7 @@ def mark_task_incomplete(task_id):
         }
     }
     return jsonify(rsp), 200
+
+# *******************
+# ROUTES FOR GOAL_BP
+# *******************
