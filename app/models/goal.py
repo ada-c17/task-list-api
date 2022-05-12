@@ -9,5 +9,12 @@ class Goal(db.Model):
     @classmethod
     def from_dict(cls, data_dict):
         return cls(
-                title=data_dict["title"],
+                    title=data_dict["title"],
             )
+
+    
+    def to_dict(self):
+        return dict(
+                    id=self.goal_id,
+                    title=self.title
+        )
