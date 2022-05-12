@@ -12,17 +12,12 @@ tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 @tasks_bp.route("", methods=["POST"])
 def create_new_task():
     request_body = validate_request(request, "title", "description")
-    try:
-        new_task = Task(
+    new_task = Task(
             title=request_body["title"],
             description=request_body["description"],
-            completed_at=request_body["completed_at"]
+            completed_at=request_body["completed_at"] if request_body.get("completed_at", None) != None else None
         )
-    except KeyError:
-        new_task = Task(
-            title=request_body["title"],
-            description=request_body["description"]
-        )
+
     db.session.add(new_task)
     db.session.commit()
     return make_response({"task": new_task.to_dict()}, 201)
