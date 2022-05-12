@@ -27,7 +27,7 @@ def create_one_goal():
     }
     return jsonify(response), 201
 
-
+# get all goals
 @goals_bp.route('', methods=['GET'])
 def get_all_goals():
     goals= Goal.query.all()
@@ -110,3 +110,47 @@ def delete_one_goal(goal_id):
     }
 
     return jsonify(response_body), 200
+
+
+@goals_bp.route('/<goal_id>/tasks', methods=['POST'])
+def create_tasks_for_one_goal(goal_id):
+    goal = validate_goal(goal_id)
+    # goal = Goal.query.get(goal_id)
+    request_body = request.get_json()
+   
+    for task_id in request_body.get("task_ids"):
+        tasks=Task.query.get(task_id)
+        goal.tasks.append(tasks)
+
+    db.session.commit()
+
+    response = {
+        "id":goal.goal_id,
+        "task_ids":request_body.get("task_ids")
+    }
+    return jsonify(response), 200
+
+
+@goals_bp.route('/<goal_id>/tasks', methods=['GET'])
+def get_tasks_for_a_goal(goal_id):
+    chosen_goal = validate_goal(goal_id)
+
+    chosen_goal_tasks=[]
+    for task in chosen_goal.tasks:
+        chosen_goal_tasks.append(
+            {
+                "id":task.task_id,
+                "goal_id":task.goal_id,
+                'title':task.title,
+                'description':task.description,
+                'is_complete':bool(task.completed_at)
+            }
+        )
+
+    response= {
+        "id":chosen_goal.goal_id,
+        "title":chosen_goal.title,
+        # "task":chosen_goal_tasks["goal_id"],
+        "tasks": chosen_goal_tasks
+    }
+    return jsonify(response), 200

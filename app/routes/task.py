@@ -94,7 +94,9 @@ def get_one_task(task_id):
         'description':chosen_task.description,
         'is_complete':bool(chosen_task.completed_at)}
     }
-
+    if chosen_task.goal_id:
+        rsp["task"]["goal_id"] = chosen_task.goal_id  
+        
     return jsonify(rsp), 200
 
 # update chosen task
