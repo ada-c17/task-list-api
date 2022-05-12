@@ -40,15 +40,3 @@ def replace_goal_safely(goal, data_dict):
         goal.replace_details(data_dict)
     except KeyError as err:
         error_message(f"Missing key: {err}", 400)
-
-# def get_goal_record_by_id(id):
-#     try:
-#         id = int(id)
-#     except ValueError:
-#         error_message(f"Invalid id {id}", 400)
-
-#     goal = Goal.query.get(id)
-#     if goal:
-#         return goal
-    
-#     error_message(f"No goal with id {id} found", 404)
