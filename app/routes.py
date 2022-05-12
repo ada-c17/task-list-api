@@ -303,3 +303,30 @@ def send_tasks_to_goal(goal_id):
     }
 
     return jsonify(response), 200
+
+
+@goals_bp.route('/<goal_id>/tasks', methods = ['GET'])
+def get_tasks_of_one_goal(goal_id):
+
+    chosen_goal = validate(goal_id, "goal")
+
+    tasks = []
+    for task in chosen_goal.tasks:
+        is_complete = check_if_completed(task)
+        tasks.append(
+            {
+                "id":task.task_id,
+                "goal_id":chosen_goal.goal_id,
+                "title":task.title,
+                "description":task.description,
+                "is_complete":is_complete
+            }
+        )
+    response = {
+        "id":chosen_goal.goal_id,
+        "title":chosen_goal.title,
+        "tasks":tasks
+    }
+
+    return jsonify(response)
+
