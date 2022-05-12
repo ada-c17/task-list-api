@@ -8,10 +8,13 @@ class Task(db.Model):
     description = db.Column(db.String, nullable=False)
     completed_at = db.Column(db.DateTime, default=None)
     is_complete = db.Column(db.Boolean, nullable=False, default=False)
+    goal_id = db.Column(db.Integer, db.ForeignKey("goal.goal_id"), nullable=True)
+    goal = db.relationship("Goal", back_populates="tasks", lazy=True)
 
     def make_dict(self):
         data_dict=dict(
                 id=self.task_id,
+                goal_id=self.goal_id,
                 title=self.title,
                 description=self.description, 
                 is_complete = self.is_complete
@@ -25,7 +28,7 @@ class Task(db.Model):
         if "completed_at" in data_dict:
             self.completed_at = data_dict["completed_at"]
             self.is_complete = True
-    
+
     def mark_complete(self):
         self.is_complete = True
         self.completed_at = datetime.utcnow()

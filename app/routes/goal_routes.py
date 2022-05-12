@@ -3,6 +3,7 @@ import os
 from flask import Blueprint, jsonify, abort, make_response, request
 from app.models.goal import Goal
 from app import db
+from app.routes.task_routes import get_task_record_by_id
 
 # Routes for Goal
 
@@ -40,6 +41,19 @@ def create_goal():
 
     return jsonify({"goal": goal.make_dict()}), 201
 
+# POST /goals/<goal_id>/tasks
+@bp.route("/<goal_id>/tasks", methods=["POST"])
+def assign_tasks_to_goal(goal_id):
+    request_body = request.get_json()
+
+    for task_id in request_body["task_ids"]:
+        task = get_task_record_by_id(task_id)
+        task.goal_id = goal_id
+
+    db.session.commit()
+
+    return jsonify({"goal_id": goal_id, "task_ids": request_body["task_ids"]})
+
 # GET /goals
 @bp.route("", methods=["GET"])
 def list_goals():
@@ -55,6 +69,18 @@ def get_goal_by_id(goal_id):
     goal = get_goal_record_by_id(goal_id)
 
     return jsonify({"goal": goal.make_dict()})
+
+# GET /goals/<goal_id>/tasks
+@bp.route("/<goal_id>/tasks", methods=["GET"]) 
+def get_tasks_of_one_goal(goal_id):
+    goal = get_goal_record_by_id(goal_id)
+    goal_dict = goal.make_dict()
+
+    task_list = []
+    for task in goal.tasks:
+        task_list.append(task.make_dict())
+
+    return jsonify({"goal_id": goal_dict["id"], "title": goal_dict["title"], "tasks": task_list})
 
 # PUT /goals/<goal_id>
 @bp.route("/<goal_id>", methods=["PUT"])
