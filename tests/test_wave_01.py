@@ -88,6 +88,7 @@ def test_create_task(client):
     assert new_task.title == "A Brand New Task"
     assert new_task.description == "Test Description"
     assert new_task.completed_at == None
+    
 
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
@@ -191,3 +192,18 @@ def test_create_task_must_contain_description(client):
         "details": "Invalid data"
     }
     assert Task.query.all() == []
+
+# ------------------------------------
+# *****ADDED TEST TO FOR INVALID INPUT****
+# Wanted to get my coverage up for helper.py.
+# Now 100% coverage
+def test_get_task_invalid_input(client):
+    # Act
+    response = client.get("/tasks/hello")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    assert response_body == {
+        "message": "task hello is invalid"
+    }
