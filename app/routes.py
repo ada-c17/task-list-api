@@ -1,8 +1,14 @@
 from datetime import datetime
 from xmlrpc.client import boolean
+
+from dotenv import load_dotenv
+import requests
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, abort, make_response, request
+import os
+
+load_dotenv()
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -15,6 +21,26 @@ def validate(input_id):
     if not task:
         abort(make_response({"message":f"Task {int_id} not found"}, 404))
     return task
+
+def send_slack_message(task, message):
+    '''
+    if message = completed, send slack message that task has been completed:
+        "Someone just completed the task {task.title}"
+    if message = incomplete, send slack message that task has been marked incomplete. 
+        "The task {task.title} sent: {}"
+    '''
+    if message == "completed":
+        send_message = f"Someone just completed the task {task.title}"
+    else: 
+        send_message = f"The task {task.title} sent: {message}"
+
+
+    url = os.environ.get("SLACK_POST_URL")+send_message
+    header_authorization = "Bearer "+os.environ.get("SLACK_AUTH_KEY")
+    headers = {'Authorization': header_authorization}
+    requests.post(url, headers=headers)
+    return
+
 
 @tasks_bp.route("", methods=["POST"])
 def create_task():
@@ -95,8 +121,10 @@ def update_one_task(task_id):
     elif "is_complete" in request_body_keys:
         if request_body["is_complete"] == True:
             task.completed_at = datetime.utcnow()
+            send_slack_message(task, "completed")
         elif request_body["is_complete"] == False:
             task.completed_at = None
+            send_slack_message(task, "marked incomplete")
 
     db.session.commit()
     # db.session.expire(task)
@@ -110,8 +138,10 @@ def task_completion(task_id, mark_completion):
 
     if mark_completion == "mark_complete":
         task.completed_at = datetime.utcnow()
+        send_slack_message(task, "completed")
     elif mark_completion == "mark_incomplete":
         task.completed_at = None
+        send_slack_message(task, "marked incomplete")
     else:
         abort(make_response({"message":f"please use mark_complete or mark_incomplete"}, 404))
     
