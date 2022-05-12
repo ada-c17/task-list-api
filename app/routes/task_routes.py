@@ -88,7 +88,7 @@ def delete_task(task_id):
 
 # Mark task as complete
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
-def mark_completed(task_id):
+def mark_complete(task_id):
     task = validate_task(task_id)
 
     path = "https://slack.com/api/chat.postMessage"
