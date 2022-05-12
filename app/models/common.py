@@ -28,17 +28,23 @@ class TaskListJSONEncoder(JSONEncoder):
             }
         return JSONEncoder.default(self, obj)
 
+
 #########################################
 # Shared validation and filtering methods
+
+class MissingValueError(Exception): ...
+class FormatError(ValueError): ...
+class DBLookupError(LookupError): ...
+class IDTypeError(TypeError): ...
 
 def validate_and_get_by_id(cls, target_id):
     try:
         target_id = int(target_id)
     except:
-        raise ValueError
+        raise IDTypeError
     target = cls.query.get(target_id)
     if not target:
-        raise LookupError
+        raise DBLookupError
     return target
 
 
