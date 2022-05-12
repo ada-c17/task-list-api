@@ -13,11 +13,11 @@ tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 @tasks_bp.route("", methods=['POST'])
 def create_task():
     request_body = request.get_json()
-    completed = request_body["completed_at"] if "completed_at" in request_body else None
+    
     try:
         new_task = Task(title=request_body["title"],
                     description=request_body["description"],
-                    completed_at = completed
+                    completed_at = request_body["completed_at"] if "completed_at" in request_body else None
                     ) 
     except KeyError as err:
         return make_response({"details": "Invalid data"}, 400)
@@ -93,16 +93,9 @@ def update_task_with_id(task_id):
     task = validate_task(task_id)
     task.completed_at = datetime.utcnow()
 
-    slack_token = os.environ.get("SLACK_BOT_TOKEN")
-    channel = "#task-notifications"
-    
-    r = requests.post('https://slack.com/api/chat.postMessage', {
-        'token': slack_token,
-        'channel': channel,
-        'text': f'Someone just completed {task.title}'
-        }).json()	
-    
-    db.session.commit()
+    db.session.commit() 
+    print(post_slack_message(task.title))
+
     return {"task": {
             "id": task.task_id,
             "title": task.title,
@@ -110,6 +103,7 @@ def update_task_with_id(task_id):
             "is_complete": task.is_complete()
     }
         }
+
 
 # PATCH /tasks/<task_id>/mark_incomplete
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
@@ -149,3 +143,14 @@ def validate_task(task_id):
         abort(make_response({"message":f"task {task_id} not found"}, 404))
 
     return task
+
+def post_slack_message(text):
+    channel = "task-notifications"
+    return requests.post('https://slack.com/api/chat.postMessage',
+    headers={"Authorization": os.environ.get("SLACK_BOT_TOKEN")},
+    json={
+        'channel': channel,
+        'text': text
+    }).json()
+
+  
