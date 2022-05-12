@@ -202,3 +202,16 @@ def test_create_task_must_contain_description(client):
         "details": "Invalid data"
     }
     assert Task.query.all() == []
+
+# test code coverage
+def test_read_task_is_not_integer_id(client):
+    # Act
+    response = client.get("tasks/one")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    assert response_body == {"message": f"The task id one is invalid. The id must be integer."}
+
+
+# Optional Enhancement Testing
