@@ -1,25 +1,12 @@
 from app import db
-from flask import Blueprint, jsonify, make_response, request, abort
+from flask import Blueprint, make_response, request
 from ..models.task import Task
+from .routes_helper import success_response, error_response, validate_item, post_completed_task_to_slack
 from datetime import datetime
-import requests, os
+
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
-#helper functions
-
-def validate_task(task_id):
-    try:
-        task_id = int(task_id)
-    except:
-        abort(make_response({"message": f"Task {task_id} invalid"}, 400))
-
-    task = Task.query.get(task_id)
-#check task is found
-    if not task:
-        abort(make_response({"message": f"Task {task_id} not found"}, 404))
-    else:
-        return task
 
 #routes
 
@@ -33,14 +20,15 @@ def create_task():
             completed_at=request_body.get("completed_at")
             )
     except: 
-        abort(make_response({"details": "Invalid data"}, 400))
+        error_response({"details": "Invalid data"}, 400)
 
     db.session.add(new_task)
     db.session.commit()
 
     response_body = {"task": new_task.to_dict()}
 
-    return make_response(jsonify(response_body), 201)
+    return success_response(response_body, 201)
+    # return make_response(jsonify(response_body), 201)
 
 
 @tasks_bp.route("", methods=["GET"])
@@ -56,22 +44,23 @@ def get_tasks():
     else:
         tasks = Task.query.all()
 
-    tasks_response = [task.to_dict() for task in tasks]
-    return make_response(jsonify(tasks_response), 200)
+    response_body = [task.to_dict() for task in tasks]
+
+    return success_response(response_body, 200)
 
 
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_task_by_id(task_id):
-    task = validate_task(task_id)
+    task = validate_item(Task, task_id)
 
-    response_body = {"task": task.to_dict_with_goal()}
+    response_body = {"task": task.to_dict()}
 
-    return make_response(jsonify(response_body), 200)
+    return success_response(response_body, 200)
 
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
-    task = validate_task(task_id)
+    task = validate_item(Task, task_id)
     request_body = request.get_json()
 
     try:
@@ -84,45 +73,42 @@ def update_task(task_id):
 
     response_body = {"task": task.to_dict()}
 
-    return make_response(jsonify(response_body), 200)
+    return success_response(response_body, 200)
+
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
-    task = validate_task(task_id)
+    task = validate_item(Task, task_id)
 
     db.session.delete(task)
     db.session.commit()
 
-    return make_response(jsonify({"details": f'Task {task_id} "{task.title}" successfully deleted'}), 200)
+    response_body = {"details": f'Task {task_id} "{task.title}" successfully deleted'}
+
+    return success_response(response_body, 200)
+
 
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_task_complete(task_id):
-    task = validate_task(task_id)
+    task = validate_item(Task, task_id)
     task.completed_at = datetime.utcnow()
     
     db.session.commit()
-
-    path = "https://slack.com/api/chat.postMessage"
-
-    SLACK_API_KEY = os.environ.get("SLACK_API_TOKEN")
+    post_completed_task_to_slack(task.title)
 
     response_body = {"task": task.to_dict()}
-    headers = {"Authorization": f"Bearer {SLACK_API_KEY}",
-    "Content-Type": "application/json"}
-    json_body = {"channel": "task-notifications",
-    "text": f"Someone just completed the task {task.title}"}
 
-    requests.post(path, headers=headers, json=json_body)
+    return success_response(response_body, 200)
 
-    return make_response(jsonify(response_body), 200)
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_task_incomplete(task_id):
-    task = validate_task(task_id)
+    task = validate_item(Task, task_id)
     task.completed_at = None
     
     db.session.commit()
 
     response_body = {"task": task.to_dict()}
 
-    return make_response(jsonify(response_body), 200)
+    return success_response(response_body, 200)
+
