@@ -111,18 +111,10 @@ def replace_task(task_id):
 
 @task_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def complete_task(task_id):
-    title = ''
     task = validate_task(task_id)
-    request_body = request.get_json()
     
     task.completed_at = datetime.utcnow()
     is_complete = bool(task.completed_at)
-
-    if request_body:
-        title = request_body.get("title")
-
-    if title:
-        task.title = request_body["title"]
 
     db.session.commit()
     
