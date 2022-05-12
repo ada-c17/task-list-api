@@ -2,7 +2,7 @@ import requests
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, abort, make_response, request
-from .helper import validate_task
+from .helper import validate_record
 from sqlalchemy import asc, desc
 from datetime import datetime
 from dotenv import load_dotenv
@@ -52,13 +52,13 @@ def read_all_tasks():
 # GET one task
 @tasks_bp.route("/<task_id>", methods=["GET"])  
 def read_one_task(task_id):
-    task = validate_task(task_id)
+    task = validate_record(Task, task_id)
     return jsonify({"task": task.to_json()}), 200
 
 # UPDATE one task
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
-    task = validate_task(task_id)
+    task = validate_record(Task, task_id)
     request_body = request.get_json()
 
     try:
@@ -77,7 +77,7 @@ def update_task(task_id):
 # DELETE one task
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
-    task = validate_task(task_id)
+    task = validate_record(Task, task_id)
     db.session.delete(task)
     db.session.commit()
 
@@ -87,7 +87,7 @@ def delete_task(task_id):
 # Mark task as complete
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_complete(task_id):
-    task = validate_task(task_id)
+    task = validate_record(Task, task_id)
 
     path = "https://slack.com/api/chat.postMessage"
     API_KEY = os.environ.get("SLACK_API")
@@ -111,7 +111,7 @@ def mark_complete(task_id):
 # Mark task as incomplete
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_incomplete(task_id):
-    task = validate_task(task_id)
+    task = validate_record(Task, task_id)
 
     task.completed_at = None
 
