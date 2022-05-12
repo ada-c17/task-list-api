@@ -94,6 +94,7 @@ def get_one_goal(goal_id):
     # If this goal isn't found, return 404 response code
     if not goal:
         abort(make_response({"details" : f"Invalid data"}, 404))
+        
 
     return format_goal_response_body(goal), 200
 
