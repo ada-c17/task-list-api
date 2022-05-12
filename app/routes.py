@@ -1,4 +1,6 @@
 import json
+import os
+import requests
 from crypt import methods
 from flask import Blueprint, abort, make_response, jsonify, request
 from datetime import datetime
@@ -163,6 +165,18 @@ def mark_task_complete(task_id):
             "is_complete": selected_task.completed_at
         }
     }
+
+    # Slack stuff
+    channel_id = "C03FG8SA2LR"
+    api_key = "Bearer " + os.environ.get("SLACK_BOT_API_KEY")
+    post_message_url = "https://slack.com/api/chat.postMessage"
+    post_message_params = {
+        "channel": channel_id, 
+        "text": f"Someone just completed the task {selected_task.title}"}
+    post_message_headers = {
+        "Authorization": api_key
+    }
+    requests.post(post_message_url, params=post_message_params, headers=post_message_headers)
     return jsonify(rsp), 200
 
 # ditto above
