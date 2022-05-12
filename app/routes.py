@@ -1,6 +1,7 @@
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, request, abort, make_response
+import sqlalchemy
 
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
@@ -35,7 +36,17 @@ def create_one_task():
 @tasks_bp.route('', methods=['GET'])
 def get_all_tasks():
     tasks = Task.query.all()
+    sort_params = request.args.get("sort")
+
+    if sort_params == "asc":
+        tasks = Task.query.order_by(Task.title.asc())
+    elif sort_params == "desc":
+        tasks = Task.query.order_by(Task.title.desc())
+    else:
+        tasks = Task.query.all()
+        
     rsp = []
+    # refactor opporunity when appending tasks to rsp
     for task in tasks:
         rsp.append({
             "id": task.task_id,
