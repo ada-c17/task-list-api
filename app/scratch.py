@@ -46,6 +46,44 @@
     # else:
     #     tasks = Task.query.all()
 
+######WAVE_3########
+######routes########
 
+# "completed"
+# create a patch route to tasks/<task_id>/mark_complete
+# request body has an id and a completed_at 'null' value
+# resposnse body is dictionary with task: as key and tasks as values
+# > nested dictionary is_complete key == true
+
+# PATCH on tasks/<task_id>/mark_complete
+# "complete" on "completed task"
+# request is ID and completed_at with a datetime value
+# response is dictionary with key task and value tasks
+# > nested dictionary is_complete == true
+
+
+# if it is " not completed"
+# > patch route to tasks/<task_id>/mark_incomplete 
+# ** noticce how there are two routes, make two routes
+# request body has an id and a "completed_at" attribute with datetime
+# update makes response body:
+# dictionary with task as key and tasks as values
+# >nested dictionary is_complete == false
+# completed_at (which is in the methods) is null/None
+
+# patch on tasks/<task_id>/mark_incomplete
+
+
+#wave 4
+## slack message sent to task-notifications with
+## "Someone just completed the task My Beautiful Task"
+## need to use api key !!
+# api_key (?) made in .env
+# > no request body
+# params : channel and text
+# authorization : api_key
+# patch -> sends to channel 'task-notifications'
+# {"type": "text",
+# "text": "Hello World!"}
 ####################
 ########END#########

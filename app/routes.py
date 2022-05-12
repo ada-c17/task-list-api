@@ -1,5 +1,7 @@
 import json
+import os
 import datetime
+import requests
 from urllib import response
 from flask import Blueprint, jsonify, abort, make_response, request
 from sqlalchemy import desc
@@ -8,7 +10,10 @@ from app.models.task import Task
 
 
 
+
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
+api_key = os.environ.get("BOT_API_KEY")
+
 
 
 @tasks_bp.route("", methods = ["POST"])
@@ -94,40 +99,27 @@ def delete_task_by_id(id):
 
     return make_response(jsonify({"details": f"Task {task.id} \"{task.title}\" successfully deleted"}), 200)
 
+
 @tasks_bp.route("/<id>/mark_complete", methods=["PATCH"])
 def update_task_mark_complete_by_id(id):
     task = get_task(id)
+    text = f"Someone just completed the task {task.title}"
+    channel_id = "C03ENLYJ7AT"
+
+    path = f"https://slack.com/api/chat.postMessage?channel={channel_id}&text={text}"
+    
+    headers = {"Authorization": api_key}
 
     task.completed_at = datetime.date.today()
     
     db.session.commit()
 
     response_body = {"task":task.to_dictionary()}
+    response = requests.post(path, headers=headers)
 
     return response_body
-# "completed"
-# create a patch route to tasks/<task_id>/mark_complete
-# request body has an id and a completed_at 'null' value
-# resposnse body is dictionary with task: as key and tasks as values
-# > nested dictionary is_complete key == true
-
-# PATCH on tasks/<task_id>/mark_complete
-# "complete" on "completed task"
-# request is ID and completed_at with a datetime value
-# response is dictionary with key task and value tasks
-# > nested dictionary is_complete == true
 
 
-# if it is " not completed"
-# > patch route to tasks/<task_id>/mark_incomplete 
-# ** noticce how there are two routes, make two routes
-# request body has an id and a "completed_at" attribute with datetime
-# update makes response body:
-# dictionary with task as key and tasks as values
-# >nested dictionary is_complete == false
-# completed_at (which is in the methods) is null/None
-
-# patch on tasks/<task_id>/mark_incomplete
 @tasks_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
 def update_task_mark_incomplete_by_id(id):
     task = get_task(id)
