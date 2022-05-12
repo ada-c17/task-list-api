@@ -128,7 +128,7 @@ def delete_task(task_id):
     task = validate_id(task_id)
     db.session.delete(task)
     db.session.commit()
-    return make_response({"details": f'Task {task_id} "{task.title}" successfully deleted'})
+    return make_response({"details": f"Task {task_id} \"{task.title}\" successfully deleted"})
 
 # MARK COMPLETE
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
