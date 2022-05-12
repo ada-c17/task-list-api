@@ -127,12 +127,6 @@ def test_mark_complete_missing_task(client):
 
     # Assert
     assert response.status_code == 404
-
-    #raise Exception("Complete test with assertion about response body")
-    # *****************************************************************
-    # **Complete test with assertion about response body***************
-    # *****************************************************************
-    
     assert response_body ==  {"msg": "Task not found"}
 
 #@pytest.mark.skip(reason="No way to test this feature yet")
@@ -143,11 +137,6 @@ def test_mark_incomplete_missing_task(client):
 
     # Assert
     assert response.status_code == 404
-
-    #raise Exception("Complete test with assertion about response body")
-    # *****************************************************************
-    # **Complete test with assertion about response body***************
-    # *****************************************************************
     assert response_body ==  {"msg": "Task not found"}
 
 # Let's add this test for creating tasks, now that
@@ -207,3 +196,26 @@ def test_update_task_with_completed_at_date(client, completed_task):
     assert task.title == "Updated Task Title"
     assert task.description == "Updated Test Description"
     assert task.completed_at
+
+
+#OPTIONAL
+
+def test_create_task_with_invalid_completed_at(client):
+    # Act
+    date = datetime.utcnow()
+    date_str = date.strftime("%m/%d/%Y")
+
+    response = client.post("/tasks", json={
+        "title": "A Brand New Task",
+        "description": "Test Description",
+        "completed_at": date_str
+    })
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    assert response_body == {"msg": "The datatype of completed_at must be datetime"}
+
+
+
+

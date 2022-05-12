@@ -111,8 +111,10 @@ def create_one_task():
         abort(make_response(jsonify(response), 400))
 
     if "completed_at" in request_body:
+        #if isinstance(request_body['completed_at'], datetime.utcnow):
         new_task = Task(title=request_body['title'], 
                     description=request_body['description'], completed_at=request_body['completed_at'])
+
     else:
         new_task = Task(title=request_body['title'], 
                     description=request_body['description'])
@@ -121,6 +123,11 @@ def create_one_task():
     db.session.commit()
     response = make_task_response(new_task)
     return jsonify(response), 201
+
+
+    #assert response.status_code == 400
+    assert response_body == {"msg": "The datatype of completed_at must be datetime"}
+
 
 
 @tasks_bp.route('/<task_id>', methods = ['GET'])

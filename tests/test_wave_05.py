@@ -132,11 +132,6 @@ def test_delete_goal(client, one_goal):
     # Check that the goal was deleted
     response = client.get("/goals/1")
     assert response.status_code == 404
-
-    #raise Exception("Complete test with assertion about response body")
-    # *****************************************************************
-    # **Complete test with assertion about response body***************
-    # *****************************************************************
     assert Goal.query.get(1) == None
 
 
@@ -164,6 +159,8 @@ def test_create_goal_missing_title(client):
 
     # Assert
     assert response.status_code == 400
+    assert response.status_code == 400
+    assert "details" in response_body
     assert response_body == {
         "details": "Invalid data"
     }
