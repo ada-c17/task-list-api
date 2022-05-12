@@ -1,5 +1,5 @@
 # test function post_slack_message
-from app.routes import post_slack_message
+from app.routes.helpers import post_slack_message
 import pytest
 
 @pytest.mark.skip
