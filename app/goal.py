@@ -139,7 +139,7 @@ def update_goal(goal_id):
             "details" : "Invalid data"
         }, 400
 
-
+    # Update change to Goal Title
     goal_to_update.title = request_body["title"]
 
     db.session.commit()
@@ -178,13 +178,15 @@ def post_tasks_to_goal(goal_id):
 
     # Check that "task_ids" is in the request_body
     if "task_ids" in request_body:
-        # could add check if "task_id" doesn't exist -->  404 
 
         # Loop through the "task_ids"
         # Assign the Task foreign key to match the Goal primary key
         for task_id in request_body["task_ids"]:
             task = Task.query.get(task_id)
             task.goal_id = goal_for_post.goal_id
+    else:
+        # Check if "task_id" doesn't exist -->  404 
+        abort(make_response({"message" : f"Sorry, not found."}, 404))
 
 
     db.session.commit()
@@ -224,6 +226,8 @@ def get_tasks_one_goal(goal_id):
                 "is_complete": task.completed_at,
                 }
             )
+    
+    # If there are no tasks for the goal, an empty list will be returned (Test 4, Wave 6)
 
 
     response_body = {
