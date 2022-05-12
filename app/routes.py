@@ -466,6 +466,7 @@ def post_tasks_to_goal(goal_id):
 
     # Check that "task_ids" is in the request_body
     if "task_ids" in request_body:
+        # could add check if "task_id" doesn't exist -->  404 
 
         # Loop through the "task_ids"
         for task_id in request_body["task_ids"]:
