@@ -64,12 +64,13 @@ def get_one_goal(goal_id):
 
     request_body = request.get_json()
 
-    response = {
-        "goal":{
-        "id":chosen_goal.goal_id,
-        "title":chosen_goal.title }
-    }
-    return jsonify(response), 200
+    # response = {
+    #     "goal":{
+    #     "id":chosen_goal.goal_id,
+    #     "title":chosen_goal.title }
+    # }
+    # return jsonify(response), 200
+    return jsonify(chosen_goal.to_dict()), 200
 
 
 # update one goal
