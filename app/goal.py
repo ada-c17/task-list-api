@@ -207,16 +207,6 @@ def post_tasks_to_goal(goal_id):
 
         # Loop through the "task_ids"
         # Assign the Task foreign key to match the Goal primary key
-<<<<<<< HEAD
-        # for task_id in request_body["task_ids"]:
-        #     task = Task.query.get(task_id)
-        #     task.goal_id = goal_for_post.goal_id
-            # task_id_list.append(task.goal_id)
-            # db.session.add(task)
-    # else:
-        # Check if "task_id" doesn't exist -->  404 
-        # abort(make_response({"message" : f"Sorry, not found."}, 404))
-=======
         for task_id in request_body["task_ids"]:
             task = Task.query.get(task_id)
             task.goal_id = goal_for_post.goal_id
@@ -224,7 +214,6 @@ def post_tasks_to_goal(goal_id):
     else:
         # Check if "task_id" doesn't exist -->  404 
         abort(make_response({"message" : f"Sorry, task ids not found."}, 404))
->>>>>>> refactoring-branch
 
     # db.session.add(goal_for_post.tasks[task_id_list])
     db.session.commit()
