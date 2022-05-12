@@ -149,6 +149,7 @@ def test_create_goal_missing_title(client):
         "details": "Invalid data"
     }
 
+
 def test_validate_goal_id(client):
     # Act
     response = client.get("/goals/one")
@@ -157,6 +158,7 @@ def test_validate_goal_id(client):
     # Assert
     assert response.status_code == 400
     assert response_body == {'details': 'Invalid data'}
+
 
 def test_update_goal_missing_title(client, one_goal):
     # Act
@@ -168,3 +170,65 @@ def test_update_goal_missing_title(client, one_goal):
 
     goal = Goal.query.get(1)
     assert goal.title == 'Build a habit of going outside daily'
+
+
+def test_get_goals_sorted_asc(client, three_goals):
+    # Act
+    response = client.get("/goals?sort=asc")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert len(response_body) == 3
+    assert response_body == [
+        {
+            "id": 1,
+            "title": "Build a habit of going outside daily"},
+        {
+            "id": 3,
+            "title": "Code everyday for at least 3 hours"},
+        {
+            "id": 2,
+            "title": "Read one book in a month"}
+        ]
+
+
+def test_get_goals_sorted_desc(client, three_goals):
+    # Act
+    response = client.get("/goals?sort=desc")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert len(response_body) == 3
+    assert response_body == [
+        {
+            "id": 2,
+            "title": "Read one book in a month"},
+        {
+            "id": 3,
+            "title": "Code everyday for at least 3 hours"},
+        {
+            "id": 1,
+            "title": "Build a habit of going outside daily"}
+        ]
+
+def test_get_goals_sorted_invalid_params(client, three_goals):
+    # Act
+    response = client.get("/goals?sort=descc")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert len(response_body) == 3
+    assert response_body == [
+        {
+            "id": 1,
+            "title": "Build a habit of going outside daily"},
+        {
+            "id": 2,
+            "title": "Read one book in a month"},
+        {
+            "id": 3,
+            "title": "Code everyday for at least 3 hours"}
+        ]

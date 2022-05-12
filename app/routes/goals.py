@@ -36,8 +36,15 @@ def create_one_goal():
 
 @goals_bp.route('', methods=['GET'])
 def get_all_goals():
+    params = request.args.get('sort')
+    if params == 'desc':
+        goals = Goal.query.order_by(Goal.title.desc()).all()
+    elif params == 'asc':
+        goals = Goal.query.order_by(Goal.title.asc()).all()
+    else:
+        goals = Goal.query.all()
+
     response_body = []
-    goals = Goal.query.all()
 
     for goal in goals:
         response_body.append(goal.to_json())
