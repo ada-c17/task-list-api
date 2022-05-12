@@ -25,8 +25,7 @@ def validate_task(task_id):
 
     return task
 
-def make_task_dict(task): #refactor so that functions that call it and need the "task" key create it manually,
-# so that the functionality of this helper function can be extended
+def make_task_dict(task):
     task_dict = {
             "id": task.id,
             "title": task.title,
@@ -53,18 +52,9 @@ def get_all_tasks():
         tasks = Task.query.all()
 
     for task in tasks: 
-        response = { # use make_task_dict here once it's refactored
-            "id": task.id,
-            "title": task.title,
-            "description": task.description,
-        }
-        if task.completed_at:
-            response["is_complete"] = task.completed_at
-        else:
-            response["is_complete"] = False
-        response_body.append(response)
+        task_dict = make_task_dict(task)
+        response_body.append(task_dict)
         
-
     return jsonify(response_body), 200
 
 @tasks_bp.route("/<task_id>", methods=["GET"])
@@ -136,7 +126,7 @@ def mark_task_complete(task_id):
     headers = {
         "Authorization": f"Bearer {API_KEY}"
     }
-    print(headers)
+    
     bot_request = requests.post("https://slack.com/api/chat.postMessage", headers=headers, params=payload)
 
     return jsonify(task_dict), 200
