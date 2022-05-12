@@ -24,6 +24,22 @@ def validate_task_id(task_id):
     return task
 
 
+def check_for_params():
+    params = request.args
+    if 'sort' in params:
+        if params['sort'] == 'desc':
+            tasks = Task.query.order_by(Task.title.desc()).all()
+        elif params['sort'] == 'asc':
+            tasks = Task.query.order_by(Task.title.asc()).all()
+        else:
+            tasks = Task.query.all()
+    elif 'title' in params:
+        tasks = Task.query.filter_by(title=params['title'])
+    else:
+        tasks = Task.query.all()
+    return tasks
+
+
 @tasks_bp.route('', methods=['POST'])
 def create_one_task():
     request_body = request.get_json()
@@ -38,13 +54,7 @@ def create_one_task():
 
 @tasks_bp.route('', methods=['GET'])
 def get_all_tasks():
-    params = request.args.get('sort')
-    if params == 'desc':
-        tasks = Task.query.order_by(Task.title.desc()).all()
-    elif params == 'asc':
-        tasks = Task.query.order_by(Task.title.asc()).all()
-    else:
-        tasks = Task.query.all()
+    tasks = check_for_params()
 
     tasks_response = []
     for task in tasks:

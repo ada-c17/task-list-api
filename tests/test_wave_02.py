@@ -85,3 +85,28 @@ def test_get_tasks_sorted_invalid_params(client, three_tasks):
             "is_complete": False,
             "title": "Pay my outstanding tickets 😭"}
     ]
+
+def test_get_tasks_filtered_by_title(client, three_tasks):
+    # Act
+    response = client.get("/tasks?title=Answer forgotten email 📧")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert len(response_body) == 1
+    assert response_body == [{
+            "description": "",
+            "id": 2,
+            "is_complete": False,
+            "title": "Answer forgotten email 📧"
+        }]
+
+def test_get_tasks_filtered_by_title_non_existing_title(client, three_tasks):
+    # Act
+    response = client.get("/tasks?title=Non existing title")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert len(response_body) == 0
+    assert response_body == []
