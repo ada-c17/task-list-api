@@ -6,12 +6,14 @@ from datetime import datetime
 import requests
 import os
 from app.models.goal import Goal
+from dotenv import load_dotenv
 
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix='/tasks')
 
 goals_bp = Blueprint("goals_bp",  __name__, url_prefix='/goals')
 
+load_dotenv()
 #*************************************************
 # HELPER FUNCTIONS
 
