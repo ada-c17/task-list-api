@@ -102,12 +102,7 @@ def update_task_to_complete(task_id):
 
     db.session.commit()
 
-    # slackbot stuff
-    API_KEY = os.environ.get('SLACKBOT_API_KEY')
-    url = 'https://slack.com/api/chat.postMessage'
-    params = {'channel': 'task-notifications', 'text': f'Someone just completed the task {task.title}'}
-    headers = {'Authorization' : API_KEY }
-    requests.post(url,params=params, headers=headers)
+    post_completed_task_to_slack(task)
 
     return jsonify({"task":task.to_dict()})
 
@@ -120,4 +115,12 @@ def update_task_to_incomplete(task_id):
     db.session.commit()
 
     return jsonify({"task":task.to_dict()})
+
+def post_completed_task_to_slack(task):
+    API_KEY = os.environ.get('SLACKBOT_API_KEY')
+    url = "https://slack.com/api/chat.postMessage"
+    data = {"channel": "task-notifications", "text": f"Someone just completed the task {task.title}"}
+    headers = {'Authorization' : f"Bearer {API_KEY}" }
+    requests.post(url, data=data, headers=headers)
+
 

@@ -22,6 +22,11 @@ class Task(db.Model):
                 description = data_dict["description"],
                 completed_at = completed_time
             )
+        # else: 
+        # return cls(
+        #         title = data_dict["title"],
+        #         description = data_dict["description"]
+        #     )
 
     def replace_details(self, data_dict):
         self.title = data_dict["title"]
