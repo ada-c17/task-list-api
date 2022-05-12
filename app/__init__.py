@@ -8,11 +8,12 @@ from flask_json import FlaskJSON, JsonError, json_response, as_json
 db = SQLAlchemy()
 migrate = Migrate()
 load_dotenv()
-json = FlaskJSON(db)
+
 
 def create_app(test_config=None):
     app = Flask(__name__)
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
 
     if test_config is None:
         app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(

@@ -14,10 +14,11 @@ task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 @task_bp.route("", methods=["POST"])
 def create_tasks():
     request_body = request.get_json()
-    try:
-        new_task = Task.valid_task(request_body)
-    except:
-        return abort(make_response({"details": "Invalid data"}, 400))
+    # try:
+    new_task = Task.valid_task(request.get_json())
+        # new_task = Task.valid_task(request_body)
+    # except ValueError:
+    #     abort(make_response({"details": "Invalid data"}, 400))
     db.session.add(new_task)
     db.session.commit()
 
@@ -38,10 +39,8 @@ def create_tasks():
 
 @task_bp.route("", methods=["GET"])
 def read_all_tasks():
-    
 
     sort_query = request.args.get("sort")
-    
 
     if sort_query == "asc":
         tasks = Task.query.order_by(asc(Task.title))
@@ -49,13 +48,12 @@ def read_all_tasks():
         tasks = Task.query.order_by(desc(Task.title))
     else:
         tasks = Task.query.all()
-    tasks_response = []    
+
     try:
-        for task in tasks:
-            tasks_response.append(task.make_json())
-            
+        tasks_response = [task.make_json() for task in tasks]        
     except:
         abort(make_response({"details":f"task not found"}, 404))
+    
     return make_response(jsonify(tasks_response),200)
 
 
