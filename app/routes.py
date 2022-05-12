@@ -3,7 +3,12 @@ from sqlalchemy import desc
 from app import db
 from app.models.task import Task
 from datetime import date
+
+# imports for slackbot
 import os
+import logging
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -85,6 +90,7 @@ def mark_task_complete(task_id):
     response_body = {"task": task.to_dict()}
 
     db.session.commit()
+    post_slack_completion_message(task_id)
     
     return make_response(jsonify(response_body), 200)
 
@@ -112,3 +118,21 @@ def validate_task(task_id):
         abort(make_response({"details": f"Task #{task_id} not found"}, 404))
     
     return task
+
+# post completion message to slack
+def post_slack_completion_message(task_id):
+    client = WebClient(token=os.environ.get("SLACK_BOT_TOKEN"))
+    logger = logging.getLogger(__name__)
+    channel_id = "C03EP2Q0WK1"
+
+    task = validate_task(task_id)
+
+    try:
+        result = client.chat_postMessage(
+            channel=channel_id,
+            text=f"Someone just completed the task {task.title}"
+        )
+        logger.info(result)
+    
+    except SlackApiError as e:
+        logger.error(f"Error posting message: {e}")
