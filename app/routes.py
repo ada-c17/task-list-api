@@ -132,7 +132,7 @@ def patch_one_task(task_id, mark=None):
                 "channel": "#task-notifications",
                 "text": f"Someone just completed the task {one_task.title}"
                 }
-        header = {"Authorization": "Bearer " + os.environ.get('SLACK_BOT_TOKEN')}
+        header = {"Authorization": f"Bearer {os.environ.get('SLACK_BOT_TOKEN')}"}
         requests.post(path, data=query_params, headers=header)
 
     elif mark == 'mark_incomplete':
