@@ -69,7 +69,13 @@ def add_task_list(goal_id):
             "task_ids": [task.task_id for task in goal.tasks]}
 
 @goal_bp.route("/<goal_id>/tasks", strict_slashes=False,methods=["GET"])
-def get_goal_tasks(goal_id)
+def get_goal_tasks(goal_id):
+    goal = validate_id(Goal, goal_id)
+    response = goal.todict()
+    response["tasks"] = [task.todict() for task in goal.tasks]
+    return jsonify(response), 200
+
+
 # @goal_bp.route("/<goal_id>/tasks", strickt_slashes=False,methods=["POST"])
 # def create_task_on_goal(goal_id):
 #     goal = validate_id(Goal, goal_id)

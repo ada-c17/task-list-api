@@ -10,10 +10,13 @@ class Task(db.Model):
     goal = db.relationship("Goal", back_populates="tasks")
 
     def todict(self):
-        return {"id": self.task_id,
-                "title": self.title,
-                "description": self.description,
-                "is_complete": bool(self.completed_at)}
+        task_dict = {"id": self.task_id,
+                    "title": self.title,
+                    "description": self.description,
+                    "is_complete": bool(self.completed_at)}
+        if self.goal_id:
+            task_dict["goal_id"] = self.goal_id
+        return task_dict
 
     @classmethod
     def fromdict(cls, data_dict):
