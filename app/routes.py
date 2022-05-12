@@ -77,8 +77,9 @@ def create_task():
     
     new_task=Task(
         title=request_body["title"],
-        description=request_body["description"])
-
+        description=request_body["description"],
+        completed_at=request_body.get("completed_at", None)
+    )
     db.session.add(new_task)
     db.session.commit()
 
@@ -87,7 +88,7 @@ def create_task():
             "id": new_task.task_id,
              "title": new_task.title,
              "description": new_task.description,
-             "is_complete": False
+             "is_complete": new_task.completed_at !=None
              }
              }
     return jsonify(rsp),201         
@@ -123,13 +124,19 @@ def get_tasks():
 @tasks_bp.route("/<task_id>", methods=["GET"]) 
 def get_one_task(task_id):
     task=validate_task(task_id)
-    return {
+    resp = {
         "task": {
         "id" : task.task_id,
         "title": task.title,
         "description": task.description,
         "is_complete":False}
-        }, 200  
+        }
+    
+    if task.goal != None:
+        resp["task"]["goal_id"] = task.goal_id
+        print("hii")
+
+    return resp, 200  
 
 #update a task
 @tasks_bp.route("/<task_id>", methods=["PUT"])
@@ -280,6 +287,61 @@ def delete_goal(goal_id):
     return (make_response({"details":f'Goal {goal_id} "{goal.title}" successfully deleted'}), 200)    
 
 
+
+# /goals/<goal_id>/tasks
+# get all tasks for one goal
+@goals_bp.route("/<goal_id>/tasks", methods=["POST"])  
+def get_tasks(goal_id):
+
+    goal=validate_goal(goal_id)
+
+    request_body = request.get_json()
+
+    task_ids=request_body.get('task_ids')
+    
+    for taskid in task_ids:
+        task = validate_task(taskid)
+        task.goal_id = goal_id
+
+    db.session.commit()  
+
+    goal = validate_goal(goal_id)
+    task_ids_response = []
+    for task in goal.tasks:
+        task_ids_response.append(task.task_id)
+
+    resp = {
+        "id": goal.goal_id,
+        "task_ids": task_ids_response
+    }
+
+    return jsonify(resp), 200
+
+
+@goals_bp.route("/<goal_id>/tasks", methods=["GET"])  
+def get_tasks_for_goal(goal_id): 
+    
+    goal=validate_goal(goal_id)
+
+    tasks_response=[]
+    for task in goal.tasks:
+        tasks_response.append(
+            {
+      "id": task.task_id,
+      "goal_id": goal.goal_id,
+      "title": task.title,
+      "description": task.description,
+      "is_complete": task.completed_at != None
+        }
+    )
+
+    goal_response = {
+        "id": goal.goal_id,
+        "title": goal.title,
+        "tasks": tasks_response
+    }
+
+    return jsonify(goal_response), 200
 
 
 
