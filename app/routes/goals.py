@@ -13,8 +13,6 @@ def read_all_goal():
         - Getting all goals and returning in json response with 200
         - Returning empty list if no goal in database
     """
-    
-
     params = request.args
     # sort by title
     if "sort" in params:
