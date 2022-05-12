@@ -185,7 +185,7 @@ def post_tasks_to_goal(goal_id):
         for task_id in request_body["task_ids"]:
             task = Task.query.get(task_id)
             task.goal_id = goal_for_post.goal_id
-            db.session.add(task)
+            # db.session.add(task)
     else:
         # Check if "task_id" doesn't exist -->  404 
         abort(make_response({"message" : f"Sorry, not found."}, 404))
