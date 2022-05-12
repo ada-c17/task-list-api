@@ -222,3 +222,13 @@ def update_goal(goal_id):
         return format_goal(goal), 200
     return goal
 
+@goals_bp.route('/<goal_id>', methods=['DELETE'])
+def delete_goal(goal_id):
+    goal = validate_goal(goal_id)
+    if isinstance(goal, Goal):
+        db.session.delete(goal)
+        db.session.commit()
+        return {
+            "details" : f'Goal {goal_id} "{goal.title}" successfully deleted'
+        }
+    return goal
