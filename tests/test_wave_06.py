@@ -95,14 +95,14 @@ def test_get_tasks_for_specific_goal(client, one_task_belongs_to_one_goal):
     }
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_task_includes_goal_id(client, one_task_belongs_to_one_goal):
     response = client.get("/tasks/1")
     response_body = response.get_json()
 
     assert response.status_code == 200
     assert "task" in response_body
-    assert "goal_id" in response_body["task"]
+    # assert "goal_id" in response_body["task"]
     assert response_body == {
         "task": {
             "id": 1,
