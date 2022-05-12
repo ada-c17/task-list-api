@@ -32,11 +32,8 @@ def read_all_tasts():
     if len(chosen_task) == 0:
         return jsonify([]), 200
 
-    # return all tasts
-    response_body = []
-    for task in chosen_task:
-        # call method from Task class 
-        response_body.append(task.task_response_body_dict())
+    # get all tasts
+    response_body = [task.task_response_body_dict() for task in chosen_task]
 
     return jsonify(response_body), 200
 
@@ -60,6 +57,7 @@ def validate_task_id(task_id):
     for task in tasks:
         if task.id == task_id:
             return task
+    
     abort(make_response({"message": f"The task id {task_id} is not found"}, 404))
 
 
@@ -95,7 +93,7 @@ def creat_task():
         description = request_task["description"]
     )
     # if input has completed_at then add it into database
-    if "completed_at" in request_task:
+    if "completed_at" in request_task :
         new_task.completed_at = request_task["completed_at"]
     db.session.add(new_task)
     db.session.commit()
@@ -138,11 +136,8 @@ def delete_one_task_by_id(task_id):
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def update_to_mark_complete(task_id):
     chosen_task = validate_task_id(task_id)
-    # request_task = request.get_json()
-    # if "completed_at" in request_task:
-    #     chosen_task.completed_at = request_task["completed_at"]
-    
-    chosen_task.completed_at = datetime.utcnow()
+
+    chosen_task.completed_at = datetime.now()
 
     db.session.commit()
 
