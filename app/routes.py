@@ -15,10 +15,12 @@ def create_task():
         new_task = Task(
             title=request_body["title"],
             description=request_body["description"],
-            completed_at=request_body["completed_at"]
         )
     except:
         abort(make_response({"details": "Invalid data"}, 400))
+    
+    if request_body["completed_at"]:
+        new_task.completed_at = request_body["completed_at"]
 
     db.session.add(new_task)
     db.session.commit()
@@ -58,7 +60,9 @@ def update_one_task_by_id(task_id):
 
     task.title = request_body["title"]
     task.description = request_body["description"]
-    task.completed_at = request_body["completed_at"]
+
+    if request_body["completed_at"]:
+        task.completed_at = request_body["completed_at"]
 
     db.session.commit()
 
@@ -83,6 +87,7 @@ def mark_task_complete(task_id):
     response_body = {"task": task.to_dict()}
 
     db.session.commit()
+    
     return make_response(jsonify(response_body), 200)
 
 # mark one task incomplete by id
