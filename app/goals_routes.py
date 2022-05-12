@@ -14,24 +14,29 @@ goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 
 @goals_bp.route("", methods=["GET"])
 def get_all_goals():
+    """Displays all goals"""
     response_body = []
     goals = Goal.query.all()
 
     for goal in goals: 
         response = goal.make_goal_dict()
         response_body.append(response)
+
     return jsonify(response_body), 200
 
 @goals_bp.route("/<goal_id>", methods=["GET"])
 def get_one_goal(goal_id):
+    """Displays one goal when given a goal id"""
     goal = Goal.validate_goal(goal_id)
     goal_dict = {"goal": goal.make_goal_dict()}
     return jsonify(goal_dict), 200
 
 @goals_bp.route("", methods=["POST"])
 def create_goal():
+    """Creates one goal"""
     request_body = request.get_json()
     
+    # Tries to create a goal with given request body. Throws an error if needed data is missing.
     try:
         new_goal = Goal(title=request_body["title"])
     except:
@@ -46,6 +51,7 @@ def create_goal():
 
 @goals_bp.route("/<goal_id>", methods=["PUT"])
 def update_goal(goal_id):
+    """Updates the data stored in a goal with a given goal id"""
     goal = Goal.validate_goal(goal_id)
     request_body = request.get_json()
 
@@ -59,6 +65,7 @@ def update_goal(goal_id):
 
 @goals_bp.route("/<goal_id>", methods=["DELETE"])
 def delete_goal(goal_id):
+    """Deletes a goal with a given goal id"""
     goal = Goal.validate_goal(goal_id)
 
     db.session.delete(goal)
@@ -68,12 +75,15 @@ def delete_goal(goal_id):
 
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
 def add_tasks_to_goal(goal_id):
+    """Assigns a task to a goal"""
     goal = Goal.validate_goal(goal_id)
     request_body = request.get_json()
     
+    # Verifies request format is correct, throws an error if not.
     if "task_ids" not in request_body:
         abort(make_response({"Message": "Please give a list of task ids."}, 400))
 
+    # Iterates through list of given tasks IDs, verifies task is valid, and assigns it to goal.
     task_id_list = []
     for task_id in request_body["task_ids"]:
         task = Task.validate_task(task_id)
@@ -86,10 +96,12 @@ def add_tasks_to_goal(goal_id):
 
 @goals_bp.route("/<goal_id>/tasks", methods=["GET"])
 def get_tasks_for_goal(goal_id):
+    """Displays all the associated tasks for a goal with a given id"""
     goal = Goal.validate_goal(goal_id)
     goal_dict = Goal.make_goal_dict(goal)
-    goal_dict["tasks"] = []
     
+    # Formats response to display all tasks belonging to a goal
+    goal_dict["tasks"] = []
     tasks = Goal.query.get(goal.goal_id).tasks
     for task in tasks:
         task_dict = task.make_task_dict()

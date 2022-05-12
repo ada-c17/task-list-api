@@ -48,7 +48,7 @@ def get_one_task(task_id):
 
 @tasks_bp.route("", methods=["POST"])
 def create_task():
-    """Create one task"""
+    """Creates one task"""
     request_body = request.get_json()
     
     # Tries to create a task with given request body. Throws an error if needed data is missing.
