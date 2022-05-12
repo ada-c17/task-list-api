@@ -5,10 +5,12 @@ from datetime import datetime
 import os
 import requests
 
+# Slackbot API functionality data, SLACK_BOT_TOKEN in .env
 SLACK_API_URL = "https://slack.com/api/chat.postMessage"
 SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix = "/tasks")
+
 
 @tasks_bp.route("", methods=["POST"])
 def create_task():
@@ -16,7 +18,7 @@ def create_task():
 
     if "title" not in request_body or \
         "description" not in request_body:
-        abort(make_response({"details": "Invalid data"}, 400))
+        abort(make_response(jsonify({"details": "Invalid data"}), 400))
 
     task = Task(
         title = request_body["title"],
@@ -31,12 +33,14 @@ def create_task():
 
     response = task.task_response()
 
-    return jsonify({"task": response}), 201
+    return make_response(jsonify({"task": response}), 201)
 
 
 @tasks_bp.route("", methods=["GET"])
 def get_tasks():
     response = []
+
+    # Order by sorted if "sort" in argument
     sort_by = request.args.get('sort')
     if sort_by == "asc":
         tasks = Task.query.order_by(Task.title.asc()).all()
@@ -48,19 +52,22 @@ def get_tasks():
     for task in tasks:
         response.append(task.task_response())
 
-    return jsonify(response)
+    return make_response(jsonify(response), 200)
 
 
+# Helper function to validate task id is integer and exists
 def validate_task(task_id):
     try:
         task_id = int(task_id)
     except:
-        abort(make_response({"message":f"Task id '{task_id}' is invalid"}, 400))
+        response = {"message":f"Task id '{task_id}' is invalid"}
+        abort(make_response(jsonify(response), 400))
 
     task = Task.query.get(task_id)
 
     if not task:
-        abort(make_response({"message":f"Task id '{task_id}' not found"}, 404))
+        response = {"message":f"Task id '{task_id}' not found"}
+        abort(make_response(jsonify(response), 404))
 
     return task
 
@@ -68,8 +75,10 @@ def validate_task(task_id):
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = validate_task(task_id)
+
     response = task.task_response()
-    return jsonify({"task": response}), 200
+
+    return make_response(jsonify({"task": response}), 200)
 
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
@@ -84,7 +93,8 @@ def update_task(task_id):
 
     response = task.task_response()
 
-    return make_response({"task": response})
+    return make_response(jsonify({"task": response}), 200)
+
 
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_task_complete(task_id):
@@ -95,6 +105,7 @@ def mark_task_complete(task_id):
     db.session.add(task)
     db.session.commit()
 
+    # Define arguments to integrate Slackbot API chat.postMessage method
     headers = {
         "Authorization": f"Bearer {SLACK_BOT_TOKEN}"
     }
@@ -102,10 +113,13 @@ def mark_task_complete(task_id):
         "channel":  "task-notifications",
         "text": f"Someone just completed the task {task.title}"
     }
+    
+    # Slackbot "Grace's Slackbot" calls to SLACK_API_URL and posts message
     requests.post(SLACK_API_URL, headers=headers, data=data)
 
     response = task.task_response()
-    return make_response({"task": response})
+    return make_response(jsonify({"task": response}))
+
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_task_incomplete(task_id):
@@ -118,7 +132,7 @@ def mark_task_incomplete(task_id):
 
     response = task.task_response()
 
-    return make_response({"task": response})
+    return make_response(jsonify({"task": response}))
 
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
@@ -132,4 +146,4 @@ def delete_task(task_id):
     "details": f"Task {task.task_id} \"{task.title}\" successfully deleted"
     }
 
-    return jsonify(response), 200
+    return make_response(jsonify(response), 200)

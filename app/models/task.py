@@ -8,25 +8,19 @@ class Task(db.Model):
     completed_at = db.Column(db.DateTime, nullable=True, default=None)
     goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'), nullable=True)
 
+
     def task_response(self):
-
         is_complete = True if self.completed_at else False
 
-        return {
+        response = {
                 'id': self.task_id,
                 'title': self.title,
                 'description': self.description,
                 'is_complete': is_complete
                 }
-    
-    def goal_task_response(self):
 
-        is_complete = True if self.completed_at else False
+        # Update response dictionary if task includes goal id
+        if self.goal_id:
+            response['goal_id'] = self.goal_id
 
-        return {
-                'id': self.task_id,
-                'goal_id': self.goal.goal_id,
-                'title': self.title,
-                'description': self.description,
-                'is_complete': is_complete
-                }
+        return response

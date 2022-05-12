@@ -7,8 +7,9 @@ class Goal(db.Model):
     tasks = db.relationship("Task", backref="goal", lazy=True)
 
     def goal_response(self):
-
-        return {
+        response = {
             "id": self.goal_id,
             "title": self.title
             }
+
+        return response
