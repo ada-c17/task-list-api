@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import os
 from dotenv import load_dotenv
-from app.models.common import EnhancedJSONEncoder
+from app.models.common import TaskListJSONEncoder
 
 
 db = SQLAlchemy()
@@ -13,7 +13,7 @@ load_dotenv()
 
 def create_app(test_config=None):
     app = Flask(__name__)
-    app.json_encoder = EnhancedJSONEncoder
+    app.json_encoder = TaskListJSONEncoder
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     if test_config is None:

@@ -1,7 +1,7 @@
 # Task-aware JSONEncoder
 from flask.json import JSONEncoder
 
-class EnhancedJSONEncoder(JSONEncoder):
+class TaskListJSONEncoder(JSONEncoder):
 
     def default(self, obj):
         if type(obj).__name__ == 'Task':
@@ -14,6 +14,11 @@ class EnhancedJSONEncoder(JSONEncoder):
             if obj.goal_id:
                 details['goal_id'] = obj.goal_id
             return details
+        elif type(obj).__name__ == 'Goal':
+            return {
+                'id': obj.goal_id,
+                'title': obj.title
+            }
         return JSONEncoder.default(self, obj)
 
 #########################################
