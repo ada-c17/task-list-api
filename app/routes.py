@@ -14,7 +14,7 @@ def create_task():
         db.session.add(new_task)
         db.session.commit()
     except:
-        abort(make_response(jsonify({"message":f"invalid input"}), 400))
+        abort(make_response(jsonify({"details":f"invalid data"}), 400))
     return make_response(jsonify({"task": new_task.to_json()}), 201)
 
 @task_bp.route("", methods=["GET"])
@@ -30,3 +30,23 @@ def fetch_all_tasks():
     for task in tasks:
         task_response.append(task.to_json())
     return make_response(jsonify(task_response),200)
+
+@task_bp.route("/<task_id>", methods=["PUT"])
+def update_a_task(task_id):
+    try:
+        task_id = int(task_id)
+    except:
+        abort(make_response(jsonify({"details":f"invalid data"}), 400))
+    task = Task.query.get(task_id)
+    if not task:
+        abort(make_response(jsonify({"details": f"task {task_id} not found"}), 404))
+
+    request_body = request.get_json()
+
+    try:
+        task.title = request_body["title"]
+        task.description = request_body["description"]
+        db.session.commit()
+    except:
+        abort(make_response(jsonify({"details":f"invalid data"}), 400))
+    return make_response(jsonify({"task": task.to_json()}),200)
