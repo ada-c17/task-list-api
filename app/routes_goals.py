@@ -46,10 +46,7 @@ def get_all_goals():
     
     response = []
     for goal in goals:
-        response.append({
-            "id": goal.goal_id,
-            "title": goal.title
-        })
+        response.append(goal.to_dict())
     return jsonify(response), 200
 
 @goals_bp.route("/<goal_id>", methods=["GET"])
@@ -57,10 +54,7 @@ def get_one_goal(goal_id):
     goal = validate_goal(goal_id)
 
     response = {
-        "goal": {
-            "id": goal.goal_id,
-            "title": goal.title
-        }
+        "goal": goal.to_dict()
     }
     return jsonify(response), 200
 
@@ -77,10 +71,7 @@ def update_one_goal(goal_id):
         abort(make_response(jsonify(response), 400))
 
     response = {
-        "goal": {
-            "id": goal.goal_id,
-            "title": goal.title
-        }
+        "goal": goal.to_dict()
     }
     return jsonify(response), 200
 

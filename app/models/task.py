@@ -10,8 +10,6 @@ class Task(db.Model): # where do i put nullable=True?
     goal = db.relationship("Goal", back_populates="tasks")
     
 
-    # make helper function for to dict
-
     def to_dict(self):
         return {
             "id": self.task_id,
