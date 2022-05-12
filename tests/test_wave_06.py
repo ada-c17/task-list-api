@@ -55,7 +55,7 @@ def test_get_tasks_for_specific_goal_no_goal(client):
     assert response_body == {"message":f"Task id '1' not found"}
     assert Task.query.all() == []
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_for_specific_goal_no_tasks(client, one_goal):
     # Act
     response = client.get("/goals/1/tasks")
@@ -72,7 +72,7 @@ def test_get_tasks_for_specific_goal_no_tasks(client, one_goal):
     }
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_for_specific_goal(client, one_task_belongs_to_one_goal):
     # Act
     response = client.get("/goals/1/tasks")

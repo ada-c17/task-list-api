@@ -18,3 +18,15 @@ class Task(db.Model):
                 'description': self.description,
                 'is_complete': is_complete
                 }
+    
+    def goal_task_response(self):
+
+        is_complete = True if self.completed_at else False
+
+        return {
+                'id': self.task_id,
+                'goal_id': self.goal.goal_id,
+                'title': self.title,
+                'description': self.description,
+                'is_complete': is_complete
+                }

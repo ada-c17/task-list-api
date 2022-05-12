@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, make_response, request, abort
 from app import db
 from app.models.goal import Goal
 from app.models.task import Task
-from app.routes.task import tasks_bp
+from app.routes.task import tasks_bp, get_tasks, get_one_task
 
 from datetime import datetime
 import os
@@ -124,3 +124,18 @@ def add_tasks_to_goals(goal_id):
     "id": goal.goal_id,
     "task_ids": task_ids
 }
+
+
+@goals_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_goal_tasks(goal_id):
+    goal = validate_goal(goal_id)
+    response = {
+            "id": goal.goal_id,
+            "title": goal.title,
+            "tasks": []
+            }
+
+    for task in goal.tasks:
+        response["tasks"].append(task.goal_task_response())
+
+    return jsonify(response)
