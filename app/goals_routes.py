@@ -88,3 +88,5 @@ def delete_goal(goal_id):
     db.session.commit()
 
     return jsonify({"details": f'Goal {goal_id} "{goal.title}" successfully deleted'}), 200
+
+@goals_bp.route("/<goal_id>/tasks", methods=["POST"]):
