@@ -11,6 +11,7 @@ class Task(db.Model):
     goal = db.relationship("Goal", back_populates="tasks")
 
     def make_task_dict(self):
+        """Converts a Task into a dictionary object"""
         task_dict = {
                 "id": self.id,
                 "title": self.title,
@@ -27,6 +28,7 @@ class Task(db.Model):
 
     @classmethod
     def validate_task(cls, task_id):
+        """Confirms task id is a valid integer, and an existing task"""
         try:
             task_id = int(task_id)
         except:

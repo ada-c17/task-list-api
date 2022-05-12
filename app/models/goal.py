@@ -8,6 +8,7 @@ class Goal(db.Model):
     tasks = db.relationship("Task", back_populates="goal")
 
     def make_goal_dict(self):
+        """Converts a Goal into a dictionary object"""
         goal_dict = {
                 "id": self.goal_id,
                 "title": self.title,
@@ -17,6 +18,7 @@ class Goal(db.Model):
 
     @classmethod
     def validate_goal(cls, goal_id):
+        """Confirms goal id is a valid integer, and an existing Goal"""
         try:
             goal_id = int(goal_id)
         except:
