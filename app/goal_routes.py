@@ -13,3 +13,9 @@ def get_goals():
     goals = Goal.query.all()
     response = [goal.todict() for goal in goals]
     return jsonify(response), 200
+
+@goal_bp.route("/<goal_id>", strict_slashes=False, methods=["GET"])
+def get_goal(goal_id):
+    goal = validate(Goal,goal_id)
+    response = {"goal": goal.todict()}
+    return jsonify(response), 200
