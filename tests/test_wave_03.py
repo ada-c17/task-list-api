@@ -35,7 +35,8 @@ def test_mark_complete_on_incomplete_task(client, one_task):
             "id": 1,
             "title": "Go on my daily walk 🏞",
             "description": "Notice something new every day",
-            "is_complete": True
+            "is_complete": True,
+            "goal_id" : None
         }
     }
     assert Task.query.get(1).completed_at
@@ -55,7 +56,8 @@ def test_mark_incomplete_on_complete_task(client, completed_task):
             "id": 1,
             "title": "Go on my daily walk 🏞",
             "description": "Notice something new every day",
-            "is_complete": False
+            "is_complete": False,
+            "goal_id" : None
         }
     }
     assert Task.query.get(1).completed_at == None
@@ -92,7 +94,8 @@ def test_mark_complete_on_completed_task(client, completed_task):
             "id": 1,
             "title": "Go on my daily walk 🏞",
             "description": "Notice something new every day",
-            "is_complete": True
+            "is_complete": True,
+            "goal_id" : None
         }
     }
     assert Task.query.get(1).completed_at
@@ -111,7 +114,8 @@ def test_mark_incomplete_on_incomplete_task(client, one_task):
             "id": 1,
             "title": "Go on my daily walk 🏞",
             "description": "Notice something new every day",
-            "is_complete": False
+            "is_complete": False,
+            "goal_id" : None
         }
     }
     assert Task.query.get(1).completed_at == None
@@ -157,7 +161,8 @@ def test_create_task_with_valid_completed_at(client):
             "id": 1,
             "title": "A Brand New Task",
             "description": "Test Description",
-            "is_complete": True
+            "is_complete": True,
+            "goal_id" : None
         }
     }
     new_task = Task.query.get(1)
@@ -184,7 +189,8 @@ def test_update_task_with_completed_at_date(client, completed_task):
             "id": 1,
             "title": "Updated Task Title",
             "description": "Updated Test Description",
-            "is_complete": True
+            "is_complete": True,
+            "goal_id" : None
         }
     }
     task = Task.query.get(1)
