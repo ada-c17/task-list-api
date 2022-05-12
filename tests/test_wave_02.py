@@ -1,7 +1,7 @@
 import pytest
 
 
-#@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_sorted_asc(client, three_tasks):
     # Act
     response = client.get("/tasks?sort=asc")
@@ -29,7 +29,7 @@ def test_get_tasks_sorted_asc(client, three_tasks):
     ]
 
 
-#@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_sorted_desc(client, three_tasks):
     # Act
     response = client.get("/tasks?sort=desc")
@@ -55,3 +55,16 @@ def test_get_tasks_sorted_desc(client, three_tasks):
             "is_complete": False,
             "title": "Answer forgotten email 📧"},
     ]
+
+
+# additional test to verify that if sort has an invalid parameter,
+# the response body will have an error message
+def test_get_error_message_if_sort_has_invalid_parameter(client, three_tasks):
+    # Act
+    response = client.get("/tasks?sort=tagsytdfahsh")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    assert response_body == {
+        "msg": "Please enter 'asc' or 'desc' parameter to 'sort"}
