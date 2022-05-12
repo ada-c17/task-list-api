@@ -180,8 +180,7 @@ def post_tasks_to_goal(goal_id):
     # Check that "task_ids" is in the request_body
     if "task_ids" in request_body:
 
-        # Loop through the "task_ids"
-        # Assign the Task foreign key to match the Goal primary key
+        # Loop through the "task_ids" and assign the Task foreign key to match the Goal primary key
         for task_id in request_body["task_ids"]:
             task = Task.query.get(task_id)
             task.goal_id = goal_for_post.goal_id
