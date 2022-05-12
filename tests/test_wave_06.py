@@ -1,3 +1,4 @@
+import re
 from app.models.goal import Goal
 import pytest
 
@@ -116,3 +117,37 @@ def test_get_task_includes_goal_id(client, one_task_belongs_to_one_goal):
             "is_complete": False
         }
     }
+
+# Test code coverage
+def test_post_task_ids_to_goal_missing_task_ids(client, one_goal):
+    # Act
+    response = client.post("/goals/1/tasks", json={})
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    assert response_body == {"message": "The input is invalid."}
+
+
+def test_post_task_ids_to_goal_with_task_id_not_exist(client, one_goal, three_tasks):
+    # Act
+    response = client.post("/goals/1/tasks", json={
+        "task_ids": [1, 2, 3, 4]
+    })
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 404
+    assert response_body == {"message": "The task id 4 is not found"}
+
+
+def test_post_task_ids_to_goal_with_task_id_not_integer(client, one_goal, three_tasks):
+    # Act
+    response = client.post("/goals/1/tasks", json={
+        "task_ids": ["one", 2, 3]
+    })
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    assert response_body == {"message": f"The task id one is invalid. The id must be integer."}
