@@ -1,5 +1,6 @@
-from flask import abort, make_response
+from flask import abort, make_response, jsonify
 from app.models.task import Task
+from app.models.goal import Goal
 
 def validate_task(task_id):
     try:
@@ -13,7 +14,7 @@ def validate_task(task_id):
         abort(make_response({"error_message": f"id {task_id} not found"}, 404))
     return task
 
-def validate(cls, id):
+def validate_id(cls, id):
     try:
         id = int(id)
     except:

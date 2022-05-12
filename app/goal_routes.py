@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request, make_response, abort
 from app.models.goal import Goal
 from app import db
-from app.helper import validate
+from app.helper import validate_id
 import datetime
 import os
 import requests
@@ -33,7 +33,7 @@ def create_goal():
 
 @goal_bp.route("/<goal_id>", strict_slashes=False, methods=["GET"])
 def get_goal(goal_id):
-    goal = validate(Goal,goal_id)
+    goal = validate_id(Goal,goal_id)
     response = {"goal": goal.todict()}
     return jsonify(response), 200
 
@@ -41,7 +41,7 @@ def get_goal(goal_id):
 @goal_bp.route("/<goal_id>", strict_slashes=False, methods=["PUT"])
 def update_goal(goal_id):
     request_body = request.get_json()
-    goal = validate(Goal,goal_id)
+    goal = validate_id(Goal,goal_id)
     goal.title = request_body["title"]
     response = {"goal":goal.todict()}
     return jsonify(response), 200
@@ -49,7 +49,7 @@ def update_goal(goal_id):
 
 @goal_bp.route("/<goal_id>", strict_slashes=False, methods=["DELETE"])
 def delete_goal(goal_id):
-    goal = validate(Goal, goal_id)
+    goal = validate_id(Goal, goal_id)
     response = { "details": f'Goal {goal.goal_id} "{goal.title}" successfully deleted'}
     db.session.delete(goal)
     db.session.commit()
