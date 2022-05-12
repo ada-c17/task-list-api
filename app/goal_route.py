@@ -39,6 +39,7 @@ def get_goals():
 def goal_id_validation(input_id):
     try:
         input_id = int(input_id)
+        Goal.query.get(input_id)#additional check exists or not
     except ValueError:
         rsp = {"msg": f"Invalid goal id #{input_id}."}
         abort(make_response(jsonify(rsp), 400))
@@ -75,10 +76,6 @@ def update_goal(goal_id):
 @goal_bp.route("/<goal_id>", methods=["DELETE"])
 def delete_goal(goal_id):
     goal = goal_id_validation(goal_id)
-    goals = Goal.query.all()
-    
-    # if len(goals) < 1:
-    #     abort(make_response({"msg": "Not Found"}), 404)
         
     db.session.delete(goal)
     db.session.commit()
@@ -108,6 +105,14 @@ def create_tasks_for_one_goal(goal_id):
         "id": task.goal_id,
         "task_ids": request_body.get("task_ids")
     }), 200
+
+@goal_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_tasks_for_one_goal(goal_id):
+    goal = goal_id_validation(goal_id)
+
+    return make_response(jsonify(goal.to_json2()), 200)
+
+
 """
 database visualization
  task_id |       title        |           description            |        completed_at        | goal_id 
@@ -131,10 +136,3 @@ database visualization
        2 | Build a habit of sleeping at 11 pm
        3 | Build a habit of getting up at 7 am
 """
-
-
-@goal_bp.route("/<goal_id>/tasks", methods=["GET"])
-def get_tasks_for_one_goal(goal_id):
-    goal = goal_id_validation(goal_id)
-
-    return make_response(jsonify(goal.to_json2()), 200)

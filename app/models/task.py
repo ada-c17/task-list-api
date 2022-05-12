@@ -20,8 +20,6 @@ class Task(db.Model):
                 "description": self.description,
         }
         
-        
-
         if self.completed_at:
             task_dict["is_complete"] = True
         else:

@@ -210,16 +210,3 @@ def test_update_task_with_completed_at_date(client, completed_task):
     assert task.completed_at
    
    
-   #added by Liqing
-def test_update_task_with_invalid_completed_at_date(client, invalid_completed_task):
-    # Act
-    response = client.put("/tasks/1", json={
-        "title": "Updated Task Title",
-        "description": "Updated Test Description",
-        "completed_at": "in3"
-    })
-    response_body = response.get_json()
-
-    # Assert
-    assert ValueError
-    assert response_body == "only supports date time in yy/mm/dd hh:mm:ss formats"

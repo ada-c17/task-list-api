@@ -80,12 +80,14 @@ def update_task(taskID):
     
     if response_body and "completed_at" in response_body:
         try:
-            if isinstance(response_body["completed_at"], datetime.datetime):
-                task.completed_at = response_body["completed_at"]
-        except:
-            raise ValueError("only supports date time in yy/mm/dd hh:mm:ss formats")  
+            #task.completed_at = datetime.datetime.strptime(response_body["completed_at"], "%a, %d %b %Y %H:%M:%S %Z")
+            #Thu, 12 May 2022 18:58:53 GMT works but not for 2022-05-07 03:21:52, but handles invalid string
+            task.completed_at = response_body["completed_at"] #works for 2022-05-07 03:21:52
+        except ValueError:
+            abort(make_response({"msg": f"invalid datetime format"}))
         """ We don't have frontend UI for users, either we can build a calendar UI for the convenience or 
                 we can also generate a documentation for developers who use this api, saying completed_at accepts a certain types of formats."""
+    
     task.title = response_body["title"]
     task.description = response_body["description"]
     db.session.commit()
@@ -120,7 +122,6 @@ def update_tasks_with_completed(taskID):
         "task": 
             task.to_json()}, 200
 
-    
 
 def slack_api_call(task):
     SLACK_PATH = "https://slack.com/api/chat.postMessage"
