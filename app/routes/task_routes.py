@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify,request
 from app.models.task import Task
 from app import db
-from ..models.helpers import post_slack_message, validate_task 
+from ..models.helpers import post_slack_message, validate_object 
 from datetime import datetime
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
@@ -34,7 +34,7 @@ def get_all_tasks():
 
 @tasks_bp.route("/<id>", methods=["GET"])
 def get_one_tasks(id):
-    task = validate_task(id)
+    task = validate_object(Task, id)
 
     return jsonify({"task": task.to_json()}), 200
 
@@ -51,7 +51,7 @@ def create_task():
 
 @tasks_bp.route("/<id>", methods=["PUT"])
 def update_task(id):
-    task = validate_task(id)
+    task = validate_object(Task, id)
 
     request_body = request.get_json()
 
@@ -63,7 +63,7 @@ def update_task(id):
 
 @tasks_bp.route("/<id>", methods=["DELETE"])
 def delete_one_task(id):
-    task = validate_task(id)
+    task = validate_object(Task, id)
 
     db.session.delete(task)
     db.session.commit()
@@ -72,7 +72,7 @@ def delete_one_task(id):
 
 @tasks_bp.route("/<id>/mark_complete", methods = ["PATCH"])
 def mark_one_task_complete(id):
-	task = validate_task(id)
+	task = validate_object(Task, id)
 
 	post_slack_message(f"Someone just completed the task {task.title}")
 
@@ -84,7 +84,7 @@ def mark_one_task_complete(id):
 
 @tasks_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
 def mark_one_task_incomplete(id):
-	task = validate_task(id)
+	task = validate_object(Task, id)
 
 	task.completed_at = None
 
