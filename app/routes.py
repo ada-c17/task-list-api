@@ -24,6 +24,9 @@ def create_task():
             title=request_body["title"], 
             description=request_body["description"]
             )
+        
+        if "completed_at" in request_body:
+            new_task.completed_at = request_body["completed_at"]
 
         ##try these instead of using expire:
         #return make_response({
@@ -35,7 +38,7 @@ def create_task():
 
         db.session.add(new_task)
         db.session.commit()
-        db.session.expire(new_task)
+        # db.session.expire(new_task)
 
         return make_response(jsonify(new_task.single_dict()), 201)
 
@@ -44,21 +47,20 @@ def create_task():
 
 @tasks_bp.route("", methods=["GET"])
 def read_all_tasks():
-    # # from planets api:
-    # name_query = request.args.get("name")
-    # description_query = request.args.get("description")
-    # order_from_sun_query = request.args.get("order_from_sun")
-    # if name_query:
-    #     planets = Planet.query.filter_by(name=name_query)
-    # elif description_query:
-    #     planets = Planet.query.filter(Planet.description.ilike("%" + description_query + "%"))
-    # elif order_from_sun_query:
-    #     planets = Planet.query.filter_by(order_from_sun =order_from_sun_query)
-    # else:
-    #     planets = Planet.query.all()
     sort_query = request.args.get("sort")
+    title_query = request.args.get("title")
+    description_query = request.args.get("description")
+    completed_query = request.args.get("is_complete")
 
-    if sort_query in ("asc","desc") :
+    if title_query:
+        tasks = Task.query.filter(Task.title.ilike("%" + title_query + "%"))
+    elif description_query:
+        tasks = Task.query.filter(Task.description.ilike("%" + description_query + "%"))
+    elif completed_query == "false":
+        tasks = Task.query.filter(Task.completed_at == None)
+    elif completed_query == "true":
+        tasks = Task.query.filter(Task.completed_at != None)
+    elif sort_query in ("asc","desc"):
         if sort_query == "asc":
             tasks = Task.query.order_by(Task.title).all()
         else:
@@ -97,9 +99,25 @@ def update_one_task(task_id):
             task.completed_at = None
 
     db.session.commit()
-    db.session.expire(task)
+    # db.session.expire(task)
 
     return make_response(jsonify(task.single_dict()), 200)
+
+@tasks_bp.route("/<task_id>/<mark_completion>", methods=["PATCH"])
+def task_completion(task_id, mark_completion):
+    task = validate(task_id)
+    request_body = request.get_json()
+
+    if mark_completion == "mark_complete":
+        task.completed_at = datetime.utcnow()
+    elif mark_completion == "mark_incomplete":
+        task.completed_at = None
+    else:
+        abort(make_response({"message":f"please use mark_complete or mark_incomplete"}, 404))
+    
+    db.session.commit()
+    return make_response(jsonify(task.single_dict()), 200)
+
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
