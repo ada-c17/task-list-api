@@ -40,5 +40,3 @@ class Task(db.Model):
                 title=request_body["title"],
                 description=request_body["description"])
         return new_task
-
-    

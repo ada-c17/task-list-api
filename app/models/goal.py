@@ -1,6 +1,5 @@
 from app import db
 
-
 class Goal(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String, nullable=False)
@@ -12,3 +11,12 @@ class Goal(db.Model):
             "title":self.title
             }
         return goal_dict
+
+    def update(self, request_body):
+        self.title=request_body["title"]
+
+    @classmethod
+    def create(cls, request_body):
+        new_goal = cls(
+                title=request_body["title"])
+        return new_goal
