@@ -65,18 +65,19 @@ def update_one_goal(goal_id):
 
     try:
         goal.title = request_body["title"]
-        db.session.commit()
     except:
         response = {"details": "Goal needs a title"}
         abort(make_response(jsonify(response), 400))
-
+    
+    db.session.commit()
+    
     response = {
         "goal": goal.to_dict()
     }
     return jsonify(response), 200
 
 @goals_bp.route("/<goal_id>", methods=["DELETE"])
-def delete_one_route(goal_id):
+def delete_one_goal(goal_id):
     goal = validate_goal(goal_id)
 
     db.session.delete(goal)

@@ -95,7 +95,7 @@ def test_create_task_with_invalid_completed_at_returns_400(client):
     assert len(tasks) == 0
 
 # WAVE 2
-def test_get_tasks_with_invalid_query_param_returns_400(client, three_tasks):
+def test_get_tasks_with_invalid_query_param_value_returns_400(client, three_tasks):
     response = client.get("/tasks?sort=nope")
     response_body = response.get_json()
 

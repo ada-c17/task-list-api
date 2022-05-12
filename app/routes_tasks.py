@@ -37,6 +37,14 @@ def get_all_tasks():
         else:
             response = {"details": "Invalid data"}
             abort(make_response(jsonify(response), 400))
+    # Get tasks that aren't completed yet   
+    elif "complete" in params:
+        if params["complete"] == "false":
+            tasks = db.session.query(Task).filter(Task.completed_at == None)
+        else:
+            response = {"details": "Invalid data"}
+            abort(make_response(jsonify(response), 400))
+    # If there are no query params
     else:
         tasks = Task.query.all()
     
