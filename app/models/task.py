@@ -1,4 +1,5 @@
 from app import db
+from datetime import datetime
 
 class Task(db.Model):
     ## class variables
@@ -26,3 +27,30 @@ class Task(db.Model):
         if self.goal_id:
             task_dict["goal_id"] = self.goal_id
         return task_dict 
+
+    def create_from_request(self, request_body):
+        self.title = request_body["title"],
+        self.description = request_body["description"]
+        completed = request_body.get("completed_at")
+        if completed:
+            if type(completed) == str:
+                try:
+                    #datetime.utcnow() default string
+                    is_formatted = datetime.strptime(completed, 
+                                                    "%a, %d %B %Y %H:%M:%S %Z")
+                except ValueError:
+                    try:
+                        #yyyy-mm-dd hh:mm:ss format
+                        is_formatted = datetime.strptime(completed, 
+                                                        "%Y-%m-%d %H:%M:%S")
+                    except ValueError:
+                        try:
+                            #yyyy-mm-dd hh:mm format (omit seconds)
+                            is_formatted = datetime.strptime(completed, 
+                                                            "%Y-%m-%d %H:%M")
+                        except ValueError:
+                            is_formatted = False
+                if is_formatted:
+                    self.completed_at = completed
+                    #does not add invalid timestamps to database entry
+        return self

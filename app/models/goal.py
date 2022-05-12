@@ -1,6 +1,5 @@
 from app import db
 
-
 class Goal(db.Model):
     #class variables
     expected_elements = {"title":str}
@@ -16,3 +15,7 @@ class Goal(db.Model):
             "title": self.title,
         }
         return goal_dict
+
+    def create_from_request(self, request_body):
+        self.title = request_body["title"]
+        return self

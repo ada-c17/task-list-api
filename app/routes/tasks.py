@@ -4,36 +4,13 @@ import os
 from dotenv import load_dotenv
 from app import db
 from flask import Blueprint, jsonify, make_response, request
-from datetime import date
+from datetime import datetime, timezone
 from app.models.task import Task
 from app.routes.request_helpers import handle_id_request, check_complete_request_body
 
 load_dotenv()
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
-
-
-# def handle_id_request(id, database):
-    
-#     try:
-#         id = int(id)
-#     except:
-#         abort(make_response({"msg": f"Invalid {database.db_name} ID '{id}'."}, 400))
-
-#     query = database.query.get(id)
-
-#     if not query:
-#         abort(make_response({"msg": f"{database.db_name} ID '{id}' does not exist."}, 404))
-
-#     return query
-
-# def check_complete_request_body(request, database):
-#     request_body = request.get_json()
-#     if all(element in request_body for element in database.expected_elements):
-#         if all(type(request_body[element]) == database.expected_elements[element] \
-#                     for element in database.expected_elements):
-#                         return request_body
-#     abort(make_response({"details": "Invalid data"}, 400))
 
 def slack_complete(task):
     url = "https://slack.com/api/chat.postMessage"
@@ -74,13 +51,7 @@ def get_all_tasks():
 @tasks_bp.route("", methods=["POST"])
 def create_new_task():
     request_body = check_complete_request_body(request, Task)
-    new_task = Task(
-        title = request_body["title"],
-        description = request_body["description"]
-    )
-
-    if request_body.get("completed_at"):
-        new_task.completed_at = request_body["completed_at"]
+    new_task = Task().create_from_request(request_body)
 
     db.session.add(new_task)
     db.session.commit()
@@ -100,8 +71,7 @@ def update_task_by_id(id):
     request_body = check_complete_request_body(request, Task)
     task_to_update = handle_id_request(id, Task)
 
-    task_to_update.title = request_body["title"]
-    task_to_update.description = request_body["description"]
+    task_to_update.create_from_request(request_body)
 
     db.session.commit()
 
@@ -125,7 +95,7 @@ def delete_task_by_id(id):
 @tasks_bp.route("/<id>/mark_complete", methods=["PATCH"])
 def mark_task_complete(id):
     task = handle_id_request(id, Task)
-    task.completed_at = date.today()
+    task.completed_at = datetime.now(timezone.utc)
     db.session.commit()
 
     confirmation_msg = {"task": task.make_response_dict()}

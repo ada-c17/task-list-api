@@ -27,7 +27,7 @@ def get_goal_by_id(id):
 @goals_bp.route("", methods=["POST"])
 def create_new_goal():
     request_body = check_complete_request_body(request, Goal)
-    new_goal = Goal(title=request_body["title"])
+    new_goal = Goal().create_from_request(request_body)
 
     db.session.add(new_goal)
     db.session.commit()
@@ -40,7 +40,7 @@ def update_goal_by_id(id):
     request_body = check_complete_request_body(request, Goal)
     active_goal = handle_id_request(id, Goal)
 
-    active_goal.title = request_body["title"]
+    active_goal.create_from_request(request_body)
 
     db.session.commit()
     confirmation_msg = {"goal": active_goal.make_response_dict()}
