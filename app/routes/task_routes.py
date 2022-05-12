@@ -2,10 +2,10 @@ from flask import Blueprint, request, make_response, jsonify
 import requests
 from app.models.task import Task
 from app import db
-from datetime import date
+from datetime import datetime
 import os
 import requests
-from app.routes.helper_routes import get_filtered_tasks, validate_id, validate_request
+from app.routes.helper_routes import get_filtered_tasks, validate_datetime, validate_id, validate_request
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -15,8 +15,8 @@ def create_new_task():
     new_task = Task(
             title=request_body["title"],
             description=request_body["description"],
-            completed_at=request_body["completed_at"] if request_body.get("completed_at", None) != None else None
-        )
+            completed_at=validate_datetime(request_body)
+            )
 
     db.session.add(new_task)
     db.session.commit()
@@ -58,7 +58,7 @@ def delete_task(task_id):
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_complete(task_id):
     task = validate_id(Task, task_id)
-    task.completed_at = date.today()
+    task.completed_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     db.session.commit()
 
     channel_name = "task-notifications"

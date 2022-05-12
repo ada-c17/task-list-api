@@ -1,5 +1,6 @@
 from flask import make_response, abort, jsonify
 from app.models.task import Task
+import datetime
 
 
 def validate_id(cls, id):
@@ -46,3 +47,15 @@ def get_filtered_tasks(request):
 
     tasks = tasks.all()
     return tasks
+
+def validate_datetime(request_body):
+    datetime_string = (
+        request_body["completed_at"] if request_body.get("completed_at", None) != None else None
+    )
+    format = "%Y-%m-%d %H:%M:%S"
+    try:
+        datetime.datetime.strptime(datetime_string, format)
+        return datetime_string
+    except ValueError:
+        abort(make_response({"details": "Invalid date format. Use YYYY-MM-DD HH:MM:SS."}, 400))
+        
