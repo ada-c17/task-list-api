@@ -14,6 +14,7 @@ def validate_task(task_id):
         abort(make_response({"error_message": f"id {task_id} not found"}, 404))
     return task
 
+
 def validate_id(cls, id):
     try:
         id = int(id)
@@ -25,3 +26,11 @@ def validate_id(cls, id):
     if not model:
         abort(make_response({"error_message": f"id {id} not found"}, 404))
     return model
+
+
+def form_json_response(model):
+    if type(model) == Task:
+        response = {"task": model.todict()}
+    if type(model) == Goal:
+        response = {"goal": model.todict()}
+    return jsonify(response)

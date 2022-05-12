@@ -2,9 +2,6 @@ from flask import Blueprint, jsonify, request, make_response, abort
 from app.models.goal import Goal
 from app import db
 from app.helper import validate_id
-import datetime
-import os
-import requests
 
 goal_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
