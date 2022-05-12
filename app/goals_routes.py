@@ -88,6 +88,12 @@ def add_tasks_to_goal(goal_id):
 def get_tasks_for_goal(goal_id):
     goal = Goal.validate_goal(goal_id)
     goal_dict = Goal.make_goal_dict(goal)
-    goal_dict["tasks"] = Goal.query.get(goal.goal_id).tasks
+    goal_dict["tasks"] = []
     
+    tasks = Goal.query.get(goal.goal_id).tasks
+    for task in tasks:
+        task_dict = task.make_task_dict()
+        goal_dict["tasks"].append(task_dict)
+    
+
     return jsonify(goal_dict), 200

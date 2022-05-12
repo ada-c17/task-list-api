@@ -20,6 +20,8 @@ class Task(db.Model):
             task_dict["is_complete"] = True
         else:
             task_dict["is_complete"] = False
+        if self.goal_id:
+            task_dict["goal_id"] = self.goal_id
 
         return task_dict
 
