@@ -12,19 +12,6 @@ API_KEY = os.getenv('PROJECT_API_KEY')
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
-# def validate_task(task_id):
-#     try:
-#         task_id = int(task_id)
-#     except:
-#         abort(make_response({"Message":f"Task {task_id} invalid"}, 400))
-
-#     task = Task.query.get(task_id)
-
-#     if not task:
-#         abort(make_response({"Message":f"Task {task_id} not found"}, 404))
-
-#     return task
-
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
     response_body = []

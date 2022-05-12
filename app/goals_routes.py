@@ -80,9 +80,14 @@ def add_tasks_to_goal(goal_id):
         task.goal_id = goal.goal_id
         task_id_list.append(task.id)
 
-    # add task to goal.tasks
-        
-    
     db.session.commit()
     
     return jsonify({"id": goal.goal_id, "task_ids": task_id_list}), 200
+
+@goals_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_tasks_for_goal(goal_id):
+    goal = Goal.validate_goal(goal_id)
+    goal_dict = Goal.make_goal_dict(goal)
+    goal_dict["tasks"] = Goal.query.get(goal.goal_id).tasks
+    
+    return jsonify(goal_dict), 200
