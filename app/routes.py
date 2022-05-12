@@ -7,15 +7,16 @@ task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
 @task_bp.route("", strict_slashes=False, methods=["GET"])
 def get_tasks():
-    tasks = Task.query.all()
+    sort_order = request.args.get("sort")
+    if sort_order == 'asc':
+        #sort ascending
+        tasks = Task.query.order_by(Task.title.asc())
+    elif sort_order == 'desc':
+        tasks = Task.query.order_by(Task.title.desc())
+    else:
+        tasks = Task.query.all()
+
     response = [task.todict() for task in tasks]
-    return jsonify(response), 200
-
-
-@task_bp.route("/<task_id>", strict_slashes=False, methods=["GET"])
-def get_task(task_id):
-    task = validate_task(task_id)
-    response = {"task": task.todict()}
     return jsonify(response), 200
 
 
@@ -35,6 +36,13 @@ def create_task():
 
     response = response = {"task": new_task.todict()}
     return jsonify(response), 201
+
+
+@task_bp.route("/<task_id>", strict_slashes=False, methods=["GET"])
+def get_task(task_id):
+    task = validate_task(task_id)
+    response = {"task": task.todict()}
+    return jsonify(response), 200
 
 
 @task_bp.route("/<task_id>", strict_slashes=False, methods=["PUT"])
