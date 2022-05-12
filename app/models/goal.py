@@ -7,7 +7,7 @@ class Goal(db.Model):
 
     @classmethod
     def make_goal(cls,request_body):
-        new_goal = cls(title = request_body["title"])
+        new_goal = cls(title = request_body["title"], tasks = [])
             
         return new_goal
 

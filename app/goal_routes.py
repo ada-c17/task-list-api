@@ -60,8 +60,6 @@ def create_tasks(goal_id):
     goal = check_goal_exists(goal_id)
     request_body = request.get_json()
 
-    goal.tasks = []
-
     for id in request_body["task_ids"]:
         task = check_task_exists(id)
         goal.tasks.append(task)
