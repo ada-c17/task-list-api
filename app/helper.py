@@ -28,3 +28,9 @@ def validate_goal(id):
         abort(make_response({"message": f"goal {id} not found"}, 404))
 
     return goal
+
+def validate_req_body_tasks(request_body, key1, key2):
+    if key1 not in request_body.keys() or key2 not in request_body.keys():
+        return False
+    
+    return True

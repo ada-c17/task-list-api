@@ -7,7 +7,7 @@ from requests import request
 from sqlalchemy import desc
 from app import db
 from app.models.task import Task
-from app.helper import validate_task
+from app.helper import validate_task, validate_req_body_tasks
 from flask import Blueprint, jsonify, make_response, request
 
 tasks_bp = Blueprint("task", __name__, url_prefix="/tasks")
@@ -16,40 +16,16 @@ tasks_bp = Blueprint("task", __name__, url_prefix="/tasks")
 @tasks_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
-    if "title" not in request_body.keys():
+    if not validate_req_body_tasks(request_body, "title", "description"):
         return {"details": "Invalid data"}, 400
-    elif "description" not in request_body.keys():
-        return {"details": "Invalid data"}, 400
-    elif "completed_at" in request_body.keys():
-        new_task = Task(title=request_body["title"],
-                    description=request_body["description"],
-                    completed_at=request_body["completed_at"])
-        db.session.add(new_task)
-        db.session.commit()
-        return { "task": {
-            "id": new_task.task_id,
-            "title": new_task.title,
-            "description": new_task.description,
-            "is_complete": True
-        }}, 201
-    else:
-        new_task = Task(title=request_body["title"],
-                    description=request_body["description"])
-        db.session.add(new_task)
-        db.session.commit()
-
-        return { "task": {
-            "id": new_task.task_id,
-            "title": new_task.title,
-            "description": new_task.description,
-            "is_complete": False
-        }}, 201
-
+    new_task = Task.create(request_body)
+    db.session.add(new_task)
+    db.session.commit()
+    return { "task": new_task.to_json()}, 201
 
 # GET all
 @tasks_bp.route("", methods=["GET"])
 def read_task():
-
     sort_query = request.args.get("sort")
     if sort_query == 'asc':
         tasks = Task.query.order_by(Task.title).all()
@@ -68,36 +44,17 @@ def read_task():
 def read_one_task(task_id):
     task = validate_task(task_id)
 
-    if task.goal_id:
-        return {"task": task.to_json_goal()}, 200
-    else:
-        return { "task": task.to_json()}, 200
+    return { "task": task.to_json()}, 200
 
 # UPDATE one Task
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
     task = validate_task(task_id)
     request_body = request.get_json()
-    task.title = request_body["title"]
-    task.description = request_body["description"]
 
-    if "completed_at" in request_body.keys():
-        task.completed_at = request_body["completed_at"]
-        db.session.commit()
-        return { "task": {
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": True
-        }}, 200
-    else:
-        db.session.commit()
-        return { "task": {
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": False
-        }}, 200
+    task.update(request_body)
+    db.session.commit()
+    return { "task": task.to_json()}, 200
 
 # DELETE one Task
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
@@ -124,12 +81,7 @@ def patch_complete_task(task_id):
     }
     slack_response = requests.post(url, params=params, headers=header)
 
-    return {"task": {
-        "id": task.task_id,
-        "title": task.title,
-        "description": task.description,
-        "is_complete": True
-    }}, 200
+    return {"task": task.to_json()}
 
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
@@ -138,12 +90,7 @@ def patch_incomplete_task(task_id):
 
     task.completed_at = None
     db.session.commit()
-    return { "task": {
-        "id": task.task_id,
-        "title": task.title,
-        "description": task.description,
-        "is_complete": False
-    }}, 200
+    return { "task": task.to_json()}, 200
 
         
     

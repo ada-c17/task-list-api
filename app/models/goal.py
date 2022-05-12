@@ -9,13 +9,13 @@ class Goal(db.Model):
 
     def to_json(self):
         return {"id": self.goal_id,
-                "title": self.title
+                "title": self.title,
         }
     
     def to_json_tasks(self):
         return {"id": self.goal_id,
                 "title": self.title,
-                "tasks": [item.to_json_goal() for item in self.tasks]
+                "tasks": [item.to_json() for item in self.tasks]
         }
 
     def update(self, req_body):

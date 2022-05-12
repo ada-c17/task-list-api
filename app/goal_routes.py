@@ -39,9 +39,7 @@ def create_task(goal_id):
 @goal_bp.route("/<goal_id>/tasks", methods=["GET"])
 def get_tasks(goal_id):
     goal = validate_goal(goal_id)
-
-    # task_list = [task.task_id for task in goal.tasks]
-    return jsonify(goal.to_json_tasks())
+    return goal.to_json_tasks()
 
 # GET all
 @goal_bp.route("", methods=["GET"])
