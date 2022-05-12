@@ -1,5 +1,6 @@
-from flask import Blueprint, jsonify, make_response, request, abort
+from flask import Blueprint, jsonify, request, make_response
 from app.models.task import Task
+from .routes_helper import validate_task_id, create_message
 from app import db
 from datetime import datetime
 
@@ -14,7 +15,6 @@ def create_task():
         create_message("Invalid data", 400)
     # could change the above to a try and except
     task = Task.from_dict(request_body)
-
     db.session.add(task)
     db.session.commit()
 
@@ -49,7 +49,6 @@ def replace_task(task_id):
     request_body = request.get_json()
     # might want to put this into a try and except
     task.override_task(request_body)
-    
     db.session.commit()
 
     return jsonify({"task": task.to_dict()}), 200
@@ -60,6 +59,7 @@ def delete_task(task_id):
     task = validate_task_id(task_id)
     db.session.delete(task)
     db.session.commit()
+
     create_message(f"Task {task_id} \"{task.title}\" successfully deleted", 200)
 
 
@@ -77,22 +77,4 @@ def mark_task_incomplete(task_id):
     task = validate_task_id(task_id)
     task.completed_at = None
     db.session.commit()
-    
     return jsonify({"task": task.to_dict()}), 200
-
-
-def validate_task_id(task_id):
-    try:
-        task_id = int(task_id)
-    except:
-        create_message("Invalid data", 400)
-
-    task = Task.query.get(task_id)
-
-    if not task:
-        create_message("Task 1 not found", 404)
-    return task
-
-
-def create_message(details_info, status_code):
-    abort(make_response({"details": details_info}, status_code))
