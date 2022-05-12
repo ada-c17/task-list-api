@@ -59,9 +59,9 @@ def valid_goal(goal_id):
     return goal
 
 def check_completed_at(request_body):
-    if "completed_at" not in request_body:
+    time = request_body.get("completed_at",-1)
+    if  time == -1:
         return None
-    time = request_body["completed_at"]
     try:
         # utcnow() data string format: 'Thu, 12 May 2022 04:19:18 GMT'
         return datetime.strptime(time, '%a, %d %b %Y %H:%M:%S GMT')
