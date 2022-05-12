@@ -52,10 +52,12 @@ def validate_datetime(request_body):
     datetime_string = (
         request_body["completed_at"] if request_body.get("completed_at", None) != None else None
     )
-    format = "%Y-%m-%d %H:%M:%S"
-    try:
-        datetime.datetime.strptime(datetime_string, format)
+    if not datetime_string:
         return datetime_string
+
+    try:
+        format = "%a, %d %B %Y %H:%M:%S %Z" 
+        dt = datetime.datetime.strptime(datetime_string, format)
+        return dt
     except ValueError:
         abort(make_response({"details": "Invalid date format. Use YYYY-MM-DD HH:MM:SS."}, 400))
-        
