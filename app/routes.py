@@ -3,6 +3,7 @@ from app.models.task import Task
 from app.models.goal import Goal
 from flask import Blueprint, jsonify, make_response, request, abort
 from datetime import date
+from sqlalchemy import select, desc, asc
 import requests
 import os
 from dotenv import load_dotenv
@@ -51,7 +52,8 @@ def get_tasks():
         tasks_response.sort(key=lambda t: t["title"])
     if sort_query == "desc":
         tasks_response.sort(reverse=True, key=lambda t: t["title"])
-    
+        # tasks = Task.query.order_by(desc(Task.title)) does work
+        # tasks = select(Task).order_by(desc(Task.title)) doesn't work
     return jsonify(tasks_response)
 
 @tasks_bp.route("/<task_id>", methods =["GET"])
