@@ -75,3 +75,16 @@ def assign_tasks(goal_id):
 
     return jsonify({"id": goal.goal_id,
     "task_ids": request_body["task_ids"]}), 200
+
+@goals_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_all_tasks(goal_id):
+    goal = validate_goal(goal_id)
+
+    tasks = []
+    for task in goal.tasks:
+        tasks.append(task.to_json())
+
+    goal_response = goal.to_json()
+    goal_response["tasks"] = tasks
+
+    return jsonify(goal_response), 200

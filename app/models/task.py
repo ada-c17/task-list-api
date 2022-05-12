@@ -20,13 +20,17 @@ class Task(db.Model):
         return new_task
 
     def to_json(self):
-        return {
+        task_dict = {
             "id": self.task_id,
             "title": self.title,
             "description": self.description,
             "is_complete": True if self.completed_at else False
-
         }
+
+        if self.goal:
+            task_dict["goal_id"] = self.goal_id
+
+        return task_dict
 
     def update(self, req_body):
         self.title = req_body["title"]
