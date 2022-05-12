@@ -4,11 +4,9 @@ from flask_migrate import Migrate
 import os
 from dotenv import load_dotenv
 
-
 db = SQLAlchemy()
 migrate = Migrate()
 load_dotenv()
-
 
 def create_app(test_config=None):
     app = Flask(__name__)
@@ -30,5 +28,11 @@ def create_app(test_config=None):
     migrate.init_app(app, db)
 
     # Register Blueprints here
+    from .tasks_routes import tasks_bp
+    app.register_blueprint(tasks_bp)
+    from .goals_routes import goals_bp
+    app.register_blueprint(goals_bp)
+    from .tasks_routes import homepage_bp
+    app.register_blueprint(homepage_bp)
 
     return app
