@@ -1,8 +1,11 @@
 from app.models.task import *
+from app.models.goal import *
 from flask import Blueprint, jsonify, abort, make_response, request
 from datetime import date
+
+
 # This is the BluePrint object that helps to "connect" my functions to
-# endpoints and HTTP methods.
+# endpoints and HTTP methods for tasks.
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
 #---------------post_task-----------
@@ -199,4 +202,155 @@ def patch_incomplete_task_by_id(id):
     task_dict['is_complete'] = False
     return_dict = {"task": task_dict}
     return jsonify(return_dict), 200
+#----------------------------------------------------------------------
+# ---------------GOAL-----------------------------------------------
+#----------------------------------------------------------------------
+# This is the BluePrint object that helps to "connect" my functions to
+# endpoints and HTTP methods for goals.
+goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
+
+@goals_bp.route("", methods=["POST"])
+def post_goal():
+    # request.get_json() returns a dictionary with keys: "title"
+    # Use corresponding values to create the Task instance.
+    post_dict = request.get_json()
+    print(post_dict)
     
+    if 'title' not in post_dict:
+        return make_response({"details":"Invalid data"},400)
+    
+    title = post_dict['title']
+    goal = Goal(title=title)
+    db.session.add(goal)
+    db.session.commit()
+
+    goal_dict={}
+    goal_dict['id'] = goal.id
+    goal_dict['title'] = goal.title
+    return_dict = {"goal": goal_dict}
+    return jsonify(return_dict), 201
+
+#------------GET ALL GOALS---------------
+@goals_bp.route("", methods=["GET"]) 
+def get_all_goals():
+    
+    goal_db = Goal.query.all()
+
+    # Alchemy converts all rows into list of instances and assigns to goal_db
+    # goal_db = list of all instances
+    
+    goal_dict = {}
+    goals_response = [] 
+    for goal in goal_db:  
+        goal_dict = {'id': goal.id,
+                'title': goal.title
+    }             
+        goals_response.append(goal_dict)
+    return jsonify(goals_response), 200  
+
+#-----------------------------------
+@goals_bp.route("/<id>",methods = ["GET"]) 
+def get_goal_by_id(id):
+    # Remember that id from the request is a string and not an integer
+
+    goal = Goal.query.get(id)
+    if (goal == None):
+        abort(make_response({"message":f"goal {id} not found"}, 404))
+    else:
+        goal_dict={}
+        goal_dict['id'] = goal.id
+        goal_dict['title'] = goal.title
+        return_dict = {"goal": goal_dict}
+        return jsonify(return_dict), 200
+
+#------------PUT Method - update goal by id---------
+@goals_bp.route("/<id>", methods=["PUT"])
+def update_goal_by_id(id):
+    goal = Goal.query.get(id)
+    
+    if (goal == None):
+        abort(make_response({"message":f"goal {id} not found"}, 404))
+
+    update_dict = request.get_json()
+    if 'title' not in update_dict:
+        return make_response({"details":"Invalid data"},400)
+
+    title = update_dict['title']
+    goal.title = title
+    
+    db.session.commit()
+
+    goal_dict={}
+    goal_dict['id'] = goal.id
+    goal_dict['title'] = goal.title
+    
+    return_dict = {"goal": goal_dict}
+    return jsonify(return_dict), 200
+#------------remove goal by id------------
+@goals_bp.route("/<id>", methods=["DELETE"])
+def remove_goal_by_id(id):
+    goal = Goal.query.get(id)
+    
+    if (goal == None):
+        abort(make_response({"message":f"goal {id} not found"}, 404))
+    
+    db.session.delete(goal)
+    db.session.commit()
+    return make_response({"details":f"Goal {id} \"{goal.title}\" successfully deleted"},200)
+#------------------------------------------------
+#----------------WAVE 6-------------------------
+#---------------------------------------------------
+#app/goal_routes.py
+@goals_bp.route("/<goal_id>/tasks", methods=["POST"])
+def create_task(goal_id):
+    db.session.add(task)
+    db.session.commit()
+
+    return make_response(jsonify(f"Task {task.title} by {task.goal.title} successfully created"), 201)
+#--------------
+#app/goal_routes.py
+def validate_goal(goal_id):
+    try:
+        goal_id = int(goal_id)
+    except:
+        abort(make_response({"message":f"goal {goal_id} invalid"}, 400))
+
+    goal = Goal.query.get(goal_id)
+
+    if not goal:
+        abort(make_response({"message":f"goal {goal_id} not found"}, 404))
+
+    return goal
+
+@goals_bp.route("/<goal_id>/books", methods=["POST"])
+def create_task(goal_id):
+
+    goal = validate_goal(goal_id)
+
+    request_body = request.get_json()
+    new_task = Task(
+        title=request_body["title"],
+        description=request_body["description"],
+        is_complete = request_body["is_complete"]
+        goal=goal
+    )
+    db.session.add(new_task)
+    db.session.commit()
+    return make_response(jsonify(f"Task {new_task.title} by {new_task.goal.title} successfully created"), 201)
+
+#-----------------
+@goals_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_tasks(goal_id):
+
+    goal = validate_goal(goal_id)
+
+    tasks_response = []
+    for task in goal.tasks:
+        tasks_response.append(
+            {
+            "id": task.id,
+            "title": task.title,
+            "description": task.description
+            }
+        )
+    return jsonify(tasks_response)    
