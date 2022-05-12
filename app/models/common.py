@@ -1,4 +1,5 @@
-# Task-aware JSONEncoder
+######################################################
+# extension of JSONEncoder class for Task List objects
 from flask.json import JSONEncoder
 
 class TaskListJSONEncoder(JSONEncoder):
@@ -21,9 +22,9 @@ class TaskListJSONEncoder(JSONEncoder):
             }
         elif type(obj).__name__ == 'TasksGoal':
             return {
-                'id': obj.goal_id,
-                'title': obj.title,
-                'tasks': obj.tasks
+                'id': obj._.goal_id,
+                'title': obj._.title,
+                'tasks': obj._.tasks
             }
         return JSONEncoder.default(self, obj)
 
@@ -52,16 +53,16 @@ def get_filtered_and_sorted(cls, request_args):
     # make query filters from these 3 params, ignoring any others
     filters = []
     if 'title' in params:
-        filters.append(cls.title.like(f'%{params['title']}%'))
+        filters.append(cls.title.like(f"%{params['title']}%"))
     if 'description' in params:
-        filters.append(cls.description.like(f'%{params['description']}%'))
+        filters.append(cls.description.like(f"%{params['description']}%"))
     if 'is_complete' in params:
         if not params['is_complete']:
             filters.append(cls.completed_at == None)
         filters.append(cls.completed_at != None)
     filters = tuple(filters)
-
-    if not sort_style:    
+    
+    if not sort_style:
         return cls.query.filter(*filters).all()
     return (cls.query.filter_by(*filters)
                             .order_by(getattr(cls.title,sort_style)()).all())

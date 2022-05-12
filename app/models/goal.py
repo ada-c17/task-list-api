@@ -8,4 +8,4 @@ class Goal(db.Model):
 
 class TasksGoal():
     def __init__(self, goal):
-        self.goal = goal
+        self._ = goal
