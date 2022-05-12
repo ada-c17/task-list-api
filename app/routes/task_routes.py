@@ -111,9 +111,7 @@ def replace_task(task_id):
 
 @task_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def complete_task(task_id):
-    request_body = request.get_json()
     task = validate_task(task_id)
-
     title = task.title
     
     #Call to Slack API
