@@ -1,9 +1,8 @@
-import json
+import json, os, requests
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, abort, make_response, request
 from datetime import datetime
-
 from app.routes_helper import validate_task
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
@@ -69,16 +68,20 @@ def delete_task(task_id):
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_task_complete(task_id):
     task_data = validate_task(task_id)
-    
     task_data.completed_at = datetime.utcnow()
 
     db.session.commit()
+
+    SLACK_URL = 'https://slack.com/api/chat.postMessage'
+    msg = {"text": f"Someone just completed the task {task_data.title}", "channel": "test-channel"}
+    auth = os.environ.get('SLACK_BOT_TOKEN')
+    requests.post(SLACK_URL, json=msg, headers={'Authorization': f'Bearer {auth}'})
+
     return make_response(jsonify(dict(task=task_data.to_dict())))
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_task_incomplete(task_id):
     task_data = validate_task(task_id)
-    
     task_data.completed_at = None
 
     db.session.commit()
