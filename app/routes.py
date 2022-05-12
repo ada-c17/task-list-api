@@ -133,8 +133,8 @@ def patch_task_complete(task_id):
     task.completed_at = datetime.utcnow()
 
     '''
-    sends a post request to my Slackbot to send a message about the
-    task that's just been completed
+    Nested request - sends a post request to my Slackbot to send a
+    message about the task that's just been completed
     '''
     call_slackbot(task)
 

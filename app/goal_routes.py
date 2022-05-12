@@ -2,10 +2,7 @@ from flask import Blueprint, jsonify, make_response, abort, request
 from app.models.goal import Goal
 from app import db
 # helper function file import
-# from sqlalchemy import asc, desc
-# from datetime import datetime
-# import requests
-# import os
+
 
 goal_bp = Blueprint("goal_bp", __name__, url_prefix="/goals")
 
