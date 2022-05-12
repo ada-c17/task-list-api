@@ -1,8 +1,5 @@
 
-from flask import jsonify, abort, make_response, request
-from app import db
-from app.models.goal import Goal
-from app.models.task import Task
+from flask import jsonify, abort, make_response
 import os
 import requests
 
@@ -16,12 +13,10 @@ def success_message(message, status_code=200):
 def return_database_info_list(return_value):
     return make_response(jsonify(return_value))
 
-
 def return_database_info_dict(category, return_value):
     return_dict = {}
     return_dict[category] = return_value
     return make_response(jsonify(return_dict))
-
 
 def get_record_by_id(cls, id):
     try:
@@ -39,8 +34,10 @@ def create_record_safely(cls, data_dict):
         return cls.create_from_dict(data_dict)
     except ValueError as err:
         error_message(f"Invalid data", 400)
+    # I'm not sure the below error will ever actually come about with how my create_from_dict functions are structured.
+    # However, I'm leaving it in as a reflection of how I would choose to structure error messages if left to my own devices
     except KeyError as err:
-        error_message(f"Missing key(s): {err}.  {cls.return_class_name()} not added to {cls.return_class_name()} List.", 400)
+        error_message(f"Invalid key(s): {err}.  {cls.return_class_name()} not added to {cls.return_class_name()} List.", 400)
 
 def update_record_safely(cls, record, data_dict):
     try:
@@ -52,16 +49,12 @@ def update_record_safely(cls, record, data_dict):
 
 def send_slackbot_message(task_title):
     path = "https://slack.com/api/chat.postMessage"
-    print(path)
     slackbot_key = os.environ.get("SLACK_OAUTH_TOKEN")
-    print(slackbot_key)
     headers = {'authorization': f'Bearer {slackbot_key}'}
-    print(headers)
     params = {
         'channel' : 'task-notifications',
         'text' : f'Someone just completed task {task_title}! :tada::tada::tada:',
     }
-    print(params)
     requests.patch(path, headers=headers, params=params)
 
 

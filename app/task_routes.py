@@ -1,12 +1,11 @@
 
-from flask import Blueprint, jsonify, abort, make_response, request
+from flask import Blueprint, request
 from app import db
 from app.models.task import Task
 from app.helper_functions import *
 import datetime as dt
 from datetime import date
-import os
-import requests
+
 
 task_bp = Blueprint("Tasks", __name__, url_prefix="/tasks")
 
@@ -23,11 +22,13 @@ def create_new_task():
 
     return success_message(dict(task=new_task.self_to_dict_no_goal()), 201)
 
+
 @task_bp.route("", methods=["GET"])
 def get_all_tasks():
     sort_param = request.args.get("sort")
     tasks = Task.query.all()
     all_tasks = [task.self_to_dict_no_goal() for task in tasks]
+
     if not sort_param:
         return return_database_info_list(all_tasks)
     if sort_param == "asc":
@@ -41,10 +42,12 @@ def get_all_tasks():
 @task_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = get_record_by_id(Task, task_id)
+
     if task.goal_id:
         return return_database_info_dict("task", task.self_to_dict_with_goal())
     else:
         return return_database_info_dict("task", task.self_to_dict_no_goal())
+
 
 @task_bp.route("/<task_id>", methods=["PUT", "PATCH"])
 def update_task_by_id(task_id):
@@ -57,6 +60,7 @@ def update_task_by_id(task_id):
 
     return return_database_info_dict("task", task.self_to_dict_no_goal())
 
+
 @task_bp.route("/<task_id>/<completion_status>", methods=["PATCH"])
 def update_task_completion_status(task_id, completion_status):
     task = get_record_by_id(Task, task_id)
@@ -67,6 +71,7 @@ def update_task_completion_status(task_id, completion_status):
         }
         update_record_safely(Task, task, completion_info)
         send_slackbot_message(task.title)
+        
     elif completion_status == "mark_incomplete":
         completion_info = {
             "completed_at" : None

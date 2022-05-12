@@ -1,4 +1,5 @@
 from app import db
+from app.helper_functions import get_record_by_id
 
 
 class Goal(db.Model):
@@ -7,8 +8,9 @@ class Goal(db.Model):
     tasks = db.relationship("Task", back_populates="goal", lazy=True)
 
     required_attributes = {
-        "title": True, 
-        }
+        "title" : True
+        # "tasks" : False
+    }
 
     # Instance Methods
     def self_to_dict_no_tasks(self):
@@ -28,13 +30,16 @@ class Goal(db.Model):
         return instance_dict
 
     def update_self(self, data_dict):
+        dict_key_errors = []
         for key in data_dict.keys():
             if hasattr(self, key):
                 setattr(self, key, data_dict[key])
             else:
-                raise ValueError(key)
+                dict_key_errors.append(key)
+        if dict_key_errors:
+            raise ValueError(dict_key_errors)
     
-    def id_and_task_ids_only(self):
+    def return_id_and_task_ids_only(self):
         task_ids = [task.task_id for task in self.tasks]
 
         id_and_tasks_dict = dict(
@@ -45,21 +50,24 @@ class Goal(db.Model):
 
 
     # Class Methods
-    
 
     @classmethod
     def create_from_dict(cls, data_dict):
-        # if "completed_at" not in data_dict.keys():
-        #     data_dict["completed_at"] = None
+        ### future refactoring
+        ### I'd like to add functionality here that would allow a goal to be created with task IDs in the input dict
+        ### but I'm not sure I'll have time
+        ### I could use below but I'd have to import Task and I'm not sure that's best practice
+        # if "tasks" not in data_dict.keys():
+        #   data_dict["tasks"] = []
+        # new_instance = cls(title=data_dict["title"])
+        # for elem in data_dict["task_ids"]:
+        #     task = get_record_by_id(Task, elem)
+        #     new_instance.tasks.append(task)
 
         if data_dict.keys() == cls.required_attributes.keys():
-            return cls(title=data_dict["title"],
-                    # description = data_dict["description"],
-                    # completed_at = data_dict["completed_at"]
-            )
-        
+            return cls(title=data_dict["title"])
         else:
-            remaining_keys= set(data_dict.keys())-set(cls.required_attributes.keys())
+            remaining_keys= set(data_dict.keys())-set("title")
             response=list(remaining_keys)
             raise ValueError(response)
     
