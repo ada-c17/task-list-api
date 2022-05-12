@@ -11,7 +11,9 @@ load_dotenv()
 
 
 def create_app(test_config=None):
+    print('foobar')
     app = Flask(__name__)
+    print('after foobar')
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     if test_config is None:

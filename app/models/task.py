@@ -13,6 +13,11 @@ class Task(db.Model):
             "description": self.description,
             "is_complete": bool(self.completed_at)
             }
+    
+    def single_dict(self):
+        return {
+            "task":self.to_dict()
+        }
 
     ## previous version
         # return {

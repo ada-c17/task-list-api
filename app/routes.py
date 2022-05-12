@@ -37,7 +37,7 @@ def create_task():
         db.session.commit()
         db.session.expire(new_task)
 
-        return make_response(jsonify({"task":new_task.to_dict()}), 201)
+        return make_response(jsonify(new_task.single_dict()), 201)
 
     except KeyError:
         return make_response(jsonify({"details":"Invalid data"}), 400)
@@ -56,7 +56,7 @@ def read_all_tasks():
 def read_one_task(task_id):
     task = validate(task_id)
 
-    return make_response(jsonify({"task":task.to_dict()}), 200)
+    return make_response(jsonify(task.single_dict()), 200)
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_one_task(task_id):
@@ -79,7 +79,7 @@ def update_one_task(task_id):
     db.session.commit()
     db.session.expire(task)
 
-    return make_response(jsonify({"task":task.to_dict()}), 200)
+    return make_response(jsonify(task.single_dict()), 200)
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
