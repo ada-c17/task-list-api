@@ -111,10 +111,12 @@ def replace_task(task_id):
 
 @task_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def complete_task(task_id):
+    request_body = request.get_json()
     task = validate_task(task_id)
 
     if task.title:
-        title = task.title
+        title = request_body["title"]
+        task.title = request_body["title"]
     else:
         title = "My beautiful task"
     
