@@ -14,7 +14,7 @@ def post_to_slack(task):
     }
 
     post_headers = {
-        "Authorization": os.environ.get("SLACK_API_KEY")
+        "Authorization": "Bearer " + os.environ.get("SLACK_API_KEY")
     }
 
     response = requests.post(url, params=query_params, headers=post_headers)
