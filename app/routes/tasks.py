@@ -57,6 +57,8 @@ def create_new_task():
     db.session.commit()
 
     confirmation_msg = {"task": new_task.make_response_dict()}
+    if "completed_at" in request_body and new_task.completed_at == None:
+        confirmation_msg["warning"] = "Invalid completed_at. Valid formats: datetime.utcnow(), yyyy-mm-dd hh:mm:ss, yyyy-mm-dd hh:mm. Update with PUT task/<id> or POST task/<id>/mark-complete."
 
     return make_response(jsonify(confirmation_msg), 201)
 
