@@ -5,6 +5,7 @@ from crypt import methods
 from flask import Blueprint, abort, make_response, jsonify, request
 from datetime import datetime
 from app.models.task import Task
+from app.models.goal import Goal
 from app import db
 
 task_bp = Blueprint('task_bp', __name__, url_prefix="/tasks")
@@ -76,7 +77,7 @@ def validate_task(task_id):
 
 
 @task_bp.route('/<task_id>', methods=['GET'])
-def get_or_update_one_task(task_id):
+def get_one_task(task_id):
     selected_task = validate_task(task_id)
 
     boolean_completed_task(selected_task)
@@ -153,7 +154,7 @@ def delete_one_task(task_id):
 
 
 # frankly, I'd love to be able to merge this function 
-# and the one below into a singular funct. and just use two route decorators
+# and the one below into a singular function. and just use two route decorators
 # until I can figure that out though, I'm separating them into two
 @task_bp.route('/<task_id>/mark_complete', methods=['PATCH'])
 def mark_task_complete(task_id):
@@ -172,7 +173,7 @@ def mark_task_complete(task_id):
         }
     }
 
-    # Slack stuff
+    # Slack bot message posting
     channel_id = "C03FG8SA2LR"
     api_key = "Bearer " + os.environ.get("SLACK_BOT_API_KEY")
     post_message_url = "https://slack.com/api/chat.postMessage"
@@ -205,6 +206,100 @@ def mark_task_incomplete(task_id):
     }
     return jsonify(rsp), 200
 
+
 # *******************
 # ROUTES FOR GOAL_BP
 # *******************
+
+def validate_goal(goal_id):
+    try:
+        goal_id = int(goal_id)
+    except ValueError:
+        rsp = {"msg": f"Invalid ID: {goal_id}"}
+        abort(make_response(jsonify(rsp), 400))    
+    
+    selected_goal = Goal.query.get(goal_id)
+    if selected_goal is None:
+        rsp = {"msg": f"Could not find goal with ID: {goal_id}"}
+        abort(make_response(jsonify(rsp), 404))
+
+    return selected_goal   
+
+
+@goal_bp.route('', methods=['POST'])
+def create_one_goal():
+    request_body = request.get_json()
+    try:
+        request_body["title"] == True
+    except KeyError:
+        rsp = {"details": "Invalid data"}
+        abort(make_response(jsonify(rsp), 400))
+
+    new_goal = Goal(
+        title = request_body["title"]
+    )   
+    
+    db.session.add(new_goal)
+    db.session.commit()
+
+    rsp = {"goal": {
+        "id": new_goal.goal_id,
+        "title": new_goal.title,
+    }}
+
+    return jsonify(rsp), 201
+
+
+@goal_bp.route('', methods=['GET'])
+def get_all_goals():
+    goals = Goal.query.all()
+    goals_response = []
+
+    for goal in goals:
+        goals_response.append({
+            "id": goal.goal_id,
+            "title": goal.title
+            })
+    
+    return jsonify(goals_response), 200
+
+
+@goal_bp.route('/<goal_id>', methods=['GET'])
+def get_one_goal(goal_id):
+    selected_goal = validate_goal(goal_id)
+
+    rsp = {"goal": {
+        "id": selected_goal.goal_id,
+        "title": selected_goal.title,
+    }}
+
+    return jsonify(rsp), 200
+
+
+@goal_bp.route('/<goal_id>', methods=['PUT'])
+def update_one_goal(goal_id):
+    selected_goal = validate_goal(goal_id)
+    request_body = request.get_json()
+    try:
+        selected_goal.title = request_body["title"]
+    except KeyError:
+        return {"details": "Invalid data"}, 400   
+    db.session.commit()
+
+    rsp = {"goal": {
+        "id": selected_goal.goal_id,
+        "title": selected_goal.title,
+    }}
+
+    return jsonify(rsp), 200
+
+
+@goal_bp.route('/<goal_id>', methods=['DELETE'])
+def delete_one_goal(goal_id):
+    selected_goal = validate_goal(goal_id)
+
+    db.session.delete(selected_goal)
+    db.session.commit()
+
+    return {"details": 
+        f'Goal {selected_goal.goal_id} \"{selected_goal.title}" successfully deleted'}, 200
