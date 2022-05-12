@@ -161,13 +161,7 @@ def replace_one_task(task_id):
 
     db.session.commit()
 
-    return { "task": {
-                "id" : chosen_task.task_id,
-                "title": chosen_task.title,
-                "description": chosen_task.description,
-                "is_complete": bool(chosen_task.completed_at)
-                }
-            }
+    return { "task": chosen_task.to_dict()}
     return jsonify(response), 200
 
 
@@ -218,13 +212,7 @@ def completed_task(task_id):
     print(response_body)
 
 
-    return { "task": {
-                "id" : chosen_task.task_id,
-                "title": chosen_task.title,
-                "description": chosen_task.description,
-                "is_complete": bool(chosen_task.completed_at)
-                }
-            }, 200
+    return { "task": chosen_task.to_dict()}, 200
     # return jsonify(response), 200
 
 
@@ -237,13 +225,7 @@ def incompleted_task(task_id):
     db.session.add(chosen_task)
     db.session.commit()
 
-    return { "task": {
-                "id" : chosen_task.task_id,
-                "title": chosen_task.title,
-                "description": chosen_task.description,
-                "is_complete": bool(chosen_task.completed_at)
-                }
-            }, 200
+    return { "task": chosen_task.to_dict()}, 200
 
 
 
