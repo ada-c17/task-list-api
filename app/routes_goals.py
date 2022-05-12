@@ -68,10 +68,13 @@ def get_one_goal(goal_id):
 def update_one_goal(goal_id):
     goal = validate_goal(goal_id)
     request_body = request.get_json()
-    
-    # Add catch if title is not there or invalid input
-    goal.title = request_body["title"]
-    db.session.commit()
+
+    try:
+        goal.title = request_body["title"]
+        db.session.commit()
+    except:
+        response = {"details": "Goal needs a title"}
+        abort(make_response(jsonify(response), 400))
 
     response = {
         "goal": {
@@ -93,7 +96,7 @@ def delete_one_route(goal_id):
 
 
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
-def create_one_goal_tasks_list(goal_id):
+def create_goal_ids_for_tasks(goal_id):
     goal = validate_goal(goal_id)
     request_body = request.get_json()
 
