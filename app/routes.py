@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, make_response, abort
 from sqlalchemy import desc
 from app import db
 from app.models.task import Task
+from datetime import date
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -67,6 +68,17 @@ def delete_task_by_id(task_id):
     db.session.commit()
 
     return make_response({"details": f'Task {task_id} "{task.title}" successfully deleted'})
+
+# mark one task complete by id
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def mark_task_complete(task_id):
+    task = validate_task(task_id)
+
+    task.completed_at = date.today()
+    response_body = {"task": task.to_dict()}
+
+    db.session.commit()
+    return make_response(jsonify(response_body), 200)
 
 # check for valid task using id
 def validate_task(task_id):
