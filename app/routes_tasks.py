@@ -41,14 +41,7 @@ def create_one_task():
     db.session.add(new_task)
     db.session.commit()
 
-    response =  {
-        "task": {
-            "id": new_task.task_id,
-            "title": new_task.title,
-            "description": new_task.description,
-            "is_complete": is_complete
-        } 
-        }
+    response =  {"task": new_task.to_dict() }
     return jsonify(response), 201
 
 
@@ -61,12 +54,7 @@ def get_all_tasks():
     tasks = Task.query.all()
     task_list = []
     for task in tasks:
-        is_complete = complete_or_not(task)
-        task_list.append( 
-        {   "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": is_complete})
+        task_list.append(task.to_dict())
 
     def get_title(task_list):            # https://www.programiz.com/python-programming/methods/list/sort
         return task_list.get('title')
@@ -81,12 +69,8 @@ def get_all_tasks():
 @task_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = validate_task(task_id)
-    is_complete = complete_or_not(task)
     response = { "task":
-            {"id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": is_complete}
+            task.to_dict()
         }
     return jsonify(response), 200
 
@@ -95,18 +79,11 @@ def get_one_task(task_id):
 @task_bp.route("/<task_id>", methods=["PUT"])
 def update_one_task(task_id):
     task = validate_task(task_id)
-    is_complete = complete_or_not(task)
-
     request_body = request.get_json()
     task.title = request_body['title']
     task.description = request_body['description']
     db.session.commit()
-    response = {"task":
-    {   "id": task.task_id,
-        "title": task.title ,
-        "description": task.description,
-        "is_complete": is_complete } 
-        }
+    response = {"task": task.to_dict()}
     return jsonify(response), 200
 
 # request body will have { 'id': 1, 'is_complete' = false}
@@ -117,18 +94,9 @@ def update_one_task(task_id):
 def mark_task_completed(task_id):
     task = validate_task(task_id)
     request_body = request.get_json()
-    # try:
-        # need to mark the task as completed, and update this in the record
-        # and save in the data base
-    task.completed_at = datetime.datetime.now()  # do I need to somehow use  datetime.utcnow()?
-    is_complete = complete_or_not(task)
+    task.completed_at = datetime.datetime.now()  
+    response = {"task": task.to_dict()}
     db.session.commit()
-    response = {"task":
-    {   "id": task.task_id,
-        "title": task.title ,
-        "description": task.description,
-        "is_complete": is_complete }
-        }
     bot_token = 'Bearer '+ os.environ.get('SLACK_BOT_TOKEN')
     print(bot_token)
     slack = requests.post('https://slack.com/api/chat.postMessage', headers={'Authorization': bot_token}, params={'channel': 'task-notifications', 'text':f'Someone just completed the task {task.title}', 'format': 'json'})
@@ -150,28 +118,14 @@ def mark_task_incomplete(task_id):
     task.completed_at = None
     is_complete = False
     db.session.commit()
-    response = {"task":
-    {   "id": task.task_id,
-        "title": task.title ,
-        "description": task.description,
-        "is_complete": is_complete } 
-        }
+    response = {"task": task.to_dict()}
     return jsonify(response), 200
 
 
 
 
-# request body:
-#        { "title": "Updated Task Title",
-#         "description": "Updated Test Description"}
-
-#response_body == {"task": {
-#             "id": 1,
-#             "title": "Updated Task Title",
-#             "description": "Updated Test Description",
-#             "is_complete": False
-#         } }, 200
-
+# request body:{ "title": "Updated Task Title","description": "Updated Test Description"}
+# response_body == {"task": {"id": 1,"title": "Updated Task Title","description": "Updated Test Description","is_complete": False} }, 200
 
 # Delete: DELETE
 @task_bp.route("/<task_id>", methods=["DELETE"])
