@@ -19,5 +19,5 @@ class Goal(db.Model):
         return {
             "id":self.goal_id,
             "title":self.title,
-            "tasks":[task.to_dict_goals() for task in self.tasks]
+            "tasks":[task.to_dict() for task in self.tasks]
         }

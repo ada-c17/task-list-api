@@ -276,7 +276,3 @@ def get_tasks_from_goal(goal_id):
 
 
 
-
-
-
-
