@@ -203,7 +203,7 @@ def post_tasks_to_goal(goal_id):
     
 
     # Check that "task_ids" is in the request_body
-    # if "task_ids" in request_body:
+    if "task_ids" in request_body:
 
         # Loop through the "task_ids"
         # Assign the Task foreign key to match the Goal primary key
@@ -221,7 +221,6 @@ def post_tasks_to_goal(goal_id):
     response_body = {
         "id" : goal_for_post.goal_id, 
         "task_ids" : task_id_list
-        # "task_ids" : request_body["task_ids"]
     }
 
     return response_body, 200
