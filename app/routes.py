@@ -81,6 +81,25 @@ def make_goal_response(goal):
     return response
 
 
+#helper function, sorts tasks by title
+def sort_tasks(params, tasks_response):
+    sort_type = None
+    if params["sort"] == "asc":
+        #ascending
+        sort_type = "A"
+    else:
+        #descending
+        sort_type = "D"
+
+    if sort_type == "A":
+        tasks_response = (sorted(tasks_response, key=lambda task: task['title']))
+
+    elif sort_type == "D":
+        tasks_response = (sorted(tasks_response, key=lambda task: task['title'], reverse = True))
+
+    return tasks_response
+
+
 # TASKS
 
 @tasks_bp.route('', methods = ['POST'])
@@ -137,22 +156,12 @@ def get_all_tasks():
 
     #check params for sorting
     params = request.args
-    sort_type = None
     if "sort" in params:
-        if params["sort"] == "asc":
-            #ascending
-            sort_type = "A"
-        else:
-            #descending
-            sort_type = "D"
+        tasks_response = sort_tasks(params, tasks_response)
 
-    if sort_type == "A":
-        tasks_response = (sorted(tasks_response, key=lambda task: task['title']))
-
-    elif sort_type == "D":
-        tasks_response = (sorted(tasks_response, key=lambda task: task['title'], reverse = True))
-  
     return jsonify(tasks_response)
+
+
 
 
 #SLACK API  - sends message to slack
@@ -173,7 +182,7 @@ def message_slack(task):
 def mark_complete(task_id):
     chosen_task = validate(task_id, "task")
 
-    #check if task was already completed, if not send message to slack
+    #check if task was already completed, if not, send message to slack
     if not check_if_completed(chosen_task):
         message_slack(chosen_task)
 
