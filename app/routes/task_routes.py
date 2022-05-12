@@ -1,4 +1,3 @@
-from asyncio import tasks
 from flask import Blueprint, jsonify,request
 from app.models.task import Task
 from app import db
@@ -7,7 +6,6 @@ from datetime import datetime
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
-#GET ALL TASKS
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
 
@@ -30,22 +28,15 @@ def get_all_tasks():
 	else:
 		tasks = Task.query.all()
 
-	tasks_response = []
-
-	for task in tasks:
-		tasks_response.append(task.to_json())
+	tasks_response = [task.to_json() for task in tasks]
 
 	return jsonify(tasks_response), 200
-
-# GET ONE TASK
-
 
 @tasks_bp.route("/<id>", methods=["GET"])
 def get_one_tasks(id):
     task = validate_task(id)
-    print(task)
-    return jsonify({"task": task.to_json()}), 200
 
+    return jsonify({"task": task.to_json()}), 200
 
 @tasks_bp.route("", methods=["POST"])
 def create_task():
@@ -58,7 +49,6 @@ def create_task():
 
 	return jsonify({"task": new_task.to_json()}), 201
 
-#PUT one task
 @tasks_bp.route("/<id>", methods=["PUT"])
 def update_task(id):
     task = validate_task(id)
@@ -70,9 +60,6 @@ def update_task(id):
     db.session.commit()
 
     return jsonify({"task": task.to_json()}), 200
-
-#DELETE ONE PLANET
-
 
 @tasks_bp.route("/<id>", methods=["DELETE"])
 def delete_one_task(id):
@@ -95,11 +82,10 @@ def mark_one_task_complete(id):
 
 	return jsonify({"task": task.to_json()}), 200
 
-
 @tasks_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
 def mark_one_task_incomplete(id):
 	task = validate_task(id)
-	
+
 	task.completed_at = None
 
 	db.session.commit()
