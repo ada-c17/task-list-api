@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, abort, make_response, request
 from app.models.task import Task
-from .tasks import validate_task_id, get_all_tasks
+from .tasks import validate_task_id
 from app.models.goal import Goal
 from app import db
 
@@ -29,10 +29,7 @@ def create_one_goal():
     db.session.add(new_goal)
     db.session.commit()
 
-    rsp = {'goal': {
-        'id': new_goal.id,
-        'title': new_goal.title
-        }}
+    rsp = {'goal': new_goal.to_json()}
     
     return jsonify(rsp), 201
 
@@ -43,10 +40,7 @@ def get_all_goals():
     goals = Goal.query.all()
 
     for goal in goals:
-        response_body.append({
-            'id': goal.id,
-            'title': goal.title
-        })
+        response_body.append(goal.to_json())
     
     return jsonify(response_body), 200
 
@@ -54,10 +48,7 @@ def get_all_goals():
 @goals_bp.route('/<goal_id>', methods=['GET'])
 def get_one_goal(goal_id):
     goal = validate_goal_id(goal_id)
-    rsp = {'goal': {
-        'id': goal.id,
-        'title': goal.title
-        }}
+    rsp = {'goal': goal.to_json()}
 
     return jsonify(rsp), 200
 
@@ -74,10 +65,7 @@ def update_one_goal(goal_id):
         
     db.session.commit()
 
-    rsp = {'goal': {
-        'id': goal.id,
-        'title': goal.title
-        }}
+    rsp = {'goal': goal.to_json()}
     return jsonify(rsp), 200
 
 
@@ -115,28 +103,12 @@ def send_tasks_list_to_one_goal(goal_id):
 def get_tasks_of_one_goal(goal_id):
     goal = validate_goal_id(goal_id)
     tasks = goal.tasks
-
-    is_complete = False
     
     tasks_list = []
     for task in goal.tasks:
-        if task.completed_at:
-            is_complete = True
+        tasks_list.append(task.to_json())
 
-        tasks_list.append({
-            'id': task.id,
-            'goal_id': task.id,
-            'title': task.title,
-            'description': task.description,
-            'is_complete': is_complete
-        })
-
-    rsp = {
-            'id': goal.id,
-            'title': goal.title,
-            'tasks': tasks_list
-        }
-
+    rsp = goal.to_json()
+    rsp['tasks'] = tasks_list
 
     return jsonify(rsp), 200
-    # get_all_tasks():
