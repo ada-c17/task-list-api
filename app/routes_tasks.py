@@ -65,7 +65,6 @@ def get_one_task(task_id):
         }
     }
 
-    # Add check to pass Wave 6's last test
     if task.goal_id:
         response["task"]["goal_id"] = task.goal_id
 
@@ -125,10 +124,13 @@ def update_task(task_id):
     task = validate_task(task_id)
     request_body = request.get_json()
 
-    # Add check here to make sure both are provided
     # Assuming that completed_at can only be changed by mark_(in)complete
-    task.title = request_body["title"]
-    task.description = request_body["description"]
+    try:
+        task.title = request_body["title"]
+        task.description = request_body["description"]
+    except:
+        response = {"details": "Task needs both a title and description"}
+        abort(make_response(jsonify(response), 400))
 
     db.session.commit()
 

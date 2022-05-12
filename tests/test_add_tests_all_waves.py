@@ -1,3 +1,4 @@
+from cgitb import reset
 from app.models.task import Task
 from app.models.goal import Goal
 import pytest
@@ -5,15 +6,6 @@ import unittest
 from unittest.mock import Mock, patch
 from app import db
 
-# This fixture gets called in every test that
-# references "one_task"
-# This fixture creates a task and saves it in the database
-# @pytest.fixture
-# def one_task_no_mark_complete(app):
-#     new_task = Task(
-#         title="Go on my daily walk 🏞", description="Notice something new every day", completed_at=None)
-#     db.session.add(new_task)
-#     db.session.commit()
 
 
 def test_get_tasks_with_invalid_query_param_returns_400(client, three_tasks):
@@ -26,18 +18,30 @@ def test_get_tasks_with_invalid_query_param_returns_400(client, three_tasks):
     tasks = Task.query.all()
     assert len(tasks) == 3 # no changes to three_tasks
     
-
-def test_mark_complete_with_invalid_completed_at_returns_400(client):
-    response = client.post("/tasks", json={
-        "title": "A Brand New Task",
-        "description": "Test Description",
-        "completed_at": "this isn't a date"
-    })
-
+def test_update_task_returns_400_with_no_title(client, one_task):
+    response = client.put("/tasks/1", json={"description": "New task description"})
     response_body = response.get_json()
 
     assert response.status_code == 400
-    assert "task" not in response_body
-    assert response_body["details"] == "Invalid date data"
-    tasks = Task.query.all()
-    assert len(tasks) == 0
+    assert len(response_body) == 1
+    assert response_body["details"] == "Task needs both a title and description"
+    task = Task.query.get(1)
+    assert task.description == "Notice something new every day"
+
+def test_update_task_returns_400_with_no_description(client, one_task):
+    response = client.put("/tasks/1", json={"title": "New Title"})
+    response_body = response.get_json()
+
+    assert response.status_code == 400
+    assert len(response_body) == 1
+    assert response_body["details"] == "Task needs both a title and description"
+    task = Task.query.get(1)
+    assert task.title == "Go on my daily walk 🏞"
+
+# write tests to check that create_one_task adds in datetime if appropriate format
+# 1: 'Sat, 07 May 2022 23:59:31 GMT'
+# 2: '2022-05-07 18:48:06.598253'
+# 3: else, invalid type is 400
+
+# would we want to write tests to check that validate_task and validate_goal 
+# are working correctly?
