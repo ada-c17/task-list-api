@@ -7,6 +7,8 @@ from datetime import datetime
 import requests
 import os
 
+#------task--------#
+
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
 @tasks_bp.route("", methods=["POST"])
@@ -62,6 +64,7 @@ def get_all_tasks():
         )
     return jsonify(tasks_response), 200
 
+# helper function on testing valid tasks 
 def validate_task(task_id):
     try:
         task_id = int(task_id)
@@ -185,7 +188,7 @@ def delete_task(task_id):
     }, 200
 
 
-#_____Wave05_____#
+#------goal------#
 
 goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 
@@ -229,7 +232,7 @@ def get_all_goals():
         )
     return jsonify(goals_response), 200
 
-
+# helper function on testing valid goals
 def validate_goal(goal_id):
     try:
         goal = int(goal_id)
@@ -242,6 +245,7 @@ def validate_goal(goal_id):
         response = {"details": f"Could not find goal with id #{goal_id}"}
         abort(make_response(jsonify(response),404))
     return chosen_goal
+
 
 @goals_bp.route("/<goal_id>", methods=["GET"])
 def get_one_goal(goal_id):
@@ -285,6 +289,7 @@ def delete_goal(goal_id):
         "details": f'Goal {chosen_goal.goal_id} "{chosen_goal.title}" successfully deleted'
     }, 200
 
+
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
 def send_task_list(goal_id):
     chosen_goal = validate_goal(goal_id)
@@ -305,6 +310,7 @@ def send_task_list(goal_id):
         "task_ids": request_body["task_ids"]
     })
     return response, 200
+
 
 @goals_bp.route("/<goal_id>/tasks", methods=["GET"])
 def get_tasks_of_one_goal(goal_id):
