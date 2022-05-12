@@ -1,5 +1,3 @@
-# There are no tests for wave 4.
-
 # test function post_slack_message
 from app.routes import post_slack_message
 import pytest

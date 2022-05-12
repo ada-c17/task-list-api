@@ -3,6 +3,7 @@ from app.models.task import Task
 from app.models.goal import Goal
 import requests
 import os
+from datetime import datetime
 
 def post_slack_message(text):
     URL = "https://slack.com/api/chat.postMessage"
@@ -56,3 +57,13 @@ def valid_goal(goal_id):
         abort(make_response({"msg":f"Goal id {goal_id} not found"}, 404))
 
     return goal
+
+def check_completed_at(request_body):
+    if "completed_at" not in request_body:
+        return None
+    time = request_body["completed_at"]
+    try:
+        #utcnow() data string format: 'Thu, 12 May 2022 04:19:18 GMT'
+        return datetime.strptime(time, '%a, %d %b %Y %H:%M:%S GMT')
+    except ValueError:
+        abort(make_response({"msg":f"Complete_at Time {time} invalid"}, 404))

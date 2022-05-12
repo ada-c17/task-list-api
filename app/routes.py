@@ -2,8 +2,8 @@ from flask import Blueprint, request, make_response, jsonify, abort
 from app.models.goal import Goal
 from app.models.task import Task
 from app import db
-from datetime import date
-from app.helpers import valid_task, valid_goal, display_task, display_goal, post_slack_message
+from datetime import datetime
+from app.helpers import valid_task, valid_goal, display_task, display_goal, post_slack_message, check_completed_at
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
@@ -15,13 +15,11 @@ def handle_tasks():
         try:
             task = Task(
                 title = request_body["title"],
-                description = request_body["description"]
+                description = request_body["description"],
+                completed_at = check_completed_at(request_body)
                 )
         except:
-            abort(make_response({"details":"Invalid data"}, 400))
-        
-        if "completed_at" in request_body:
-            task.completed_at = request_body["completed_at"]
+            abort(make_response({"details":"Invalid data"}, 400))  
 
         db.session.add(task)
         db.session.commit()
@@ -37,7 +35,7 @@ def handle_tasks():
         param = request.args.get("sort")
         if param:
             is_desc = True if param == "desc" else False
-            tasks.sort(reverse=is_desc, key=lambda task:task.title)
+            tasks.sort(reverse=is_desc, key=lambda task:task.title)         
             
         res = []
         for task in tasks:
@@ -62,6 +60,7 @@ def handle_task(task_id):
         request_body = request.get_json()
         task.title = request_body["title"]
         task.description = request_body["description"]
+        task.completed_at = check_completed_at(request_body)
         db.session.commit()
 
         return make_response(
@@ -79,7 +78,7 @@ def handle_task(task_id):
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_complete(task_id):
     task = valid_task(task_id)
-    task.completed_at = date.today()
+    task.completed_at = datetime.utcnow()
     db.session.commit()
     post_slack_message(f"Someone just completed the task {task.title}")
 
@@ -133,7 +132,11 @@ def handle_goal(goal_id):
 
     elif request.method == "PUT":
         request_body = request.get_json()
-        goal.title = request_body["title"]
+        try:
+            goal.title = request_body["title"]
+        except:
+            abort(make_response({"details":"Invalid data"}, 400))
+
         db.session.commit()
 
         return make_response(
