@@ -1,14 +1,15 @@
 from app import db
 from flask import make_response
 from sqlalchemy import asc
+from datetime import datetime
 
 
 class Task(db.Model):
     task_id = db.Column(db.Integer, primary_key=True, autoincrement = True)
     title = db.Column(db.String)
     description = db.Column(db.String)
-    completed_at = db.Column(db.DateTime, nullable = True, default = None,)
-    # is_complete = db.Column(db.Boolean, default = False)
+    completed_at = db.Column(db.DateTime, nullable = True, default = None)
+
 
     def to_json(self):
         json_response = {
@@ -25,6 +26,7 @@ class Task(db.Model):
     def update_task(self, request_body):
         self.title = request_body["title"]
         self.description = request_body["description"]
+        
         
 
     @classmethod
