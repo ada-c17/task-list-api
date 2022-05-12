@@ -76,12 +76,20 @@ def get_all_tasks():
 @tasks_bp.route('/<task_id>', methods=['GET'])
 def get_one_task(task_id):
     one_task = validate_task_id(task_id)
-    response = {
-            "id": one_task.task_id,
-            "title": one_task.title,
-            "description": one_task.description,
-            "is_complete": isinstance(one_task.completed_at, datetime.datetime)
-        }
+    print(one_task.goal_id)
+    if one_task.goal_id:
+        response = {"goal_id": one_task.goal_id,
+                    "id": one_task.task_id,
+                    "title": one_task.title,
+                    "description": one_task.description,
+                    "is_complete": isinstance(one_task.completed_at, datetime.datetime)}
+    else:
+        response = {
+                "id": one_task.task_id,
+                "title": one_task.title,
+                "description": one_task.description,
+                "is_complete": isinstance(one_task.completed_at, datetime.datetime)
+            }
     return jsonify({"task": response}), 200
 
 @tasks_bp.route('/<task_id>', methods=['PUT'])
@@ -208,3 +216,48 @@ def delete_one_goal(goal_id):
     db.session.commit()
 
     return {"details": f'Goal {one_goal.goal_id} "{one_goal.title}" successfully deleted'}, 200
+
+#######################################
+######################################
+
+@goals_bp.route("<goal_id>/tasks", methods=["POST"])
+def create_task_with_goal_id(goal_id):
+    goal = validate_goal_id(goal_id)
+    request_body = request.get_json()
+    ids = []
+    for id in request_body["task_ids"]:
+        task= validate_task_id(id)
+        task.goal = goal
+        ids.append(id)
+    
+    db.session.commit()
+    
+    response = {
+        "id": goal.goal_id,
+        "task_ids": ids
+    }
+    return response, 200
+
+@goals_bp.route("<goal_id>/tasks", methods=["GET"])
+def get_all_task_with_goal_id(goal_id):
+    goal = validate_goal_id(goal_id)
+    task_response = []
+    for task in goal.task:
+        task_response.append(    {
+            "id": task.task_id,
+            "goal_id": task.goal_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": isinstance(task.completed_at, datetime.datetime)
+        })
+
+    return {
+        "id": goal.goal_id,
+        "title": goal.title,
+        "tasks": task_response
+    }, 200
+
+    
+
+
+
