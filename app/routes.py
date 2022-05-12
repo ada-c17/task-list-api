@@ -48,3 +48,22 @@ def create_task():
                         "description": new_task.description,
                         "is_complete": bool(new_task.completed_at)}
     return jsonify(response), 201
+
+
+@task_bp.route("/<task_id>", strict_slashes=False, methods=["PUT"])
+def update_task(task_id):
+    request_body = request.get_json()
+    task = validate_task(task_id)
+    task.title = request_body["title"]
+    task.description = request_body["description"]
+    task.completed_at = request_body.get("completed_at")
+
+    db.session.commit()
+
+    response = {}
+    response["task"] = {"id": task.id,
+                        "title": task.title,
+                        "description": task.description,
+                        "is_complete": bool(task.completed_at)}
+
+    return jsonify(response), 200
