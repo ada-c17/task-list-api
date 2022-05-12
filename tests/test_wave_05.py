@@ -182,3 +182,14 @@ def test_create_goal_missing_title(client):
     assert response_body == {
         "details": "Invalid data"
     }
+
+
+# test code coverage
+def test_goal_id_not_integer(client):
+    # Act
+    response = client.get("/goals/one")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    assert response_body == {"message": f"The goal id one is invalid. The id must be integer."}
