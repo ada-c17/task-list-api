@@ -2,9 +2,6 @@ from flask import Blueprint, jsonify, make_response, request, abort
 from app import db
 from app.models.goal import Goal
 from .task_routes import validate_task_id, Task
-# from sqlalchemy import desc
-# import requests
-# import os
 
 goal_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
@@ -47,12 +44,6 @@ def add_goal():
 
 @goal_bp.route("", methods=["GET"])
 def get_goals():
-#     sort_param = request.args.get("sort")
-#     if sort_param == "asc":
-#         tasks = Task.query.order_by("title")
-#     elif sort_param == "desc":
-#         tasks = Task.query.order_by(desc(Task.title))
-#     else:
     goals = Goal.query.all()
 
     result_list = [goal.to_dict() for goal in goals]
@@ -102,27 +93,3 @@ def get_tasks_from_goal(id):
     goal = validate_goal_id(id)
     result = goal.get_tasks()
     return jsonify(result)
-
-# @task_bp.route("<id>/mark_complete", methods=["PATCH"])
-# def mark_complete(id):
-#     task = validate_task_id(id)
-#     updated_task = task.mark_done()
-
-#     db.session.commit()
-#     send_slack_message(f"Someone just completed the task {task.title}")
-
-#     return jsonify({"task":updated_task})
-
-# @task_bp.route("<id>/mark_incomplete", methods=["PATCH"])
-# def mark_incomplete(id):
-#     task = validate_task_id(id)
-#     updated_task = task.mark_not_done()
-
-#     db.session.commit()
-
-#     return jsonify({"task":updated_task})
-
-# def send_slack_message(message):
-#     Slack_Key = os.environ.get("Slack_API_Token")
-#     requests.post('https://slack.com/api/chat.postMessage', params={'text':message, 'channel':'task-notifications'}, headers={'Authorization':Slack_Key})
-#     return True

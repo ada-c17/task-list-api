@@ -11,7 +11,6 @@ class Task(db.Model):
     is_complete = db.Column(db.Boolean, default=False)
     completed_at = db.Column(db.DateTime)
     goal_id = db.Column(db.Integer, db.ForeignKey(Goal.goal_id))
-    # goal = db.relationship("Goal", back_populates="task")
 
     def task_to_dict(self):
         if self.goal_id:
