@@ -19,6 +19,12 @@ class TaskListJSONEncoder(JSONEncoder):
                 'id': obj.goal_id,
                 'title': obj.title
             }
+        elif type(obj).__name__ == 'TasksGoal':
+            return {
+                'id': obj.goal_id,
+                'title': obj.title,
+                'tasks': obj.tasks
+            }
         return JSONEncoder.default(self, obj)
 
 #########################################
@@ -33,6 +39,7 @@ def validate_and_get_by_id(cls, target_id):
     if not target:
         raise LookupError
     return target
+
 
 def get_filtered_and_sorted(cls, request_args):
     params = dict(request_args)  # Conversion to make args object mutable
