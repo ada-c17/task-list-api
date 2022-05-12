@@ -194,7 +194,7 @@ def post_tasks_to_goal(goal_id):
     task_id_list = []
 
     for id in task_ids:
-        task_id_list.append(validate_task(id))
+        task_id_list.append(validate_task(id).task_id)
     
     for task_id in task_id_list:
         task_id.goal_for_post = goal_for_post
