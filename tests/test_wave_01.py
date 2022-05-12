@@ -66,7 +66,7 @@ def test_get_task_not_found(client):
     # *****************************************************************
     # how to get task_id into response body?
     # assert response_body == {"message": f"Task id {task_id} not found"}
-    assert response_body == {"details": "Task 1 not found"}
+    assert response_body == {"details": "Task not found"}
 
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
@@ -138,7 +138,8 @@ def test_update_task_not_found(client):
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
-    assert response_body == {"details": "Task 1 not found"}
+    assert response_body == {"details": "Task not found"}
+
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_delete_task(client, one_task):
@@ -170,7 +171,7 @@ def test_delete_task_not_found(client):
     # *****************************************************************
 
     assert Task.query.all() == []
-    assert response_body == {"details": "Task 1 not found" }
+    assert response_body == {"details": "Task not found" }
 
 
 # @pytest.mark.skip(reason="No way to test this feature yet")

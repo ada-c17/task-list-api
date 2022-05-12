@@ -1,8 +1,9 @@
-from flask import Blueprint, jsonify, request, make_response
+from flask import Blueprint, jsonify, make_response, request
 from app.models.task import Task
 from .routes_helper import validate_task_id, create_message
 from app import db
 from datetime import datetime
+import requests, os
 
 
 bp = Blueprint("tasks", __name__, url_prefix="/tasks")
@@ -60,14 +61,27 @@ def delete_task(task_id):
     db.session.delete(task)
     db.session.commit()
 
-    create_message(f"Task {task_id} \"{task.title}\" successfully deleted", 200)
+    create_message(f'Task {task_id} "{task.title}" successfully deleted', 200)
 
 
 @bp.route("/<task_id>/mark_complete", methods=("PATCH",))
 def mark_task_complete(task_id):
     task = validate_task_id(task_id)
+
+    # task.title = "My Beautiful Task"
+    # task.description = "What a pretty task!"
     task.completed_at = datetime.utcnow()
+    
     db.session.commit()
+
+    requests.post(
+        url="https://slack.com/api/chat.postMessage", 
+        data={
+            "channel": "task-notifications", 
+            "text": f"Someone just completed the task {task.title}"
+        }, 
+        headers={"Authorization": os.environ.get("token")}, 
+    )
 
     return jsonify({"task": task.to_dict()}), 200
 
