@@ -319,4 +319,39 @@ def get_goal_or_abort(goal_id):
     return chosen_goal
 
 
-# @goals_bp.route("/<goal_id>/tasks", methods = ["POST"])
+@goals_bp.route("/<goal_id>/tasks", methods = ["POST"])
+def add_tasks_to_goal(goal_id):
+    goal = get_goal_or_abort(goal_id)
+
+    request_body = request.get_json()
+    new_goal = Task(
+        title=request_body["title"],
+        description=request_body["description"],
+        goal=goal
+    )
+
+    db.session.add(new_goal)
+    db.session.commit()
+    return make_response(jsonify(), 200)
+
+
+
+
+@goals_bp.route("/<goal_id>/tasks", methods = ["POST"])
+def add_tasks_to_goal(goal_id):
+    goal = get_goal_or_abort(goal_id)
+
+    request_body = request.get_json()
+    print("Here's my request body", request_body)
+    for task_id in request_body["task_ids"]:
+        task = get_task_or_abort(task_id)
+        goal.tasks.append(task) 
+        
+    db.session.commit()
+    response = {
+        "id": goal.goal_id,
+        "task_ids": goal.tasks
+    }
+    return make_response(jsonify(response), 200)
+
+
