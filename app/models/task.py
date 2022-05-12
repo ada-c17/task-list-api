@@ -5,36 +5,35 @@ from flask import make_response, abort
 
 class Task(db.Model):
     task_id = db.Column(db.Integer, primary_key=True)
-
     title = db.Column("title",db.String)
-
     description = db.Column("description", db.String)
-
     completed_at = db.Column("completed_at", db.DateTime, default=None)
+    goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'))
+    goal = db.relationship("Goal", back_populates="tasks")
 
 
 
 
     def to_json(self):
-        if self.completed_at == None:
-            return {
-                "id": self.task_id,
-                "title": self.title,
-                "description": self.description,
-                "is_complete": False
-            }
-        else:
-            return {
-                "id": self.task_id,
-                "title": self.title,
-                "description": self.description,
-                "is_complete": True
-            }
+
+        is_complete = True if self.completed_at else False
+
+        response_body = {
+            "id": self.task_id,
+            "title": self.title,
+            "description": self.description,
+            "is_complete": is_complete
+        }
+
+        if self.goal_id: response_body["goal_id"] = self.goal_id 
+        
+        return response_body
+
 
     @classmethod
     def create(cls, request_body):
         try:
-            new_task = cls(title=request_body["title"], description=request_body["description"],completed_at = request_body["completed_at"]
+            new_task = cls(title=request_body["title"], description=request_body["description"], completed_at=request_body.get("completed_at"), goal_id=request_body.get("goal_id")
             )
         except KeyError:
             return abort(make_response({"details": "Invalid data"}, 400))
