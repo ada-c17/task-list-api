@@ -1,5 +1,5 @@
 from app import db
-from flask import Blueprint, jsonify, make_response, request, abort
+from flask import Blueprint, make_response, request
 from ..models.goal import Goal
 from ..models.task import Task
 from .routes_helper import success_response, error_response, validate_item
