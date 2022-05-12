@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, make_response, request
+from flask import Blueprint, jsonify, make_response, request, abort
 from requests import session
 from app.models.task import Task
 from app.models.helper import validate_id, validate_data
@@ -8,31 +8,21 @@ from sqlalchemy import asc, desc
 task_db = Blueprint("tasks",__name__, url_prefix = "/tasks")
 # goal_db = Blueprint("goals", __name__, url_prefix = "/goals")
 
+
 @task_db.route("", methods = ["GET"])
 def get_all_tasks():
     task_response = []
-    tasks = Task.query.all()
-    for task in tasks:
-        task_response.append(task.to_json())
-    return jsonify(task_response), 200
-
-@task_db.route("?sort=asc", methods = ["GET"])
-def sort_all_tasks_asc():
-    task_response = []
-    ordered_tasks = Task.query.order_by(asc(Task.title)).all()
+    sort_query = request.args.get("sort")
+    if not sort_query:
+        ordered_tasks = Task.query.all()
+    elif sort_query == "asc":
+        ordered_tasks = Task.query.order_by(asc(Task.title)).all()
+    elif sort_query == "desc":
+        ordered_tasks = Task.query.order_by(desc(Task.title)).all()
+    
     for task in ordered_tasks:
         task_response.append(task.to_json())
     return jsonify(task_response), 200
-
-@task_db.route("?sort=desc", methods = ["GET"])
-def sort_all_tasks_desc():
-    task_response = []
-    ordered_tasks = Task.query.order_by(desc(Task.title))
-    for task in ordered_tasks:
-        task_response.append(task.to_json())
-    print(ordered_tasks)
-    return jsonify(task_response), 200
-
 
 @task_db.route("/<task_id>", methods = ["GET"])
 def get_one_task(task_id):
@@ -43,8 +33,12 @@ def get_one_task(task_id):
 @task_db.route("", methods = ["POST"])
 def create_one_response():
     request_body = request.get_json()
+    # if not request_body['title']:
+    #     return abort(make_response(f"Invalid data"),400)
+
     valid_data = validate_data(request_body)
-    new_task = Task.create_task(request_body)
+    
+    new_task = Task.create_task(valid_data)
     db.session.add(new_task)
     db.session.commit()
     return jsonify({"task":new_task.to_json()}), 201

@@ -1,6 +1,7 @@
 import pytest
 
 
+
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_sorted_asc(client, three_tasks):
     # Act
@@ -8,6 +9,7 @@ def test_get_tasks_sorted_asc(client, three_tasks):
     response_body = response.get_json()
 
     # Assert
+    # assert ordered_tasks ==
     assert response.status_code == 200
     assert len(response_body) == 3
     assert response_body == [

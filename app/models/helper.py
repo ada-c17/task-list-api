@@ -13,7 +13,9 @@ def validate_id(task_id):
     return task
 
 def validate_data(request_body):
+    # return abort(make_response(f"Invalid data"),400)
     if 'title' not in request_body:
-        return abort(make_response(f"Invalid data"),400)
+        return abort(make_response({"details":f"Invalid data"},400))
     elif 'description' not in request_body:
-        return abort(make_response(f"Invalid data"),400)
+        return abort(make_response({"details":f"Invalid data"},400))
+    return request_body
