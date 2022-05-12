@@ -1,8 +1,8 @@
 
 
 
-import os, requests, json
-from datetime import date, datetime
+import os, requests
+from datetime import datetime
 from requests import request
 from sqlalchemy import desc
 from app import db
