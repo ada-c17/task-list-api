@@ -37,15 +37,24 @@ def validate_and_get_by_id(cls, target_id):
 def get_filtered_and_sorted(cls, request_args):
     params = dict(request_args)  # Conversion to make args object mutable
     sort_style = params.pop('sort', None)
-    # TODO: Check behavior of filter_by() when supplied parameter not in model
-    if sort_style and len(params) > 0:
-        results = [item.to_json() for item in 
-                    cls.query.filter_by(**params)
-                            .order_by(getattr(cls.title,sort_style)())]
-    elif sort_style:
-        results = [item.to_json() for item in 
-                    cls.query.order_by(getattr(cls.title,sort_style)())]
-    else:
-        results = [item.to_json() for item in cls.query.filter_by(**params)]
+    if sort_style not in {None, 'asc', 'desc'}:
+        sort_style = None
+    if sort_style and len(params) == 0: # just sort
+        return cls.query.order_by(getattr(cls.title,sort_style)()).all()
+    
+    # make query filters from these 3 params, ignoring any others
+    filters = []
+    if 'title' in params:
+        filters.append(cls.title.like(f'%{params['title']}%'))
+    if 'description' in params:
+        filters.append(cls.description.like(f'%{params['description']}%'))
+    if 'is_complete' in params:
+        if not params['is_complete']:
+            filters.append(cls.completed_at == None)
+        filters.append(cls.completed_at != None)
+    filters = tuple(filters)
 
-    return results
+    if not sort_style:    
+        return cls.query.filter(*filters).all()
+    return (cls.query.filter_by(*filters)
+                            .order_by(getattr(cls.title,sort_style)()).all())
