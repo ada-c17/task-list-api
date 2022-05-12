@@ -19,13 +19,4 @@ class Task(db.Model):
             "task":self.to_dict()
         }
 
-    ## previous version
-        # return {
-        #     "task": {
-        #         "id": self.task_id,
-        #         "title": self.title,
-        #         "description": self.description,
-        #         "is_complete": bool(self.completed_at)
-        #     }
-        # }
     

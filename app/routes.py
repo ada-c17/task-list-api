@@ -1,33 +1,20 @@
 from datetime import datetime
-from xmlrpc.client import boolean
-
 from dotenv import load_dotenv
 import requests
 from app import db
 from app.models.task import Task
+from app.models.goal import Goal
 from flask import Blueprint, jsonify, abort, make_response, request
 import os
 
 load_dotenv()
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
-
-def validate(input_id):
-    try:
-        int_id = int(input_id)
-    except:
-        abort(make_response({"message":f"Task {input_id} invalid"}, 400))
-    task = Task.query.get(int_id)
-    if not task:
-        abort(make_response({"message":f"Task {int_id} not found"}, 404))
-    return task
+goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 
 def send_slack_message(task, message):
     '''
-    if message = completed, send slack message that task has been completed:
-        "Someone just completed the task {task.title}"
-    if message = incomplete, send slack message that task has been marked incomplete. 
-        "The task {task.title} sent: {}"
+    send slack message with task information - use when marking tasks complete/incomplete
     '''
     if message == "completed":
         send_message = f"Someone just completed the task {task.title}"
@@ -42,6 +29,20 @@ def send_slack_message(task, message):
     return
 
 
+## Task Validation & Routes
+
+
+def validate_tasks(input_id):
+    try:
+        int_id = int(input_id)
+    except:
+        abort(make_response({"message":f"Task {input_id} invalid"}, 400))
+    task = Task.query.get(int_id)
+    if not task:
+        abort(make_response({"message":f"Task {int_id} not found"}, 404))
+    return task
+
+
 @tasks_bp.route("", methods=["POST"])
 def create_task():
     try:
@@ -53,14 +54,6 @@ def create_task():
         
         if "completed_at" in request_body:
             new_task.completed_at = request_body["completed_at"]
-
-        ##try these instead of using expire:
-        #return make_response({
-                #     "task": new_task.to_dict()
-                # }, 201)
-        # return {
-        #         "task": new_task.to_json()
-        #     }, 200
 
         db.session.add(new_task)
         db.session.commit()
@@ -102,13 +95,13 @@ def read_all_tasks():
 
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def read_one_task(task_id):
-    task = validate(task_id)
+    task = validate_tasks(task_id)
 
     return make_response(jsonify(task.single_dict()), 200)
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_one_task(task_id):
-    task = validate(task_id)
+    task = validate_tasks(task_id)
     request_body = request.get_json()
     request_body_keys = request_body.keys()
 
@@ -133,8 +126,7 @@ def update_one_task(task_id):
 
 @tasks_bp.route("/<task_id>/<mark_completion>", methods=["PATCH"])
 def task_completion(task_id, mark_completion):
-    task = validate(task_id)
-    request_body = request.get_json()
+    task = validate_tasks(task_id)
 
     if mark_completion == "mark_complete":
         task.completed_at = datetime.utcnow()
@@ -151,11 +143,103 @@ def task_completion(task_id, mark_completion):
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
-    task = validate(task_id)
+    task = validate_tasks(task_id)
     
     response = {"details":f"Task {task.task_id} \"{task.title}\" successfully deleted"}
-# "details": 'Task 1 "Go on my daily walk 🏞" successfully deleted'
+
     db.session.delete(task)
+    db.session.commit()
+
+    return make_response(jsonify(response), 200)
+
+## Goal Validation & Routes:
+
+
+def validate_goals(input_id):
+    try:
+        int_id = int(input_id)
+    except:
+        abort(make_response({"message":f"Goal {input_id} invalid"}, 400))
+    goal = Goal.query.get(int_id)
+    if not goal:
+        abort(make_response({"message":f"Goal {int_id} not found"}, 404))
+    return goal
+
+
+@goals_bp.route("", methods=["GET"])
+def read_all_goals():
+    # sort_query = request.args.get("sort")
+    # title_query = request.args.get("title")
+
+    # if title_query:
+    #     tasks = Task.query.filter(Task.title.ilike("%" + title_query + "%"))
+    # elif description_query:
+    #     tasks = Task.query.filter(Task.description.ilike("%" + description_query + "%"))
+    # elif completed_query == "false":
+    #     tasks = Task.query.filter(Task.completed_at == None)
+    # elif completed_query == "true":
+    #     tasks = Task.query.filter(Task.completed_at != None)
+    # elif sort_query in ("asc","desc"):
+    #     if sort_query == "asc":
+    #         tasks = Task.query.order_by(Task.title).all()
+    #     else:
+    #         tasks = Task.query.order_by(Task.title.desc()).all()
+    # else: 
+    
+    goals = Goal.query.all()
+
+    goals_response = []
+    for goal in goals:
+        goals_response.append(goal.to_dict())
+    
+    return make_response(jsonify(goals_response), 200)
+
+
+@goals_bp.route("/<goal_id>", methods=["GET"])
+def read_one_goal(goal_id):
+    goal = validate_goals(goal_id)
+
+    return make_response(jsonify(goal.single_dict()), 200)
+
+
+@goals_bp.route("", methods=["POST"])
+def create_goal():
+    try:
+        request_body = request.get_json()
+        new_goal = Goal(
+            title=request_body["title"]
+            )
+
+        db.session.add(new_goal)
+        db.session.commit()
+
+        return make_response(jsonify(new_goal.single_dict()), 201)
+
+    except KeyError:
+        return make_response(jsonify({"details":"Invalid data"}), 400)
+
+
+@goals_bp.route("/<goal_id>", methods=["PUT"])
+def update_one_goal(goal_id):
+    goal = validate_goals(goal_id)
+    request_body = request.get_json()
+    request_body_keys = request_body.keys()
+
+    if "title" in request_body_keys:
+        goal.title = request_body["title"]
+
+    db.session.commit()
+
+    return make_response(jsonify(goal.single_dict()), 200)
+
+
+@goals_bp.route("/<goal_id>", methods=["DELETE"])
+def delete_goal(goal_id):
+    goal = validate_goals(goal_id)
+    
+    response = {"details":f"Goal {goal.goal_id} \"{goal.title}\" successfully deleted"}
+
+    db.session.delete(goal)
     db.session.commit()
 
     return make_response(jsonify(response), 200)
