@@ -7,6 +7,7 @@ import os
 import requests
 from datetime import datetime
 from sqlalchemy.sql.functions import now
+# from .helper import validate_planet
 
 task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 
@@ -24,17 +25,26 @@ def validate_task(task_id):
 @task_bp.route("", methods=["POST"])
 def create_tasks():
     request_body = request.get_json()
-    if request_body['completed_at']:
-        the_time = request_body['completed_at']
-    else:
-        the_time = None
     try:
-        new_task = Task(title = request_body["title"], description = request_body["description"], completed_at = the_time)
-        db.session.add(new_task)
-        db.session.commit()
+        new_task = Task.valid_task(request_body)
     except:
-        abort(make_response({"details":f"Invalid data"}, 400))
-    return make_response({"task" : new_task.make_json()}, 201)
+        return abort(make_response({"details": "Invalid data"}, 400))
+    db.session.add(new_task)
+    db.session.commit()
+
+    return jsonify({"task": new_task.make_json()}), 201
+    # request_body = request.get_json()
+    # if request_body['completed_at']:
+    #     the_time = request_body['completed_at']
+    # else:
+    #     the_time = None
+    # try:
+    #     new_task = Task(title = request_body["title"], description = request_body["description"], completed_at = the_time)
+    #     db.session.add(new_task)
+    #     db.session.commit()
+    # except:
+    #     abort(make_response({"details":f"Invalid data"}, 400))
+    # return make_response({"task" : new_task.make_json()}, 201)
 
 
 @task_bp.route("", methods=["GET"])
