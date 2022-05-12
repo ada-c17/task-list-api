@@ -109,7 +109,7 @@ def read_all_tasks():
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def read_one_task(task_id):
     task = validate_id(task_id)
-    return {"task": task.to_dict()}
+    return {"task": task.to_dict_with_goal_id()}
 
 # PUT /<task_id>
 @tasks_bp.route("/<task_id>", methods=["PUT"])
@@ -210,8 +210,12 @@ def delete_goal(goal_id):
 
 # Gather all tasks of one goal
 @goals_bp.route("/<goal_id>/tasks", methods=["GET"])
-def get_tasks_from_one_goal():
-    pass
+def get_tasks_from_one_goal(goal_id):
+    goal = validate_id(goal_id)
+    # request_body = validate_request(request)
+    response = goal.to_dict()
+    response["tasks"] = goal.get_tasks()
+    return make_response(response)
 
 # Gather all tasks of one goal
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
@@ -220,13 +224,6 @@ def connect_tasks_to_goal(goal_id):
     request_body = validate_request(request)
     for task_id in request_body["task_ids"]:
         goal.tasks.append(Task.query.get(task_id))
-    list_of_task_ids_added = []
-    for task_instance in goal.tasks:
-        list_of_task_ids_added.append(task_instance.task_id)
     db.session.commit()
-    return make_response({
-        "id": goal.goal_id,
-        "task_ids": list_of_task_ids_added
-    })
-
-    # for task in tasks
+    response = {"id": goal.goal_id, "task_ids": goal.get_task_ids()}
+    return make_response(response)
