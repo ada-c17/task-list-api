@@ -16,13 +16,15 @@ def read_all_goal():
     
 
     params = request.args
+    # sort by title
     if "sort" in params:
         if params["sort"].lower() == "desc" or params["sort"].lower() == "descending":
                 chosen_goal = Goal.query.order_by( desc(Goal.title) ).all()
         else:
             chosen_goal = Goal.query.order_by( asc(Goal.title) ).all()
+    # sort by id if no any query params
     else:
-        chosen_goal = Goal.query.all()
+        chosen_goal = Goal.query.order_by(asc(Goal.id)).all()
 
     if len(chosen_goal) == 0:
         return jsonify([]), 200
