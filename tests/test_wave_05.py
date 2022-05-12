@@ -112,7 +112,7 @@ def test_update_goal_not_found(client):
     # Assert
     assert response.status_code == 404
     assert response_body == {'details' : 'Goal id: 1 not found'}
-    # ---- Complete Assertions Here ----
+    
 
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
