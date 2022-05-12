@@ -127,6 +127,8 @@ def test_mark_complete_missing_task(client):
 
     # Assert
     assert response.status_code == 404
+    assert "message" in response_body
+    assert response_body == {"message": "Could not find task with id 1"}
 
     # raise Exception("Complete test with assertion about response body")
     # *****************************************************************
@@ -142,6 +144,8 @@ def test_mark_incomplete_missing_task(client):
 
     # Assert
     assert response.status_code == 404
+    assert "message" in response_body
+    assert response_body == {"message": "Could not find task with id 1"}
 
     # raise Exception("Complete test with assertion about response body")
     # *****************************************************************
