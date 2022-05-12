@@ -27,12 +27,7 @@ def get_all_tasks():
 
     tasks_response = []
     for task in tasks:
-        tasks_response.append({
-            "id": task.id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": False
-        })
+        tasks_response.append(task.to_dict())
 
     # there probably is way to query by sorted
     if "sort" in params:
@@ -86,12 +81,7 @@ def get_one_task(task_id):
     chosen_task = validate_task(task_id)
 
     return jsonify({
-        "task": {
-            "id": chosen_task.id,
-            "title": chosen_task.title,
-            "description": chosen_task.description,
-            "is_complete": False
-            }
+        "task": chosen_task.to_dict()
     })
 
 
