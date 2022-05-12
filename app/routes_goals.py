@@ -24,6 +24,7 @@ def validate_goal(goal_id):
 @goals_bp.route("", methods=["POST"])
 def create_one_goal():
     request_body = request.get_json()
+    # Goal only requires a title
     try:
         new_goal = Goal(title=request_body["title"])
     except:
@@ -33,20 +34,15 @@ def create_one_goal():
     db.session.commit()
 
     response = {
-        "goal": {
-            "id": new_goal.goal_id,
-            "title": new_goal.title
-        }
+        "goal": new_goal.to_dict()
     }
     return jsonify(response), 201
 
 @goals_bp.route("", methods=["GET"])
 def get_all_goals():
     goals = Goal.query.all()
+    response = [goal.to_dict() for goal in goals]
     
-    response = []
-    for goal in goals:
-        response.append(goal.to_dict())
     return jsonify(response), 200
 
 @goals_bp.route("/<goal_id>", methods=["GET"])
@@ -63,6 +59,7 @@ def update_one_goal(goal_id):
     goal = validate_goal(goal_id)
     request_body = request.get_json()
 
+    # Can only update title for Goal
     try:
         goal.title = request_body["title"]
     except:
@@ -93,13 +90,15 @@ def create_goal_ids_for_tasks(goal_id):
     request_body = request.get_json()
 
     for id in request_body["task_ids"]:
-        task = validate_task(id) # this checks, add test
+        task = validate_task(id) # aborts if an invalid task_id is there
         task.goal_id = goal.goal_id
+    # add all goal_ids for any requested tasks
+    # if there is invalid task_id(s) in the request_body, nothing will be updated
     db.session.commit()
 
     response = {
         "id": goal.goal_id,
-        "task_ids": request_body["task_ids"] # is this the best way?
+        "task_ids": request_body["task_ids"] 
     }
 
     return jsonify(response), 200

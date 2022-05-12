@@ -48,9 +48,7 @@ def get_all_tasks():
     else:
         tasks = Task.query.all()
     
-    response = []
-    for task in tasks:
-        response.append(task.to_dict())
+    response = [task.to_dict() for task in tasks]
 
     return jsonify(response), 200
 
@@ -62,7 +60,7 @@ def get_one_task(task_id):
     response = {
         "task": task.to_dict()
     }
-
+    # Adds goal_id only if task has one
     if task.goal_id:
         response["task"]["goal_id"] = task.goal_id
 
@@ -72,6 +70,7 @@ def get_one_task(task_id):
 @tasks_bp.route("", methods=["POST"])
 def create_one_task():
     request_body = request.get_json()
+    # Check minimum reqs for making a task: title and description
     try:
         new_task = Task(title=request_body["title"],
                 description=request_body["description"])
@@ -79,9 +78,10 @@ def create_one_task():
         response = {"details": "Invalid data"}
         abort(make_response(jsonify(response), 400))
     
+    # Check for optional attribute value of completed_at
     if request_body.get("completed_at"):
         try:
-            # request object (python to json) converts datetime.utcnow() format
+            # request object converts & changes datetime.utcnow() format
             # Example:
             # From datetime class- 2022-05-07 18:48:06.598253
             # To string class- 'Sat, 07 May 2022 23:59:31 GMT' 
@@ -93,6 +93,7 @@ def create_one_task():
                     '%a, %d %B %Y %H:%M:%S %Z')
             else:
                 # '2022-05-07 18:48:06.598253' format will never start with a letter
+                #  I used this value to test in Postman, it is more accurate to datetime format
                 converted_datetime = datetime.strptime(completed_at, 
                     '%Y-%m-%d %H:%M:%S.%f')
             new_task.completed_at = converted_datetime
@@ -117,7 +118,7 @@ def update_task(task_id):
     task = validate_task(task_id)
     request_body = request.get_json()
 
-    # Assuming that completed_at can only be changed by mark_(in)complete
+    # completed_at can only be changed by mark_(in)complete
     try:
         task.title = request_body["title"]
         task.description = request_body["description"]
@@ -149,9 +150,13 @@ def delete_one_task(task_id):
 def update_task_mark_complete(task_id):
     task = validate_task(task_id)
 
+    # This route can mark a completed task as complete again
     if not task.completed_at:
+        # I only want to change the value of completed_at when it is first complete
         task.completed_at = datetime.utcnow()
         db.session.commit()
+
+        # Send Slack message only with first time task is completed
         headers = {
             "Authorization": f"Bearer {SLACK_KEY}"
         }
