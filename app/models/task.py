@@ -14,3 +14,7 @@ class Task(db.Model):
                 "description": self.description,
                 "is_complete": False
         }
+
+    # def update(self, req_body):
+    #     self.title = req_body["title"]
+    #     self.description = req_body["description"]
