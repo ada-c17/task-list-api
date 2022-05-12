@@ -22,7 +22,7 @@ def get_goals():
 #GET one goal by id
 @goals_bp.route("<goal_id>", methods=['GET'])
 def get_one_goal(goal_id):
-    goal = validate_element(goal_id)
+    goal = validate_element(goal_id, "goal")
     return jsonify({"goal": goal.to_json()}), 200
 
 
@@ -41,7 +41,7 @@ def create_one_goal():
 #UPDATE one goal by id
 @goals_bp.route("<goal_id>", methods=['PUT'])
 def update_one_goal(goal_id):
-    goal = validate_element(goal_id)
+    goal = validate_element(goal_id, "goal")
     request_body = request.get_json()
 
     goal.title = request_body['title']
@@ -54,7 +54,7 @@ def update_one_goal(goal_id):
 #DELETE one goal by id
 @goals_bp.route('<goal_id>', methods=['DELETE'])
 def delete_goal(goal_id):
-    goal = validate_element(goal_id)
+    goal = validate_element(goal_id, "goal")
 
     db.session.delete(goal)
     db.session.commit()
@@ -67,14 +67,14 @@ def delete_goal(goal_id):
 #POST - attach tasks onto one goal
 @goals_bp.route('/<goal_id>/tasks', methods=['POST'])
 def create_task_for_goal(goal_id):
-    goal = validate_element(goal_id)
+    goal = validate_element(goal_id, "goal")
     request_body = request.get_json()
     task_list = []
     task_ids = request_body["task_ids"]
     print(task_ids)
     
     for task_id in task_ids:
-        task = Task.query.get(task_id)
+        task = validate_element(task_id, "task")
         task.goal_id = goal.id
         task_list.append(task)
 
@@ -91,7 +91,7 @@ def create_task_for_goal(goal_id):
 #Get all tasks for one goal
 @goals_bp.route('/<goal_id>/tasks', methods=['GET'])
 def get_task_for_goal(goal_id):
-    goal = validate_element(goal_id)
+    goal = validate_element(goal_id, "goal")
     tasks = Task.query.filter_by(goal=goal)
     task_list = []
 

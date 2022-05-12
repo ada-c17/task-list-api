@@ -32,7 +32,7 @@ def get_tasks():
 #Get one task
 @tasks_bp.route("<task_id>", methods=['GET'])
 def get_one_task(task_id):
-    task = validate_element(task_id)
+    task = validate_element(task_id, "task")
 
     return jsonify({"task": task.to_json()}), 200
 
@@ -52,7 +52,7 @@ def create_task():
 #UPDATE one task
 @tasks_bp.route("<task_id>", methods=['PUT'])
 def update_one_task(task_id):
-    task = validate_element(task_id)
+    task = validate_element(task_id, "task")
     request_body = request.get_json()
 
     task.title = request_body['title']
@@ -66,7 +66,7 @@ def update_one_task(task_id):
 #Delete one task
 @tasks_bp.route('<task_id>', methods=['DELETE'])
 def delete_task(task_id):
-    task = validate_element(task_id)
+    task = validate_element(task_id, "task")
 
     db.session.delete(task)
     db.session.commit()
@@ -77,7 +77,7 @@ def delete_task(task_id):
 #Mark one task complete
 @tasks_bp.route('/<task_id>/mark_complete', methods=['PATCH'])
 def mark_task_complete(task_id):
-    task = validate_element(task_id)
+    task = validate_element(task_id, "task")
     
     task.completed_at = datetime.now()
     db.session.commit()
@@ -99,7 +99,7 @@ def mark_task_complete(task_id):
 #Mark one task incomplete
 @tasks_bp.route('/<task_id>/mark_incomplete', methods=['PATCH'])
 def mark_task_incomplete(task_id):
-    task = validate_element(task_id)
+    task = validate_element(task_id, "task")
 
     task.completed_at = None
     db.session.commit()
