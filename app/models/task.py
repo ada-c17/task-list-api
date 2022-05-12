@@ -7,6 +7,8 @@ class Task(db.Model):
     title = db.Column(db.String, default=None)
     description = db.Column(db.String, default=None)
     completed_at = db.Column(db.DateTime, nullable=True, default=None)
+    goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'))
+    goal = db.relationship("Goal", back_populates="tasks", nullable=True)
 
     def to_json(self):
         return {"id": self.task_id,
