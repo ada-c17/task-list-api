@@ -1,4 +1,3 @@
-from urllib import response
 from app import db
 from app.models.goal import Goal
 class Task(db.Model):
@@ -7,9 +6,9 @@ class Task(db.Model):
     description = db.Column(db.String, nullable=False)
     completed_at = db.Column(db.DateTime, default=None)
     goal_id = db.Column(db.Integer, db.ForeignKey('goal.id'), nullable=True)
-    goal = db.relationship("Goal", back_populates='tasks', lazy=True)
+    
 
-    def task_response_body(self):
+    def task_response_body_dict(self):
         response_task = {
             "id": self.id,
             "title": self.title,
