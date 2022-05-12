@@ -8,27 +8,14 @@ task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 @task_bp.route("", strict_slashes=False, methods=["GET"])
 def get_tasks():
     tasks = Task.query.all()
-    response = []
-    for task in tasks:
-        response.append({"id": task.id, 
-                        "title": task.title, 
-                        "description": task.description, 
-                        "is_complete": bool(task.completed_at)})
-    
+    response = [task.todict() for task in tasks]
     return jsonify(response), 200
 
 
 @task_bp.route("/<task_id>", strict_slashes=False, methods=["GET"])
 def get_task(task_id):
-    tasks = Task.query.all()
-    response = {}
     task = validate_task(task_id)
-    
-    response["task"] = {"id": task.id, 
-                        "title": task.title, 
-                        "description": task.description, 
-                        "is_complete": bool(task.completed_at)}
-
+    response = {"task": task.todict()}
     return jsonify(response), 200
 
 
@@ -46,11 +33,7 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
 
-    response = {}
-    response["task"] = {"id": new_task.id,
-                        "title": new_task.title,
-                        "description": new_task.description,
-                        "is_complete": bool(new_task.completed_at)}
+    response = response = {"task": new_task.todict()}
     return jsonify(response), 201
 
 
@@ -64,12 +47,7 @@ def update_task(task_id):
 
     db.session.commit()
 
-    response = {}
-    response["task"] = {"id": task.id,
-                        "title": task.title,
-                        "description": task.description,
-                        "is_complete": bool(task.completed_at)}
-
+    response = response = {"task": task.todict()}
     return jsonify(response), 200
 
 
