@@ -4,9 +4,6 @@ from app.models.goal import Goal
 from app import db
 from app.task_routes import validate_task
 
-import requests
-import os
-
 goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 
 @goals_bp.route("", methods=["POST"])
@@ -138,6 +135,7 @@ def get_tasks_of_one_goal(goal_id):
         "tasks": []
 
     }
+
     for task in chosen_goal.tasks:
         response["tasks"].append({
             "id": task.task_id,
