@@ -9,6 +9,7 @@ from datetime import datetime
 from attr import validate
 from sqlalchemy import true
 from flask import Blueprint, jsonify, abort, make_response, request
+from app.task import validate_task
 from tests.conftest import one_task
 
 
@@ -175,28 +176,62 @@ def post_tasks_to_goal(goal_id):
     # Get the goal to post the tasks to
     goal_for_post = validate_goal(goal_id)
     
+    # Getting the request body 
     request_body = request.get_json()
 
+    # Verifying that the request body has a list of task ids
+    try:
+        task_ids = request_body["task_ids"]
+    except:
+        # Missing Task id in request body
+        return jsonify(make_response({"message" : f"Missing list of task ids in request body."}, 400))
+
+    if not isinstance(task_ids, list):
+        return jsonify({"message" : f"Expected a list of task ids."}), 400
+
+
+
+    task_id_list = []
+
+    for id in task_ids:
+        task_id_list.append(validate_task(id))
+    
+    for task_id in task_id_list:
+        task_id.goal_id = goal_for_post.goal_id
+
+
+    
+
     # Check that "task_ids" is in the request_body
-    if "task_ids" in request_body:
+    # if "task_ids" in request_body:
 
         # Loop through the "task_ids"
         # Assign the Task foreign key to match the Goal primary key
+<<<<<<< HEAD
         for task_id in request_body["task_ids"]:
             task = Task.query.get(task_id)
             task.goal_id = goal_for_post.goal_id
             # db.session.add(task)
     else:
+=======
+        # for task_id in request_body["task_ids"]:
+        #     task = Task.query.get(task_id)
+        #     task.goal_id = goal_for_post.goal_id
+            # task_id_list.append(task.goal_id)
+            # db.session.add(task)
+    # else:
+>>>>>>> fix-post-to-goals
         # Check if "task_id" doesn't exist -->  404 
-        abort(make_response({"message" : f"Sorry, not found."}, 404))
+        # abort(make_response({"message" : f"Sorry, not found."}, 404))
 
-    # db.session.add(task.)
+    # db.session.add(goal_for_post.tasks[task_id_list])
     db.session.commit()
 
     # Add to Goal's task_id's list
     response_body = {
         "id" : goal_for_post.goal_id, 
-        "task_ids" : request_body["task_ids"]
+        "task_ids" : task_id_list
+        # "task_ids" : request_body["task_ids"]
     }
 
     return response_body, 200
