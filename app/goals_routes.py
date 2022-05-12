@@ -78,4 +78,4 @@ def delete_goal(goal_id):
 
     return jsonify({"details": f'Goal {goal_id} "{goal.title}" successfully deleted'}), 200
 
-@goals_bp.route("/<goal_id>/tasks", methods=["POST"]):
+# @goals_bp.route("/<goal_id>/tasks", methods=["POST"]):

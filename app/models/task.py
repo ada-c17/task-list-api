@@ -6,10 +6,8 @@ class Task(db.Model):
     title = db.Column(db.String)
     description = db.Column(db.String)
     completed_at = db.Column(db.DateTime, nullable=True)
-<<<<<<< HEAD
     goal_id = db.Column(db.Integer, db.ForeignKey("goal.goal_id"))
     goal = db.relationship("Goal", back_populates="tasks")
-=======
 
     def make_task_dict(self):
         task_dict = {
@@ -23,4 +21,3 @@ class Task(db.Model):
             task_dict["is_complete"] = False
 
         return task_dict
->>>>>>> main
