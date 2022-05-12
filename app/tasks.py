@@ -1,5 +1,6 @@
 from crypt import methods
 from datetime import datetime
+from http.client import TEMPORARY_REDIRECT
 from flask import Blueprint, jsonify, request, abort, make_response
 from pytest import param
 from app import db
@@ -26,23 +27,17 @@ def get_task_or_abort(task_id):
         abort(make_response(jsonify(rsp), 404))
     return task
 
+
 def mark_completed_at(task_id, completed_at):
     task = get_task_or_abort(task_id)
     task.completed_at = completed_at
     db.session.commit()
     return jsonify(
         {
-            "task": to_dict(task)
+            "task": task.to_dict()
         }
     ), 200
 
-def to_dict(task):
-    return {
-        "id": task.id,
-        "title": task.title,
-        "description": task.description,
-        "is_complete": task.is_complete()
-    }
 
 # routes for task
 @tasks_bp.route("", methods=['POST'])
@@ -61,7 +56,7 @@ def create_one_task():
     db.session.commit()
     return jsonify(
         {
-            "task": to_dict(new_task)
+            "task": new_task.to_dict()
         }
     ), 201
 
@@ -78,7 +73,7 @@ def get_all_task():
 
     tasks_response = []
     for task in tasks:
-        tasks_response.append(to_dict(task))
+        tasks_response.append(task.to_dict())
 
     return jsonify(tasks_response), 200
 
@@ -88,7 +83,7 @@ def get_one_task(task_id):
     task = get_task_or_abort(task_id)
     return jsonify(
         {
-            "task": to_dict(task)
+            "task": task.to_dict()
         }
     ), 200
 
@@ -111,7 +106,7 @@ def update_task(task_id):
     db.session.commit()
     return jsonify(
         {
-            "task": to_dict(task)
+            "task": task.to_dict()
         }
     ), 200
 
