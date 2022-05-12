@@ -44,7 +44,27 @@ def create_task():
 
 @tasks_bp.route("", methods=["GET"])
 def read_all_tasks():
-    tasks = Task.query.all()
+    # # from planets api:
+    # name_query = request.args.get("name")
+    # description_query = request.args.get("description")
+    # order_from_sun_query = request.args.get("order_from_sun")
+    # if name_query:
+    #     planets = Planet.query.filter_by(name=name_query)
+    # elif description_query:
+    #     planets = Planet.query.filter(Planet.description.ilike("%" + description_query + "%"))
+    # elif order_from_sun_query:
+    #     planets = Planet.query.filter_by(order_from_sun =order_from_sun_query)
+    # else:
+    #     planets = Planet.query.all()
+    sort_query = request.args.get("sort")
+
+    if sort_query in ("asc","desc") :
+        if sort_query == "asc":
+            tasks = Task.query.order_by(Task.title).all()
+        else:
+            tasks = Task.query.order_by(Task.title.desc()).all()
+    else: 
+        tasks = Task.query.all()
 
     tasks_response = []
     for task in tasks:
