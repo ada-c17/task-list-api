@@ -149,3 +149,15 @@ def test_create_goal_missing_title(client):
     assert response_body == {
         "details": "Invalid data"
     }
+
+# Added test to cover Bad Requests
+def test_get_goal_bad_data(client):
+    # Act
+    response = client.get("/goals/shayla")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    assert response_body == {
+        'details': 'Invalid data'
+    }
