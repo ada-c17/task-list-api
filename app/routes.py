@@ -46,12 +46,7 @@ def create_one_task():
     db.session.commit()
 
     return {
-        "task": {
-            "id": new_task.task_id,
-            "title": new_task.title,
-            "description": new_task.description,
-            "is_complete": bool(new_task.completed_at)
-        }
+        "task": new_task.to_dict()
     }, 201 
 
 #goal post route
@@ -93,30 +88,16 @@ def read_all_tasks():
 
     tasks_response = []
     for task in tasks:
-        tasks_response.append(
-            {
-                "id": task.task_id,
-                "title": task.title,
-                "description": task.description,
-                "is_complete": bool(task.completed_at)
-            }
-        )
+        tasks_response.append(task.to_dict())
 
     return jsonify(tasks_response), 200
-
 
 
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def read_one_task(task_id):
     chosen_task = get_task_or_abort(task_id)
     
-    response = { "task": {
-                "id" : chosen_task.task_id,
-                "title": chosen_task.title,
-                "description": chosen_task.description,
-                "is_complete": bool(chosen_task.completed_at)
-                }
-            }
+    response = { "task": chosen_task.to_dict()}
 
     if chosen_task.goal_id:
         response ={ "task": {
