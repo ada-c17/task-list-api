@@ -87,6 +87,9 @@ def update_task(task_id):
     task.title = request_body["title"]
     task.description = request_body["description"]
 
+    if task.completed_at:
+        task.is_complete = True 
+
     db.session.commit()
 
     return jsonify(task.to_dict())
