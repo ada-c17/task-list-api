@@ -80,6 +80,17 @@ def mark_task_complete(task_id):
     db.session.commit()
     return make_response(jsonify(response_body), 200)
 
+# mark one task incomplete by id
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def mark_task_incomplete(task_id):
+    task = validate_task(task_id)
+
+    task.completed_at = None
+    response_body = {"task": task.to_dict()}
+
+    db.session.commit()
+    return make_response(jsonify(response_body), 200)
+
 # check for valid task using id
 def validate_task(task_id):
     try:
