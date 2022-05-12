@@ -9,3 +9,11 @@ class Task(db.Model):
 
     def is_complete(self):
         return self.completed_at is not None
+
+    def to_dict(self):
+        return {
+                "id": self.task_id,
+                "title": self.title,
+                "description": self.description,
+                "is_complete": self.is_complete()
+            }
