@@ -11,8 +11,8 @@ def validate_task(id):
     if not task:
         abort(make_response({"message": f"Task{id} not found"}, 404))
 
-    
     return task
+
 
 def validate_client_requests(request_body):
     try:
@@ -25,11 +25,5 @@ def validate_client_requests(request_body):
     
 
 
-#     try:
-#         len(req) == 2
-#     except TypeError:
-#         abort(make_response({"details": "Invalid data"},400))
-#     # if "description" not in req:
-#     #     abort(make_response({"details": "Invalid data"},400))
-#     req = req.get_json()
+
 

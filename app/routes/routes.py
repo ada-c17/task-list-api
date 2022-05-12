@@ -1,4 +1,3 @@
-from datetime import datetime
 from flask import Blueprint, jsonify, request, make_response
 from app import db
 from app.models.task import Task
@@ -57,7 +56,15 @@ def create_one_task():
 def update_one_task(id):
     task = validate_task(id)
     request_body = request.get_json()
+#    response = client.put("/tasks/1", json={
+#         "title": "Updated Task Title",
+#         "description": "Updated Test Description",
+#         "completed_at": datetime.utcnow() or None
+#     })
     task.update(request_body)
+        # >>> def update(self, req_body):       
+        # >>>>>> self.title = req_body["title"],
+        # >>>>>> self.description = req_body["description"]
     db.session.commit()
     return {"task": task.to_json()}, 200
 
@@ -71,14 +78,24 @@ def delete_one_task(id):
     return {"details": f'Task {id} "Go on my daily walk 🏞" successfully deleted'}
 
 
-#Update - Patch
+#Patch: mark complete 
 @tasks_bp.route("/<id>/mark_complete", methods=["PATCH"])
-def patch_one_taskl(id):
-    
-    
+def mark_complete_on_incomplete_task(id):
     task = validate_task(id)
-    complete_query = request.args.get("mark_complete")
-    if complete_query is True:
-        task.is_complete = True
-        task.complete_at = datetime.date.todday()
-        return {"task": task.to_json()}, 200
+    # request_body = request.get_json() 
+    # -  Why dont need request_body, bc I got the task needs to be \
+    #   update from line 79. task.completed_at = None bc it was \
+    #   incompleted and request to change to completed (assign time value)
+    task.completed_at = datetime.utcnow()
+    db.session.commit()
+    # return make_response({"task": task.to_json()}), 200
+    return {"task": task.to_json()}, 200
+#Patch:mark imcomplete 
+@tasks_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
+def mark_incomplete_on_complete_task(id):
+    task = validate_task(id)
+    task.completed_at = None
+    db.session.commit()
+    return {"task": task.to_json()}, 200
+
+
