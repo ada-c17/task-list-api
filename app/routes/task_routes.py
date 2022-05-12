@@ -1,9 +1,10 @@
+from psycopg2 import DataError
 from app import db
 from app.models.task import Task
 from .routes_helpers import validate_id, error_message, send_msg_to_channel, sort_records
 from flask import Blueprint, request, make_response, jsonify
-from sqlalchemy import asc,desc
 from datetime import date
+import time
 
 tasks_bp = Blueprint("task", __name__, url_prefix="/tasks")
 
@@ -39,6 +40,9 @@ def create_task():
     except KeyError:
         message = "Invalid data"
         return error_message(message, 400)
+    except DataError:
+        message = "Invalid data"
+        return error_message(message, 400)
 
     db.session.add(new_task)
     db.session.commit()
@@ -71,7 +75,7 @@ def update_task(id):
 @tasks_bp.route("/<id>/mark_complete", methods=["PATCH"])
 def mark_task_complete(id):
     task = validate_id("Task", id)
-    task.completed_at = date.today()
+    task.completed_at = time.strftime("%Y-%m-%d")
 
     db.session.commit()
 
