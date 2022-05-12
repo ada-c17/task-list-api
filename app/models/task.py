@@ -18,6 +18,7 @@ class Task(db.Model):
             "id": self.task_id,
             "title": self.title,
             "description": self.description,
+            "goal_id": self.goal_id,
             "is_complete": is_completed}
         return response
     
