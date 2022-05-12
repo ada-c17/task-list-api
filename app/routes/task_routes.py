@@ -123,7 +123,23 @@ def complete_task(task_id):
 @task_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def incomplete_task(task_id):
     task = validate_task(task_id)
+    title = "My beautiful task"
     
+    #Call to Slack API
+    auth_token = os.environ.get("Authorization")
+    headers = {
+        "Authorization": auth_token,
+        "Content-Type": "application/json; charset=utf-8"
+        }
+
+    data = {
+        "channel": 'test-channel',
+        "text": f"Someone just completed the task {title}"
+    }
+
+    slack_response = requests.post("https://slack.com/api/chat.postMessage", headers=headers, json=data)
+    # End of Slack API call
+
     task.completed_at = None
     is_complete = bool(task.completed_at)
 
