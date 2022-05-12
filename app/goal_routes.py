@@ -75,15 +75,3 @@ def get_goal_tasks(goal_id):
     response["tasks"] = [task.todict() for task in goal.tasks]
     return jsonify(response), 200
 
-
-# @goal_bp.route("/<goal_id>/tasks", strickt_slashes=False,methods=["POST"])
-# def create_task_on_goal(goal_id):
-#     goal = validate_id(Goal, goal_id)
-#     request_body = request.get_json()
-#     new_task = Task.fromdict(request_body)
-#     new_task.goal_id = goal.goal_id
-
-#     db.session.add(new_task)
-#     db.session.commit()
-
-

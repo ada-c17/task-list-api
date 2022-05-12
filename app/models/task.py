@@ -22,6 +22,6 @@ class Task(db.Model):
     def fromdict(cls, data_dict):
         task = Task(title = data_dict["title"],
                     description = data_dict["description"],
-                    completed_at = None,
+                    completed_at = data_dict.get("completed_at"),
                     goal_id = data_dict.get("goal_id"))
         return task

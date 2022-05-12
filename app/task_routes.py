@@ -28,16 +28,14 @@ def create_task():
     request_body = request.get_json()
 
     try: 
-        new_task = Task(title = request_body["title"],
-                    description = request_body["description"],
-                    completed_at = request_body.get("completed_at"))
+        new_task = Task.fromdict(request_body)
     except KeyError:
         abort(make_response({"details": f"Invalid data"}, 400))
 
     db.session.add(new_task)
     db.session.commit()
 
-    response = response = {"task": new_task.todict()}
+    response = {"task": new_task.todict()}
     return jsonify(response), 201
 
 
