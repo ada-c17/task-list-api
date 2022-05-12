@@ -18,7 +18,6 @@ def create_goal():
     
     db.session.add(new_goal)
     db.session.commit()
-
     return make_response(jsonify(dict(goal=new_goal.to_dict())), 201)
 
 @goals_bp.route("", methods=["GET"])

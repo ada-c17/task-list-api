@@ -22,7 +22,6 @@ def create_task():
     
     db.session.add(new_task)
     db.session.commit()
-
     return make_response(jsonify(dict(task=new_task.to_dict())), 201)
 
 @tasks_bp.route("", methods=["GET"])
