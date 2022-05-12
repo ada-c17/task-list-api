@@ -167,3 +167,19 @@ def test_create_goal_missing_title(client):
     assert response_body == {
         "details": "Invalid data"
     }
+
+def test_update_goal_without_title(client, one_goal):
+    response = client.put("/goals/1", json= {})
+    response_body = response.get_json()
+
+    assert response.status_code == 400
+    assert response_body == {"details":"Invalid data"}
+
+def test_get_goal_not_integer_id(client):
+    response = client.get("/goals/one")
+    response_body = response.get_json()
+
+    assert response.status_code == 400
+    assert response_body == {
+        "msg":"Goal id one invalid"
+    }

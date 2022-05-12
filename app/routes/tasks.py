@@ -11,11 +11,11 @@ def create_task():
     request_body = request.get_json()
     try:
         task = Task(
-            title = request_body["title"],
-            description = request_body["description"],
-            completed_at = check_completed_at(request_body)
-            )
-    except:
+                title = request_body["title"],
+                description = request_body["description"],
+                completed_at = check_completed_at(request_body)
+                )
+    except KeyError:
         abort(make_response({"details":"Invalid data"}, 400))  
 
     db.session.add(task)

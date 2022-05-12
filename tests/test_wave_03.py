@@ -201,3 +201,14 @@ def test_update_task_with_completed_at_date(client, completed_task):
     assert task.title == "Updated Task Title"
     assert task.description == "Updated Test Description"
     assert task.completed_at
+
+def test_update_task_with_invalid_completed_at(client, one_task):
+    response = client.put("/tasks/1", json={
+        "title": "A Brand New Task",
+        "description": "Test Description",
+        "completed_at": "not datetime"
+    })
+    response_body = response.get_json()
+
+    assert response.status_code == 404
+    assert response_body == {"msg":"Complete_at Time not datetime invalid"}

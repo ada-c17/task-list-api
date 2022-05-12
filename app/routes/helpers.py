@@ -63,7 +63,7 @@ def check_completed_at(request_body):
         return None
     time = request_body["completed_at"]
     try:
-        #utcnow() data string format: 'Thu, 12 May 2022 04:19:18 GMT'
+        # utcnow() data string format: 'Thu, 12 May 2022 04:19:18 GMT'
         return datetime.strptime(time, '%a, %d %b %Y %H:%M:%S GMT')
     except ValueError:
-        abort(make_response({"msg":f"Complete_at Time {time} invalid"}, 404))
+        abort(make_response({"msg":f"Complete_at Time {time} invalid"}, 400))
