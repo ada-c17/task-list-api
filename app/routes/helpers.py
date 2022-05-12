@@ -13,7 +13,7 @@ def post_slack_message(text):
         "text":text
     }
     headers = {
-        "Authorization" : "Bearer " + token
+        "Authorization" : f"Bearer {token}"
     }
 
     response = requests.post(URL, headers=headers, params=params)
