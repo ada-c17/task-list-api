@@ -43,8 +43,12 @@ def read_all_tasks():
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_task_by_id(task_id):
     task_data = validate_task(task_id)
+    task_dict = task_data.to_dict()
 
-    return make_response(jsonify(dict(task=task_data.to_dict())))
+    if task_data.goal_id:
+        task_dict["goal_id"] = task_data.goal_id
+
+    return make_response(jsonify(dict(task=task_dict)))
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
