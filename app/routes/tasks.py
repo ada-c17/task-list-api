@@ -26,14 +26,8 @@ def validate_task_id(task_id):
 
 @tasks_bp.route('', methods=['POST'])
 def create_one_task():
-    try:
-        request_body = request.get_json()
-        new_task = Task(title=request_body['title'], description=request_body['description'])
-    except KeyError:
-        return jsonify({'details': 'Invalid data'}), 400
-
-    if 'completed_at' in request_body:
-        new_task.completed_at = request_body['completed_at']
+    request_body = request.get_json()
+    new_task = Task.from_json(request_body)
 
     db.session.add(new_task)
     db.session.commit()
@@ -75,16 +69,11 @@ def delete_one_task(task_id):
     return jsonify({'details': f'Task {task.id} \"{task.title}\" successfully deleted'}), 200
 
 
-@tasks_bp.route('/<task_id>', methods=['PUT'])
+@tasks_bp.route('/<task_id>', methods=['PUT', 'PATCH'])
 def update_one_task(task_id):
     task = validate_task_id(task_id)
     request_body = request.get_json()
-
-    try:
-        task.title = request_body['title']
-        task.description = request_body['description']
-    except KeyError:
-        return jsonify({'details': 'Invalid data'}), 400
+    task = task.from_json_to_update(request_body)
 
     db.session.commit()
 
