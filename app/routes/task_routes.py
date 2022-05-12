@@ -113,7 +113,10 @@ def replace_task(task_id):
 def complete_task(task_id):
     task = validate_task(task_id)
 
-    title = "My beautiful task"
+    if task.title:
+        title = task.title
+    else:
+        title = "My beautiful task"
     
     #Call to Slack API
     auth_token = os.environ.get("SLACK_AUTH")
