@@ -1,22 +1,17 @@
+from multiprocessing.sharedctypes import Value
 from app import db
 
 #child class
 class Task(db.Model):
     task_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    title = db.Column(db.String) #index=True, unique=True with or without don't work for unique value
+    title = db.Column(db.String) 
+    """set to index=True, unique=True avoids duplication of values. 
+       Due to this program originally designed to allow duplication, by switching it to to unique would change my database
+       (even I can just delete the db and re-create it), I decided to leave it as it is"""
     description = db.Column(db.String)
     completed_at = db.Column(db.DateTime, nullable = True)
     goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'), nullable = True)
     goal = db.relationship("Goal", back_populates="tasks")
-    
-    #depends on None(code)/null(db)
-    # def completed(self):
-    #     if not self.completed_at:
-    #         return False
-    #     else:
-    #         return True
-    #display jsonify dict
-    
         
     def to_json(self):
         task_dict = {
@@ -25,6 +20,8 @@ class Task(db.Model):
                 "description": self.description,
         }
         
+        
+
         if self.completed_at:
             task_dict["is_complete"] = True
         else:

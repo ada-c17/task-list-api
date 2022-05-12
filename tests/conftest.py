@@ -79,6 +79,12 @@ def completed_task(app):
     db.session.add(new_task)
     db.session.commit()
 
+@pytest.fixture
+def invalid_completed_task(app):
+    new_task = Task(
+        title="Go on my daily walk 🏞", description="Notice something new every day", completed_at="in3")
+    db.session.add(new_task)
+    db.session.commit()
 
 # This fixture gets called in every test that
 # references "one_goal"
