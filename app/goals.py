@@ -1,15 +1,7 @@
-# from asyncio import tasks
-# from crypt import methods
-# from datetime import datetime
-# from turtle import title
 from flask import Blueprint, jsonify, request, abort, make_response
-# from pytest import param
 from app import db
 from app.models.goal import Goal
-# from app.models.task import Task
 from app.tasks import get_task_or_abort
-# import requests
-
 
 goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 
@@ -46,6 +38,7 @@ def create_one_goal():
         }
     ),201
 
+
 @goals_bp.route("", methods=['GET'])
 def get_all_goals():
     goals = Goal.query.all()
@@ -70,7 +63,6 @@ def get_one_goal(goal_id):
 def update_goal(goal_id):
     goal = get_goal_or_abort(goal_id)
     request_body = request.get_json()
-
     try:
         goal.title = request_body["title"]
     except KeyError:

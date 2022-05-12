@@ -1,8 +1,5 @@
-from crypt import methods
 from datetime import datetime
-from http.client import TEMPORARY_REDIRECT
 from flask import Blueprint, jsonify, request, abort, make_response
-from pytest import param
 from app import db
 from app.models.task import Task
 import requests
