@@ -106,7 +106,7 @@ def get_task_or_abort(list_of_task_id):
 @goal_bp.route("/<goal_id>/tasks", methods=["POST"])
 def create_tasks_to_goal(goal_id):
 
-    goal = validate_goal(goal_id) #first need to validate ID using helper function
+    goal = validate_goal(goal_id)
 
     request_body = request.get_json()
     try:

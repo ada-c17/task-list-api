@@ -33,9 +33,9 @@ def get_all_saved_tasks():
     elif sort_query == "desc":
         tasks = Task.query.order_by(Task.title.desc())
     else:
-        tasks = Task.query.all() #list of objects
+        tasks = Task.query.all()
     tasks_response = []
-    for task in tasks: #each row is converted to an object
+    for task in tasks:
         tasks_response.append(
             {
                 "id": task.id,
@@ -56,8 +56,8 @@ def get_one_task(task_id):
     "description": task.description,
     "is_complete": bool(task.completed_at)
     }}
-    
-    if task.goal_id != None: #checking if task.goal_id is in the model Task, it is automatically None 
+
+    if task.goal_id != None: 
         response_body["task"]["goal_id"] = task.goal_id
     return jsonify(response_body)
 
