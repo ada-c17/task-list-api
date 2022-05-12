@@ -38,6 +38,7 @@ def send_slack_notice(title):
         "text": f"Someone just completed the task {title}"
     }
     slack_post = requests.post(PATH, params=query_params, headers=AUTH_HEADER)
+    return slack_post
 
 @task_bp.route("", methods=["POST"])
 def create_task():
@@ -90,6 +91,10 @@ def get_all_tasks():
         "description": task.description,
         "is_complete": is_complete(task)
         })
+        if task.goal_id:
+            tasks_response.append({
+                "goal_id": task.goal_id
+                })
     return jsonify(tasks_response)
 
 @task_bp.route("/<task_id>", methods=["GET"])
@@ -97,13 +102,17 @@ def get_one_task(task_id):
     '''Request information about a specific Task.'''
     task = validate_task(task_id)
 
-    return { 
-        "task": {
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": is_complete(task)
+    response_body = {
+        "id": task.task_id,
+        "title": task.title,
+        "description": task.description,
+        "is_complete": is_complete(task)
         }
+    if task.goal_id:
+        response_body["goal_id"] = task.goal_id
+
+    return { 
+        "task": response_body
     }
 
 @task_bp.route("/<task_id>", methods=["PUT"])
