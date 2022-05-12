@@ -8,17 +8,6 @@ class Task(db.Model):
     goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'), nullable=True)
     goal = db.relationship('Goal', back_populates='tasks')
 
-    def to_json(self):
-        details = {
-                'id': self.task_id,
-                'title': self.title,
-                'description': self.description,
-                'is_complete': self.completed_at != None
-            }
-        if self.goal_id:
-            details['goal_id'] = self.goal_id
-        return details
-    
     @classmethod
     def new_task(cls, task_details):
         # Validate and clean input
