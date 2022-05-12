@@ -68,7 +68,10 @@ def read_task():
 def read_one_task(task_id):
     task = validate_task(task_id)
 
-    return { "task": task.to_json()}, 200
+    if task.goal_id:
+        return {"task": task.to_json_goal()}, 200
+    else:
+        return { "task": task.to_json()}, 200
 
 # UPDATE one Task
 @tasks_bp.route("/<task_id>", methods=["PUT"])

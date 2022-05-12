@@ -11,6 +11,12 @@ class Goal(db.Model):
         return {"id": self.goal_id,
                 "title": self.title
         }
+    
+    def to_json_tasks(self):
+        return {"id": self.goal_id,
+                "title": self.title,
+                "tasks": [item.to_json_goal() for item in self.tasks]
+        }
 
     def update(self, req_body):
         self.title = req_body["title"]
