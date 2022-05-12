@@ -148,3 +148,23 @@ def test_create_goal_missing_title(client):
     assert response_body == {
         "details": "Invalid data"
     }
+
+def test_validate_goal_id(client):
+    # Act
+    response = client.get("/goals/one")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    assert response_body == {'details': 'Invalid data'}
+
+def test_update_goal_missing_title(client, one_goal):
+    # Act
+    response = client.put("/goals/1", json={})
+    response_body = response.get_json()
+
+    assert response.status_code == 400
+    assert response_body == {'details': "Invalid data"}
+
+    goal = Goal.query.get(1)
+    assert goal.title == 'Build a habit of going outside daily'

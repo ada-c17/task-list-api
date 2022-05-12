@@ -187,3 +187,12 @@ def test_create_task_must_contain_description(client):
         "details": "Invalid data"
     }
     assert Task.query.all() == []
+
+def test_validate_task_id(client):
+    # Act
+    response = client.get("/tasks/one")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    assert response_body == {'details': 'Invalid data'}

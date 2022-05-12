@@ -1,3 +1,4 @@
+from urllib import response
 import pytest
 
 
@@ -53,5 +54,34 @@ def test_get_tasks_sorted_desc(client, three_tasks):
             "description": "",
             "id": 2,
             "is_complete": False,
+            "title": "Answer forgotten email 📧"}
+    ]
+
+def test_get_tasks_sorted_invalid_params(client, three_tasks):
+    # Act
+
+    response = client.get("/tasks?sort=descc")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert len(response_body) == 3
+    assert response_body == [
+        {
+            "description": "",
+            "id": 1,
+            "is_complete": False,
+            "title": "Water the garden 🌷"},
+        
+        {
+            "description": "",
+            "id": 2,
+            "is_complete": False,
             "title": "Answer forgotten email 📧"},
+
+        {
+            "description": "",
+            "id": 3,
+            "is_complete": False,
+            "title": "Pay my outstanding tickets 😭"}
     ]
