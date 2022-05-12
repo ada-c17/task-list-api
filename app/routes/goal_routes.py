@@ -3,6 +3,7 @@ from app import db
 from app.models.goal import Goal
 from app.models.task import Task
 from sqlalchemy import desc
+from app.routes.task_routes import validate_task
 
 
 goal_bp = Blueprint("goal", __name__, url_prefix="/goals")
@@ -88,3 +89,54 @@ def delete_goal(goal_id):
 
     return make_response(jsonify(response), 200)
 
+@goal_bp.route("/<goal_id>/tasks", methods=["POST"])
+def add_tasks_to_goal(goal_id):
+    goal = validate(goal_id)
+
+    request_body = request.get_json()
+    try:
+        task_ids = request_body["task_ids"]
+    except KeyError:
+        return jsonify({'msg': "Missing task_ids in request body"}), 400
+
+    if not isinstance(task_ids, list):
+        return jsonify({'msg': "Expected list of task ids"}), 400
+    
+    tasks = []
+    for id in task_ids:
+        tasks.append(validate_task(id))
+    
+    for task in tasks:
+        task.goal = goal
+
+    db.session.commit()
+
+    response = {
+        "id": goal.goal_id,
+        "task_ids": task_ids
+    }
+
+    return make_response(jsonify(response), 200)
+
+@goal_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_tasks_for_goal(goal_id):
+    goal = validate(goal_id)
+
+    tasks_response = []
+    for task in goal.tasks:
+        tasks_response.append(
+            {"id": task.task_id,
+            "goal_id": task.goal_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": bool(task.completed_at)
+            }
+        )
+    response_body = {
+        "id": goal.goal_id,
+        "title": goal.title,
+        "tasks": tasks_response
+    }
+
+    return make_response(jsonify(response_body), 200)
+    
