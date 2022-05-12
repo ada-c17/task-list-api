@@ -24,13 +24,13 @@ def validate_goal(goal_id):
 
     return goal
 
-def make_goal_dict(goal):
-    goal_dict = {
-            "id": goal.goal_id,
-            "title": goal.title,
-    }
+# def make_goal_dict(goal):
+#     goal_dict = {
+#             "id": goal.goal_id,
+#             "title": goal.title,
+#     }
     
-    return goal_dict
+#     return goal_dict
 
 @goals_bp.route("", methods=["GET"])
 def get_all_goals():
@@ -48,7 +48,7 @@ def get_all_goals():
 @goals_bp.route("/<goal_id>", methods=["GET"])
 def get_one_goal(goal_id):
     goal = validate_goal(goal_id)
-    goal_dict = {"goal": make_goal_dict(goal)}
+    goal_dict = {"goal": goal.make_goal_dict()}
     return jsonify(goal_dict), 200
 
 @goals_bp.route("", methods=["POST"])
@@ -63,7 +63,7 @@ def create_goal():
     db.session.add(new_goal)
     db.session.commit()
 
-    goal_dict = {"goal": make_goal_dict(new_goal)}
+    goal_dict = {"goal": new_goal.make_goal_dict()}
 
     return jsonify(goal_dict), 201
 
@@ -76,7 +76,7 @@ def update_goal(goal_id):
 
     db.session.commit()
 
-    goal_dict = {"goal": make_goal_dict(goal)}
+    goal_dict = {"goal": goal.make_goal_dict()}
 
     return jsonify(goal_dict), 200
 
