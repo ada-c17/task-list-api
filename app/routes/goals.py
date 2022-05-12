@@ -135,33 +135,6 @@ def get_task_or_abort(task_id):
             return task
     abort(make_response({"message": f"The task id {task_id} is not found"}, 404))
 
-# @goals_bp.route("/<goal_id>/tasks", methods=["POST"]) 
-# def post_task_ids_to_goal(goal_id):
-#     """Adding goal id into foreign key column of task table and returning json response object with 200"""
-#     # add task ids to goal
-#     chosen_goal = validate_goal_id(goal_id)
-#     request_task_list = request.get_json()
-#     # check if task_ids exist in request body and it is a list
-#     if "task_ids" in request_task_list and isinstance(request_task_list["task_ids"], list):
-#         tasks_list = request_task_list["task_ids"]
-#     else:
-#         abort(make_response({"message": "The input is invalid."}, 400))
-
-#     # get all tasks by task_id for specific goal
-#     tasks = [get_task_or_abort(task_id) for task_id in tasks_list]
-#     # set foreign key goal id in task table to specific goal
-#     for task in tasks:
-#         task.goal_id = goal_id
-
-#     db.session.commit()
-
-#     response_body = {
-#         "id": chosen_goal.id,
-#         "task_ids": tasks_list
-#     }
-
-#     return jsonify(response_body), 200
-
 
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"]) 
 def post_task_ids_to_goal(goal_id):
@@ -182,13 +155,9 @@ def post_task_ids_to_goal(goal_id):
                 chosen_task.goal_id = chosen_goal.id
     db.session.commit()
 
-    # get all task ids list for one goal
-    # tasks = Task.query.all()
-    # task_ids = [task.id for task in tasks if task.goal_id == chosen_goal.id]
-
     response_body = {
         "id": chosen_goal.id,
-        "task_ids": tasks_list
+        "task_ids": [task.id for task in chosen_goal.tasks]
     }
 
     return jsonify(response_body), 200
@@ -202,10 +171,6 @@ def get_tasks_of_a_goal(goal_id):
     response_body = {
         "id": chosen_goal.id,
         "title": chosen_goal.title,
-        "tasks": []
+        "tasks": [task.task_response_body_dict() for task in chosen_goal.tasks]
     }
-
-    # get list of tasks for specific goal
-    response_body["tasks"] = [task.task_response_body_dict() for task in chosen_goal.tasks]
-
     return jsonify(response_body), 200
