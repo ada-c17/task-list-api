@@ -9,9 +9,7 @@ class Task(db.Model):
     goal = db.relationship("Goal", back_populates="tasks")
 
     def to_dict(self, is_complete):
-        print(f"{self.goal_id=}")
         if self.goal_id:
-            print("In the code with goal id")
             dict_vals = {
                 "task": {
                 "id": self.task_id,
