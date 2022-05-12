@@ -1,6 +1,8 @@
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, abort, make_response, request
+from .route_helpers import fetch_task
+from sqlalchemy import asc, desc
 
 
 task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
@@ -14,33 +16,34 @@ def create_task():
         db.session.add(new_task)
         db.session.commit()
     except:
-        abort(make_response(jsonify({"details":f"invalid data"}), 400))
+        abort(make_response(jsonify({"details":f"Invalid data"}), 400))
     return make_response(jsonify({"task": new_task.to_json()}), 201)
 
 @task_bp.route("", methods=["GET"])
 def fetch_all_tasks():
 
-    # title_query = request.args.get("title")
-    # if title_query:
-    #     tasks = Task.query.filter_by(title_query)
-    # else:
-    tasks = Task.query.all()
+    sort = request.args.get("sort")
+    if sort == "asc":
+        tasks = Task.query.filter_by().order_by(Task.title.asc())
+    elif sort == "desc":
+        tasks = Task.query.filter_by().order_by(Task.title.desc())
+    else:
+        tasks = Task.query.all()
 
     task_response = []
     for task in tasks:
         task_response.append(task.to_json())
     return make_response(jsonify(task_response),200)
 
+@task_bp.route("/<task_id>", methods=["GET"])
+def fetch_a_task(task_id):
+    task = fetch_task(task_id)
+    return make_response(jsonify({"task": task.to_json()}), 200)
+
 @task_bp.route("/<task_id>", methods=["PUT"])
 def update_a_task(task_id):
-    try:
-        task_id = int(task_id)
-    except:
-        abort(make_response(jsonify({"details":f"invalid data"}), 400))
-    task = Task.query.get(task_id)
-    if not task:
-        abort(make_response(jsonify({"details": f"task {task_id} not found"}), 404))
-
+    
+    task = fetch_task(task_id)
     request_body = request.get_json()
 
     try:
@@ -48,5 +51,12 @@ def update_a_task(task_id):
         task.description = request_body["description"]
         db.session.commit()
     except:
-        abort(make_response(jsonify({"details":f"invalid data"}), 400))
+        abort(make_response(jsonify({"details":f"Invalid data"}), 400))
     return make_response(jsonify({"task": task.to_json()}),200)
+
+@task_bp.route("/<task_id>", methods=["DELETE"])
+def delete_a_task(task_id):
+    task = fetch_task(task_id)
+    db.session.delete(task)
+    db.session.commit()
+    return make_response(jsonify({"details": f"Task {task.task_id} \"{task.title}\" successfully deleted"}), 200)
