@@ -5,7 +5,7 @@ class Goal(db.Model):
     title = db.Column(db.String)
     tasks = db.relationship("Task", back_populates="goal", lazy=True)
 
-    def to_dict(self):
+    def goal_to_json(self):
         return {
             "id": self.goal_id, 
             "title": self.title, 

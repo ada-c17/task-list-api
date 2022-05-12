@@ -1,4 +1,5 @@
 from app import db
+from datetime import datetime 
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -8,12 +9,12 @@ class Task(db.Model):
     goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'), nullable=True)
     goal = db.relationship("Goal", back_populates="tasks")
 
-    def to_dict(self):
+    def task_to_json(self):
         response = { 
             "id": self.id, 
             "title": self.title,
             "description": self.description,
-            "is_complete": bool(self.completed_at)
+            "is_complete": isinstance(self.completed_at, datetime)
         }
 
         if self.goal_id:

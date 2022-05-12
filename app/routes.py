@@ -1,11 +1,9 @@
 from app import db
 from app.models.task import Task 
-from app.models.goal import Goal
 from datetime import datetime 
 from flask import Blueprint, jsonify, abort, make_response, request
 import os 
 from slack_sdk import WebClient 
-
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -25,59 +23,58 @@ def validate_task(task_id):
 @tasks_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
-    if "completed_at" not in request_body: 
-        try:
-            new_task = Task(title=request_body["title"], 
-                        description=request_body["description"])
-        except KeyError:
-            return {
-                "details": "Invalid data"
-            }, 400
-    else: 
-        try:
-            new_task = Task(title=request_body["title"], 
-                        description=request_body["description"],
-                        completed_at=request_body["completed_at"])
-        except KeyError:
-            return {
-                "details": "Invalid data"
-            }, 400
+    if "title" not in request_body or "description" not in request_body:
+        return make_response({"details": "Invalid data"}, 400)
+    
+    new_task = Task(title=request_body["title"], 
+                    description=request_body["description"])
+
+    if "completed_at" in request_body: 
+        new_task.completed_at=request_body["completed_at"]
+    # if "completed_at" not in request_body: 
+    #     try:
+    #         new_task = Task(title=request_body["title"], 
+    #                     description=request_body["description"])
+    #     except KeyError:
+    #         return {
+    #             "details": "Invalid data"
+    #         }, 400
+    # else: 
+    #     try:
+    #         new_task = Task(title=request_body["title"], 
+    #                     description=request_body["description"],
+    #                     completed_at=request_body["completed_at"])
+    #     except KeyError:
+    #         return {
+    #             "details": "Invalid data"
+    #         }, 400
     
     db.session.add(new_task)
     db.session.commit()
 
-    response = {
-        "id": new_task.id,
-        "title": new_task.title,
-        "description": new_task.description,
-        "is_complete": isinstance(new_task.completed_at, datetime)
-    }
+    # response = {
+    #     "id": new_task.id,
+    #     "title": new_task.title,
+    #     "description": new_task.description,
+    #     "is_complete": isinstance(new_task.completed_at, datetime)
+    # }
 
-    return make_response(jsonify({"task": response}), 201)
+    return make_response(jsonify({"task": new_task.to_dict()}), 201)
 
 
 @tasks_bp.route("", methods=["GET"])
 def read_all_tasks():
-    query_params = request.args
-    if 'sort' in query_params: 
-        sort_order_query = request.args.get("sort")
-        if sort_order_query == "asc":
-            tasks = Task.query.order_by(Task.title.asc())
-        elif sort_order_query == "desc":
+    sort_order_query = request.args.get("sort")
+    if sort_order_query == "desc":
             tasks = Task.query.order_by(Task.title.desc())
+    elif sort_order_query == "asc":
+        tasks = Task.query.order_by(Task.title.asc())
     else:
         tasks = Task.query.all()
     
     tasks_response = []
     for task in tasks:
-        tasks_response.append(
-            {
-            "id": task.id, 
-            "title": task.title,
-            "description": task.description, 
-            "is_complete": isinstance(task.completed_at, datetime)
-            }
-        )
+        tasks_response.append(task.to_dict())
     return make_response(jsonify(tasks_response))
 
 @tasks_bp.route("/<task_id>", methods=["GET"])
