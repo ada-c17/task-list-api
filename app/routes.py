@@ -55,6 +55,7 @@ def make_task_response(task):
     response = {
         "task": {
             'id': task.task_id,
+            'goal_id': task.goal_id,
             'title': task.title,
             'description': task.description,
             'is_complete': is_complete
@@ -113,6 +114,7 @@ def get_all_tasks():
 
         tasks_response.append({
             'id': task.task_id,
+            'goal_id': task.goal_id,
             'title': task.title,
             'description': task.description,
             'is_complete': is_complete
