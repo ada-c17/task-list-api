@@ -67,3 +67,12 @@ def update_task(task_id):
                         "is_complete": bool(task.completed_at)}
 
     return jsonify(response), 200
+
+
+@task_bp.route("/<task_id>", strict_slashes=False, methods=["DELETE"])
+def delete_task(task_id):
+    task = validate_task(task_id)
+    response = {"details": 'Task 1 "Go on my daily walk 🏞" successfully deleted'}
+    db.session.delete(task)
+    db.session.commit()
+    return jsonify(response), 200
