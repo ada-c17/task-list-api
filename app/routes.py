@@ -319,20 +319,20 @@ def get_goal_or_abort(goal_id):
     return chosen_goal
 
 
-@goals_bp.route("/<goal_id>/tasks", methods = ["POST"])
-def add_tasks_to_goal(goal_id):
-    goal = get_goal_or_abort(goal_id)
+# @goals_bp.route("/<goal_id>/tasks", methods = ["POST"])
+# def add_tasks_to_goal(goal_id):
+#     goal = get_goal_or_abort(goal_id)
 
-    request_body = request.get_json()
-    new_goal = Task(
-        title=request_body["title"],
-        description=request_body["description"],
-        goal=goal
-    )
+#     request_body = request.get_json()
+#     new_goal = Task(
+#         title=request_body["title"],
+#         description=request_body["description"],
+#         goal=goal
+#     )
 
-    db.session.add(new_goal)
-    db.session.commit()
-    return make_response(jsonify(), 200)
+#     db.session.add(new_goal)
+#     db.session.commit()
+#     return make_response(jsonify(), 200)
 
 
 
