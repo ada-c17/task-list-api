@@ -117,19 +117,22 @@ def read_one_task(task_id):
                 "is_complete": bool(chosen_task.completed_at)
                 }
             }
+
+    if chosen_task.goal_id:
+        response ={ "task": {
+                "id": chosen_task.task_id,
+                "goal_id": chosen_task.goal_id,
+                "title": chosen_task.title,
+                "description": chosen_task.description,
+                "is_complete": bool(chosen_task.completed_at)
+                }
+            }
     return jsonify(response), 200
 
 
 #goal get routes
 @goals_bp.route("", methods=["GET"])
 def read_all_goals():
-    # param = request.args
-    # if "sort" in param:
-    #     if param["sort"] == "asc":
-    #         tasks = Task.query.order_by(Task.title.asc())
-    #     elif param["sort"] == "desc":
-    #         tasks = Task.query.order_by(Task.title.desc())
-    # else:
     goals = Goal.query.all()
 
     goals_response = []
@@ -222,12 +225,12 @@ def completed_task(task_id):
     db.session.add(chosen_task)
     db.session.commit()
 
-    post_message = "Someone just completed the task" + chosen_task.title
+    post_message = f"Someone just completed the task {chosen_task.title}"
 
     path = "https://slack.com/api/chat.postMessage"
     key = os.environ.get('SLACK_TOKEN_KEY')
-    data = {"channel": "task-notifications", "text": post_message }
-    headers = {"Authorization": "Bearer" + key}
+    data = {"channel": "task-notifications", "text": post_message}
+    headers = {"Authorization": "Bearer " + key}
 
     response = requests.post(path, params=data, headers=headers)
     response_body = response.json()
@@ -323,7 +326,6 @@ def get_goal_or_abort(goal_id):
 def add_tasks_to_goal(goal_id):
     goal = Goal.query.get(goal_id)
     request_body = request.get_json()
-    # print(request_body)
     task_list = []
     for task_id in request_body["task_ids"]:
         task_list.append(Task.query.get(task_id))
@@ -347,19 +349,20 @@ def read_tasks_of_one_goal(goal_id):
     goal = get_goal_or_abort(goal_id)
 
     tasks_response = []
+
     for task in goal.tasks:
-        tasks_response.append({
-            "id": goal.goal_id,
-            "title": goal.title,
-            "tasks": [
+            tasks_response.append(
                 {
                     "id": task.task_id,
                     "goal_id": goal.goal_id,
                     "title": task.title,
                     "description": task.description,
-                    "is_complete": task.competed_at
-                }
-            ]    
-        })
-    return jsonify(tasks_response), 200
+                    "is_complete": bool(task.completed_at)
+                }    
+        )
+            
+    return jsonify({
+            "id": goal.goal_id,
+            "title": goal.title,
+            "tasks": tasks_response}), 200
 
