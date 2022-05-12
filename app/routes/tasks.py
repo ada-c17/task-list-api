@@ -1,6 +1,5 @@
 from flask import Blueprint, jsonify, abort, make_response, request
 from app.models.task import Task
-from app.models.goal import Goal
 from app import db
 from datetime import datetime
 import logging
@@ -33,23 +32,15 @@ def create_one_task():
     except KeyError:
         return jsonify({'details': 'Invalid data'}), 400
 
-    is_complete = False
-
     if 'completed_at' in request_body:
         new_task.completed_at = request_body['completed_at']
-        is_complete = True
 
     db.session.add(new_task)
     db.session.commit()
 
-    rsp = {'task': {
-            'id': new_task.id,
-            'title': new_task.title,
-            'description': new_task.description,
-            'is_complete': is_complete
-        }}
-
+    rsp = {'task': new_task.to_json()}
     return jsonify(rsp), 201
+
 
 @tasks_bp.route('', methods=['GET'])
 def get_all_tasks():
@@ -60,42 +51,20 @@ def get_all_tasks():
         tasks = Task.query.order_by(Task.title.asc()).all()
     else:
         tasks = Task.query.all()
-    tasks_response = []
 
-    is_complete = False
-    
+    tasks_response = []
     for task in tasks:
-        if task.completed_at:
-            is_complete = True
-        tasks_response.append({
-                'id': task.id,
-                'title': task.title,
-                'description': task.description,
-                'is_complete': is_complete
-            })
-    
+        tasks_response.append(task.to_json())
     return jsonify(tasks_response), 200
+
 
 @tasks_bp.route('/<task_id>', methods=['GET'])
 def get_one_task(task_id):
     task = validate_task_id(task_id)
-    is_complete = False
-
-    if task.completed_at:
-        is_complete = True
-
-    rsp = {"task": {
-        'id': task.id,
-        'title': task.title,
-        'description': task.description,
-        'is_complete': is_complete,
-        
-    }}
-
-    if task.goal_id: 
-        rsp['task']['goal_id'] = task.goal_id
+    rsp = {'task': task.to_json()}
 
     return jsonify(rsp), 200
+
 
 @tasks_bp.route('/<task_id>', methods=['DELETE'])
 def delete_one_task(task_id):
@@ -105,32 +74,23 @@ def delete_one_task(task_id):
 
     return jsonify({'details': f'Task {task.id} \"{task.title}\" successfully deleted'}), 200
 
+
 @tasks_bp.route('/<task_id>', methods=['PUT'])
 def update_one_task(task_id):
     task = validate_task_id(task_id)
     request_body = request.get_json()
-    is_complete = False
 
     try:
         task.title = request_body['title']
         task.description = request_body['description']
     except KeyError:
         return jsonify({'details': 'Invalid data'}), 400
-    
-    if 'completed_at' in request_body:
-        task.completed_at = request_body['completed_at']
-        is_complete = True
 
     db.session.commit()
 
-    rsp = {"task": {
-        'id': task.id,
-        'title': task.title,
-        'description': task.description,
-        'is_complete': is_complete
-    }}
-
+    rsp = {'task': task.to_json()}
     return jsonify(rsp), 200
+
 
 @tasks_bp.route('<task_id>/mark_complete', methods=['PATCH'])
 def mark_task_complete(task_id):
@@ -151,16 +111,9 @@ def mark_task_complete(task_id):
     except SlackApiError as e:
         logger.error(f"Error posting message: {e}")
 
-    rsp = {
-        'task': {
-            'id': task.id,
-            'title': task.title,
-            'description': task.description,
-            'is_complete': True
-        }
-    }
-    
+    rsp = {'task': task.to_json()}
     return jsonify(rsp), 200
+
 
 @tasks_bp.route('<task_id>/mark_incomplete', methods=['PATCH'])
 def mark_task_incomplete(task_id):
@@ -169,13 +122,5 @@ def mark_task_incomplete(task_id):
 
     db.session.commit()
 
-    rsp = {
-        'task': {
-            'id': task.id,
-            'title': task.title,
-            'description': task.description,
-            'is_complete': False
-        }
-    }
-    
+    rsp = {'task': task.to_json()}
     return jsonify(rsp), 200
