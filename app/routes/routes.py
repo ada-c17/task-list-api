@@ -61,7 +61,7 @@ def read_all_tasks():
 
 @task_bp.route("/<task_id>", methods=["GET"])
 def read_one_task(task_id):
-    task = validate_task(task_id)
+    task = validate_task(Task,task_id)
     try:
         return make_response({"task" : task.make_json()}, 200)
     except:
@@ -71,7 +71,7 @@ def read_one_task(task_id):
 @task_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
 
-    task = validate_task(task_id)
+    task = validate_task(Task,task_id)
     request_body = request.get_json()
     try: 
         task.title = request_body["title"]
@@ -86,7 +86,7 @@ def update_task(task_id):
 
 @task_bp.route("/<task_id>", methods=["DELETE"])
 def delete_a_task(task_id):
-    task = validate_task(task_id)
+    task = validate_task(Task,task_id)
 
     db.session.delete(task)
     db.session.commit()

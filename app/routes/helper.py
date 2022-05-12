@@ -1,13 +1,13 @@
 from flask import jsonify, abort, make_response
 from app.models.task import Task
 
-def validate_task(task_id):
+def validate_task(cls,task_id):
     try:
         task_id = int(task_id)
-    except:
+    except ValueError:
         abort(make_response(jsonify(f"task {task_id} invalid"), 400))
-    task = Task.query.get(task_id)
+    obj = cls.query.get(task_id)
 
-    if not task:
+    if not obj:
         abort(make_response(jsonify(f"task {task_id} not found"), 404))
-    return task
+    return obj

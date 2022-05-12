@@ -16,15 +16,16 @@ class Task(db.Model):
         else:
             is_complete = True
         task_dic = {}
-        if not self.goal_id:
-            task_dic["id"] = self.task_id
-            task_dic["title"] = self.title
-            task_dic["description"] = self.description
-            task_dic["is_complete"] = is_complete
-            return task_dic
-        else:
+        
+        task_dic["id"] = self.task_id
+        task_dic["title"] = self.title
+        task_dic["description"] = self.description
+        task_dic["is_complete"] = is_complete
+            
+        if self.goal_id:
+
             task_dic["goal_id"] = self.goal_id 
-            return task_dic
+        return task_dic
 
     @classmethod
     def valid_task(cls, request_body):
@@ -71,47 +72,4 @@ class Task(db.Model):
 
 
 
-
-# from app import db
-# from flask_json import json, FlaskJSON, JsonError, json_response,as_json
-# from flask import current_app, abort, make_response, jsonify
-
-
-# class Task(db.Model):
-#     task_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-#     title = db.Column(db.String)
-#     description = db.Column(db.String)
-#     completed_at = db.Column(db.DateTime)
-#     goal_id = db.Column(db.Integer, db.ForeignKey("goal.goal_id"))
-#     goal = db.relationship("Goal", back_populates = "tasks")
-
-    
-#     def make_json(self):
-#         if not self.completed_at:
-#             is_complete = False
-#         else:
-#             is_complete = True
-#         dic_table = {}
-#         if not self.goal_id: 
-#             dic_table["id"] = self.task_id
-#             dic_table["title"] = self.description
-#             dic_table["is_complete"] = is_complete
-#             return jsonify(dic_table)
-#         else:
-#             dic_table["id"] = self.task_id
-#             dic_table["goal_id"] = self.goal_id
-#             return jsonify(dic_table)
-
-#     @classmethod
-#     def valid_task(cls, request_body):
-#         try:
-#             new_task = cls(
-#             title=request_body['title'],
-#             description=request_body['description'],
-#             completed_at=request_body['completed_at'])
-#         except KeyError: 
-#             new_task = cls(
-#             title=request_body['title'],
-#             description=request_body['description'])
-#         return new_task
  
