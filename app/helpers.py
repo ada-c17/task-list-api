@@ -26,7 +26,7 @@ def call_slack(msg):
     }
 
     header = {
-        "Authorization": "Bearer " + os.environ.get("SLACK_TOKEN")
+        "Authorization": os.environ.get("SLACK_TOKEN")
     }
 
     requests.post(PATH, params=query_params, headers=header)
