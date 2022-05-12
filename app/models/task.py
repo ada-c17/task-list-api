@@ -1,3 +1,4 @@
+from requests import request
 from app import db
 
 class Task(db.Model):
@@ -13,6 +14,7 @@ class Task(db.Model):
             title=self.title,
             description=self.description,
             is_complete=True if self.completed_at else False
+            # is_complete=self.completed_at is not None
         )
 
 
@@ -20,14 +22,11 @@ class Task(db.Model):
     def from_dict(cls, data_dict):
         return cls(
                 title=data_dict["title"],
-                description=data_dict["description"])
+                description=data_dict["description"],
+                # completed_at = True if data_dict["completed_at"] else None)
+                completed_at = data_dict.get("completed_at", None))
         
 
     def override_task(self, data_dict):
         self.title = data_dict["title"]
         self.description = data_dict["description"]
-
-
-
-
-        # is_complete=self.completed_at is not None
