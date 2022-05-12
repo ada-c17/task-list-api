@@ -81,7 +81,6 @@ def ordered_tasks_query(sort_method):
         tasks = Task.query.all()
     return tasks
 
-
 def ordered_goals_query(sort_method):
     '''
     Determines the order_by type (if any) for GET all goals when called.
@@ -245,6 +244,34 @@ def delete_goal(goal_id):
 
     return make_response({"details": f'Goal {goal.goal_id} "{goal.title}" successfully deleted'})
 
+
+@goals_bp.route("/<goal_id>/tasks", methods=["POST"])
+def post_tasks_to_goal(goal_id):
+    goal = validate_object(goal_id, "goal")
+
+    request_body = request.get_json()
+    try:
+        task_ids = request_body["task_ids"]
+    except ValueError:
+        return jsonify({"msg":"No task ID found.  Please re-enter data with task IDs."})
+
+    tasks = [validate_object(task_id, "task") for task_id in task_ids]
+
+    for task in tasks:
+        task.goal_id = int(goal_id)
+
+    db.session.commit()
+
+    return jsonify({
+        "id": int(goal_id),
+        "task_ids": [task.task_id for task in tasks]
+    })
+
+
+@goals_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_tasks_from_goal(goal_id):
+    goal = validate_object(goal_id, "goal")
+    return jsonify(goal.to_dict_advanced())
 
 
 
