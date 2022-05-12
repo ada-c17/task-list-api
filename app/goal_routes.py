@@ -5,6 +5,7 @@ from app.models.goal import Goal
 from app.models.task import Task
 from datetime import datetime
 import os 
+from app.routes import is_completed
 
 
 goals_bp = Blueprint ('goals_bp', __name__, url_prefix = '/goals')
@@ -116,7 +117,7 @@ def get_tasks(goal_id):
             {
             "id": task.id,
             "title": task.title,
-            "completed at": task.completed_at,
+            'is_complete': is_completed(task.completed_at),
             "goal": goal.title
             }
         )
