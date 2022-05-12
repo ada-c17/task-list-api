@@ -94,7 +94,7 @@ def get_one_goal(goal_id):
     # If this goal isn't found, return 404 response code
     if not goal:
         abort(make_response({"details" : f"Invalid data"}, 404))
-        
+
 
     return format_goal_response_body(goal), 200
 
@@ -188,7 +188,6 @@ def post_tasks_to_goal(goal_id):
     else:
         # Check if "task_id" doesn't exist -->  404 
         abort(make_response({"message" : f"Sorry, not found."}, 404))
-
 
     db.session.commit()
 
