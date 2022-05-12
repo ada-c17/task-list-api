@@ -2,7 +2,7 @@
 from app.routes.helpers import post_slack_message
 import pytest
 
-@pytest.mark.skip
+# @pytest.mark.skip
 def test_post_message_return_True():
     assert post_slack_message("Hello World!") == True
 

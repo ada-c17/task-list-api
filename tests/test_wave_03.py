@@ -210,5 +210,5 @@ def test_update_task_with_invalid_completed_at(client, one_task):
     })
     response_body = response.get_json()
 
-    assert response.status_code == 404
+    assert response.status_code == 400
     assert response_body == {"msg":"Complete_at Time not datetime invalid"}

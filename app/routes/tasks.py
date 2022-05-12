@@ -13,6 +13,9 @@ def create_task():
         task = Task(
                 title = request_body["title"],
                 description = request_body["description"],
+                # if user does not input completed_at, will return None
+                # if user does include completed_at but not in the correct format, return 400 and abort
+                # accept completed_at datetime format string: 'Thu, 12 May 2022 04:19:18 GMT'
                 completed_at = check_completed_at(request_body)
                 )
     except KeyError:
