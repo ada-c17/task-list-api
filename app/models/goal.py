@@ -1,7 +1,6 @@
 from app import db
 from flask import abort, make_response
 
-
 class Goal(db.Model):
     goal_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String)
@@ -22,7 +21,5 @@ class Goal(db.Model):
 
         return new_goal
 
-    def update(self, request_body):
-        self.title = request_body["title"]
 
 

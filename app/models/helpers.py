@@ -16,7 +16,6 @@ def validate_task(id):
 
 	return task
 
-
 def validate_goal(id):
 	try:
 		id = int(id)

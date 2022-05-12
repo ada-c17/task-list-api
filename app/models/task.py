@@ -1,4 +1,3 @@
-from sqlalchemy import null
 from app import db
 from flask import make_response, abort
 
@@ -9,9 +8,6 @@ class Task(db.Model):
     completed_at = db.Column("completed_at", db.DateTime, default=None)
     goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'))
     goal = db.relationship("Goal", back_populates="tasks")
-
-
-
 
     def to_json(self):
 
@@ -27,7 +23,6 @@ class Task(db.Model):
         if self.goal_id: response_body["goal_id"] = self.goal_id 
         
         return response_body
-
 
     @classmethod
     def create(cls, request_body):
