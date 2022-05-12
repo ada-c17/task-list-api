@@ -189,6 +189,7 @@ def post_tasks_to_goal(goal_id):
         # Check if "task_id" doesn't exist -->  404 
         abort(make_response({"message" : f"Sorry, not found."}, 404))
 
+    db.session.add()
     db.session.commit()
 
     # Add to Goal's task_id's list
