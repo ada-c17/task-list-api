@@ -1,7 +1,7 @@
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, request, abort, make_response
-import sqlalchemy
+from datetime import datetime
 
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
@@ -11,12 +11,14 @@ def validate_create_or_put():
     request_body = request.get_json()
     try:
         new_task = Task(title=request_body["title"],
-                    description=request_body["description"])
+                    description=request_body["description"],
+                    completed_at=request_body.get("completed_at"))
     except:
         rsp = {
             "details": "Invalid data"
         }
         abort(make_response(jsonify(rsp), 400))
+    
     return new_task
 
 @tasks_bp.route('', methods=['POST'])
@@ -25,14 +27,8 @@ def create_one_task():
     
     db.session.add(new_task)
     db.session.commit()
-
-    return { "task": {
-        "id": new_task.task_id,
-        "title": new_task.title,
-        "description": new_task.description,
-        "is_complete": False
-    }}, 201
-
+    return {"task": new_task.to_dict()}, 201
+    
 @tasks_bp.route('', methods=['GET'])
 def get_all_tasks():
     tasks = Task.query.all()
@@ -44,16 +40,11 @@ def get_all_tasks():
         tasks = Task.query.order_by(Task.title.desc())
     else:
         tasks = Task.query.all()
-        
+
     rsp = []
     # refactor opporunity when appending tasks to rsp
     for task in tasks:
-        rsp.append({
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": False
-        })
+        rsp.append(task.to_dict())
 
     return jsonify(rsp), 200
 
@@ -73,14 +64,7 @@ def get_task_or_abort(task_id):
 def get_one_task(task_id):
     chosen_task = get_task_or_abort(task_id)
 
-    rsp = { "task": 
-        {
-            "id": chosen_task.task_id,
-            "title": chosen_task.title,
-            "description": chosen_task.description,
-            "is_complete": False
-        }
-    }
+    rsp = {"task": chosen_task.to_dict()}
     return jsonify(rsp), 200
 
 @tasks_bp.route("/<task_id>", methods=['PUT'])
@@ -93,14 +77,7 @@ def put_one_task(task_id):
     
     db.session.commit()    
     
-    rsp = { "task": 
-        {
-            "id": chosen_task.task_id,
-            "title": chosen_task.title,
-            "description": chosen_task.description,
-            "is_complete": False
-        }
-    }
+    rsp = {"task": chosen_task.to_dict()}
     return jsonify(rsp), 200
 
 @tasks_bp.route("/<task_id>", methods=['DELETE'])
@@ -112,4 +89,20 @@ def delete_one_task(task_id):
     rsp = {
         "details": f'Task {task_id} "{chosen_task.title}" successfully deleted'
     }
+    return jsonify(rsp), 200
+
+# ------------- WAVE 3 -------------
+@tasks_bp.route("/<task_id>/<complete_status>", methods=['PATCH'])
+def update_task_complete_status(task_id, complete_status):
+    chosen_task = get_task_or_abort(task_id)
+    
+    if "mark_incomplete" in complete_status:
+        chosen_task.completed_at = None
+    elif "mark_complete" in complete_status:
+        chosen_task.completed_at = datetime.now() 
+    
+    db.session.commit()
+
+    rsp = {"task": chosen_task.to_dict()}
+
     return jsonify(rsp), 200
