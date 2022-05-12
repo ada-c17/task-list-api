@@ -1,8 +1,9 @@
+import os
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, request, abort, make_response
 from datetime import datetime
-
+import requests
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -42,7 +43,7 @@ def get_all_tasks():
         tasks = Task.query.all()
 
     rsp = []
-    # refactor opporunity when appending tasks to rsp
+    
     for task in tasks:
         rsp.append(task.to_dict())
 
@@ -100,7 +101,17 @@ def update_task_complete_status(task_id, complete_status):
         chosen_task.completed_at = None
     elif "mark_complete" in complete_status:
         chosen_task.completed_at = datetime.now() 
-    
+
+        # WAVE 4
+        SLACKBOT_TOKEN = os.environ.get("SLACKBOT_TOKEN")
+        slackbot_url = "https://slack.com/api/chat.postMessage"
+        slackbot_headers =  {"Authorization": "Bearer " + SLACKBOT_TOKEN}
+        slackbot_msg = {
+                "channel": "task-notifications", 
+                "text": f"Someone just completed the task {chosen_task.title}"
+        }
+        requests.post(slackbot_url, data=slackbot_msg, headers=slackbot_headers)
+
     db.session.commit()
 
     rsp = {"task": chosen_task.to_dict()}
