@@ -14,13 +14,21 @@ class Task(db.Model):
     def make_dict(self):
         data_dict=dict(
                 id=self.task_id,
-                goal_id=self.goal_id,
                 title=self.title,
                 description=self.description, 
                 is_complete = self.is_complete
             )
+        if self.goal_id != None:
+            data_dict["goal_id"] = self.goal_id
 
         return data_dict
+
+    # def make_extended_dict(self):
+    #     data_dict = self.make_dict()
+    #     data_dict["goal_id"] = self.goal_id
+
+    #     return data_dict
+
     
     def replace_all_details(self, data_dict):
         self.title = data_dict["title"]

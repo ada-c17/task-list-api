@@ -44,6 +44,9 @@ def create_goal():
 # POST /goals/<goal_id>/tasks
 @bp.route("/<goal_id>/tasks", methods=["POST"])
 def assign_tasks_to_goal(goal_id):
+    goal = get_goal_record_by_id(goal_id)
+    goal_dict = goal.make_dict()
+
     request_body = request.get_json()
 
     for task_id in request_body["task_ids"]:
@@ -52,7 +55,7 @@ def assign_tasks_to_goal(goal_id):
 
     db.session.commit()
 
-    return jsonify({"goal_id": goal_id, "task_ids": request_body["task_ids"]})
+    return jsonify({"id": goal_dict["id"], "task_ids": request_body["task_ids"]})
 
 # GET /goals
 @bp.route("", methods=["GET"])
@@ -80,7 +83,7 @@ def get_tasks_of_one_goal(goal_id):
     for task in goal.tasks:
         task_list.append(task.make_dict())
 
-    return jsonify({"goal_id": goal_dict["id"], "title": goal_dict["title"], "tasks": task_list})
+    return jsonify({"id": goal_dict["id"], "title": goal_dict["title"], "tasks": task_list})
 
 # PUT /goals/<goal_id>
 @bp.route("/<goal_id>", methods=["PUT"])
