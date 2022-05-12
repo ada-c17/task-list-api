@@ -98,7 +98,7 @@ def test_create_task(client):
     # Act
     response = client.post("/tasks", json={
         "title": "A Brand New Task",
-        "description": "Test Description",
+        "description": "Test Description"
     })
     response_body = response.get_json()
 
@@ -125,7 +125,7 @@ def test_update_task(client, one_task):
     # Act
     response = client.put("/tasks/1", json={
         "title": "Updated Task Title",
-        "description": "Updated Test Description",
+        "description": "Updated Test Description"
     })
     response_body = response.get_json()
 
@@ -151,7 +151,7 @@ def test_update_task_not_found_with_empty_db(client):
     # Act
     response = client.put("/tasks/1", json={
         "title": "Updated Task Title",
-        "description": "Updated Test Description",
+        "description": "Updated Test Description"
     })
     response_body = response.get_json()
 
@@ -172,7 +172,7 @@ def test_update_task_not_found_id_with_populated_db(client, one_task):
     # Act
     response = client.put("/tasks/33444", json={
         "title": "Updated Task Title",
-        "description": "Updated Test Description",
+        "description": "Updated Test Description"
     })
     response_body = response.get_json()
 
@@ -187,7 +187,7 @@ def test_update_task_with_invalid_id_with_populated_db(client, one_task):
     # Act
     response = client.put("/tasks/hello_ada", json={
         "title": "Updated Task Title",
-        "description": "Updated Test Description",
+        "description": "Updated Test Description"
     })
     response_body = response.get_json()
 

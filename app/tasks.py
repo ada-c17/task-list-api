@@ -44,7 +44,7 @@ def to_dict(task):
         "is_complete": task.is_complete()
     }
 
-# routes
+# routes for task
 @tasks_bp.route("", methods=['POST'])
 def create_one_task():
     request_body = request.get_json()
@@ -55,7 +55,7 @@ def create_one_task():
             description = request_body["description"],
             completed_at = request_body.get("completed_at"))
     except KeyError:
-        return {"details" : "Invalid data"}, 400
+        return { "details" : "Invalid data"}, 400
 
     db.session.add(new_task)
     db.session.commit()
