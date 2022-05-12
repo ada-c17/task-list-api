@@ -112,8 +112,6 @@ def test_update_goal(client, one_goal):
     # Assert
     
     
-    
-    
 
 # @pytest.mark.skip(reason="test to be completed by student")
 def test_update_goal_not_found(client):
