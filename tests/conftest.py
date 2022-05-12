@@ -91,3 +91,12 @@ def one_task_belongs_to_one_goal(app, one_goal, one_task):
     goal = Goal.query.first()
     goal.tasks.append(task)
     db.session.commit()
+
+@pytest.fixture
+def three_goals(app):
+    db.session.add_all([
+        Goal(title="Build a habit of going outside daily"),
+        Goal(title="Run at a marathon"),
+        Goal(title="Bake a birthday cake"),
+    ])
+    db.session.commit()

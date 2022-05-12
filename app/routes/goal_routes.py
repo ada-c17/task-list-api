@@ -6,19 +6,17 @@ from flask import Blueprint, request, jsonify
 
 goals_bp = Blueprint("goal", __name__, url_prefix="/goals")
 
-# Get all goals
 @goals_bp.route("", methods=["GET"])
 def get_all_goals():
     if request.args.get("sort"):
         sort_query = request.args.get("sort")
         goals = sort_records(Goal, sort_query)
     else:
-        goals = Task.query.all() 
-        
+        goals = Goal.query.all() 
+
     goals_response = [goal.to_json() for goal in goals]
     return jsonify(goals_response), 200
 
-# Get one goal
 @goals_bp.route("/<id>", methods=["GET"])
 def get_one_goal(id):
     goal = validate_id(Goal, id)
@@ -27,7 +25,6 @@ def get_one_goal(id):
 
     return jsonify(response_body), 200
 
-# Create a goal
 @goals_bp.route("", methods=["POST"])
 def create_goal():
     request_body = request.get_json()
@@ -42,7 +39,6 @@ def create_goal():
 
     return jsonify(response_body), 201
 
-# Update a goal
 @goals_bp.route("/<id>", methods=["PUT"])
 def update_goal(id):
     goal = validate_id(Goal, id)
@@ -57,7 +53,6 @@ def update_goal(id):
     
     return jsonify(response_body), 200
 
-# Delete a goal
 @goals_bp.route("/<id>", methods=["DELETE"])
 def delete_goal(id):
     goal = validate_id(Goal, id)
@@ -67,7 +62,6 @@ def delete_goal(id):
 
     return jsonify({'details':f'Goal {goal.id} "{goal.title}" successfully deleted'}), 200
 
-# Post Task IDs to a GOAL
 @goals_bp.route("/<id>/tasks", methods=["POST"])
 def post_existing_tasks_to_goal(id):
     goal = validate_id(Goal, id)
@@ -88,7 +82,6 @@ def post_existing_tasks_to_goal(id):
     
     return jsonify(response_body), 200
 
-# Get tasks for one specific goal
 @goals_bp.route("/<id>/tasks", methods=["GET"])
 def get_all_tasks_by_goal(id):
     goal = validate_id(Goal, id)

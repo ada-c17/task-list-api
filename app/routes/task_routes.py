@@ -1,14 +1,11 @@
-from psycopg2 import DataError
 from app import db
 from app.models.task import Task
-from .routes_helpers import validate_id, error_message, send_msg_to_channel, sort_records, validate_data
-from flask import Blueprint, request, make_response, jsonify
-from datetime import date
+from .routes_helpers import validate_id, send_msg_to_channel, sort_records, validate_data
+from flask import Blueprint, request, jsonify
 import time
 
 tasks_bp = Blueprint("task", __name__, url_prefix="/tasks")
 
-# Get all tasks
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
     if request.args.get("sort"):
@@ -21,7 +18,6 @@ def get_all_tasks():
 
     return jsonify(tasks_response), 200
 
-# Get One Task - already dry
 @tasks_bp.route("/<id>", methods=["GET"])
 def get_one_task(id):
     task = validate_id(Task, id)
@@ -30,7 +26,6 @@ def get_one_task(id):
     
     return jsonify(response_body), 200
 
-# Create Task - already dry
 @tasks_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
@@ -44,7 +39,6 @@ def create_task():
 
     return jsonify(response_body), 201
 
-# Update Task - already dry
 @tasks_bp.route("/<id>", methods=["PUT"])
 def update_task(id):
     task = validate_id(Task, id)
@@ -59,7 +53,6 @@ def update_task(id):
 
     return jsonify(response_body), 200
 
-# Mark Task Complete - this be dry
 @tasks_bp.route("/<id>/mark_complete", methods=["PATCH"])
 def mark_task_complete(id):
     task = validate_id(Task, id)
@@ -74,7 +67,6 @@ def mark_task_complete(id):
 
     return jsonify(response_body), 200
 
-# Mark Task Incomplete - this dry
 @tasks_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
 def mark_task_incomplete(id):
     task = validate_id(Task, id)
@@ -88,7 +80,6 @@ def mark_task_incomplete(id):
     
     return jsonify(response_body), 200
 
-# Delete Task - dry
 @tasks_bp.route("/<id>", methods=["DELETE"])
 def delete_task(id):
     task = validate_id(Task, id)
