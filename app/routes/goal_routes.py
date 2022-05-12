@@ -1,9 +1,6 @@
-from datetime import datetime
-from email import message
 from flask import Blueprint, jsonify, abort, make_response, request
 from app import db
 from app.models.goal import Goal
-from sqlalchemy import asc, desc
 from app.models.goal import Goal
 from app.models.task import Task
 
@@ -60,9 +57,7 @@ def get_one_goal(goal_id):
 @goal_bp.route("/<goal_id>", methods=["PUT"])
 def replace_goal(goal_id):
     goal = validate_goal(goal_id)
-
     request_body = request.get_json()
-
     goal.title = request_body["title"]
     
     db.session.commit()
@@ -80,7 +75,6 @@ def delete_goal(goal_id):
 
 @goal_bp.route("/<goal_id>/tasks", methods=["GET"])
 def get_tasks_for_goal(goal_id):
-
     goal = validate_goal(goal_id)
 
     tasks_response = []
