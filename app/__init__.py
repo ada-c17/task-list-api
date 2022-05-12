@@ -10,7 +10,7 @@ migrate = Migrate()
 load_dotenv()
 
 
-def create_app(test_config=None):
+def create_app(test_config=None): #pragma no cover
     app = Flask(__name__)
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -25,10 +25,15 @@ def create_app(test_config=None):
     # Import models here for Alembic setup
     from app.models.task import Task
     from app.models.goal import Goal
+    from app.routes_helper import validated_goal, validated_task
 
     db.init_app(app)
     migrate.init_app(app, db)
 
     # Register Blueprints here
-
+    from .routes.task_route import tasks_bp
+    app.register_blueprint(tasks_bp)
+    from .routes.goal_route import goals_bp
+    app.register_blueprint(goals_bp)
+    
     return app
