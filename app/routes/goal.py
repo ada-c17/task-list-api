@@ -90,15 +90,7 @@ def get_tasks_for_goal(goal_id):
 
     tasks_for_goal = []
     for task in goal.tasks:
-        tasks_for_goal.append(
-            {
-            "id": task.task_id,
-            "goal_id": task.goal_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": bool(task.completed_at)
-            }
-        )
+        tasks_for_goal.append(task.return_task_dict())
 
     response = {
         "id": goal.goal_id,

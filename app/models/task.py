@@ -9,6 +9,15 @@ class Task(db.Model):
     goal = db.relationship("Goal", back_populates="tasks")
 
     def return_task_dict(self):
+        if self.goal_id:
+            return {
+                "id": self.task_id,
+                "goal_id": self.goal_id,
+                "title": self.title,
+                "description": self.description,
+                "is_complete": bool(self.completed_at)
+                }
+
         return {
             "id": self.task_id,
             "title": self.title,
