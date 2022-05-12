@@ -1,6 +1,7 @@
 from flask import Blueprint, make_response, request,jsonify, abort
 from app import db
 from app.models.goal import Goal
+from app.models.task import Task
 
 goal_bp = Blueprint("goal_bp", __name__, url_prefix="/goals")
 
@@ -87,3 +88,59 @@ def delete_one_goal(goal_id):
     response_body = (f'Goal {goal.goal_id} "{goal.title}" successfully deleted')
 
     return make_response(jsonify({"details":response_body}))
+
+def get_task_or_abort(task_id):
+    try:
+        task_id = int(task_id)
+    except ValueError:
+        abort(make_response({"message":f"Task {task_id} invalid"}, 400))
+
+    task = Task.query.get(task_id)
+
+    if not task:
+        abort(make_response({"message":f"Task {task_id} not found"}, 404))
+
+    return task
+
+
+@goal_bp.route("/<goal_id>/tasks", methods=["POST"])
+def create_tasks_to_goal(goal_id):
+
+    goal = validate_goal(goal_id) #first need to validate ID using helper function
+
+    request_body = request.get_json()
+    try:
+        task_id = request_body["task_ids"]
+    except ValueError:
+        return jsonify({"message": "Missing task_id in request body"}, 400)
+
+    if not isinstance(task_id,list): #check to see if this isn't a list
+        return jsonify({'msg': "Expected list of task IDs"}), 400
+
+    for task in task_id:
+        tasks = get_task_or_abort(task)
+        if tasks.id == task: #??
+            tasks.goal_id = goal.goal_id
+
+    db.session.commit()
+    return make_response(jsonify({
+        "id": goal.goal_id,
+        "task_ids": request_body["task_ids"]
+    }))
+
+@goal_bp.route("/<goal_id>/tasks", methods=["GET"]) #CHECK AND REDO
+def get_tasks_to_goal(goal_id):
+    goal = validate_goal(goal_id)
+
+    tasks = Task.query.all()
+    response_body = {
+        "id": goal.goal_id,
+        "title": goal.title,
+        "tasks": []
+    }
+
+    for task in tasks:
+        if task.goal_id == goal.goal_id: #333 == 333
+            response_body["tasks"].append(task.to_dict())
+    db.session.commit()
+    return jsonify(response_body), 200

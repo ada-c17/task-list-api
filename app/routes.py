@@ -13,7 +13,7 @@ task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 def validate_task(task_id):
     try:
         task_id = int(task_id)
-    except:
+    except ValueError:
         abort(make_response({"message":f"Task {task_id} invalid"}, 400))
 
     task = Task.query.get(task_id)
@@ -50,12 +50,17 @@ def get_all_saved_tasks():
 def get_one_task(task_id):
     task = validate_task(task_id)
 
-    return jsonify({"task":
+    response_body = {"task":
     {"id": task.id,
     "title": task.title,
     "description": task.description,
-    "is_complete": bool(task.completed_at)}
-    }) 
+    "is_complete": bool(task.completed_at)
+    }}
+    
+    if task.goal_id != None: #checking if task.goal_id is in the model Task, it is automatically None 
+        response_body["task"]["goal_id"] = task.goal_id
+    return jsonify(response_body)
+
 
 @task_bp.route("", methods=["POST"])
 def create_task():

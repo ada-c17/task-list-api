@@ -136,7 +136,7 @@ def test_delete_goal(client, one_goal):
 
 
 
-@pytest.mark.skip(reason="test to be completed by student")
+#@pytest.mark.skip(reason="test to be completed by student")
 def test_delete_goal_not_found(client):
     response = client.delete("/goals/1")
     response_body = response.get_json()
