@@ -64,13 +64,7 @@ def update_task(task_id):
     request_body = request.get_json()
 
     try:
-        if 'completed_at' in request_body:
-            task.title = request_body["title"]
-            task.description = request_body["description"]
-            task.completed_at = request_body["completed_at"]
-        else:
-            task.title = request_body["title"]
-            task.description = request_body["description"]
+        task.update(request_body)
     except KeyError:
         return abort(make_response(jsonify({"details":"Invalid data"}), 400))
 

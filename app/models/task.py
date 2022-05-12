@@ -23,8 +23,13 @@ class Task(db.Model):
         return task_dictionary
 
     def update(self, request_body):
-        self.title = request_body["title"]
-        self.description = request_body["description"]
+        if 'completed_at' in request_body:
+            self.title = request_body["title"]
+            self.description = request_body["description"]
+            self.completed_at = request_body["completed_at"]
+        else:
+            self.title = request_body["title"]
+            self.description = request_body["description"]
 
     @classmethod
     def create_complete(cls,request_body):
