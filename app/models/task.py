@@ -11,13 +11,13 @@ class Task(db.Model):
     def to_dict(self, is_complete):
         if self.goal_id:
             dict_vals = {
-                "task": {
+                "task": 
+                {
                 "id": self.task_id,
                 "goal_id": self.goal_id,
                 "title": self.title,
                 "description": self.description,
-                "is_complete": is_complete
-                }
+                "is_complete": is_complete}
                 }
         else:
             dict_vals = {
