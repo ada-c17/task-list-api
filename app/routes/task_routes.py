@@ -79,18 +79,7 @@ def get_one_task(task_id):
     task = validate_task(task_id)
     is_complete = bool(task.completed_at)
 
-    if task.goal_id:
-            return {
-        "task": {
-            "id": task.task_id,
-            "goal_id": task.goal_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": is_complete
-        }
-            }
-    else:
-        return {"task": task.to_dict(is_complete)}
+    return {"task": task.to_dict(is_complete)}
 
 @task_bp.route("/<task_id>", methods=["PUT"])
 def replace_task(task_id):
