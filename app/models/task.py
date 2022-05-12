@@ -11,3 +11,11 @@ class Task(db.Model): # where do i put nullable=True?
     
 
     # make helper function for to dict
+
+    def to_dict(self):
+        return {
+            "id": self.task_id,
+            "title": self.title,
+            "description": self.description,
+            "is_complete": bool(self.completed_at)
+        }

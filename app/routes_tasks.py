@@ -42,12 +42,7 @@ def get_all_tasks():
     
     response = []
     for task in tasks:
-        response.append({
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": bool(task.completed_at)
-        })
+        response.append(task.to_dict())
 
     return jsonify(response), 200
 
@@ -57,12 +52,7 @@ def get_one_task(task_id):
     task = validate_task(task_id)
 
     response = {
-        "task": {
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": bool(task.completed_at)
-        }
+        "task": task.to_dict()
     }
 
     if task.goal_id:
@@ -91,13 +81,13 @@ def create_one_task():
             completed_at = request_body["completed_at"] 
             # Converted string format will always start with a letter that is the day of the week
             if completed_at[0].isalpha():
-                finished = datetime.strptime(completed_at, 
+                converted_datetime = datetime.strptime(completed_at, 
                     '%a, %d %B %Y %H:%M:%S %Z')
             else:
                 # '2022-05-07 18:48:06.598253' format will never start with a letter
-                finished = datetime.strptime(completed_at, 
+                converted_datetime = datetime.strptime(completed_at, 
                     '%Y-%m-%d %H:%M:%S.%f')
-            new_task.completed_at = finished
+            new_task.completed_at = converted_datetime
         except: 
             # Again, any input is invalid that is not:
             # '2022-05-07 18:48:06.598253' 
@@ -109,12 +99,7 @@ def create_one_task():
     db.session.commit()
 
     response = {
-        "task": {
-            "id": new_task.task_id,
-            "title": new_task.title,
-            "description": new_task.description,
-            "is_complete": bool(new_task.completed_at)
-        }
+        "task": new_task.to_dict()
     }
 
     return jsonify(response), 201
@@ -135,12 +120,7 @@ def update_task(task_id):
     db.session.commit()
 
     response = {
-        "task": {
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": bool(task.completed_at)
-        }
+        "task": task.to_dict()
     }
 
     return jsonify(response), 200
@@ -175,12 +155,7 @@ def update_task_mark_complete(task_id):
         requests.post(SLACK_PATH, headers=headers, params=query_params)
 
     response = {
-        "task": {
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": True
-        }
+        "task": task.to_dict()
     }
 
     return jsonify(response), 200
@@ -193,12 +168,7 @@ def update_task_mark_incomplete(task_id):
     db.session.commit()
 
     response = {
-        "task": {
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": False
-        }
+        "task": task.to_dict()
     }
 
     return jsonify(response), 200
