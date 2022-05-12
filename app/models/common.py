@@ -1,5 +1,23 @@
+# Task-aware JSONEncoder
+from flask.json import JSONEncoder
 
-# Common model methods
+class EnhancedJSONEncoder(JSONEncoder):
+
+    def default(self, obj):
+        if type(obj).__name__ == 'Task':
+            details = {
+                'id': obj.task_id,
+                'title': obj.title,
+                'description': obj.description,
+                'is_complete': obj.completed_at != None
+            }
+            if obj.goal_id:
+                details['goal_id'] = obj.goal_id
+            return details
+        return JSONEncoder.default(self, obj)
+
+#########################################
+# Shared validation and filtering methods
 
 def validate_and_get_by_id(cls, target_id):
     try:
