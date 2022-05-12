@@ -227,6 +227,7 @@ def delete_one_goal(goal_id):
 
 #######################################
 ######################################
+#GOALS + TASKS ROUTES
 
 @goals_bp.route("<goal_id>/tasks", methods=["POST"])
 def create_task_with_goal_id(goal_id):
