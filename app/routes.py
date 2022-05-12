@@ -25,6 +25,11 @@ def create_task():
         new_task = Task.new_task(request.get_json())
     except ValueError:
         abort(make_response(jsonify({"details": "Invalid data"}),400))
+    except TypeError as err:
+        abort(e.make_error_response(err, Task, None, 
+                                    detail=" If provided, the timestamp for "
+        "completion must be input as a string in a standard date and time "
+        "format."))
     
     db.session.add(new_task)
     db.session.commit()
@@ -45,13 +50,13 @@ def update_task(task_id):
         task = c.validate_and_get_by_id(Task, task_id)
     except (ValueError, LookupError) as err:
         abort(e.make_error_response(err, Task, task_id))
+    except TypeError as err:
+        abort(e.make_error_response(err, Task, task_id, 
+                                    detail=" If provided, the timestamp for "
+        "completion must be input as a string in a standard date and time "
+        "format."))
     
-    # TODO: refactor below into Task model as instance method
-    updated_details = request.get_json()
-    
-    for k,v in updated_details.items():
-        setattr(task, k, v)
-    
+    task.update(request.get_json())
     db.session.commit()
 
     return jsonify({'task': task}), 200
