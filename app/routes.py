@@ -2,6 +2,10 @@ from app import db
 from app.models.task import Task
 from flask import Blueprint, request, jsonify, make_response, abort
 from datetime import datetime
+import requests
+import os
+from dotenv import load_dotenv
+
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
 # CREATE aka POST new task at endpoint: /tasks
@@ -126,6 +130,9 @@ def mark_complete(id):
     task.completed_at = datetime.utcnow()
 
     db.session.commit()
+    print(post_slack_message(task.title))
+
+
     return make_response(jsonify({"task": task.to_dict()}), 200)
 
 # PATCH a task at endpoint: tasks/id/mark_incomplete
@@ -139,6 +146,21 @@ def mark_incomplete(id):
     return make_response(jsonify({"task": task.to_dict()}), 200)
 
 
+def post_slack_message(text):
+    slack_channel = "task-notifications"
+    slack_user_name = "smiley_face"
+    slack_icon_emoji = "hope-ada"
+
+    load_dotenv()
+    
+    return requests.post('https://slack.com/api/chat.postMessage', 
+        headers={"Authorization": os.environ.get("bearer_token")},
+        json={
+        'channel': slack_channel,
+        'text': text,
+        'icon_emoji': slack_icon_emoji,
+        'username': slack_user_name
+            }).json()	
 
 
 

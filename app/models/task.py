@@ -1,11 +1,12 @@
 from app import db
-from datetime import datetime
+# from datetime import datetime
 class Task(db.Model):
     task_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=False)
     completed_at = db.Column(db.DateTime, nullable=True, default=None)
-    # completed_at = db.Column(db.DateTime, nullable=True)
+    goal_id = db.Column(db.Integer, db.ForeignKey("goal.goal_id"))
+    goals = db.relationship("Goal", back_populates="task")
     # __tablename__ = "tasks" #This is optional for if you want to plurally name your table 
 
     def to_dict(self):
@@ -22,23 +23,16 @@ class Task(db.Model):
     def update(self,request_body):
         self.title = request_body["title"]
         self.description = request_body["description"]
-
-    # @classmethod
-    # def from_dict(cls, request_body):
-    #     new_task = cls(
-    #         title=request_body["title"],
-    #         description=request_body["description"],
-    #             )
-    #     return new_task
     
     @classmethod
     def create(cls, request_body):
         return cls(
             title=request_body["title"],
             description=request_body["description"],
-            completed_at=request_body.get("completed_at", None) #This value returns None if there is no argument
+            # completed_at = request_body["completed_at"] if "completed at" in request_body else None
+            completed_at=request_body.get("completed_at", None) 
+            #This value returns None if there is no argument
             # .get is a dictionary method. 
-
             )
 
 
@@ -46,4 +40,3 @@ class Task(db.Model):
 
 
 
-        # complete = request_body["completed_at"] if "completed at" in request_body else None
