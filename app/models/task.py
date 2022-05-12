@@ -8,7 +8,7 @@ class Task(db.Model):
     goal_id = db. Column(db.Integer, db.ForeignKey("goal.goal_id"), nullable=True)
     goal = db.relationship("Goal", back_populates="tasks")
 
-    def return_task_dict(self):
+    def to_dict(self):
         if self.goal_id:
             return {
                 "id": self.task_id,

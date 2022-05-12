@@ -19,7 +19,7 @@ def get_saved_tasks():
 
     task_list = []
     for task in tasks:
-        task_list.append(task.return_task_dict())
+        task_list.append(task.to_dict())
     
     return jsonify(task_list), 200
 
@@ -28,7 +28,7 @@ def get_saved_tasks():
 def get_one_saved_task(task_id):
     task = helper_functions.validate_task_or_abort(task_id)
 
-    return jsonify({"task": task.return_task_dict()}), 200
+    return jsonify({"task": task.to_dict()}), 200
 
 
 @tasks_bp.route("", methods=["POST"])
@@ -53,7 +53,7 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
 
-    return jsonify({"task": new_task.return_task_dict()}), 201
+    return jsonify({"task": new_task.to_dict()}), 201
 
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
@@ -70,7 +70,7 @@ def update_saved_task(task_id):
 
     db.session.commit()
 
-    return jsonify({"task": task.return_task_dict()}), 200
+    return jsonify({"task": task.to_dict()}), 200
 
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
@@ -92,7 +92,7 @@ def mark_task_complete(task_id):
 
     slackbot.post_to_slack(task)
 
-    return jsonify({"task": task.return_task_dict()}), 200
+    return jsonify({"task": task.to_dict()}), 200
 
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
@@ -102,4 +102,4 @@ def mark_task_incomplete(task_id):
     task.completed_at = None
     db.session.commit()
     
-    return jsonify({"task": task.return_task_dict()}), 200
+    return jsonify({"task": task.to_dict()}), 200

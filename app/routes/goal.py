@@ -11,7 +11,7 @@ def get_saved_goals():
 
     goal_list = []
     for goal in goals:
-        goal_list.append(goal.return_goal_dict())
+        goal_list.append(goal.to_dict())
     
     return jsonify(goal_list), 200
 
@@ -20,7 +20,7 @@ def get_saved_goals():
 def get_one_saved_goal(goal_id):
     goal = helper_functions.validate_goal_or_abort(goal_id)
 
-    return jsonify({"goal": goal.return_goal_dict()}), 200
+    return jsonify({"goal": goal.to_dict()}), 200
 
 
 @goals_bp.route("", methods=["POST"])
@@ -35,7 +35,7 @@ def create_goal():
     db.session.add(new_goal)
     db.session.commit()
 
-    return jsonify({"goal": new_goal.return_goal_dict()}), 201
+    return jsonify({"goal": new_goal.to_dict()}), 201
 
 
 @goals_bp.route("/<goal_id>", methods=["PUT"])
@@ -47,7 +47,7 @@ def update_saved_goal(goal_id):
     goal.title = request_body["title"]
     db.session.commit()
 
-    return jsonify({"goal": goal.return_goal_dict()}), 200
+    return jsonify({"goal": goal.to_dict()}), 200
 
 
 @goals_bp.route("/<goal_id>", methods=["DELETE"])
@@ -90,7 +90,7 @@ def get_tasks_for_goal(goal_id):
 
     tasks_for_goal = []
     for task in goal.tasks:
-        tasks_for_goal.append(task.return_task_dict())
+        tasks_for_goal.append(task.to_dict())
 
     response = {
         "id": goal.goal_id,
