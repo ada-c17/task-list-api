@@ -1,5 +1,7 @@
 from app import db
-from flask import current_app, abort, make_response
+from flask_json import json
+
+from flask import current_app, abort, make_response, json_encoder
 
 
 class Task(db.Model):
@@ -10,26 +12,22 @@ class Task(db.Model):
     goal_id = db.Column(db.Integer, db.ForeignKey("goal.goal_id"))
     goal = db.relationship("Goal", back_populates = "tasks")
 
-
+    @json.encoder
     def make_json(self):
         if not self.completed_at:
             is_complete = False
         else:
             is_complete = True
-        if self.goal_id:
-            return {"id": self.task_id,
-            "goal_id": self.goal_id,
-            "title": self.title,
-            "description": self.description,
-            "is_complete": is_complete
-        }
-        else: 
-            return {
-                "id": self.task_id,
-                "title": self.title,
-                "description": self.description,
-                "is_complete": is_complete
-            }
+        dic_table = {}
+        if not self.goal_id: 
+            dic_table["id"] = self.task_id
+            dic_table["title"] = self.description
+            dic_table["is_complete"] = is_complete
+            return dic_table
+        else:
+            dic_table["id"] = self.task_id
+            dic_table["goal_id"] = self.goal_id
+            return dic_table
 
     @classmethod
     def valid_task(cls, request_body):
