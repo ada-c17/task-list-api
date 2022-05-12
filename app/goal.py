@@ -120,14 +120,16 @@ def create_goal():
     db.session.add(new_goal)
     db.session.commit()
 
-    response_body = jsonify({ "goal" : 
-        {
-            "id" : new_goal.goal_id,
-            "title" : new_goal.title
-        }
-    })
+    # response_body = jsonify({ "goal" : 
+    #     {
+    #         "id" : new_goal.goal_id,
+    #         "title" : new_goal.title
+    #     }
+    # })
 
-    return response_body, 201
+
+
+    return format_goal_response_body(new_goal), 201
 
 
 
@@ -188,6 +190,7 @@ def post_tasks_to_goal(goal_id):
         # could add check if "task_id" doesn't exist -->  404 
 
         # Loop through the "task_ids"
+        # Assign the Task foreign key to match the Goal primary key
         for task_id in request_body["task_ids"]:
             task = Task.query.get(task_id)
             task.goal_id = goal_for_post.goal_id
