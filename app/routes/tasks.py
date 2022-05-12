@@ -3,10 +3,12 @@ from flask import Blueprint, jsonify, request, make_response, abort
 from pytest import param
 from app.models.task import Task
 from app import db
-import datetime
-
+from datetime import datetime
+import os
+import requests
 
 tasks_bp = Blueprint('tasks_bp', __name__, url_prefix='/tasks')
+
 
 @tasks_bp.route('', methods=['POST'])
 def create_a_task():
@@ -21,7 +23,6 @@ def create_a_task():
         new_task = Task(title=request_body["title"],
                         description=request_body["description"],
                         completed_at=completed_at)
-
     except:
         return {"details": "Invalid data"}, 400
     
@@ -29,7 +30,7 @@ def create_a_task():
     db.session.commit()
     
     return jsonify({
-        "task": {
+        'task': {
             "id": new_task.task_id,
             "title": new_task.title,
             "description": new_task.description,
@@ -46,112 +47,117 @@ def get_all_tasks():
         tasks = Task.query.order_by(Task.title.desc())
     else:
         tasks = Task.query.all()
-    tasks_response = []
+    task_list = []
     
     for task in tasks:
-        tasks_response.append({
+        task_list.append({
                 'id': task.task_id,
                 'title': task.title,
                 'description': task.description,
                 'is_complete': bool(task.completed_at)
-            })
+        })
 
-    return jsonify(tasks_response), 200
+    return jsonify(task_list), 200
 
 
-def get_task_or_abort(task_id):
+def validate_task(task_id):
     try:
         task_id = int(task_id)
     except ValueError:
         return jsonify({'details': f'Invalid task id: {task_id}. Task id must be an integer'}), 400
 
-    chosen_task = Task.query.get(task_id)
+    task = Task.query.get(task_id)
 
-    if chosen_task is None:
-        task_response = {'details': f'Could not find task id {task_id}'}
-        abort(make_response(jsonify(task_response), 404))
+    if task is None:
+        task_not_found = {'details': f'Could not find task id {task_id}'}
+        abort(make_response(jsonify(task_not_found), 404))
         
-    return chosen_task
+    return task
     
 
 @tasks_bp.route('/<task_id>', methods=['GET'])
 def get_one_task(task_id):
-    chosen_task = get_task_or_abort(task_id)
+    task = validate_task(task_id)
     return jsonify({
-        "task": {
-            'id': chosen_task.task_id,
-            'title': chosen_task.title,
-            'description': chosen_task.description,
-            'is_complete': bool(chosen_task.completed_at)
+        'task': {
+            'id': task.task_id,
+            'title': task.title,
+            'description': task.description,
+            'is_complete': bool(task.completed_at)
             }
         }), 200
 
 
 @tasks_bp.route('/<task_id>', methods=['PUT'])
-def put_one_task(task_id):
-    chosen_task = get_task_or_abort(task_id)
+def update_task(task_id): #REFACTOR?
+    task = validate_task(task_id)
     
     request_body = request.get_json()
     try:
-        chosen_task.title = request_body["title"]
-        chosen_task.description = request_body["description"]
+        task.title = request_body["title"]
+        task.description = request_body["description"]
     except KeyError:
-        return jsonify({"details": "Request must include both title and description"}), 400
+        return jsonify({'details': 'Request must include both title and description'}), 400
     
     db.session.commit()
 
     return jsonify({
-        "task": {
-            'id': chosen_task.task_id,
-            'title': chosen_task.title,
-            'description': chosen_task.description,
-            'is_complete': bool(chosen_task.completed_at)
+        'task': {
+            'id': task.task_id,
+            'title': task.title,
+            'description': task.description,
+            'is_complete': bool(task.completed_at)
             }
         }), 200
 
 
 @tasks_bp.route('/<task_id>/mark_complete', methods=['PATCH'])
-def patch_completed_task(task_id):
-    validated_task = get_task_or_abort(task_id)
+def mark_task_complete(task_id):
+    task = validate_task(task_id)
     
-    validated_task.completed_at = datetime.datetime.now()
+    task.completed_at = datetime.now()
     db.session.commit()
 
+    url = "https://slack.com/api/chat.postMessage"
+    message = f'Someone just completed the task {task.title}'
+    params = {'channel': 'task-notifications', 'text': message}
+    headers = {'Authorization': f'Bearer {os.environ.get("SLACK_API_KEY")}'}
+
+    requests.post(url, params=params, headers=headers)
+
     return jsonify({
-        "task": {
-            'id': validated_task.task_id,
-            'title': validated_task.title,
-            'description': validated_task.description,
-            'is_complete': bool(validated_task.completed_at)
+        'task': {
+            'id': task.task_id,
+            'title': task.title,
+            'description': task.description,
+            'is_complete': bool(task.completed_at)
             }
-        }), 200
+    }), 200
 
 
 @tasks_bp.route('/<task_id>/mark_incomplete', methods=['PATCH'])
-def patch_incomplete_task(task_id):
-    validated_task = get_task_or_abort(task_id)
+def mark_task_incomplete(task_id):
+    task = validate_task(task_id)
 
-    validated_task.completed_at = None
+    task.completed_at = None
     db.session.commit()
 
     return jsonify({
-        "task": {
-            'id': validated_task.task_id,
-            'title': validated_task.title,
-            'description': validated_task.description,
-            'is_complete': bool(validated_task.completed_at)
+        'task': {
+            'id': task.task_id,
+            'title': task.title,
+            'description': task.description,
+            'is_complete': bool(task.completed_at)
             }
         }), 200
 
 
-@tasks_bp.route("/<task_id>", methods=["DELETE"])
+@tasks_bp.route('/<task_id>', methods=['DELETE'])
 def delete_task(task_id):
-    chosen_task = get_task_or_abort(task_id)
+    task = validate_task(task_id)
 
-    db.session.delete(chosen_task)
+    db.session.delete(task)
     db.session.commit()
 
-    return {
-        "details": f"Task {chosen_task.task_id} \"{chosen_task.title}\" successfully deleted"
-    }, 200
+    return jsonify({'details': f'Task {task.task_id} \"{task.title}\" successfully deleted'}), 200
 
