@@ -36,23 +36,12 @@ def create_one_task():
 @tasks_bp.route('', methods=['GET'])
 def get_all_tasks():
     sort_query = request.args.get("sort")
-    # title_query = request.args.get("title")
-    # if title_query:
-    #     tasks = Task.query.filter_by(title= title_query)
+
     if sort_query == "asc":
         tasks = Task.query.order_by(asc(Task.title))
     elif sort_query == "desc":
         tasks = Task.query.order_by(desc(Task.title))
 
-    # if "title" in params and "description" in params:
-    #     description_exp=params["age"]
-    #     tasks = Task.query.filter_by(title = title_exp, description = description_exp)
-    # elif "title" in params:
-    #     title_exp = params["title"]
-    #     tasks = Task.query.filter_by(title = title_exp)
-    # elif "description" in params:
-    #     description_exp=params["age"]
-    #     tasks = Task.query.filter_by(description = description_exp)
     else:
         tasks= Task.query.all()
 
@@ -96,7 +85,7 @@ def get_one_task(task_id):
     }
     if chosen_task.goal_id:
         rsp["task"]["goal_id"] = chosen_task.goal_id  
-        
+
     return jsonify(rsp), 200
 
 # update chosen task
@@ -126,8 +115,6 @@ def update_one_task(task_id):
     }
 
     return jsonify(rsp), 200
-
-    # return make_response(f"Task #{chosen_task.task_id} successfully updated"), 200
 
 
 # delete chosen task
