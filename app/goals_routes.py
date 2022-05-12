@@ -29,11 +29,7 @@ def make_goal_dict(goal):
             "id": goal.goal_id,
             "title": goal.title,
     }
-    # if goal.completed_at:
-    #     goal_dict["is_complete"] = True
-    # else:
-    #     goal_dict["is_complete"] = False
-
+    
     return goal_dict
 
 @goals_bp.route("", methods=["GET"])
@@ -53,4 +49,33 @@ def get_all_goals():
 def get_one_goal(goal_id):
     goal = validate_goal(goal_id)
     goal_dict = {"goal": make_goal_dict(goal)}
+    return jsonify(goal_dict), 200
+
+@goals_bp.route("", methods=["POST"])
+def create_goal():
+    request_body = request.get_json()
+    
+    try:
+        new_goal = Goal(title=request_body["title"])
+    except:
+        abort(make_response({"details": f"Invalid data"}, 400))
+
+    db.session.add(new_goal)
+    db.session.commit()
+
+    goal_dict = {"goal": make_goal_dict(new_goal)}
+
+    return jsonify(goal_dict), 201
+
+@goals_bp.route("/<goal_id>", methods=["PUT"])
+def update_goal(goal_id):
+    goal = validate_goal(goal_id)
+    request_body = request.get_json()
+
+    goal.title = request_body["title"]
+
+    db.session.commit()
+
+    goal_dict = {"goal": make_goal_dict(goal)}
+
     return jsonify(goal_dict), 200
