@@ -1,7 +1,10 @@
-from turtle import title
+import requests
+import os
 from flask import Blueprint, jsonify, abort, make_response, request
-from app.models.task import Task 
+from app.models.task import Task
 from app import db
+
+# Routes for Task
 
 bp = Blueprint("tasks_bp",__name__, url_prefix="/tasks")
 
@@ -82,6 +85,11 @@ def mark_complete_task_by_id(task_id):
     task.mark_complete()
 
     db.session.commit()
+
+    token = os.environ.get("SLACK_TOKEN")
+    payload = {"channel":"task-notifications", "text":f"Someone just completed the task {task.title}"}
+    header = {"Authorization":f"Bearer {token}"}
+    r = requests.post("https://slack.com/api/chat.postMessage", params=payload, headers=header)
 
     return jsonify({"task": task.make_dict()})
 
