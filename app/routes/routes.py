@@ -7,20 +7,9 @@ import os
 import requests
 from datetime import datetime
 from sqlalchemy.sql.functions import now
-# from .helper import validate_planet
+from .helper import validate_task
 
 task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
-
-def validate_task(task_id):
-    try:
-        task_id = int(task_id)
-    except:
-        abort(make_response(jsonify(f"task {task_id} invalid"), 400))
-    task = Task.query.get(task_id)
-
-    if not task:
-        abort(make_response(jsonify(f"task {task_id} not found"), 404))
-    return task
 
 @task_bp.route("", methods=["POST"])
 def create_tasks():
