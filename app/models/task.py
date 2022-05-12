@@ -1,8 +1,5 @@
-from email.policy import default
-
-from sqlalchemy import null
 from app import db
-
+from sqlalchemy import null
 
 class Task(db.Model):
     task_id = db.Column(db.Integer, primary_key=True, autoincrement = True)

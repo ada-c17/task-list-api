@@ -1,11 +1,7 @@
-from email.policy import default
-from turtle import title
 from flask import Blueprint, make_response,request,jsonify,abort
-from sqlalchemy import asc, false, null, true
 from app import db
 from app.models.goal import Goal
 from app.models.task import Task
-from sqlalchemy import func
 from datetime import datetime
 import requests
 from flask import current_app as app
