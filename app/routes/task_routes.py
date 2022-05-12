@@ -71,7 +71,7 @@ def update_task(id):
 
     db.session.commit()
 
-    return jsonify({"task":updated_task})
+    return jsonify({"task":updated_task.task_to_dict()})
 
 @task_bp.route("<id>", methods=["DELETE"])
 def delete_task(id):
@@ -89,7 +89,7 @@ def mark_complete(id):
     db.session.commit()
     send_slack_message(f"Someone just completed the task {task.title}")
 
-    return jsonify({"task":updated_task})
+    return jsonify({"task":updated_task.task_to_dict()})
 
 @task_bp.route("<id>/mark_incomplete", methods=["PATCH"])
 def mark_incomplete(id):
@@ -98,7 +98,7 @@ def mark_incomplete(id):
 
     db.session.commit()
 
-    return jsonify({"task":updated_task})
+    return jsonify({"task":updated_task.task_to_dict()})
 
 def send_slack_message(message):
     Slack_Key = os.environ.get("Slack_API_Token")

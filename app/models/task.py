@@ -50,15 +50,15 @@ class Task(db.Model):
         if "completed_at" in data_dict:
             self.completed_at=data_dict["completed_at"]
             self.is_complete=True
-        return self.task_to_dict()
+        return self
 
     def mark_done(self):
         self.is_complete = True
         current_time = datetime.datetime.now()
         self.completed_at = current_time
-        return self.task_to_dict()
+        return self
 
     def mark_not_done(self):
         self.is_complete = False
         self.completed_at = None
-        return self.task_to_dict()
+        return self
