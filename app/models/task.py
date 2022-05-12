@@ -6,7 +6,6 @@ from app import db
     "title": "Fold the laundry",
     "description": "Do this on a counter",
     "is_complete": false
-
 }
 '''
 
@@ -35,7 +34,7 @@ class Task(db.Model):
     #     self.completed_at = request_body["completed_at"]
 
 
-    # no task_id here
+    #no task_id here
     # @classmethod
     # def create(cls, request_body):
     #     new_task = cls(
@@ -45,3 +44,4 @@ class Task(db.Model):
     #         is_complete = request_body["is_complete"]
     #     )
     #     return new_task
+

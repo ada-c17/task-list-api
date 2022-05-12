@@ -4,6 +4,8 @@ from app import db
 # helper function file import
 from sqlalchemy import asc, desc
 from datetime import datetime
+import requests
+import os
 
 task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 
@@ -13,11 +15,9 @@ POST ROUTE
 '''
 
 # CREATE TASK
-# LOCALHOST
-# without create decorator from Task model
 @task_bp.route("", methods=["POST"])
 def create_task():
-    request_body = request.get_json()  # this is from request pckg
+    request_body = request.get_json()
 
     if "title" not in request_body:
         return make_response(jsonify({"details": "Invalid data"}), 400)
@@ -44,11 +44,6 @@ def create_task():
 '''
 GET ROUTES
 '''
-
-# def sort_ascending(listofdicts, key):
-#     sorted_dict = sorted(listofdicts, key=lambda d: d[key])
-#     return sorted_dict
-
 
 # GET SAVED TASKS - ALL, QUERY PARAMS
 @task_bp.route("", methods=["GET"])
@@ -137,7 +132,12 @@ def patch_task_complete(task_id):
 
     task.completed_at = datetime.utcnow()
 
-    # task.update(request_body)
+    '''
+    sends a post request to my Slackbot to send a message about the
+    task that's just been completed
+    '''
+    call_slackbot(task)
+
     db.session.commit()
 
     task_response_body = {
@@ -148,6 +148,24 @@ def patch_task_complete(task_id):
     }
 
     return make_response(jsonify({"task": task_response_body}), 200)
+
+
+# HELPER FUNCTION THAT SENDS A POST REQUEST TO SLACKBOT FOR PATCH METHOD
+def call_slackbot(tasky):
+
+    response1 = requests.post(
+        "https://slack.com/api/chat.postMessage",
+        params={
+            "channel": "task-notifications",
+            "text": f"Someone just completed the task {tasky.title}"
+        },
+        headers={
+            "Authorization": os.environ.get("SLACK_AUTH")
+        }
+    )
+
+    # return response1
+    return response1.json()
 
 # PATCH ONE TASK - MARK INCOMPLETE
 @task_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
