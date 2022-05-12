@@ -6,7 +6,9 @@ from app import db
 import os
 import datetime
 
-from ..helpers import validate_task
+from ..helpers import validate_object
+from ..helpers import validate_new_data
+# from ..helpers import validate_task
 from flask import Blueprint, request, jsonify, make_response, abort
 
 env_path = Path('.') / '.env'
@@ -24,11 +26,9 @@ def create_task():
         new_task = Task.create(request_body)
         db.session.add(new_task)
         db.session.commit()
-
     except KeyError:
         return abort(make_response(jsonify({"details": "Invalid data"}), 400))
-
-    return make_response(jsonify(new_task.to_json()), 201)
+    return new_task.to_json(), 201
 
 
 @tasks_bp.route("", methods=["GET"])
@@ -40,61 +40,43 @@ def get_all_tasks():
         tasks = Task.query.order_by(Task.title.desc()).all()
     else:
         tasks = Task.query.all()
-    # tasks_response = [task.to_json() for task in tasks]
-    tasks_response = []
+    tasks_response = [task.to_json()["task"] for task in tasks]
 
-    for task in tasks:
-        complete = None
-        if task.completed_at == None:
-            complete = False
-        else:
-            complete = True
-        tasks_response.append({
-            "id": task.task_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": complete
-        })
-
-    return make_response(jsonify(tasks_response), 200)
+    return jsonify(tasks_response), 200
 
 
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def handle_task(task_id):
-    task = validate_task(task_id)
-    return make_response(jsonify(task.to_json()), 200)
+    task = validate_object(Task, task_id)
+
+    if task.goal_id:
+        task.to_json()["task"]["goal_id"] = task.goal_id
+
+    return jsonify(task.to_json()), 200
 
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
-    task = validate_task(task_id)
+    task = validate_object(Task, task_id)
     request_body = request.get_json()
 
-    task.title = request_body["title"]
-    task.description = request_body["description"]
-    # Task.update(request_body)
+    task.update(request_body)
     db.session.commit()
-
-    # try:
-    #     Task.update(request_body)
-    #     db.session.commit()
-    # except KeyError:
-    #     return abort(make_response(jsonify("Missing information")), 400)
-
-    return make_response(jsonify(task.to_json()), 200)
+    return jsonify(task.to_json()), 200
 
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_one_task(task_id):
-    task = validate_task(task_id)
+    task = validate_object(Task, task_id)
+
     db.session.delete(task)
     db.session.commit()
-    return make_response(jsonify({"details": f'Task {task_id} "{task.title}" successfully deleted'}), 200)
+    return jsonify({"details": f'Task {task_id} "{task.title}" successfully deleted'}), 200
 
 
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def complete_update(task_id):
-    task = validate_task(task_id)
+    task = validate_object(Task, task_id)
     request_body = request.get_json()
 
     if task.completed_at == None:
@@ -103,17 +85,16 @@ def complete_update(task_id):
     db.session.commit()
     client.chat_postMessage(channel='#task-notifications',
                             text=f"task: '{task.title}' is complete")
-
-    return make_response(jsonify(task.to_json()), 200)
+    return task.to_json(), 200
 
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def incomplete_update(task_id):
-    task = validate_task(task_id)
+    task = validate_object(Task, task_id)
     request_body = request.get_json()
 
     if task.completed_at != None:
         task.completed_at = None
 
     db.session.commit()
-    return make_response(jsonify(task.to_json()), 200)
+    return task.to_json(), 200
