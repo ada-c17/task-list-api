@@ -119,7 +119,7 @@ def test_mark_incomplete_on_incomplete_task(client, one_task):
     assert Task.query.get(1).completed_at == None
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_mark_complete_missing_task(client):
     # Act
     response = client.patch("/tasks/1/mark_complete")
@@ -132,17 +132,9 @@ def test_mark_complete_missing_task(client):
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
-    # assert response_body["task"]["is_complete"] == True
-    # task = Task.query.get(id)
-    # assert response_body == {
-    #     "task":{
-    #     "id": task.task_id,
-    #     "title": task.title,
-    #     "description": task.description,
-    #     "is_complete": True
-    #     }}
+    assert response_body == {"msg": f"Could not find task with id 1"}    
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_mark_incomplete_missing_task(client):
     # Act
     response = client.patch("/tasks/1/mark_incomplete")
@@ -151,11 +143,11 @@ def test_mark_incomplete_missing_task(client):
     # Assert
     assert response.status_code == 404
 
-    raise Exception("Complete test with assertion about response body")
+    #  raise Exception("Complete test with assertion about response body")
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
-
+    assert response_body == {"msg": f"Could not find task with id 1"} 
 
 # Let's add this test for creating tasks, now that
 # the completion functionality has been implemented

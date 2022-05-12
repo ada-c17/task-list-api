@@ -46,7 +46,7 @@ def test_get_goal(client, one_goal):
     }
 
 
-@pytest.mark.skip(reason="test to be completed by student")
+#@pytest.mark.skip(reason="test to be completed by student")
 def test_get_goal_not_found(client):
     pass
     # Act
@@ -56,8 +56,8 @@ def test_get_goal_not_found(client):
     #raise Exception("Complete test")
     # Assert
     # # ---- Complete Test ----
-    # assert response.status_code == 200
-    # assert response_body == []
+    assert response.status_code == 404
+    assert response_body == {"msg": f"Could not find goal with id 1"} 
     # # ---- Complete Test ----
 
 
@@ -80,30 +80,45 @@ def test_create_goal(client):
     }
 
 
-@pytest.mark.skip(reason="test to be completed by student")
+#@pytest.mark.skip(reason="test to be completed by student")
 def test_update_goal(client, one_goal):
-    raise Exception("Complete test")
+    #raise Exception("Complete test")
     # Act
     # ---- Complete Act Here ----
+    response = client.put("goals/1", json={
+        "title": "Updated Goal Title"
+    })
+    response_body = response.get_json()
 
     # Assert
     # ---- Complete Assertions Here ----
-    # assertion 1 goes here
-    # assertion 2 goes here
-    # assertion 3 goes here
+    assert response.status_code == 200
+    assert "goal" in response_body
+    assert response_body == {
+        "goal": {
+            "id": 1,
+            "title": "Updated Goal Title"
+        }
+    }
     # ---- Complete Assertions Here ----
 
 
-@pytest.mark.skip(reason="test to be completed by student")
+#@pytest.mark.skip(reason="test to be completed by student")
 def test_update_goal_not_found(client):
-    raise Exception("Complete test")
+    #raise Exception("Complete test")
     # Act
     # ---- Complete Act Here ----
+    response = client.put("goals/1", json={
+        "title": "Updated Goal Title"
+    })
+    response_body = response.get_json()
+
 
     # Assert
     # ---- Complete Assertions Here ----
-    # assertion 1 goes here
-    # assertion 2 goes here
+    assert response.status_code == 404
+    assert response_body == {"msg": f"Could not find goal with id 1"}
+
     # ---- Complete Assertions Here ----
 
 
@@ -134,17 +149,19 @@ def test_delete_goal(client, one_goal):
         }
 
 
-@pytest.mark.skip(reason="test to be completed by student")
+#@pytest.mark.skip(reason="test to be completed by student")
 def test_delete_goal_not_found(client):
-    raise Exception("Complete test")
+    #raise Exception("Complete test")
 
     # Act
     # ---- Complete Act Here ----
+    response = client.delete("/goals/1")
+    response_body = response.get_json()
 
     # Assert
     # ---- Complete Assertions Here ----
-    # assertion 1 goes here
-    # assertion 2 goes here
+    assert response.status_code == 404
+    assert response_body ==  {"msg": f"Could not find goal with id 1"}
     # ---- Complete Assertions Here ----
 
 
