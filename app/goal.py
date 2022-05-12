@@ -215,7 +215,6 @@ def post_tasks_to_goal(goal_id):
         # Check if "task_id" doesn't exist -->  404 
         abort(make_response({"message" : f"Sorry, task ids not found."}, 404))
 
-    # db.session.add(goal_for_post.tasks[task_id_list])
     db.session.commit()
 
     # Add to Goal's task_id's list
