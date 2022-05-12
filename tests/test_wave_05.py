@@ -47,7 +47,7 @@ def test_get_goal_not_found(client):
     response_body = response.get_json()
 
     assert response.status_code == 404
-    assert response_body == {"message":f"goal 1 not found"}
+    assert response_body == {"message":f"item 1 not found"}
 
 def test_create_goal(client):
     # Act
@@ -93,7 +93,7 @@ def test_update_goal_not_found(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {"message":f"goal 1 not found"}
+    assert response_body == {"message":f"item 1 not found"}
 
 def test_delete_goal(client, one_goal):
     # Act
@@ -114,7 +114,7 @@ def test_delete_goal_not_found(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {"message":f"goal 1 not found"}
+    assert response_body == {"message":f"item 1 not found"}
     assert Goal.query.all() == []
 
 def test_create_goal_missing_title(client):

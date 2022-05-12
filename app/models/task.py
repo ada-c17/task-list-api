@@ -1,5 +1,6 @@
 from sqlalchemy import ForeignKey
 from app import db
+from flask import abort, make_response, request
 
 
 class Task(db.Model):
@@ -10,14 +11,28 @@ class Task(db.Model):
     goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'), nullable=True)
     goal = db.relationship("Goal", back_populates="tasks")
 
-    def return_task_dict(self):
-        if self.completed_at:
-            status = True
-        else:
-            status = False
-        return {
+    def return_response_body(self):
+
+        response_body = {
             "id": self.task_id,
             "title": self.title,
             "description": self.description,
-            "is_complete": status
+            "is_complete": bool(self.completed_at)
         }
+
+        if self.goal_id:
+            response_body["goal_id"] = self.goal_id
+
+        return response_body
+    
+    @staticmethod
+    def validate_request_body():
+        request_body = request.get_json()
+
+        if "title" not in request_body or "description" not in request_body:
+            abort(make_response({"details": "Invalid data"}, 400))
+
+        return Task(title=request_body["title"],
+                    description=request_body["description"],
+                    completed_at=request_body.get("completed_at", None),
+                    goal_id=request_body.get("goal_id", None))
