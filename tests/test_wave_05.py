@@ -31,7 +31,7 @@ def test_get_goals_one_saved_goal(client, one_goal):
 
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
-def test_get_goal(client, one_goal):
+def test_get_goal_by_id(client, one_goal):
     # Act
     response = client.get("/goals/1")
     response_body = response.get_json()
@@ -130,6 +130,24 @@ def test_delete_goal(client, one_goal):
 
     # Check that the goal was deleted
     assert Goal.query.get(1) == None
+
+
+def test_delete_one_goal_others_unchanged(client, three_goals):
+    # Act
+    response = client.delete("/goals/1")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert "details" in response_body
+    assert response_body == {
+        "details": 'Goal 1 "Build a habit of going outside daily" successfully deleted'
+    }
+    assert Goal.query.get(1) == None
+    goal_two = Goal.query.get(2)
+    goal_three = Goal.query.get(3)
+    assert goal_two.title == "Do morning stretches five times a week"
+    assert goal_three.title == "Learn to knit"
 
 
 # @pytest.mark.skip(reason="test to be completed by student")

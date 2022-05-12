@@ -200,3 +200,27 @@ def test_update_task_with_completed_at_date(client, completed_task):
     assert task.title == "Updated Task Title"
     assert task.description == "Updated Test Description"
     assert task.completed_at
+
+
+def test_update_task_completion_only(client, one_task):
+    # Act
+    response = client.patch("/tasks/1", json={
+        "completed_at": datetime.utcnow()
+    })
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert "task" in response_body
+    assert response_body == {
+        "task": {
+            "id": 1,
+            "title": "Go on my daily walk 🏞",
+            "description": "Notice something new every day",
+            "is_complete": True
+        }
+    }
+    task = Task.query.get(1)
+    assert task.title == "Go on my daily walk 🏞"
+    assert task.description == "Notice something new every day"
+    assert task.completed_at != None
