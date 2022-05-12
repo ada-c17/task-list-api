@@ -114,11 +114,7 @@ def complete_task(task_id):
     request_body = request.get_json()
     task = validate_task(task_id)
 
-    if task.title:
-        title = request_body["title"]
-        task.title = request_body["title"]
-    else:
-        title = "My beautiful task"
+    title = task.title
     
     #Call to Slack API
     auth_token = os.environ.get("SLACK_AUTH")
