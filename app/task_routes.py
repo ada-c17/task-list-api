@@ -51,7 +51,7 @@ def create_task():
     db.session.commit()
 
     return jsonify({'task':
-    {'id':new_task.task_id, 
+    {'id':new_task.id, 
     'title':new_task.title, 
     'description':new_task.description, 
     'is_complete':new_task.is_complete}
@@ -69,47 +69,27 @@ def get_all_tasks():
         tasks = Task.query.all()
     tasks_response = []
     for task in tasks:
-        tasks_response.append({
-            "id": task.task_id, 
-            "title": task.title, 
-            "description": task.description, 
-            "is_complete": task.is_complete
-        })
-    # review 5/10 HR for to_dict helper
+        tasks_response.append(
+            task.to_dict_basic()
+        )
     return jsonify(tasks_response)
 
 # GET one task 
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = validate_task_id(task_id)
+    return jsonify(task.to_dict())
 
-    return jsonify({'task':
-    {'id':task.task_id, 
-    'title':task.title, 
-    'description':task.description, 
-    'is_complete':task.is_complete}
-    })
-
-@tasks_bp.route("/<task_id>", methods=["PUT"])
+@tasks_bp.route("/<task_id>", methods=["PATCH"])
 def update_task(task_id):
     task = validate_task_id(task_id)
     request_body = request.get_json()
-
     task.title = request_body["title"]
     task.description = request_body["description"]
 
-# mark completed HF?
-    if task.completed_at: 
-        task.is_complete = True
-
     db.session.commit()
 
-    return jsonify({'task':
-    {'id':task.task_id, 
-    'title':task.title, 
-    'description':task.description, 
-    'is_complete':task.is_complete}
-    })
+    return jsonify(task.to_dict())
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
@@ -147,12 +127,7 @@ def mark_task_complete(task_id):
     except SlackApiError as e:
         assert e.response["error"]
 
-    return jsonify({'task':
-        {'id':task.task_id, 
-        'title':task.title, 
-        'description':task.description, 
-        'is_complete':task.is_complete}
-        })
+    return jsonify(task.to_dict())
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_task_incomplete(task_id):
@@ -163,12 +138,7 @@ def mark_task_incomplete(task_id):
     task.is_complete = False
     
     db.session.commit()
-    return jsonify({'task':
-        {'id':task.task_id, 
-        'title':task.title, 
-        'description':task.description, 
-        'is_complete':task.is_complete}
-        })
+    return jsonify(task.to_dict())
 
 #PSE review 1-6 for mock interview - str manipulation, nested listed(traversing), mostly algorithm questions, algorithm practice 
 # --> will typically be asked about big O 
