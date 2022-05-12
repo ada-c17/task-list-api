@@ -20,6 +20,15 @@ class Task(db.Model):
         }
 
     def to_dict_basic(self):
+        if self.goal_id: 
+            return {
+            "id": self.id, 
+            "title": self.title, 
+            "description": self.description, 
+            "is_complete": self.is_complete, 
+            "goal_id": self.goal_id
+            }
+
         return {
             "id": self.id, 
             "title": self.title, 

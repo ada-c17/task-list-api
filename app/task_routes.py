@@ -80,7 +80,7 @@ def get_one_task(task_id):
     task = validate_task_id(task_id)
     return jsonify(task.to_dict())
 
-@tasks_bp.route("/<task_id>", methods=["PATCH"])
+@tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
     task = validate_task_id(task_id)
     request_body = request.get_json()
@@ -108,7 +108,7 @@ def mark_task_complete(task_id):
     task.completed_at = datetime.datetime.now()
     task.is_complete = True
     db.session.commit()
-
+##NOT CHANGING is_complete TO TRUE, something wrong with helper method in model?
 # create requests.post(slack api)
 
     ssl_context = ssl.create_default_context()

@@ -45,7 +45,7 @@ def get_one_goal(goal_id):
 
     return jsonify(goal.to_dict())
 
-@goals_bp.route("/<goal_id>", methods=["PATCH"])
+@goals_bp.route("/<goal_id>", methods=["PUT"])
 def update_task(goal_id):
     goal = validate_goal_id(goal_id)
     request_body = request.get_json()
@@ -66,7 +66,6 @@ def delete_goal(goal_id):
 def add_tasks_to_goal(goal_id):
     goal = validate_goal_id(goal_id)
     request_body = request.get_json()
-
     try:
         task_ids = request_body["task_ids"]
     except KeyError:
@@ -93,7 +92,16 @@ def add_tasks_to_goal(goal_id):
     return jsonify(response)
 
 @goals_bp.route("/<goal_id>/tasks", methods=["GET"])
-def get_task_of_one_goal(goal_id):
+def get_all_tasks_of_a_goal(goal_id):
     goal = validate_goal_id(goal_id)
 
-    
+    tasks_list = []
+    for task in goal.tasks:
+        task_dict = task.to_dict_basic()
+        tasks_list.append(task_dict)
+
+    return jsonify({
+        "id":goal.id, 
+        "title":goal.title, 
+        "tasks":tasks_list
+    })
