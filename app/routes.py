@@ -3,6 +3,7 @@ from sqlalchemy import desc
 from app import db
 from app.models.task import Task
 from datetime import date
+import os
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -14,13 +15,13 @@ def create_task():
     try:
         new_task = Task(
             title=request_body["title"],
-            description=request_body["description"],
+            description=request_body["description"]
         )
     except:
         abort(make_response({"details": "Invalid data"}, 400))
     
-    if request_body["completed_at"]:
-        new_task.completed_at = request_body["completed_at"]
+    if request_body.get("completed_at"):
+        new_task.completed_at = request_body.get("completed_at")
 
     db.session.add(new_task)
     db.session.commit()
@@ -60,9 +61,6 @@ def update_one_task_by_id(task_id):
 
     task.title = request_body["title"]
     task.description = request_body["description"]
-
-    if request_body["completed_at"]:
-        task.completed_at = request_body["completed_at"]
 
     db.session.commit()
 
