@@ -203,7 +203,7 @@ def replace_one_goal(goal_id):
 
     db.session.commit()
 
-    return { "task": {
+    return { "goal": {
                 "id" : chosen_goal.goal_id,
                 "title": chosen_goal.title
                 }
