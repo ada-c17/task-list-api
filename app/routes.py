@@ -5,11 +5,13 @@ from app.models.goal import Goal
 from app import db
 import datetime
 import os
-from slack_sdk import WebClient
+# from slack_sdk import WebClient
+import requests
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
-client = WebClient(token=os.environ['SLACK_BOT_TOKEN'])
+# client = WebClient(token=os.environ['SLACK_BOT_TOKEN'])
+path = "https://slack.com/api/chat.postMessage"
 
 #TASK ROUTES
 
@@ -128,7 +130,13 @@ def patch_one_task(task_id, mark=None):
 
     if mark == "mark_complete":
         one_task.completed_at = datetime.datetime.now()
-        response = client.chat_postMessage(channel='#task-notifications', text=f"Someone just completed the task {one_task.title}")
+        query_params = {
+                "channel": "#task-notifications",
+                "text": f"Someone just completed the task {one_task.title}"
+                }
+        header = {"Authorization": "Bearer " + os.environ['SLACK_BOT_TOKEN']}
+        requests.post(path, data=query_params, headers=header)
+        # response = client.chat_postMessage(channel='#task-notifications', text=f"Someone just completed the task {one_task.title}")
 
     elif mark == 'mark_incomplete':
         one_task.completed_at = None
