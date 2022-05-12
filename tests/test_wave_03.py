@@ -127,7 +127,7 @@ def test_mark_complete_missing_task(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {'details': 'No task with id 1 found'}
+    assert response_body == {'details': "No model of type <class 'app.models.task.Task'> with id 1 found"}
 
     # *****************************************************************
     # **Complete test with assertion about response body***************
@@ -142,7 +142,7 @@ def test_mark_incomplete_missing_task(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {'details': 'No task with id 1 found'}
+    assert response_body == {'details': "No model of type <class 'app.models.task.Task'> with id 1 found"}
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************

@@ -58,7 +58,7 @@ def test_get_goal_not_found(client):
     # Assert
     # ---- Complete Test ----
     assert response.status_code == 404
-    assert response_body == {'details': 'No goal with id 1 found'} 
+    assert response_body == {'details': "No model of type <class 'app.models.goal.Goal'> with id 1 found"}
     # ---- Complete Test ----
 
 
@@ -115,7 +115,7 @@ def test_update_goal_not_found(client):
     # Assert
     assert response.status_code == 404
 
-    assert response_body == {'details': 'No goal with id 1 found'}
+    assert response_body == {'details': "No model of type <class 'app.models.goal.Goal'> with id 1 found"}
 
 #@pytest.mark.skip(reason="No way to test this feature yet")
 def test_delete_goal(client, one_goal):
@@ -156,7 +156,7 @@ def test_delete_goal_not_found(client):
     # Assert
     assert response.status_code == 404
 
-    assert response_body == {'details': 'No goal with id 1 found'}
+    assert response_body == {'details': "No model of type <class 'app.models.goal.Goal'> with id 1 found"}
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************

@@ -3,39 +3,13 @@ from flask import Blueprint, jsonify, abort, make_response, request
 from sqlalchemy import null, true
 from app.models.task import Task
 from app import db
+from .routes_helper import error_message, get_record_by_id, make_task_safely, replace_task_safely
 import os
 import requests
 from dotenv import load_dotenv
 load_dotenv()
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
-
-def error_message(message, status_code):
-        abort(make_response(jsonify(dict(details=message)), status_code))
-
-def make_task_safely(data_dict):
-    try:
-        return Task.from_dict(data_dict)
-    except KeyError as err:
-        error_message(f"Missing key: {err}", 400)
-
-def replace_task_safely(task, data_dict):
-    try:
-        task.replace_details(data_dict)
-    except KeyError as err:
-        error_message(f"Missing key: {err}", 400)
-
-def get_task_record_by_id(id):
-    try:
-        id = int(id)
-    except ValueError:
-        error_message(f"Invalid id {id}", 400)
-
-    task = Task.query.get(id)
-    if task:
-        return task
-    
-    error_message(f"No task with id {id} found", 404)
 
 # POST /tasks
 @tasks_bp.route("", methods = ["POST"])
@@ -64,17 +38,17 @@ def read_all_tasks():
 
     return jsonify(result_list)
 
-# GET /tasks/<task_id>
-@tasks_bp.route("/<task_id>", methods=["Get"])
-def read_task_by_id(task_id):
-    task = get_task_record_by_id(task_id)
+# GET /tasks/<id>
+@tasks_bp.route("/<id>", methods=["Get"])
+def read_task_by_id(id):
+    task = get_record_by_id(Task, id)
     return jsonify({"task":task.to_dict()})
 
-# PUT /tasks/<task_id>
-@tasks_bp.route("/<task_id>", methods=["PUT"])
-def replace_task_by_id(task_id):
+# PUT /tasks/<id>
+@tasks_bp.route("/<id>", methods=["PUT"])
+def replace_task_by_id(id):
     request_body = request.get_json()
-    task = get_task_record_by_id(task_id)
+    task = get_record_by_id(Task, id)
 
     replace_task_safely(task, request_body)
 
@@ -83,20 +57,20 @@ def replace_task_by_id(task_id):
 
     return jsonify({"task":task.to_dict()})
 
-# DELETE /tasks/<task_id>
-@tasks_bp.route("/<task_id>", methods=["DELETE"])
-def delete_task_by_id(task_id):
-    task = get_task_record_by_id(task_id)
+# DELETE /tasks/<id>
+@tasks_bp.route("/<id>", methods=["DELETE"])
+def delete_task_by_id(id):
+    task = get_record_by_id(Task, id)
 
     db.session.delete(task)
     db.session.commit()
 
-    return jsonify({"details": f'Task {task.task_id} "{task.title}" successfully deleted'})
+    return jsonify({"details": f'Task {task.id} "{task.title}" successfully deleted'})
 
-# PATCH /tasks/<task_id>/mark_complete
-@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
-def update_task_to_complete(task_id):
-    task = get_task_record_by_id(task_id)
+# PATCH /tasks/<id>/mark_complete
+@tasks_bp.route("/<id>/mark_complete", methods=["PATCH"])
+def update_task_to_complete(id):
+    task = get_record_by_id(Task, id)
 
     task.completed_at = datetime.now()
 
@@ -106,10 +80,10 @@ def update_task_to_complete(task_id):
 
     return jsonify({"task":task.to_dict()})
 
-# PATCH /tasks/<task_id>/mark_incomplete
-@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
-def update_task_to_incomplete(task_id):
-    task = get_task_record_by_id(task_id)
+# PATCH /tasks/<id>/mark_incomplete
+@tasks_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
+def update_task_to_incomplete(id):
+    task = get_record_by_id(Task, id)
     task.completed_at = None
 
     db.session.commit()
