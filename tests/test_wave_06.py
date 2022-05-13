@@ -23,6 +23,30 @@ def test_post_task_ids_to_goal(client, one_goal, three_tasks):
     assert len(Goal.query.get(1).tasks) == 3
 
 
+def test_post_task_ids_to_goal_no_goal(client, one_goal, three_tasks):
+    # Act
+    response = client.post("/goals/2/tasks", json={
+        "task_ids": [1, 2, 3]
+    })
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 404
+    assert response_body == "A goal with id of 2 was not found."
+
+
+def test_post_task_ids_to_goal_no_matching_task(client, one_goal, three_tasks):
+    # Act
+    response = client.post("/goals/1/tasks", json={
+        "task_ids": [2, 3, 4]
+    })
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 404
+    assert response_body == "A task with id of 4 was not found. No changes were made."
+
+
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_post_task_ids_to_goal_already_with_goals(client, one_task_belongs_to_one_goal, three_tasks):
     # Act
