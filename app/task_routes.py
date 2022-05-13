@@ -72,7 +72,7 @@ def update_task_complete(id):
     header_params = {"Authorization": SLACK_AUTH}
     query_params = {
         "channel": "test-channel",
-        "text": f"Task marked complete: {task.title}"}
+        "text": f"Someone just completed the task {task.title}"}
     requests.post(SLACK_PATH, params=query_params, headers=header_params)
 
     return make_response(jsonify(task=task.self_to_dict()))
@@ -86,7 +86,7 @@ def update_task_incomplete(id):
     header_params = {"Authorization": SLACK_AUTH}
     query_params = {
         "channel": "test-channel",
-        "text": f"Task marked incomplete: {task.title}"}
+        "text": f"Someone just marked the task {task.title} as incomplete"}
     requests.post(SLACK_PATH, params=query_params, headers=header_params)
 
     return make_response(jsonify(task=task.self_to_dict()))
