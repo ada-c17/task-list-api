@@ -30,12 +30,16 @@ def slack_complete(task):
 
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
-    query_params = request.args
+    query_params = request.args.to_dict()
     if "sort" in query_params:
         if query_params["sort"] == "asc":
             task_list = Task.query.order_by(Task.title.asc()).all()
+            query_params.pop("sort")
         elif query_params["sort"] == "desc":
             task_list = Task.query.order_by(Task.title.desc()).all()
+            query_params.pop("sort")
+        else: 
+            task_list = Task.query.all()
         #care here -- if something not asc or desc in query_params["sort"]
         #task_list will not exist
     else: 
@@ -46,7 +50,17 @@ def get_all_tasks():
     for task in task_list:
         task_response.append(task.make_response_dict())
     
-    return make_response(jsonify(task_response), 200)
+    if query_params:
+        warning = {
+            "warning": "Unexpected query parameters in request.",
+            "unused_params": query_params
+            }
+        #task_response = "\n".join([jsonify(task_response), jsonify(warning)])
+        task_response = jsonify(warning, task_response)
+    else:
+        task_response = jsonify(task_response)
+    return make_response(task_response, 200)
+
 
 @tasks_bp.route("", methods=["POST"])
 def create_new_task():
