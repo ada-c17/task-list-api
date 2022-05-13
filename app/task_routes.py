@@ -3,7 +3,7 @@ from sqlalchemy import desc
 from app import db
 from app.models.task import Task
 from datetime import date
-from app.route_helpers import error_message
+from app.route_helpers import error_message, validate_model_instance
 
 # imports for slackbot
 import os
@@ -55,14 +55,14 @@ def get_all_tasks():
 # retrieve one task by id
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task_by_id(task_id):
-    task = validate_task(task_id)
+    task = validate_model_instance(Task, task_id)
 
     return {"task": task.to_dict()}
 
 # update one task by id
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_one_task_by_id(task_id):
-    task = validate_task(task_id)
+    task = validate_model_instance(Task, task_id)
     request_body = request.get_json()
 
     task.title = request_body["title"]
@@ -75,7 +75,7 @@ def update_one_task_by_id(task_id):
 # delete one task by id
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task_by_id(task_id):
-    task = validate_task(task_id)
+    task = validate_model_instance(Task, task_id)
 
     db.session.delete(task)
     db.session.commit()
@@ -85,7 +85,7 @@ def delete_task_by_id(task_id):
 # mark one task complete by id
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_task_complete(task_id):
-    task = validate_task(task_id)
+    task = validate_model_instance(Task, task_id)
 
     task.completed_at = date.today()
     response_body = {"task": task.to_dict()}
@@ -98,7 +98,7 @@ def mark_task_complete(task_id):
 # mark one task incomplete by id
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_task_incomplete(task_id):
-    task = validate_task(task_id)
+    task = validate_model_instance(Task, task_id)
 
     task.completed_at = None
     response_body = {"task": task.to_dict()}
@@ -106,27 +106,14 @@ def mark_task_incomplete(task_id):
     db.session.commit()
     return make_response(jsonify(response_body), 200)
 
-# check for valid task using id
-def validate_task(task_id):
-    try:
-        task_id = int(task_id)
-    except:
-        error_message(f"Task #{task_id} invalid", 400)
-    
-    task = Task.query.get(task_id)
-
-    if not task:
-        error_message(f"Task #{task_id} not found", 404)
-    
-    return task
-
 # post completion message to slack
 def post_slack_completion_message(task_id):
     client = WebClient(token=os.environ.get("SLACK_BOT_TOKEN"))
     logger = logging.getLogger(__name__)
     channel_id = "C03EP2Q0WK1"
 
-    task = validate_task(task_id)
+    # task = validate_task(task_id)
+    task = validate_model_instance(Task, task_id)
 
     try:
         result = client.chat_postMessage(
