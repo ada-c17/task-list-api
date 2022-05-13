@@ -190,7 +190,7 @@ def completed_task(task_id):
     path = "https://slack.com/api/chat.postMessage"
     key = os.environ.get('SLACK_TOKEN_KEY')
     data = {"channel": "task-notifications", "text": post_message}
-    headers = {"Authorization": "Bearer " + key}
+    headers = {"Authorization": f"Bearer {os.environ.get('SLACK_TOKEN_KEY')}"}
 
     requests.post(path, params=data, headers=headers)
     # response_body = response.json()
