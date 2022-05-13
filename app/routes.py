@@ -33,7 +33,6 @@ def get_all_goals():
 def get_all_tasks():
     sort_tasks = request.args.get('sort')
   
-
     if not sort_tasks: 
         tasks = Task.query.all()
     elif sort_tasks == "asc": 
@@ -56,9 +55,6 @@ def get_tasks_for_goal(id):
     "title": goal.title,
     "tasks": task_of_goal}
 
-    # if not goal.tasks:
-    #     error_message(f'No tasks associated with this goal', 404)
-
     
     for task in goal.tasks: 
         task = validate_task(id)
@@ -69,18 +65,6 @@ def get_tasks_for_goal(id):
 
     return goal_with_tasks
 
-  
-
-    
-
-   
-
-    # task_list = [task.to_dict() for task in task_list]
-
-    # return {goal.to_dict(), "tasks": [task_list]}
-        
-
-    
 
 def validate_task(id):
 	try:
@@ -168,10 +152,7 @@ def get_goal(id):
 
 def replace_task_safely(task, data_dict):
     return task.replace_details(data_dict)
-    # try:
-    #     task.replace_details(data_dict)
-    # except KeyError as err:
-    #     error_message(f"Missing key: {err}", 400)
+
 
 
 @task_bp.route("/<id>", methods=["PUT"])
@@ -199,15 +180,6 @@ def update_goal_by_id(id):
 def tasks_of_goal(id): 
     goal = validate_goal(id)
     request_body = request.get_json()
-
-    # if "task_ids" not in request_body:
-    #     return {'details': 'Invalid data'}, 404
-        
-
-    # goal_task = {"id" : goal.id,
-    # "task_ids": request_body['task_ids']}
-
-    # print(request_body['task_ids'], "SHOULD BE A LIST OF NUMBERS **")
 
     for id in request_body['task_ids']: 
         new_task = validate_task(id)
@@ -239,16 +211,17 @@ def mark_complete(id):
 @task_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
 def mark_incomplete(id):
     task = validate_task(id)
-    task.is_complete = False
     task.completed_at = None
+    task.is_complete = False
+    
 
     db.session.commit()
     headers = {
-        "Authorization": f"Bearer {slack_bot_token}",
+        "authorization": f"Bearer {slack_bot_token}",
     }
     data = {
         "channel": "test-channel",
-        "text": f"Task {task.title} has been marked incomplete",
+        "text": f"Task {task.title} is not complete",
     }
     return {"task": task.to_dict()}
 
