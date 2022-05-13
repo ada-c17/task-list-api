@@ -147,7 +147,7 @@ def test_mark_incomplete_missing_task(client):
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
-    #ask about
+    assert response_body == {"message": "Task 1 not found"}
 
 # Let's add this test for creating tasks, now that
 # the completion functionality has been implemented
