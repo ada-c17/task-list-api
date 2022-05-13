@@ -1,48 +1,51 @@
 from app import db
-from app.models.task import Task 
-from flask import Blueprint, jsonify, make_response, request, abort 
+from app.models.task import Task
+from app.models.goal import Goal
+from flask import Blueprint, jsonify, make_response, request, abort, Response
 from app.helper_routes import error_message
+import os 
+from datetime import datetime
+import requests
+
+
+
+slack_url = "https://slack.com/api/chat.postMessage"
+slack_bot_token= os.environ.get("SLACK_BOT_TOKEN")
+
 
 
 task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
+goal_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
-def make_task_safely(data_dict):
-    return Task.from_dict(data_dict)
-
-	# try:
-	# 	return Task.from_dict(data_dict)
-	# except KeyError as err:
-	# 	error_message(f"Missing key: {err}", 400)
+### NEW ROUTE!! ## 
 
 
-def replace_task_safely(task, data_dict):
-    return task.replace_details(data_dict)
-    # try:
-    #     task.replace_details(data_dict)
-    # except KeyError as err:
-    #     error_message(f"Missing key: {err}", 400)
+
+@goal_bp.route("", methods=["GET"])
+def get_all_goals():
+    goals = Goal.query.all()
+    response_body = [goal.to_dict() for goal in goals]
+    return jsonify(response_body)
+    
+
 
 @task_bp.route("", methods=["GET"])
-def get_tasks():
-    tasks = Task.query.all()
-    # asc = request.args.get("sort")
-    # desc = request.args.get("sort")
+def get_all_tasks():
+    sort_tasks = request.args.get('sort')
+  
+
+    if not sort_tasks: 
+        tasks = Task.query.all()
+    elif sort_tasks == "asc": 
+        tasks = Task.query.order_by(Task.title.asc()).all()
+    elif sort_tasks == "desc": 
+        tasks = Task.query.order_by(Task.title.desc()).all()
+    else: 
+        tasks = Task.query.all()
 
     response_body = [task.to_dict() for task in tasks]
-
-    # if asc: 
-    #     sorted(response_body, key = lambda i:i['title'])
-        
-  
-  
-    # name_param = request.args.get("name")
+    return jsonify(response_body)
     
-    # if name_param:
-    #     tasks = Task.query.filter_by(name=name_param)
-    # else:
-
-    # response_body = [task.to_dict() for task in tasks]
-    return jsonify(response_body) 
 
 def validate_task(id):
 	try:
@@ -56,77 +59,196 @@ def validate_task(id):
 		return task
 	error_message(f'task with id #{id} not found', 404)
 
+def validate_goal(id):
+	try:
+		id = int(id)
+	except ValueError:
+		error_message(f"Invalid id {id}", 400)
 
-@task_bp.route("", methods=["POST"])
-def create_task(): 
-    request_body = request.get_json()
+	goal = Goal.query.get(id)
+		
+	if goal:
+		return goal
+	error_message(f'Goal with id #{id} not found', 404)
+
+def make_task_safely(data_dict):
+    return Task.from_dict(data_dict)
+
+
+@goal_bp.route("", methods=["POST"]) 
+def create_goal(): 
+    request_body= request.get_json() 
+
+    if "title" not in request_body:
+        return {'details': 'Invalid data'}, 400
+
+    new_goal = Goal(
+        title = request_body.get("title"))
+        
+    db.session.add(new_goal)
+    db.session.commit()
+    return {"goal": new_goal.to_dict()}, 201  
+
+
+
     
 
+
+@task_bp.route("", methods=["POST"])
+def create_task():  
+    request_body = request.get_json() 
+    
+
+    # return request_body  
     if "title" not in request_body or "description" not in request_body:
         return {'details': 'Invalid data'}, 400
 
-    new_task = make_task_safely(request_body)
+    new_task = Task(
+        title = request_body.get("title"),
+        description = request_body.get("description"),
+        # is_complete=True if "completed_at" in request_body else False 
+        ) 
+    # if "completed_at" in request_body: 
+    #     new_task.is_complete=request_body['is_complete']
 
-    print(new_task)
-
+    print("new_task", new_task)
+        
     db.session.add(new_task)
     db.session.commit()
-
-    return jsonify(new_task.to_dict_one_task()), 201 
+    return {"task": new_task.to_dict()}, 201 
 
 
 @task_bp.route("/<id>", methods=["GET"])
 def get_task(id):
     task = validate_task(id)
-    return jsonify(task.to_dict_one_task())
+    response_body = {"task": task.to_dict()}
+    return response_body 
+
+@goal_bp.route("/<id>", methods=["GET"]) 
+def get_goal(id):
+    goal = validate_goal(id)
+    return {"goal": goal.to_dict()}
+
+
+
+def replace_task_safely(task, data_dict):
+    return task.replace_details(data_dict)
+    # try:
+    #     task.replace_details(data_dict)
+    # except KeyError as err:
+    #     error_message(f"Missing key: {err}", 400)
 
 
 @task_bp.route("/<id>", methods=["PUT"])
 def update_task_by_id(id):
     request_body = request.get_json()
     task = validate_task(id)
-
+    
     replace_task_safely(task, request_body)
+    db.session.add(task)
     db.session.commit()
-    return jsonify(task.to_dict_one_task())
+    return {"task": task.to_dict()}
+
+@goal_bp.route("/<id>", methods=["PUT"])
+def update_goal_by_id(id):
+    goal = validate_goal(id)
+    request_body = request.get_json()
+
+    goal.title = request_body['title']
+    
+    db.session.add(goal)
+    db.session.commit()
+    return {"goal": goal.to_dict()}
+
+@goal_bp.route("/<id>/tasks", methods=["POST"])
+def make_tasks_of_a_goal(id):
+    goal = validate_goal(id)
+
+    request_body= request.get_json() 
+    if "task_ids" not in request_body:
+        return {'details': 'Invalid data'}, 400
+
+    goal.tasks = [Task.query.get(id) for task in "task_ids"]
+
+    # goal_tasks= {
+    #     "id": goal.id,
+    #     "task_ids" : request_body["task_ids"]
+    # }
+
+    # for id in request_body["task_ids"]: 
+    #     task = Task.query.get(id)
+    #     goal.tasks.append(task)
+        
+    db.session.commit()
+    return {"task_ids": {goal.tasks}}
+        
+        
 
 
 
+
+    
+    
+
+
+
+
+@task_bp.route("/<id>/mark_complete", methods=["PATCH"])
+def mark_complete(id):
+    task = validate_task(id)
+    task.is_complete = True 
+    task.completed_at = datetime.utcnow()
+
+    db.session.commit()
+    headers = {
+        "Authorization": f"Bearer {slack_bot_token}",
+    }
+    data = {
+        "channel": "test-channel",
+        "text": "Task {task.title} has been marked complete",
+    }
+
+    return {"task": task.to_dict()}
+
+@task_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
+def mark_incomplete(id):
+    task = validate_task(id)
+    task.is_complete = False
+    task.completed_at = None
+
+    db.session.commit()
+    headers = {
+        "Authorization": f"Bearer {slack_bot_token}",
+    }
+    data = {
+        "channel": "test-channel",
+        "text": f"Task {task.title} has been marked incomplete",
+    }
+    return {"task": task.to_dict()}
 
 
 @task_bp.route("/<id>", methods=["DELETE"])
 def delete_task(id): 
-    valid_task = validate_task(id)
-    task = valid_task.to_dict_one_task()
-    title = task['task']['title']
-    response_body = {"details": f'Task {id} "{title}" successfully deleted'}
+    task = validate_task(id)
 
-    db.session.delete(valid_task)
+    response_body = {"details": f'Task {task.id} "{task.title}" successfully deleted'}
+
+    db.session.delete(task)
     db.session.commit()
     return response_body
 
 
 
-  
+@goal_bp.route("/<id>", methods=["DELETE"])
+def delete_goal(id): 
+    goal = validate_goal(id)
 
+    response_body = {"details": f'Goal {goal.id} "{goal.title}" successfully deleted'}
 
+    db.session.delete(goal)
+    db.session.commit()
+    return response_body
 
-
-# @task_bp.route("", methods=("POST",))
-# def create_task(): 
-  
-#     request_body = request.get_json()
-#     task = make_task_safely(request_body)
-
-# request_body = request.get_json()
-# new_task = make_task_safely(request_body)
-
-    # db.session.add(task)
-    # db.session.commit()
-
-    # return jsonify(task.to_dict()), 201 
-
-    # return jsonify(new_task.to_dict()), 201
 
 
 
