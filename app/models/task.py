@@ -6,7 +6,7 @@ class Task(db.Model):
     description = db.Column(db.String, nullable=False)
     completed_at = db.Column(db.DateTime, nullable=True, default=None)
     goal_id = db.Column(db.Integer, db.ForeignKey("goal.goal_id"))
-    goals = db.relationship("Goal", back_populates="task")
+    goal = db.relationship("Goal", back_populates="tasks")
     # __tablename__ = "tasks" #This is optional for if you want to plurally name your table 
 
     def to_dict(self):
