@@ -28,6 +28,16 @@ def create_task():
     return new_task.to_json(), 201
 
 
+@tasks_bp.route("/<task_id>", methods=["GET"])
+def handle_task(task_id):
+    task = validate_object(Task, task_id)
+
+    if task.goal_id:
+        task.to_json()["task"]["goal_id"] = task.goal_id
+
+    return jsonify(task.to_json()), 200
+
+
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
     sort_query = request.args.get("sort")
@@ -40,16 +50,6 @@ def get_all_tasks():
     tasks_response = [task.to_json()["task"] for task in tasks]
 
     return jsonify(tasks_response), 200
-
-
-@tasks_bp.route("/<task_id>", methods=["GET"])
-def handle_task(task_id):
-    task = validate_object(Task, task_id)
-
-    if task.goal_id:
-        task.to_json()["task"]["goal_id"] = task.goal_id
-
-    return jsonify(task.to_json()), 200
 
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
