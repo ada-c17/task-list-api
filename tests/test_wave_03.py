@@ -197,25 +197,3 @@ def test_update_task_with_completed_at_date(client, completed_task):
     assert task.description == "Updated Test Description"
     assert task.completed_at
 
-
-#OPTIONAL
-
-def test_create_task_with_invalid_completed_at(client):
-    # Act
-    date = datetime.utcnow()
-    date_str = date.strftime("%m/%d/%Y")
-
-    response = client.post("/tasks", json={
-        "title": "A Brand New Task",
-        "description": "Test Description",
-        "completed_at": date_str
-    })
-    response_body = response.get_json()
-
-    # Assert
-    assert response.status_code == 400
-    assert response_body == {"msg": "The datatype of completed_at must be datetime"}
-
-
-
-

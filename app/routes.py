@@ -81,23 +81,15 @@ def make_goal_response(goal):
     return response
 
 
-#helper function, sorts tasks by title
-def sort_tasks(params, tasks_response):
-    sort_type = None
-    if params["sort"] == "asc":
-        #ascending
-        sort_type = "A"
-    else:
-        #descending
-        sort_type = "D"
+#helper function, sorts tasks or goals by column values
+def sort_response(params, response, sort_type, column = "title"):
+    if sort_type == "asc":
+        response = (sorted(response, key=lambda i: i[column]))
 
-    if sort_type == "A":
-        tasks_response = (sorted(tasks_response, key=lambda task: task['title']))
+    elif sort_type == "desc":
+        response = (sorted(response, key=lambda i: i[column], reverse = True))
 
-    elif sort_type == "D":
-        tasks_response = (sorted(tasks_response, key=lambda task: task['title'], reverse = True))
-
-    return tasks_response
+    return response
 
 
 # TASKS
@@ -109,11 +101,11 @@ def create_one_task():
     if "description" not in request_body or "title" not in request_body:
         response = {"details": "Invalid data"}
         abort(make_response(jsonify(response), 400))
-
+    
     if "completed_at" in request_body:
-        #if isinstance(request_body['completed_at'], datetime.utcnow):
         new_task = Task(title=request_body['title'], 
                     description=request_body['description'], completed_at=request_body['completed_at'])
+
 
     else:
         new_task = Task(title=request_body['title'], 
@@ -123,10 +115,6 @@ def create_one_task():
     db.session.commit()
     response = make_task_response(new_task)
     return jsonify(response), 201
-
-
-    #assert response.status_code == 400
-    assert response_body == {"msg": "The datatype of completed_at must be datetime"}
 
 
 
@@ -164,7 +152,10 @@ def get_all_tasks():
     #check params for sorting
     params = request.args
     if "sort" in params:
-        tasks_response = sort_tasks(params, tasks_response)
+        if "column" in params:
+            tasks_response = sort_response(params, tasks_response, params["sort"], column=params["column"])
+        else:
+            tasks_response = sort_response(params, tasks_response, params["sort"])
 
     return jsonify(tasks_response)
 
@@ -278,6 +269,14 @@ def get_all_goals():
             'id': goal.goal_id,
             'title': goal.title,
         })
+
+
+    params = request.args
+    if "sort" in params:
+        if "column" in params:
+            goals_response = sort_response(params, goals_response, params["sort"], column=params["column"])
+        else:
+            goals_response = sort_response(params, goals_response, params["sort"])
 
     return jsonify(goals_response)
 

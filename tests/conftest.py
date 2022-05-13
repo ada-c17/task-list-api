@@ -58,6 +58,8 @@ def three_tasks(app):
     db.session.commit()
 
 
+
+
 # This fixture gets called in every test that
 # references "completed_task"
 # This fixture creates a task with a
@@ -90,4 +92,16 @@ def one_task_belongs_to_one_goal(app, one_goal, one_task):
     task = Task.query.first()
     goal = Goal.query.first()
     goal.tasks.append(task)
+    db.session.commit()
+
+
+
+#for added wave 2 tests
+@pytest.fixture
+def three_goals(app):
+    db.session.add_all([
+        Goal(title="A Goal"),
+        Goal(title="C Goal"),
+        Goal(title="B Goal")
+    ])
     db.session.commit()
