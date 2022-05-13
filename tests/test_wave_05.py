@@ -228,10 +228,74 @@ def test_get_goal_sort_by_title_desc(client, four_goals):
     ]
 
 
+def test_get_goal_sort_by_title_descending(client, four_goals):
+    # Assert
+    data = {
+        "sort": "DESCENDING",
+        "title": "Water the garden 🌷"
+    }
+    response = client.get("/goals", query_string=data)
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert response_body == [
+        {
+            "id": 1,
+            "title": "Water the garden 🌷"
+        },
+        {
+            "id": 4,
+            "title": "Water the garden 🌷"
+        },
+        {
+            "id": 3,
+            "title": "Pay my outstanding tickets 😭"
+        },
+        {
+            "id": 2,
+            "title": "Answer forgotten email 📧"
+        }
+
+    ]
+
+
 def test_get_goal_sort_by_title_asc(client, four_goals):
     # Assert
     data = {
         "sort": "asc",
+        "title": "Water the garden 🌷"
+    }
+    response = client.get("/goals", query_string=data)
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert response_body == [
+        {
+            "id": 2,
+            "title": "Answer forgotten email 📧"
+        },
+        {
+            "id": 3,
+            "title": "Pay my outstanding tickets 😭"
+        },
+        {
+            "id": 1,
+            "title": "Water the garden 🌷"
+        },
+        {
+            "id": 4,
+            "title": "Water the garden 🌷"
+        }
+
+    ]
+
+
+def test_get_goal_sort_by_title_ascending(client, four_goals):
+    # Assert
+    data = {
+        "sort": "Ascending",
         "title": "Water the garden 🌷"
     }
     response = client.get("/goals", query_string=data)
