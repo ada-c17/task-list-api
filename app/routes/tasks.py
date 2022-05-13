@@ -78,7 +78,20 @@ def validate_task(task_id):
 @tasks_bp.route('/<task_id>', methods=['GET'])
 def get_one_task(task_id):
     task = validate_task(task_id)
-    return jsonify({
+    
+    if task.goal_id:
+        return jsonify({
+            'task': {
+                'id': task.task_id,
+                'goal_id': task.goal_id,
+                'title': task.title,
+                'description': task.description,
+                'is_complete': bool(task.completed_at)
+                }
+            }), 200
+    
+    else:
+            return jsonify({
         'task': {
             'id': task.task_id,
             'title': task.title,

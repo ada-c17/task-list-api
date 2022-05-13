@@ -1,6 +1,8 @@
 from app.models.goal import Goal
 from app import db
+import json
 from flask import Blueprint, request, jsonify, abort, make_response
+from app.routes.tasks import tasks_bp, validate_task
 
 goals_bp = Blueprint('goals_bp', __name__, url_prefix='/goals')
 
@@ -97,5 +99,47 @@ def delete_goal(goal_id):
 
     return jsonify({'details': f'Goal {goal_id} \"{goal.title}\" successfully deleted'}), 200
 
+
+@goals_bp.route('/<goal_id>/tasks', methods=['POST'])
+def assign_tasks_to_goal(goal_id):
+    goal = validate_goal(goal_id)
+    
+    request_body = request.get_json()
+
+    task_list = request_body["task_ids"]
+
+    for task in task_list:
+        valid_task = validate_task(task)
+        goal.tasks.append(valid_task)
+    db.session.commit()
+
+    return jsonify({
+        'id': goal.goal_id,
+        'task_ids': task_list
+    }), 200
+
+
+@goals_bp.route('/<goal_id>/tasks', methods=['GET'])
+def get_tasks_for_goal(goal_id):
+    goal = validate_goal(goal_id)
+
+    task_list = []
+
+    for task in goal.tasks:
+        task_list.append(
+            {
+            "id": task.task_id,
+            "goal_id": task.goal_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": bool(task.completed_at)
+            }
+        )
+
+    return jsonify({
+        'id': goal.goal_id,
+        'title': goal.title,
+        'tasks': task_list
+    }), 200
 
 
