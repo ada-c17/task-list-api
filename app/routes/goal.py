@@ -20,12 +20,13 @@ def create_one_goal():
     db.session.add(new_goal)
     db.session.commit()
 
-    response = {
-        "goal":{
-        "id":new_goal.goal_id,
-        "title":new_goal.title }
-    }
-    return jsonify(response), 201
+    # response = {
+    #     "goal":{
+    #     "id":new_goal.goal_id,
+    #     "title":new_goal.title }
+    # }
+    # return jsonify(response), 201
+    return jsonify(new_goal.to_dict()), 201
 
 # get all goals
 @goals_bp.route('', methods=['GET'])
@@ -90,12 +91,14 @@ def update_one_goal(goal_id):
 
     db.session.commit()
 
-    response = {
-        "goal":{
-        "id":chosen_goal.goal_id,
-        "title":chosen_goal.title }
-    }
-    return jsonify(response), 200
+    # response = {
+    #     "goal":{
+    #     "id":chosen_goal.goal_id,
+    #     "title":chosen_goal.title }
+    # }
+    # return jsonify(response), 200
+
+    return jsonify(chosen_goal.to_dict()), 200
 
 
 # delete one goal
@@ -151,7 +154,6 @@ def get_tasks_for_a_goal(goal_id):
     response= {
         "id":chosen_goal.goal_id,
         "title":chosen_goal.title,
-        # "task":chosen_goal_tasks["goal_id"],
         "tasks": chosen_goal_tasks
     }
     return jsonify(response), 200

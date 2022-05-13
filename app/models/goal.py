@@ -7,9 +7,9 @@ class Goal(db.Model):
     tasks = db.relationship("Task", back_populates= "goal", lazy=True)
 
 
-def to_dict(self):
-    return {
+    def to_dict(self):
+        return {
         "goal":{
         "id":self.goal_id,
         "title":self.title }
-    }
+        }
