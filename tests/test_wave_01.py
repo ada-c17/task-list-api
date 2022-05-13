@@ -1,8 +1,9 @@
 from app.models.task import Task
+from datetime import datetime
 import pytest
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_no_saved_tasks(client):
     # Act
     response = client.get("/tasks")
@@ -13,7 +14,7 @@ def test_get_tasks_no_saved_tasks(client):
     assert response_body == []
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_one_saved_tasks(client, one_task):
     # Act
     response = client.get("/tasks")
@@ -32,7 +33,7 @@ def test_get_tasks_one_saved_tasks(client, one_task):
     ]
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_task(client, one_task):
     # Act
     response = client.get("/tasks/1")
@@ -51,7 +52,7 @@ def test_get_task(client, one_task):
     }
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_task_not_found(client):
     # Act
     response = client.get("/tasks/1")
@@ -60,18 +61,17 @@ def test_get_task_not_found(client):
     # Assert
     assert response.status_code == 404
 
-    raise Exception("Complete test with assertion about response body")
-    # *****************************************************************
-    # **Complete test with assertion about response body***************
-    # *****************************************************************
+    #raise Exception("Complete test with assertion about response body")
+    assert response_body == {'details': "No model of type <class 'app.models.task.Task'> with id 1 found"}
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_task(client):
     # Act
     response = client.post("/tasks", json={
         "title": "A Brand New Task",
         "description": "Test Description",
+
     })
     response_body = response.get_json()
 
@@ -93,7 +93,7 @@ def test_create_task(client):
     assert new_task.completed_at == None
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_update_task(client, one_task):
     # Act
     response = client.put("/tasks/1", json={
@@ -119,7 +119,7 @@ def test_update_task(client, one_task):
     assert task.completed_at == None
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_update_task_not_found(client):
     # Act
     response = client.put("/tasks/1", json={
@@ -131,13 +131,13 @@ def test_update_task_not_found(client):
     # Assert
     assert response.status_code == 404
 
-    raise Exception("Complete test with assertion about response body")
+    assert response_body == {'details': "No model of type <class 'app.models.task.Task'> with id 1 found"}
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_delete_task(client, one_task):
     # Act
     response = client.delete("/tasks/1")
@@ -152,7 +152,7 @@ def test_delete_task(client, one_task):
     assert Task.query.get(1) == None
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_delete_task_not_found(client):
     # Act
     response = client.delete("/tasks/1")
@@ -161,7 +161,7 @@ def test_delete_task_not_found(client):
     # Assert
     assert response.status_code == 404
 
-    raise Exception("Complete test with assertion about response body")
+    assert response_body == {'details': "No model of type <class 'app.models.task.Task'> with id 1 found"}
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
@@ -169,7 +169,7 @@ def test_delete_task_not_found(client):
     assert Task.query.all() == []
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_task_must_contain_title(client):
     # Act
     response = client.post("/tasks", json={
@@ -181,12 +181,12 @@ def test_create_task_must_contain_title(client):
     assert response.status_code == 400
     assert "details" in response_body
     assert response_body == {
-        "details": "Invalid data"
+        "details": "Missing key: 'title'"
     }
     assert Task.query.all() == []
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_task_must_contain_description(client):
     # Act
     response = client.post("/tasks", json={
@@ -198,6 +198,6 @@ def test_create_task_must_contain_description(client):
     assert response.status_code == 400
     assert "details" in response_body
     assert response_body == {
-        "details": "Invalid data"
+        "details": "Missing key: 'description'"
     }
     assert Task.query.all() == []
