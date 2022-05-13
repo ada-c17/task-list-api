@@ -3,15 +3,16 @@ from app import db
 from app.models.task import Task 
 import datetime
 
-import logging
-logging.basicConfig(level=logging.DEBUG)
 import os
-import ssl
-from slack_sdk import WebClient
-from slack_sdk.errors import SlackApiError
 from dotenv import load_dotenv
-
+import requests
 load_dotenv()
+
+# import logging
+# logging.basicConfig(level=logging.DEBUG)
+# import ssl
+# from slack_sdk import WebClient
+# from slack_sdk.errors import SlackApiError
 
 def validate_task_id(task_id):
     try: 
@@ -107,30 +108,40 @@ def delete_task(task_id):
 def mark_task_complete(task_id):
     task = validate_task_id(task_id)
 
-# mark completed HF?
     task.completed_at = datetime.datetime.now()
     task.is_complete = True
     db.session.commit()
-##NOT CHANGING is_complete TO TRUE, something wrong with helper method in model?
+
 # create requests.post(slack api)
-
-    ssl_context = ssl.create_default_context()
-    ssl_context.check_hostname = False
-    ssl_context.verify_mode = ssl.CERT_NONE
-
+    slack_url = "https://slack.com/api/chat.postMessage"
     slack_token = os.environ['SLACK_BOT_TOKEN']
-    client = WebClient(token=slack_token, 
-                        ssl=ssl_context)
-    task_title = task_id.title
-    try:
-        response = client.chat_postMessage(
-            channel="task-list-api", 
-            text=f"Someone just completed the task {task_title}"
-        )
-    except SlackApiError as e:
-        assert e.response["error"]
+    params = {
+        "channel": "task-list-api",
+        "text": f'Someone just completed the task "{task.title}"'
+        }
+    headers = {
+        "Authorization":"Bearer {}".format(slack_token)
+        }
+    r = requests.post(slack_url, headers=headers, params=params)
 
     return jsonify(task.to_dict())
+
+## original soln for slack bot below - keeping in case I need to reference it again... or just cry over how much time I spent trying to figure it out... 
+    # ssl_context = ssl.create_default_context()
+    # ssl_context.check_hostname = False
+    # ssl_context.verify_mode = ssl.CERT_NONE
+
+    # slack_token = os.environ['SLACK_BOT_TOKEN']
+    # client = WebClient(token=slack_token, 
+    #                     ssl=ssl_context)
+    # try:
+    #     response = client.chat_postMessage(
+    #         channel="task-list-api", 
+    #         text=f"Someone just completed the task {task_title}"
+    #     )
+    # except SlackApiError as e:
+    #     assert e.response["error"]
+
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_task_incomplete(task_id):
