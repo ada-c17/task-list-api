@@ -5,7 +5,7 @@ from flask import Blueprint, jsonify, abort, make_response, request
 import os
 import requests
 from sqlalchemy.sql.functions import now
-from .helper import validate_task, sort_filter_get
+from .helper import validate_obj, sort_filter_get
 
 task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 
@@ -32,7 +32,7 @@ def read_all_tasks():
 
 @task_bp.route("/<task_id>", methods=["GET"])
 def read_one_task(task_id):
-    task = validate_task(Task,task_id)
+    task = validate_obj(Task,task_id)
 
     return make_response({"task" : task.make_json()}, 200)
     
@@ -40,7 +40,7 @@ def read_one_task(task_id):
 @task_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
 
-    task = validate_task(Task,task_id)
+    task = validate_obj(Task,task_id)
     request_body = request.get_json()
     
     task.title = request_body["title"]
@@ -52,7 +52,7 @@ def update_task(task_id):
 
 @task_bp.route("/<task_id>", methods=["DELETE"])
 def delete_a_task(task_id):
-    task = validate_task(Task,task_id)
+    task = validate_obj(Task,task_id)
 
     db.session.delete(task)
     db.session.commit()
@@ -61,7 +61,7 @@ def delete_a_task(task_id):
 
 @task_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_complete(task_id):
-    task = validate_task(Task,task_id)
+    task = validate_obj(Task,task_id)
     
     task.completed_at = now()
 
@@ -80,7 +80,7 @@ def mark_complete(task_id):
 
 @task_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_incomplete(task_id):
-    task = validate_task(Task,task_id)
+    task = validate_obj(Task,task_id)
 
     task.completed_at = None
 
