@@ -87,7 +87,7 @@ def mark_complete_on_incomplete_task(id):
     #   update from line 79. task.completed_at = None bc it was \
     #   incompleted and request to change to completed (assign time value)
     task.completed_at = datetime.utcnow()
-    db.session.commit()
+    # db.session.commit()
 
     #add slackbot
     # message = f"Someone just completed the task {task.title}"
@@ -103,8 +103,8 @@ def mark_complete_on_incomplete_task(id):
     # "format": "json"
     }
 
-    requests.post(path, params=query_params, headers= headers)
-
+    requests.post(path, params=query_params, headers=headers)
+    db.session.commit()    
     # return make_response({"task": task.to_json()}), 200
     return jsonify({"task": task.to_json()}), 200
     
