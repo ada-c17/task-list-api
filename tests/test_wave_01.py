@@ -267,6 +267,39 @@ def test_get_tasks_sort_by_title_desc(client, three_tasks):
     ]
 
 
+def test_get_tasks_sort_by_title_descending(client, three_tasks):
+    # Act
+    data= {
+        "sort": "Descending",
+        "title": "Water the garden 🌷"
+    }
+    response = client.get("/tasks", query_string=data)
+    response_body = response.get_json()
+
+    # Assert 
+    assert response.status_code == 200
+    assert response_body == [
+        {
+            "id": 1,
+            "title": "Water the garden 🌷",
+            "description": "",
+            "is_complete": False 
+        },
+        {
+            "id": 3,
+            "title": "Pay my outstanding tickets 😭",
+            "description": "",
+            "is_complete": False 
+        },
+        {
+            "id": 2,
+            "title": "Answer forgotten email 📧",
+            "description": "",
+            "is_complete": False 
+        },
+    ]
+
+
 def test_get_tasks_sort_by_title_asc(client, three_tasks):
     # Act
     data= {
@@ -298,4 +331,39 @@ def test_get_tasks_sort_by_title_asc(client, three_tasks):
             "is_complete": False 
         }
     ]
+
+
+def test_get_tasks_sort_by_title_ascending(client, three_tasks):
+    # Act
+    data= {
+        "sort": "ASCENDING",
+        "title": "Water the garden 🌷"
+    }
+    response = client.get("/tasks", query_string=data)
+    response_body = response.get_json()
+
+    # Assert 
+    assert response.status_code == 200
+    assert response_body == [
+        {
+            "id": 2,
+            "title": "Answer forgotten email 📧",
+            "description": "",
+            "is_complete": False 
+        },
+        {
+            "id": 3,
+            "title": "Pay my outstanding tickets 😭",
+            "description": "",
+            "is_complete": False 
+        },
+        {
+            "id": 1,
+            "title": "Water the garden 🌷",
+            "description": "",
+            "is_complete": False 
+        }
+    ]
+
+
 
