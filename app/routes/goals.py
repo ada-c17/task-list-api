@@ -65,7 +65,6 @@ def update_goal(goal_id):
 
     try:
         goal.title = request_body['title']
-    
     except KeyError:
         return jsonify({'details': 'Request must include title'}), 400
 

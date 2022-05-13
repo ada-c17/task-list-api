@@ -79,7 +79,6 @@ def update_task(task_id):
     try:
         task.title = request_body['title']
         task.description = request_body['description']
-    
     except KeyError:
         return jsonify({'details': 'Request must include both title and description'}), 400
     
