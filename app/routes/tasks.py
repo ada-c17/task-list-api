@@ -1,14 +1,11 @@
+from wsgiref import headers
 from flask import Blueprint, jsonify, abort, make_response, request
+import requests
 from app.models.task import Task
 from app import db
 from datetime import datetime
-import logging
 import os
-from slack_sdk import WebClient
-from slack_sdk.errors import SlackApiError
 
-logger = logging.getLogger(__name__)
-client = WebClient(token=os.environ.get('SLACK_BOT_TOKEN'))
 tasks_bp = Blueprint('tasks_bp', __name__, url_prefix='/tasks')
 
 def validate_task_id(task_id):
@@ -98,18 +95,18 @@ def mark_task_complete(task_id):
 
     db.session.commit()
 
-    channel_id = 'C03EG8HQVEJ'
-
-    try:
-        result = client.chat_postMessage(
-        channel=channel_id, 
-        text=f'Someone just completed the task {task.title}'
-    )
-        logger.info(result)
-    except SlackApiError as e:
-        logger.error(f"Error posting message: {e}")
-
     rsp = {'task': task.to_json()}
+
+    token_key = os.environ.get("SLACK_BOT_TOKEN")
+    slack_url = "https://slack.com/api/chat.postMessage"
+    body = {
+            "text": f"Someone just completed the task {task.title}",
+            "channel": "task-notifications"}
+
+    auth_header = {"Authorization": token_key}
+
+    requests.post(slack_url, params=body, headers=auth_header)
+
     return jsonify(rsp), 200
 
 
