@@ -13,7 +13,8 @@ def send_msg_completed_task(task_title):
     }
     headers = {
         # "Content-type": "application/json", does not work
-        "Authorization": "Bearer" + " " + SLACK_API_KEY
+        # "Authorization": "Bearer" + " " + SLACK_API_KEY
+        "Authorization": f"Bearer {SLACK_API_KEY}"
     }
 
     requests.post(PATH, data=params, headers=headers)
