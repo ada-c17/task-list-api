@@ -5,10 +5,7 @@ from app.models.task import Task
 from app import db
 import os
 import datetime
-
 from ..helpers import validate_object
-from ..helpers import validate_new_data
-# from ..helpers import validate_task
 from flask import Blueprint, request, jsonify, make_response, abort
 
 env_path = Path('.') / '.env'

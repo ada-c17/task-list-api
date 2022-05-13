@@ -1,4 +1,3 @@
-from urllib import response
 from app.models.task import Task
 from app import db
 from app.models.goal import Goal
