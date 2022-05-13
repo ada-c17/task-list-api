@@ -171,8 +171,7 @@ def replace_one_goal(goal_id):
 
     db.session.commit()
 
-    return chosen_goal.to_dict()
-    return jsonify(response), 200
+    return chosen_goal.to_dict(), 200
 
 
 #PATCH
@@ -280,11 +279,13 @@ def add_tasks_to_goal(goal_id):
     
     goal.tasks = task_list
 
-    db.session.commit()
     response = {
         "id": goal.goal_id,
         "task_ids": request_body["task_ids"]
     }
+
+    db.session.add(goal)
+    db.session.commit()
 
     return make_response(jsonify(response), 200)
 
