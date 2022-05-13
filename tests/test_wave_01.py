@@ -214,3 +214,50 @@ def test_get_task_with_invalid_task_id(client, three_tasks):
     assert response_body == {
         "details" : "Invalid data"
     }
+
+
+pytest.mark.skip(reason="No way to test this feature yet")
+def test_get_task_filter_by_title(client, three_tasks):
+
+    data = {'title': 'Water the garden 🌷'}
+    response = client.get("/tasks", query_string = data)
+    response_body = response.get_json()
+
+    assert response.status_code == 200
+    assert response_body == [
+        {
+        "id" : 1, 
+        "title":"Water the garden 🌷",
+        "description": "", 
+        "is_complete": False
+        }
+    ]
+
+
+pytest.mark.skip(reason="No way to test this feature yet")
+def test_get_task_sort_by_id(client, three_tasks):
+
+    response = client.get("/tasks")
+    response_body = response.get_json()
+
+    assert response.status_code == 200
+    assert response_body == [
+        {
+        "id" : 1, 
+        "title":"Water the garden 🌷",
+        "description": "", 
+        "is_complete": False
+        },
+        {
+        "id" : 2, 
+        "title":"Answer forgotten email 📧",
+        "description": "", 
+        "is_complete": False
+        },
+         {
+        "id" : 3, 
+        "title":"Pay my outstanding tickets 😭",
+        "description": "", 
+        "is_complete": False
+        },
+    ]

@@ -38,12 +38,16 @@ def get_all_tasks():
 
     params = request.args
     if params:
-        if params["sort"] == "asc":
+        if params.get("sort") == "asc":
             tasks = Task.query.order_by(Task.title.asc()).all()
-        elif params["sort"] == "desc":
+        elif params.get("sort") == "desc":
             tasks= Task.query.order_by(Task.title.desc()).all()
+        elif params.get("sort") == "id":
+            tasks= Task.query.order_by(Task.task_id)
+        elif "title" in params:
+            tasks = Task.query.filter_by(title = params["title"]).all()
     else:
-        tasks = Task.query.order_by(Task.task_id)
+        tasks = Task.query.all()
 
     tasks_response = [task.task_to_JSON()["task"] for task in tasks]
 

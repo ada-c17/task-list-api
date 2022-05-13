@@ -99,6 +99,43 @@ def test_get_goal_sorted_desc(client, three_goals):
             "title": "Build a habit of going outside daily"}
     ]
 
+pytest.mark.skip(reason="No way to test this feature yet")
+def test_get_goal_sorted_by_id(client, three_goals):
+    # Act
+    response = client.get("/goals?sort=id")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert len(response_body) == 3
+    assert response_body == [
+        {
+            "id": 1,
+            "title": "Build a habit of going outside daily"},
+        {
+            "id": 2,
+            "title": "Work out"},
+        {
+            "id": 3,
+            "title": "Call my parents often"},
+    ]
+
+pytest.mark.skip(reason="No way to test this feature yet")
+def test_get_goal_filter_by_title(client, three_goals):
+    # Act
+    data = {'title': 'Work out'}
+    response = client.get("/goals", query_string = data)
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert len(response_body) == 1
+    assert response_body == [
+        {
+            "id": 2,
+            "title": "Work out"}
+    ]
+
 pytest.mark.skip(reason="test to be completed by student")
 def test_get_goal_not_found(client):
     # Act

@@ -8,7 +8,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 load_dotenv()
 
-def create_app(test_config=None):
+def create_app(test_config=None): # pragma: no cover
     app = Flask(__name__)
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 

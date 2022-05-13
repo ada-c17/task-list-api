@@ -34,12 +34,16 @@ def get_all_goals():
 
     params = request.args
     if params:
-        if params["sort"] == "asc":
+        if params.get("sort") == "asc":
             goals = Goal.query.order_by(Goal.title.asc()).all()
-        elif params["sort"] == "desc":
+        elif params.get("sort") == "desc":
             goals= Goal.query.order_by(Goal.title.desc()).all()
+        elif params.get("sort") == "id":
+            goals = Goal.query.order_by(Goal.goal_id)
+        elif "title" in params:
+            goals = Goal.query.filter_by(title = params["title"]).all()
     else:
-        goals = Goal.query.order_by(Goal.goal_id)
+        goals = Goal.query.all()
 
     goals_response = [goal.goal_to_JSON()["goal"] for goal in goals]
 
