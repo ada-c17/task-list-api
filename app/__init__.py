@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import os
 from dotenv import load_dotenv
-from flask_json import FlaskJSON, JsonError, json_response, as_json
+
 
 db = SQLAlchemy()
 migrate = Migrate()
