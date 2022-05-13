@@ -64,8 +64,6 @@ def test_get_task_not_found(client):
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
-    # how to get task_id into response body?
-    # assert response_body == {"message": f"Task id {task_id} not found"}
     assert response_body == {"details": "Task not found"}
 
 
@@ -169,7 +167,6 @@ def test_delete_task_not_found(client):
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
-
     assert Task.query.all() == []
     assert response_body == {"details": "Task not found" }
 

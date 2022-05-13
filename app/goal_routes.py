@@ -32,3 +32,22 @@ def real_all_goals():
     goals = Goal.query.all()
     goals_response = [task.to_dict() for task in goals]
     return make_response(jsonify(goals_response), 200)
+
+
+@bp.route("/<goal_id>", methods=("PUT",))
+def replace_goal(goal_id):
+    goal = validate_goal_id(goal_id)
+    request_body = request.get_json()
+    goal.override_goal(request_body)
+    db.session.commit()
+
+    return jsonify({"goal": goal.to_dict()}), 200
+
+
+@bp.route("/<goal_id>", methods=("DELETE",))
+def delete_goal(goal_id):
+    goal = validate_goal_id(goal_id)
+    db.session.delete(goal)
+    db.session.commit()
+
+    create_message(f'Goal {goal_id} "{goal.title}" successfully deleted', 200)

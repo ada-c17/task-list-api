@@ -9,8 +9,8 @@ class Goal(db.Model):
     @classmethod
     def from_dict(cls, data_dict):
         return cls(
-                    title=data_dict["title"],
-            )
+                    title=data_dict["title"]
+        )
 
     
     def to_dict(self):
@@ -18,3 +18,7 @@ class Goal(db.Model):
                     id=self.goal_id,
                     title=self.title
         )
+
+    
+    def override_goal(self, data_dict):
+        self.title = data_dict["title"]

@@ -67,11 +67,7 @@ def delete_task(task_id):
 @bp.route("/<task_id>/mark_complete", methods=("PATCH",))
 def mark_task_complete(task_id):
     task = validate_task_id(task_id)
-
-    # task.title = "My Beautiful Task"
-    # task.description = "What a pretty task!"
     task.completed_at = datetime.utcnow()
-    
     db.session.commit()
 
     requests.post(
