@@ -82,12 +82,15 @@ def delete_task(task_id):
     db.session.commit()
 
     return jsonify({"details":f'Task {task.task_id} "{task.title}" successfully deleted'}), 200
-    
+
 
 # Mark task as complete
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_complete(task_id):
     task = validate_record(Task, task_id)
+    task.completed_at = datetime.today()
+    db.session.commit()
+
 
     path = "https://slack.com/api/chat.postMessage"
     API_KEY = os.environ.get("SLACK_API")
@@ -95,18 +98,16 @@ def mark_complete(task_id):
 
     query_params = {
         "channel": "task-notifications",
-        "text": "Someone just completed the task My Beautiful Task"
+        "text": f"Someone just completed the {task.title}"
     }
 
-    task.completed_at = datetime.today()
     req = requests.post(path, headers=head,params=query_params)
-
-    db.session.commit()
 
     response_body = {}
     response_body['task'] = task.to_json()
 
     return jsonify(response_body), 200
+
 
 # Mark task as incomplete
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
