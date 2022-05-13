@@ -92,7 +92,7 @@ def patch_task_to_complete(id):
     headers = {"Authorization": os.environ.get("SLACK_BOT_API_KEY")}
 
     response = requests.post(path, params=query_params, headers=headers)
-    print(response.status_code)
+    # print(response.status_code)
 
     # requests.post(path, params=query_params, headers=headers), it might work without response_bot variable
     return jsonify({"task":task.to_json()}), 200
