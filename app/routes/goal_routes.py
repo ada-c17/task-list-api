@@ -62,11 +62,12 @@ def post_task_id_to_goal(goal_id):
 
 	for task_id in request_body["task_ids"]:
 		task = validate_object(Task, task_id)
-		goal.tasks.append(task) 
+		goal.tasks.append(task) #task.goal = goal, can also work since we used bilateral relationship with backpopulates
 
 	db.session.commit()
 
-	return jsonify({"id": goal.goal_id, "task_ids": request_body["task_ids"]}), 200
+	task_ids = [task.task_id for task in goal.tasks]
+	return jsonify({"id": goal.goal_id, "task_ids": task_ids}), 200
 
 @goals_bp.route("/<goal_id>/tasks", methods=["GET"])
 def read_tasks(goal_id):
