@@ -64,14 +64,15 @@ def get_filtered_and_sorted(cls, request_args):
     if 'description' in params:
         filters.append(cls.description.like(f"%{params['description']}%"))
     if 'is_complete' in params:
-        if not params['is_complete']:
+        if params['is_complete'] == 'False':
             filters.append(cls.completed_at == None)
-        filters.append(cls.completed_at != None)
+        else:
+            filters.append(cls.completed_at != None)
     filters = tuple(filters)
     
     if not sort_style:
         return cls.query.filter(*filters).all()
-    return (cls.query.filter_by(*filters)
+    return (cls.query.filter(*filters)
                             .order_by(getattr(cls.title,sort_style)()).all())
 
 
