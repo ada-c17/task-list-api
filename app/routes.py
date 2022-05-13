@@ -31,11 +31,12 @@ def create_task():
     request_body = request.get_json()
     try:
         new_task = Task.from_dict(request_body)
-    except KeyError:
+        
+        db.session.add(new_task)
+        db.session.commit()
+    
+    except:
         error_message("Invalid data", 400)
-
-    db.session.add(new_task)
-    db.session.commit()
 
     return make_response(jsonify({"task": new_task.to_dict()}), 201)
 
@@ -43,6 +44,8 @@ def create_task():
 def get_tasks():
     if request.args.get("sort") or request.args.get("sort_by"):
         tasks = Task.sort()
+    elif request.args.get("title_contains"):
+        tasks = Task.filter_titles()
     else:
         tasks = Task.query.all()
     tasks_response = [task.to_dict() for task in tasks]
@@ -58,11 +61,15 @@ def update_task(id):
     task = Task.validate(id)
 
     request_body = request.get_json()
+    try:
+        task.title = request_body["title"]
+        task.description = request_body["description"]
+        task.completed_at = request_body.get("completed_at", None)
 
-    task.title = request_body["title"]
-    task.description = request_body["description"]
+        db.session.commit()
+    except:
+        error_message("Invalid data", 400)
 
-    db.session.commit()
 
     return make_response(jsonify({"task": task.to_dict()}))
 

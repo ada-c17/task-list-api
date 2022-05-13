@@ -45,3 +45,10 @@ class Handler():
             error_message(f"{cls.__name__.lower()} {id} not found", 404)
 
         return valid
+
+    @classmethod
+    def filter_titles(cls):
+        filter_query = request.args.get("title_contains")
+
+        result = cls.query.filter(cls.title.ilike(f"%{filter_query}%")).all()
+        return result
