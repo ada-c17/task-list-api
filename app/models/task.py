@@ -1,7 +1,5 @@
 from app import db
 
-
-#  Attributes to add: title, description, and completed_at
 class Task(db.Model):
     task_id = db.Column(db.Integer, primary_key=True,autoincrement=True)
     title = db.Column(db.String)
