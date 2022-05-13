@@ -2,6 +2,7 @@ from app.models.task import Task
 from app.models.goal import Goal
 from flask import abort, make_response,request
 
+
 def validate_task(id):
     try:
         id = int(id)
@@ -43,3 +44,5 @@ def goal_validate_client_requests(request_body):
         abort(make_response({"details": "Invalid data"},400))
     
     return new_goal
+
+
