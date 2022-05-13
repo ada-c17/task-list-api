@@ -2,8 +2,6 @@ from flask import Blueprint, jsonify, make_response, abort, request
 from app.models.goal import Goal
 from app.models.task import Task
 from app import db
-# helper function file import
-
 
 goal_bp = Blueprint("goal_bp", __name__, url_prefix="/goals")
 
@@ -135,12 +133,14 @@ def post_tasks_to_goal(goal_id):
     for id in request_body["task_ids"]:
         task = Task.query.get(id)
         task.goal = goal
+        goal.tasks.append(task)
 
     db.session.commit()
 
     goal_response_body = {
             "id": goal.goal_id,
             "task_ids": request_body["task_ids"]
+
     }
 
     return make_response(jsonify(goal_response_body), 200)
