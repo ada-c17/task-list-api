@@ -24,7 +24,7 @@ class Task(db.Model):
         return interpreted_time
 
     @classmethod
-    def new_task(cls, task_details):
+    def create(cls, task_details):
         # Validate and process input before creation
         if 'title' not in task_details or 'description' not in task_details:
             raise MissingValueError

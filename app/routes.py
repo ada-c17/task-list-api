@@ -22,7 +22,7 @@ def get_tasks():
 @task_bp.route('', methods = ['POST'])
 def create_task():
     try:
-        new_task = Task.new_task(request.get_json())
+        new_task = Task.create(request.get_json())
     except (MissingValueError, FormatError) as err:
         abort(make_error_response(err, Task))
     
@@ -102,11 +102,11 @@ def get_all_goals():
 
 @goal_bp.route('', methods = ['POST'])
 def create_goal():
-    if 'title' not in request.get_json():
-        abort(make_error_response(MissingValueError, Goal))
+    try:
+        new_goal = Goal.create(request.get_json())
+    except MissingValueError as err:
+        abort(make_error_response(err, Goal))
     
-    #TODO: refactor create new goal as class method
-    new_goal = Goal(title = request.get_json()['title'])
     db.session.add(new_goal)
     db.session.commit()
 
