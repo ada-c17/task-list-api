@@ -24,3 +24,21 @@ def get_all_goals():
     goals_response = [goal.to_dict() for goal in goals]
 
     return jsonify(goals_response)
+
+# get goal by id
+@goals_bp.route("/<goal_id>", methods=["GET"])
+def get_goal_by_id(goal_id):
+    pass
+
+def validate_goal(goal_id):
+    try:
+        goal_id = int(goal_id)
+    except:
+        abort(make_response({"details": f"Goal '{goal_id}' invalid"}))
+    
+    goal = Goal.query.get(goal_id)
+    
+    if not goal:
+        abort(make_response({"details": f"Goal '{goal_id}' not found"}))
+    
+    return goal
