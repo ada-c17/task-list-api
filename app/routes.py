@@ -206,7 +206,7 @@ def validate_goal(goal_id):
         rsp = {"msg" : f"Goal with id #{goal_id} is invalid."}
     goal = Goal.query.get(goal_id)
     if not goal:
-        rsp = {"msg" : f"Goal with id #{goal_id} is not found."}
+        rsp = {"msg" : f"Goal with id #{goal_id} is not found"}
         abort(make_response(rsp, 404))
     return goal
 
@@ -238,7 +238,7 @@ def delete_one_goal(goal_id):
     goal= validate_goal(goal_id)
     db.session.delete(goal)
     db.session.commit()
-    rsp = {"details" : f"Goal deleted"}
+    rsp = {"details" : f'Goal {goal_id} "{goal.title}" successfully deleted'}
     return jsonify(rsp), 200
 
 
