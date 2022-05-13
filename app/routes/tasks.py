@@ -1,5 +1,4 @@
 import requests
-#from requests_oauthlib import OAuth1
 import os
 from dotenv import load_dotenv
 from app import db

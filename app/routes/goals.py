@@ -1,5 +1,5 @@
 from app import db
-from flask import Blueprint, jsonify, make_response, request
+from flask import Blueprint, jsonify, make_response, request, abort
 from app.models.goal import Goal
 from app.models.task import Task
 from app.routes.request_helpers import handle_id_request, check_complete_request_body
@@ -58,15 +58,34 @@ def delete_goal_by_id(id):
 
 @goals_bp.route("/<id>/tasks", methods=["POST"])
 def add_list_of_tasks_to_goal(id):
-    task_ids = request.get_json()["task_ids"]
+    handle_id_request(id, Goal)
     id = int(id)
+
+    bad_request_msg = {"msg":"Invalid input. Use {\"task_ids\": [1, 2,...]}. IDs must be int."}
+    try:
+        task_ids = request.get_json()["task_ids"]
+    except KeyError:
+        abort(make_response(jsonify(bad_request_msg), 400))
+    if not type(task_ids) == list or not all(type(task_id) == int 
+                                            for task_id in task_ids):
+        abort(make_response(jsonify(bad_request_msg), 400))
+
+    response_ids = []
+    invalid_ids = []
     for task in task_ids:
         active_task = Task.query.get(task)
-        active_task.goal_id = id
+        #for out-of-range task ids, nothing happens
+        if active_task:
+            active_task.goal_id = id
+            response_ids.append(int(task))
+        else:
+            invalid_ids.append(int(task))
 
     db.session.commit()
 
-    confirmation_msg = {"id": id, "task_ids": task_ids}
+    confirmation_msg = {"id": id, "task_ids": response_ids}
+    if invalid_ids:
+        confirmation_msg["invalid_ids"] = invalid_ids
     return make_response(jsonify(confirmation_msg), 200)
 
 @goals_bp.route("/<id>/tasks", methods=["GET"])
