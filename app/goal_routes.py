@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, make_response, request
-# from app.models.task import Task
+from app.models.task import Task
 from app.models.goal import Goal
 from .routes_helper import validate_goal_id, create_message, validate_task_id
 from app import db
@@ -53,9 +53,12 @@ def read_all_goals():
 @bp.route("/<goal_id>/tasks", methods=("GET",))
 def read_specific_goal_tasks(goal_id):
     goal = validate_goal_id(goal_id)
-    task = validate_task_id
-    goal_tasks = [task for task in goal.tasks]
-    pass
+    
+    goal_tasks = [Task.to_dict(task) for task in goal.tasks]
+
+    return make_response(jsonify({"id": goal.goal_id, 
+        "title": goal.title, "tasks": goal_tasks}))
+    
 
 
 @bp.route("/<goal_id>", methods=("PUT",))

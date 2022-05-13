@@ -12,12 +12,21 @@ class Task(db.Model):
 
 
     def to_dict(self):
-        return dict(
-            id=self.task_id,
-            title=self.title,
-            description=self.description,
-            is_complete=self.completed_at is not None
-        )
+        if self.goal_id is None:
+            return dict(
+                id=self.task_id,
+                title=self.title,
+                description=self.description,
+                is_complete=self.completed_at is not None
+            )
+        else:
+            return dict(
+                id=self.task_id,
+                title=self.title,
+                description=self.description,
+                goal_id=self.goal_id,
+                is_complete=self.completed_at is not None
+            )
 
 
     @classmethod

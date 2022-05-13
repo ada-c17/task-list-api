@@ -55,10 +55,11 @@ def test_get_tasks_for_specific_goal_no_goal(client):
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
+    assert len(response_body) == 1
     assert response_body == {"details": "Goal not found"}
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_for_specific_goal_no_tasks(client, one_goal):
     # Act
     response = client.get("/goals/1/tasks")
@@ -75,7 +76,7 @@ def test_get_tasks_for_specific_goal_no_tasks(client, one_goal):
     }
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_for_specific_goal(client, one_task_belongs_to_one_goal):
     # Act
     response = client.get("/goals/1/tasks")
@@ -100,7 +101,7 @@ def test_get_tasks_for_specific_goal(client, one_task_belongs_to_one_goal):
     }
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_task_includes_goal_id(client, one_task_belongs_to_one_goal):
     response = client.get("/tasks/1")
     response_body = response.get_json()
