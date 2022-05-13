@@ -6,8 +6,6 @@ class Goal(db.Model):
     title = db.Column(db.String)
     tasks = db.relationship("Task", back_populates="goal")
 
-
-def to_json(self):
-    return {
-        "id": self.id,
-        "title": self.title}
+    def to_json(self):
+        return {"id": self.id,
+                "title": self.title}

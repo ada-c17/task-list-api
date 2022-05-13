@@ -35,18 +35,14 @@ def get_goals():
     print(goals)
     goal_response = []
     for goal in goals:
-        goal_response.append({
-            "id": goal.id,
-            "title": goal.title})
+        goal_response.append(goal.to_json())
     return jsonify(goal_response)
 
 
 @goals_bp.route("/<id>", methods=["GET"])
 def get_single_goal(id):
     goal = validate_goal_id(id)
-    return{"goal": {
-        "id": goal.id,
-        "title": goal.title}}
+    return{"goal": goal.to_json()}
 
 
 @goals_bp.route("", methods=["POST"])
@@ -60,9 +56,7 @@ def create_goal():
     db.session.add(new_goal)
     db.session.commit()
 
-    return make_response(jsonify({"goal": {
-        "id": new_goal.id,
-        "title": new_goal.title}}), 201)
+    return (jsonify({"goal": new_goal.to_json()}), 201)
 
 
 @goals_bp.route("/<id>", methods=["PUT"])
