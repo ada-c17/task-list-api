@@ -35,7 +35,22 @@ def get_all_tasks():
     #to_dict will restrict to first input ({"sort":"asc"})
     #in this case, if subsequent inputs are invalid, no warning will be sent
     #with response
-    if "sort" in query_params:
+    if "title" in query_params:
+        #title search is case-insensitive and inclusive
+        #i.e. if title=task is passed in, tasks with "task", "TASK", "Task" etc
+        # in the title will be returned
+        titles = query_params["title"]
+        inclusive_title = f"%{titles[0]}%"
+        task_list = Task.query.filter(Task.title.ilike(inclusive_title))
+        if len(titles) > 1:
+            for title in titles[1:]:
+                inclusive_title = f"%{title}%"
+                task_list = task_list.query.filter(Task.title.ilike(inclusive_title))
+        query_params.pop("title")
+
+    #currently must choose one; sort for title-based search unimplemented
+    #and title search preferred over sorting
+    elif "sort" in query_params:
         #to limit time here, could put restriction on length of sorts
         sorts = query_params["sort"]
         #in the case of conflicting inputs (e.g. sort=asc&sort=desc)
@@ -147,7 +162,6 @@ def mark_task_complete(id):
 
     slack_complete(task)
     #slack_response = slack_complete(task)
-
     #confirmation_msg["slack-response"] = slack_response.json()
     #for troubleshooting response from Slack API through postman
     return make_response(jsonify(confirmation_msg), 200)
