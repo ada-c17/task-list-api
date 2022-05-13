@@ -7,6 +7,7 @@ from app.commons import (validate_and_get_by_id, get_filtered_and_sorted,
                         notify, make_slackbot_response)
 from app.error_responses import (MissingValueError, FormatError, DBLookupError,
                                 IDTypeError, make_error_response)
+import re
 
 ###############
 # Task routes #
@@ -185,8 +186,6 @@ def get_all_tasks_of_goal(goal_id):
 ##################
 # Slackbot route #
 ##################
-
-import re
 
 slackbot_bp = Blueprint('slackbot', __name__, url_prefix = '/slackbot')
 
