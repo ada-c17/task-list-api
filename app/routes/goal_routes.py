@@ -118,8 +118,7 @@ def tasks_of_one_goal(goal_id):
     tasks = []
     try:
         tasks = [task.make_json() for task in goal.tasks]
-        # for task in goal.tasks:
-        #     tasks.append(task.make_json())
+
     except:
         abort(make_response(jsonify(f"goal not found"), 404))
     
