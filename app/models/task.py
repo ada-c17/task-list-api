@@ -10,14 +10,14 @@ class Task(db.Model):
     goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'), nullable=True)
     goal = db.relationship("Goal", back_populates="tasks")
 
-    def to_json(self, goal_id = False):
+    def to_json(self):
 
         if not self.completed_at:
             completed_at = False
         else:
             completed_at = True
 
-        if goal_id:
+        if self.goal_id:
             return {
                 "id": self.task_id,
                 "goal_id": self.goal_id,

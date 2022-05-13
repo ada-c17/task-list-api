@@ -32,9 +32,7 @@ def fetch_all_tasks():
     else:
         tasks = Task.query.all()
 
-    task_response = []
-    for task in tasks:
-        task_response.append(task.to_json())
+    task_response = [task.to_json() for task in tasks]
     return make_response(jsonify(task_response),200)
 
 @task_bp.route("/<task_id>", methods=["GET"])
@@ -71,8 +69,7 @@ def update_task_complete(task_id, status):
 
     if status == "complete":
         task.completed_at = date.today()
-        # slack_post(task.title)
-        
+
 
     elif status == "incomplete":
         task.completed_at = None
@@ -80,5 +77,4 @@ def update_task_complete(task_id, status):
         abort(make_response(jsonify({"details":f"Invalid endpoint"}), 400))
 
     db.session.commit()
-    # return test
     return make_response(jsonify({"task": task.to_json()}),200)
