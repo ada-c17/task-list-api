@@ -24,15 +24,6 @@ def create_one_task():
     db.session.add(new_task)
     db.session.commit()
 
-    # response = {
-    #     "task":{
-    #     "id":new_task.task_id,
-    #     "title":new_task.title,
-    #     "description": new_task.description,
-    #     "is_complete": bool(new_task.completed_at) }
-    # }
-    # return jsonify(response), 201
-
     return jsonify(new_task.to_dict()), 201
 
 @tasks_bp.route('', methods=['GET'])
@@ -78,17 +69,6 @@ def get_one_task(task_id):
     chosen_task = get_task_or_abort(task_id)
 
     request_body = request.get_json()
-    # rsp = {
-    #     "task":{
-    #     'id':chosen_task.task_id,
-    #     'title':chosen_task.title,
-    #     'description':chosen_task.description,
-    #     'is_complete':bool(chosen_task.completed_at)}
-    # }
-    # if chosen_task.goal_id:
-    #     rsp["task"]["goal_id"] = chosen_task.goal_id  
-
-    # return jsonify(rsp), 200
     return jsonify(chosen_task.to_dict()), 200
 
 
@@ -109,16 +89,6 @@ def update_one_task(task_id):
         },404
 
     db.session.commit()
-
-    # rsp = {
-    #     "task":{
-    #     'id':chosen_task.task_id,
-    #     'title':chosen_task.title,
-    #     'description':chosen_task.description,
-    #     'is_complete':bool(chosen_task.completed_at)}
-    # }
-
-    # return jsonify(rsp), 200
     return jsonify(chosen_task.to_dict()), 200
 
 
@@ -136,6 +106,7 @@ def delete_one_task(task_id):
     }
 
     return jsonify(response_body), 200
+
 
 # update chosen task is completed
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
@@ -157,18 +128,8 @@ def update_task_is_complete(task_id):
     }
 
     requests.post(path, params=data, headers=headers )
-
-
-    # rsp = {
-    #     "task":{
-    #     'id':chosen_task.task_id,
-    #     'title':chosen_task.title,
-    #     'description':chosen_task.description,
-    #     'is_complete':bool(chosen_task.completed_at)}
-    # }
-
-    # return jsonify(rsp), 200
     return jsonify(chosen_task.to_dict()), 200
+
 
 # update chosen task is Incompleted
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
@@ -178,16 +139,6 @@ def update_task_is_incomplete(task_id):
     chosen_task.completed_at = None
 
     db.session.commit()
-
-    # rsp = {
-    #     "task":{
-    #     'id':chosen_task.task_id,
-    #     'title':chosen_task.title,
-    #     'description':chosen_task.description,
-    #     'is_complete':bool(chosen_task.completed_at)}
-    # }
-
-    # return jsonify(rsp), 200
     return jsonify(chosen_task.to_dict()), 200
 
 
