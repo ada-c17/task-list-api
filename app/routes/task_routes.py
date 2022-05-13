@@ -45,13 +45,11 @@ def get_all_tasks():
     elif task_query and task_query["sort"] == "desc":
         tasks = Task.query.order_by(Task.title.desc())
     else:
-        tasks = Task.query.all()
+        tasks = Task.query.order_by(Task.task_id.asc())
 
     tasks_response = []
     for task in tasks:
         tasks_response.append(Task.task_response(task))
-        if task.goal_id:
-            tasks_response.append({"goal_id": task.goal_id})
 
     return jsonify(tasks_response)
 
