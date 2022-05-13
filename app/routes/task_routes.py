@@ -16,7 +16,7 @@ def get_all_tasks():
 	# figure out getattr()
 
 	if title_query:
-		tasks = Task.query.filter_by(length_of_year=title_query)
+		tasks = Task.query.filter_by(title=title_query)
 	elif description_query:
 		tasks = Task.query.filter_by(description=description_query)
 	elif is_complete_query:
