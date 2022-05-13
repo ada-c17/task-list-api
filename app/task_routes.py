@@ -3,6 +3,7 @@ from sqlalchemy import desc
 from app import db
 from app.models.task import Task
 from datetime import date
+from app.route_helpers import error_message
 
 # imports for slackbot
 import os
@@ -23,7 +24,7 @@ def create_task():
             description=request_body["description"]
         )
     except:
-        abort(make_response({"details": "Invalid data"}, 400))
+        error_message("Invalid data", 400)
     
     if request_body.get("completed_at"):
         new_task.completed_at = request_body.get("completed_at")
@@ -110,12 +111,12 @@ def validate_task(task_id):
     try:
         task_id = int(task_id)
     except:
-        abort(make_response({"details": f"Task #{task_id} invalid"}, 400))
+        error_message(f"Task #{task_id} invalid", 400)
     
     task = Task.query.get(task_id)
 
     if not task:
-        abort(make_response({"details": f"Task #{task_id} not found"}, 404))
+        error_message(f"Task #{task_id} not found", 404)
     
     return task
 

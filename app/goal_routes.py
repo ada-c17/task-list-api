@@ -9,12 +9,13 @@ goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 # create a new goal
 @goals_bp.route("", methods=["POST"])
 def create_goal():
-    # check for request body
-    if not request.get_json():
-        abort(make_response({"details": "Invalid data"}, 400))
-    
     request_body = request.get_json()
-    new_goal = Goal(title=request_body["title"])
+
+    # check for request body
+    try:
+        new_goal = Goal(title=request_body["title"])
+    except:
+        error_message("Invalid data", 400)
 
     # update database
     db.session.add(new_goal)
