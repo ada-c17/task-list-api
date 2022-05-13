@@ -9,10 +9,9 @@ class Goal(db.Model):
     def to_dict(self):
         tasks_list = []
         for task in self.tasks:
-            tasks_list.append(task.to_dict_basic())
+            tasks_list.append(task.to_dict())
         
         if tasks_list:
-
             return {
                 "id": self.id,
                 "title": self.title,

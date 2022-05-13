@@ -29,11 +29,12 @@ def get_all_tasks():
     for task in tasks:
         tasks_response.append(task.to_dict())
 
-    # there probably is way to query by sorted
     if "sort" in params:
         if params["sort"] == "asc":
+            # Alternate method: Task.query.order_by(Task.title.asc())
             tasks_response = sorted(tasks_response, key = lambda d: d["title"])
         elif params["sort"] == "desc":
+            # Alternate method: Task.query.order_by(Task.title.desc())
             tasks_response = sorted(tasks_response, key = lambda d: d["title"], reverse=True)
     
     return jsonify(tasks_response)
@@ -51,29 +52,13 @@ def handle_tasks():
         new_task = Task(title=request_body["title"], description=request_body["description"], completed_at=datetime.utcnow())
     else:
         new_task = Task(title=request_body["title"], description=request_body["description"])
-
     
     db.session.add(new_task)
     db.session.commit()
 
-    if new_task.completed_at:
-        return jsonify({
-        "task": {
-            "id": new_task.id,
-            "title": new_task.title,
-            "description": new_task.description,
-            "is_complete": True
-        }
-    }), 201
-
     return jsonify({
-        "task": {
-            "id": new_task.id,
-            "title": new_task.title,
-            "description": new_task.description,
-            "is_complete": False
-        }
-    }), 201
+        "task":new_task.to_dict()
+        }), 201
 
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
@@ -97,28 +82,10 @@ def update_one_task(task_id):
     chosen_task.title = request_body["title"]
     chosen_task.description = request_body["description"]
 
-    if "completed_at" in request_body:
-        chosen_task.completed_at = datetime.utcnow()
-        db.session.commit()
-
-        return jsonify({
-            "task": {
-                "id": chosen_task.id,
-                "title": chosen_task.title,
-                "description": chosen_task.description,
-                "is_complete": True
-            }
-        })
-
     db.session.commit()
 
     return jsonify({
-        "task": {
-            "id": chosen_task.id,
-            "title": chosen_task.title,
-            "description": chosen_task.description,
-            "is_complete": False
-        }
+        "task": chosen_task.to_dict()
     })
 
 @tasks_bp.route("<task_id>", methods=["DELETE"])
@@ -143,12 +110,7 @@ def mark_task_complete(task_id):
     db.session.commit()
 
     return jsonify({
-        "task": {
-            "id": chosen_task.id,
-            "title": chosen_task.title,
-            "description": chosen_task.description,
-            "is_complete": True
-        }
+        "task": chosen_task.to_dict()
     })
 
 @tasks_bp.route("<task_id>/mark_incomplete", methods=["PATCH"])
@@ -159,10 +121,5 @@ def mark_task_incomplete(task_id):
     db.session.commit()
 
     return jsonify({
-        "task": {
-            "id": chosen_task.id,
-            "title": chosen_task.title,
-            "description": chosen_task.description,
-            "is_complete": False
-        }
+        "task": chosen_task.to_dict()
     })
