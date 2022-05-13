@@ -2,14 +2,14 @@ from flask import Blueprint, jsonify, request, make_response, abort
 from app.models.goal import Goal
 from app.models.task import Task
 from app import db
-from app.helper import validate_id
+from app.helper import validate_id, error_message
 
 goal_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
 @goal_bp.route("", strict_slashes=False, methods=["GET"])
 def get_goals():
     goals = Goal.query.all()
-    response = [goal.todict() for goal in goals]
+    response = [goal.to_json() for goal in goals]
     return jsonify(response), 200
 
 
@@ -20,19 +20,19 @@ def create_goal():
     try:
         new_goal = Goal(title=request_body["title"])
     except KeyError:
-        abort(make_response({"details": f"Invalid data"}, 400))
-    
+        error_message("Invalid data", 400)
+
     db.session.add(new_goal)
     db.session.commit()
 
-    response = {"goal":new_goal.todict()}
+    response = {"goal":new_goal.to_json()}
     return jsonify(response), 201
 
 
 @goal_bp.route("/<goal_id>", strict_slashes=False, methods=["GET"])
 def get_goal(goal_id):
     goal = validate_id(Goal,goal_id)
-    response = {"goal": goal.todict()}
+    response = {"goal": goal.to_json()}
     return jsonify(response), 200
 
 
@@ -41,7 +41,7 @@ def update_goal(goal_id):
     request_body = request.get_json()
     goal = validate_id(Goal,goal_id)
     goal.title = request_body["title"]
-    response = {"goal":goal.todict()}
+    response = {"goal":goal.to_json()}
     return jsonify(response), 200
 
 
@@ -71,7 +71,7 @@ def add_task_list(goal_id):
 @goal_bp.route("/<goal_id>/tasks", strict_slashes=False,methods=["GET"])
 def get_goal_tasks(goal_id):
     goal = validate_id(Goal, goal_id)
-    response = goal.todict()
-    response["tasks"] = [task.todict() for task in goal.tasks]
+    response = goal.to_json()
+    response["tasks"] = [task.to_json() for task in goal.tasks]
     return jsonify(response), 200
 

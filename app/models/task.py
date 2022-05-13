@@ -9,7 +9,7 @@ class Task(db.Model):
     goal_id = db.Column(db.Integer, ForeignKey('goal.goal_id'), nullable=True)
     goal = db.relationship("Goal", back_populates="tasks")
 
-    def todict(self):
+    def to_json(self):
         task_dict = {"id": self.task_id,
                     "title": self.title,
                     "description": self.description,
@@ -19,9 +19,9 @@ class Task(db.Model):
         return task_dict
 
     @classmethod
-    def fromdict(cls, data_dict):
-        task = Task(title = data_dict["title"],
-                    description = data_dict["description"],
-                    completed_at = data_dict.get("completed_at"),
-                    goal_id = data_dict.get("goal_id"))
+    def from_json(cls, json):
+        task = Task(title = json["title"],
+                    description = json["description"],
+                    completed_at = json.get("completed_at"),
+                    goal_id = json.get("goal_id"))
         return task

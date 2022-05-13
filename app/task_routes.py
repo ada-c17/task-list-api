@@ -19,7 +19,7 @@ def get_tasks():
     else:
         tasks = Task.query.all()
 
-    response = [task.todict() for task in tasks]
+    response = [task.to_json() for task in tasks]
     return jsonify(response), 200
 
 
@@ -28,21 +28,21 @@ def create_task():
     request_body = request.get_json()
 
     try: 
-        new_task = Task.fromdict(request_body)
+        new_task = Task.from_json(request_body)
     except KeyError:
         error_message("Invalid data", 400)
 
     db.session.add(new_task)
     db.session.commit()
 
-    response = {"task": new_task.todict()}
+    response = {"task": new_task.to_json()}
     return jsonify(response), 201
 
 
 @task_bp.route("/<task_id>", strict_slashes=False, methods=["GET"])
 def get_task(task_id):
     task = validate_id(Task, task_id)
-    response = {"task": task.todict()}
+    response = {"task": task.to_json()}
     return jsonify(response), 200
 
 
@@ -56,7 +56,7 @@ def update_task(task_id):
 
     db.session.commit()
 
-    response = response = {"task": task.todict()}
+    response = response = {"task": task.to_json()}
     return jsonify(response), 200
 
 
@@ -76,7 +76,7 @@ def mark_complete(task_id):
     db.session.commit()
 
     post_to_slack(task)
-    response = {"task": task.todict()}
+    response = {"task": task.to_json()}
     return jsonify(response), 200
 
 
@@ -86,7 +86,7 @@ def mark_incomplete(task_id):
     task.completed_at = None
     db.session.commit()
 
-    response = {"task": task.todict()}
+    response = {"task": task.to_json()}
     return jsonify(response), 200
 
 def post_to_slack(task):
