@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, make_response, request
-from app.models.task import Task
+# from app.models.task import Task
 from app.models.goal import Goal
 from .routes_helper import validate_goal_id, create_message
 from app import db

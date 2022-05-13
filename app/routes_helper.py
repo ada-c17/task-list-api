@@ -1,8 +1,8 @@
-from flask import jsonify, make_response, abort
+from flask import make_response, abort
 from app.models.task import Task
 from app.models.goal import Goal
 
-
+# maybe the ids can reactored into 1 function?
 def validate_task_id(task_id):
     try:
         task_id = int(task_id)
