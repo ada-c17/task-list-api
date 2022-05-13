@@ -1,4 +1,4 @@
-from flask import jsonify, abort, make_response
+from flask import jsonify, abort, make_response, request
 from app.models.goal import Goal
 from app.models.task import Task
 
@@ -30,3 +30,5 @@ def validate_goal(goal_id):
         abort( make_response({"massage": f" Goal {goal_id} not found"}, 404))
     
     return chosen_goal
+
+
