@@ -5,7 +5,7 @@ from sqlalchemy import desc, asc
 from datetime import date, datetime
 import os
 import requests
-from app.routes.helper_function import get_task_or_abort, validate_input_key_for_post_or_update
+from app.routes.helper_function import get_task_or_abort, validate_input_key_for_post_or_update, get_goal_or_abort
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -17,8 +17,15 @@ def read_all_tasts():
         - Returning empty list if no task in database
     """
     params = request.args
+    # sort tasks by id for specific goal id
+    if "goal_id" in params and "sort" in params:
+        chosen_goal = get_goal_or_abort(params["goal_id"])
+        if params["sort"].lower() == "desc" or params["sort"].lower() == "descending":
+            chosen_task = Task.query.filter_by(goal_id=chosen_goal.id).order_by(desc(Task.id)).all()
+        else:
+            chosen_task = Task.query.filter_by(goal_id=chosen_goal.id).order_by(asc(Task.id)).all()
     # sort tasks by title
-    if "sort" in params:
+    elif "sort" in params:
         if params["sort"].lower() == "desc" or params["sort"].lower() == "descending":
                 chosen_task = Task.query.order_by( desc(Task.title) ).all()
         else:
