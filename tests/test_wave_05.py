@@ -56,7 +56,7 @@ def test_get_goal_not_found(client):
     # Assert
     assert response.status_code == 404
     assert response_body == {
-        "msg": "Could not find goal with id 1"
+        "msg": "Could not find id 1"
     }
 
 
@@ -110,7 +110,7 @@ def test_update_goal_not_found(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {"msg": f"Could not find goal with id 1"}
+    assert response_body == {"msg": f"Could not find id 1"}
 
 
 
@@ -141,7 +141,7 @@ def test_delete_goal_not_found(client):
     # Assert
     assert response.status_code == 404
     assert response_body == {
-        "msg": "Could not find goal with id 1"
+        "msg": "Could not find id 1"
     }
 
 

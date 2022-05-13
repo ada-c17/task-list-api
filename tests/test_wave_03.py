@@ -127,7 +127,7 @@ def test_mark_complete_missing_task(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {"msg": "Could not find task with id 1"}
+    assert response_body == {"msg": "Could not find id 1"}
 
 
 
@@ -138,7 +138,7 @@ def test_mark_incomplete_missing_task(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {"msg": "Could not find task with id 1"}
+    assert response_body == {"msg": "Could not find id 1"}
 
 
 # Let's add this test for creating tasks, now that
