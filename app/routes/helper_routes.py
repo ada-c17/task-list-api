@@ -40,9 +40,9 @@ def get_filtered_tasks(request):
         tasks = tasks.filter_by(completed_at=None)
     if sort_param:    
         if sort_param == "asc":
-            tasks = tasks.order_by(Task.task_id.asc())
+            tasks = tasks.order_by(Task.title.asc())
         elif sort_param == "desc":
-            tasks = tasks.order_by(Task.task_id.desc())
+            tasks = tasks.order_by(Task.title.desc())
 
     tasks = tasks.all()
     return tasks
