@@ -182,7 +182,7 @@ def completed_task(task_id):
     
     chosen_task.completed_at = datetime.datetime.utcnow()
 
-    db.session.add(chosen_task)
+    # db.session.add(chosen_task)
     db.session.commit()
 
     post_message = f"Someone just completed the task {chosen_task.title}"
@@ -192,9 +192,9 @@ def completed_task(task_id):
     data = {"channel": "task-notifications", "text": post_message}
     headers = {"Authorization": "Bearer " + key}
 
-    response = requests.post(path, params=data, headers=headers)
-    response_body = response.json()
-    print(response_body)
+    requests.post(path, params=data, headers=headers)
+    # response_body = response.json()
+    # print(response_body)
 
 
     return { "task": chosen_task.to_dict()}, 200
