@@ -40,15 +40,13 @@ def create_one_task():
     is_complete = complete_or_not(new_task) # use of helper function to obtain T/F
     db.session.add(new_task)
     db.session.commit()
-
     response =  {"task": new_task.to_dict() }
     return jsonify(response), 201
 
 
 # Read: GET
 # Endpoint with params: "/tasks?sort=asc" and "/tasks?sort=desc"
-#Params: key:sort with values: asc, desc
-
+#Params: key is sort; values: asc, desc
 @task_bp.route("", methods=["GET"])
 def get_all_tasks():
     tasks = Task.query.all()
@@ -86,10 +84,9 @@ def update_one_task(task_id):
     response = {"task": task.to_dict()}
     return jsonify(response), 200
 
+
 # request body will have { 'id': 1, 'is_complete' = false}
 # completed_at = db.Column(db.DateTime, default=None) 
-
-
 @task_bp.route("/<task_id>/mark_complete", methods=['PATCH'])
 def mark_task_completed(task_id):
     task = validate_task(task_id)
@@ -97,19 +94,15 @@ def mark_task_completed(task_id):
     task.completed_at = datetime.datetime.now()  
     response = {"task": task.to_dict()}
     db.session.commit()
-    bot_token = 'Bearer '+ os.environ.get('SLACK_BOT_TOKEN')
-    print(bot_token)
+    bot_token = f"Bearer {os.environ.get('SLACK_BOT_TOKEN')}"
+    # print(bot_token)
     slack = requests.post('https://slack.com/api/chat.postMessage', headers={'Authorization': bot_token}, params={'channel': 'task-notifications', 'text':f'Someone just completed the task {task.title}', 'format': 'json'})
-    print(slack)
-    print(slack.content)
-    print('*****')
+    # print(slack.content)    # useful to debug if needed
     return jsonify(response), 200
 
 
-    # requests.patch(url, data=None, **kwargs)[source]
-
-    # 'message': f"Someone just completed the task {task.title}"
-
+# requests.patch(url, data=None, **kwargs)[source]
+# 'message': f"Someone just completed the task {task.title}"
 @task_bp.route("/<task_id>/mark_incomplete", methods=['PATCH'])
 def mark_task_incomplete(task_id):
     task = validate_task(task_id)
@@ -123,10 +116,8 @@ def mark_task_incomplete(task_id):
 
 
 
-
 # request body:{ "title": "Updated Task Title","description": "Updated Test Description"}
 # response_body == {"task": {"id": 1,"title": "Updated Task Title","description": "Updated Test Description","is_complete": False} }, 200
-
 # Delete: DELETE
 @task_bp.route("/<task_id>", methods=["DELETE"])
 def delete_one_task(task_id):

@@ -17,7 +17,6 @@ def validate_goal(goal_id):
 # CREATE (CRUD)
 # POST request to /goals
 # request_body = {"title": "My New Goal"}
-
 @goal_bp.route("", methods=['POST'])
 def create_one_goal():
     request_body = request.get_json()
@@ -70,7 +69,6 @@ def delete_one_goal(goal_id):
 # adding tasks to a goal: CREATE (CRUD) aka POST
 # request body: {"task_ids": [1, 2, 3]}  These are the tasks to add to the goal_id
 # response expected: { "id": 1,"task_ids": [1, 2, 3]} where id is goal_id
-
 @goal_bp.route("/<goal_id>/tasks", methods = ["POST"])
 def add_task_to_goal(goal_id):
     goal = validate_goal(goal_id)
@@ -91,7 +89,6 @@ def add_task_to_goal(goal_id):
 # example response: {"id": 333,"title": "Build a habit of going outside daily",
 #   "tasks": [{"id": 999,"goal_id": 333,"title": "Go on my daily walk 🏞","description": "Notice something new every day",
 #   "is_complete": false }]}
-
 @goal_bp.route("/<goal_id>/tasks", methods = ['GET'])
 def get_tasks_of_goal(goal_id):
     goal = validate_goal(goal_id)
