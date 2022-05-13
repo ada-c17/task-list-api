@@ -9,7 +9,7 @@ from sqlalchemy import desc
 from app import db
 from app.models.goal import Goal
 from app.models.task import Task
-from app.routes import get_task_by_id, update_task_by_id
+from app.routes import get_task, get_task_by_id, update_task_by_id
 from .helper_routes import get_record_by_id
 
 
@@ -83,32 +83,50 @@ def delete_goal_by_id(id):
 @goals_bp.route("/<id>/tasks", methods=["POST"])
 def post_tasks_for_goal(id):
     goal = get_goal(id)
-
     request_body = request.get_json()
+
     # print("~~~RQ_BOD", request_body)
     task_ids = request_body["task_ids"]
-    
+    # print(task_ids)
+    # task_list = []
+
     for task_id in task_ids:
-        task = get_task_by_id(task_id)
+        task = get_task(task_id)
+        # task_list.append(task.id)
         task.goal = goal
+        # task.goal_id = goal.id
         update_task_by_id(task_id)
     
-    goal.tasks = request_body["task_ids"]
-
-    # print("req bod:", request_body)
-
-    # new_task = Task(
-    #     title=request_body["title"],
-    #     description=request_body["description"],
-    #     completed_at=request_body["completed_at"]
-    #     )
-    # new_task.goal = goal
-    # print("new_task:", new_task)
-
-    # db.session.add(new_task)
+    # {goal.tasks.append(task) for task in task_list if task not in goal.task}
+    # goal.tasks = request_body["tasks"]
     db.session.commit()
     
-    return jsonify(f"{goal.id}: {task_ids}"),201
+    return {"id": goal.id, "task_ids": task_ids}
+    # return jsonify(dict("id: {goal.id}: task_ids: {task_ids}")),200
+
+
+@goals_bp.route("/<id>/tasks", methods=["GET"])
+def get_tasks_for_goal(id):
+    goal = get_record_by_id(Goal, id)
+    tasks = Task.query.filter_by(id=goal.id)
+    print("*******TASKS******",tasks)
+    tasks_info = [task.to_dictionary() for task in tasks]
+    response_body = {
+        "id" : goal.id,
+        "title" : goal.title,
+        "tasks" : tasks_info
+    }
+
+    # for task_id in goal.tasks:
+    #     task = get_task(task_id)
+    #     # task_list.append(task.id)
+    #     task.goal = goal
+    #     # task.goal_id = goal.id
+
+    # response_body = dict()
+    # response_body["tasks"] = goal.to_dictionary()
+    # request_body = request.get_json()
+    return jsonify(response_body)
 
 ## no request body ?
 ## response body returns {goal{tasks}}

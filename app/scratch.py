@@ -85,5 +85,24 @@
 # patch -> sends to channel 'task-notifications'
 # {"type": "text",
 # "text": "Hello World!"}
+
+
+#####WAVE_6#########
+
+    # {goal.tasks.append(task) for task in task_list if task not in goal.task}
+    # goal.tasks = request_body["tasks"]
+
+    # print("req bod:", request_body)
+
+    # new_task = Task(
+    #     title=request_body["title"],
+    #     description=request_body["description"],
+    #     completed_at=request_body["completed_at"]
+    #     )
+    # new_task.goal = goal
+    # print("new_task:", new_task)
+
+    # db.session.add(new_task)
+####################
 ####################
 ########END#########
