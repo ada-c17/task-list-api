@@ -66,27 +66,14 @@ def update_goal(id):
     goal.update(request_body)
     db.session.commit()
 
-    return make_response(jsonify({"goal": goal.to_json()}), 200)
+    return make_response(jsonify({"goal": goal.to_json()})), 200
+
 
 # Delete goal
-
-
-@goal_bp.route("/<id>", methods=["PUT"])
-def update_task(id):
-    task = validate_task(id)
-    request_body = request.get_json()
-
-    task.update(request_body)
-    db.session.commit()
-
-    return make_response(jsonify({"task": task.to_json()}), 200)
-
-
-# Delete Task: Deleting a Task
 @goal_bp.route("/<id>", methods=["DELETE"])
 def delete_goal(id):
     goal = validate_goal(id)
     db.session.delete(goal)
     db.session.commit()
 
-    return make_response(jsonify({"details": f"Goal{id} \"{goal.title}\" successfully deleted"}), 200)
+    return make_response(jsonify({"details": f"Goal {id} \"{goal.title}\" successfully deleted"}), 200)

@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, abort, make_response, request
 from requests import session
 from .helpers import validate_task
 from app import db
-from models.task import Task
+from .models.task import Task
 from datetime import datetime
 import requests
 import os
