@@ -132,7 +132,7 @@ def test_mark_complete_missing_task(client):
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
-    assert response_body["error_message"] == "id 1 not found"
+    assert response_body["details"] == "id 1 not found"
 
 
 #@pytest.mark.skip(reason="No way to test this feature yet")
@@ -148,7 +148,7 @@ def test_mark_incomplete_missing_task(client):
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
-    assert response_body["error_message"] == "id 1 not found"
+    assert response_body["details"] == "id 1 not found"
 
 
 # Let's add this test for creating tasks, now that

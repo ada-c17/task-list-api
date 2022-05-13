@@ -58,7 +58,7 @@ def test_get_goal_not_found(client):
     # assertion 1 goes here
     assert response.status_code == 404
     # assertion 2 goes here
-    assert response_body["error_message"] == "id 1 not found"
+    assert response_body["details"] == "id 1 not found"
     # ---- Complete Test ----
 
 
@@ -114,7 +114,7 @@ def test_update_goal_not_found(client):
     # assertion 1 goes here
     assert response.status_code == 404
     # assertion 2 goes here
-    assert response_body["error_message"] == "id 1 not found"
+    assert response_body["details"] == "id 1 not found"
     # ---- Complete Assertions Here ----
 
 
@@ -140,7 +140,7 @@ def test_delete_goal(client, one_goal):
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
-    assert response_body["error_message"] == "id 1 not found"
+    assert response_body["details"] == "id 1 not found"
 
 
 #@pytest.mark.skip(reason="test to be completed by student")
@@ -156,7 +156,7 @@ def test_delete_goal_not_found(client):
     # assertion 1 goes here
     assert response.status_code == 404
     # assertion 2 goes here
-    assert response_body["error_message"] == "id 1 not found"
+    assert response_body["details"] == "id 1 not found"
     # ---- Complete Assertions Here ----
 
 

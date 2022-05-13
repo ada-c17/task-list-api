@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request, make_response, abort
 from app.models.task import Task
 from app import db
-from app.helper import validate_id
+from app.helper import validate_id, error_message
 import datetime
 import os
 import requests
@@ -30,7 +30,7 @@ def create_task():
     try: 
         new_task = Task.fromdict(request_body)
     except KeyError:
-        abort(make_response({"details": f"Invalid data"}, 400))
+        error_message("Invalid data", 400)
 
     db.session.add(new_task)
     db.session.commit()
