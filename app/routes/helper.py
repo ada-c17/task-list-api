@@ -1,5 +1,7 @@
 from flask import jsonify, abort, make_response, request
 from sqlalchemy import asc,desc
+from app.models.goal import Goal
+from app.models.task import Task
 
 def validate_task(cls,task_id):
     try:
@@ -9,7 +11,10 @@ def validate_task(cls,task_id):
     obj = cls.query.get(task_id)
 
     if not obj:
-        return abort(make_response({"message":f"task {task_id} not found"}, 404))
+        if cls.__name__ == "Goal":
+            return abort(make_response({"message":f"goal {task_id} not found"}, 404))
+        if cls.__name__ == "Task":
+            return abort(make_response({"message":f"task {task_id} not found"}, 404))
     return obj
 
 def sort_or_get(cls):

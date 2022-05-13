@@ -23,13 +23,10 @@ def create_tasks():
 @task_bp.route("", methods=["GET"])
 def read_all_tasks():
     tasks = sort_or_get(Task)
-    try:
-        tasks_response = [task.make_json() for task in tasks]        
-    except:
-        abort(make_response({"details":f"task not found"}, 404))
+
+    tasks_response = [task.make_json() for task in tasks]        
     
     return make_response(jsonify(tasks_response),200)
-
 
 
 

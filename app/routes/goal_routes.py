@@ -5,20 +5,21 @@ from app.models.goal import Goal
 from app.models.task import Task
 from flask import Blueprint, jsonify, abort, make_response, request
 import os
-# from .helper import validate_planet
+from .helper import validate_task, sort_or_get
+
 
 goal_bp = Blueprint("goal_bp", __name__, url_prefix="/goals")
 
-def validate_goal(goal_id):
-    try:
-        goal_id = int(goal_id)
-    except:
-        abort(make_response(jsonify(f"goal {goal_id} invalid"), 400))
-    goal = Goal.query.get(goal_id)
+# def validate_goal(goal_id):
+#     try:
+#         goal_id = int(goal_id)
+#     except:
+#         abort(make_response(jsonify(f"goal {goal_id} invalid"), 400))
+#     goal = Goal.query.get(goal_id)
 
-    if not goal:
-        abort(make_response(jsonify(f"goal {goal_id} not found"), 404))
-    return goal
+#     if not goal:
+#         abort(make_response(jsonify(f"goal {goal_id} not found"), 404))
+#     return goal
 
 @goal_bp.route("", methods=["POST"])
 def create_goals():
@@ -57,23 +58,23 @@ def read_all_goals():
 
 @goal_bp.route("/<goal_id>", methods=["GET"])
 def read_one_goal(goal_id):
-    goal = validate_goal(goal_id)
-    try:
-        return make_response({"goal" : goal.to_json()}, 200)
-    except:
-        abort(make_response({"details":f"goal {goal_id} not found"}, 404))
+    goal = validate_task(Goal,goal_id)
+   
+    return make_response({"goal" : goal.to_json()}, 200)
+    # except:
+    #     abort(make_response({"details":f"goal {goal_id} not found"}, 404))
 
 
 @goal_bp.route("/<goal_id>", methods=["PUT"])
 def update_goal(goal_id):
 
-    goal = validate_goal(goal_id)
+    goal = validate_task(Goal,goal_id)
     request_body = request.get_json()
-    try: 
-        goal.title = request_body["title"]
+    # try: 
+    goal.title = request_body["title"]
             
-    except:
-        abort(make_response(jsonify(f"goal {goal_id} not found"), 404))
+    # except:
+    #     abort(make_response(jsonify(f"goal {goal_id} not found"), 404))
     
     db.session.commit()
 
@@ -81,7 +82,7 @@ def update_goal(goal_id):
 
 @goal_bp.route("/<goal_id>", methods=["DELETE"])
 def delete_a_goal(goal_id):
-    goal = validate_goal(goal_id)
+    goal = validate_task(Goal,goal_id)
 
     db.session.delete(goal)
     db.session.commit()
