@@ -18,5 +18,8 @@ def make_error_response(err, target_cls, target_id=None, detail=''):
         return make_response(jsonify(f"Input value for attribute of "
                                 f"{target_cls.__name__.lower()} was "
                                 f"invalid:{detail}"), 400)
-    #TODO: Decide if a general error response is needed
+    # Currently this last return statement should never run, incl. for future
+    return make_response(jsonify(f"An unexpected error occurred. Error type: "
+                                f"{err}, Error context: {target_cls.__name__}."
+                                f"{detail}"), 500)
 
