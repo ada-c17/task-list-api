@@ -12,6 +12,7 @@ class Goal(db.Model):
             id = self.id,
             title = self.title
             )
+            
     def to_dict_with_tasks(self):
         tasks_info = [task.to_dict() for task in self.tasks]
         return dict(

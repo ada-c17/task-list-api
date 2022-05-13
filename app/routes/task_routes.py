@@ -1,15 +1,23 @@
 from datetime import datetime
-from flask import Blueprint, jsonify, abort, make_response, request
-from sqlalchemy import null, true
+from flask import Blueprint, jsonify, request
 from app.models.task import Task
 from app import db
-from .routes_helper import error_message, get_record_by_id, make_task_safely, replace_task_safely
+from .routes_helper import get_record_by_id, make_task_safely, replace_task_safely
 import os
 import requests
 from dotenv import load_dotenv
+
 load_dotenv()
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
+
+def post_completed_task_to_slack(task):
+    API_KEY = os.environ.get('SLACKBOT_API_KEY')
+    url = "https://slack.com/api/chat.postMessage"
+    data = {"channel": "task-notifications", "text": f"Someone just completed the task {task.title}"}
+    headers = {'Authorization' : f"Bearer {API_KEY}" }
+    
+    requests.post(url, data=data, headers=headers)
 
 # POST /tasks
 @tasks_bp.route("", methods = ["POST"])
@@ -89,12 +97,5 @@ def update_task_to_incomplete(id):
     db.session.commit()
 
     return jsonify({"task":task.to_dict()})
-
-def post_completed_task_to_slack(task):
-    API_KEY = os.environ.get('SLACKBOT_API_KEY')
-    url = "https://slack.com/api/chat.postMessage"
-    data = {"channel": "task-notifications", "text": f"Someone just completed the task {task.title}"}
-    headers = {'Authorization' : f"Bearer {API_KEY}" }
-    requests.post(url, data=data, headers=headers)
 
 

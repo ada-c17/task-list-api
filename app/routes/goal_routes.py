@@ -1,9 +1,8 @@
-
 from app.models.goal import Goal
 from app.models.task import Task
-from flask import Blueprint, jsonify, abort, make_response, request
+from flask import Blueprint, jsonify, request
 from app import db
-from .routes_helper import error_message, get_record_by_id, make_goal_safely, replace_goal_safely
+from .routes_helper import get_record_by_id, make_goal_safely, replace_goal_safely
 
 goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 
@@ -21,14 +20,7 @@ def create_goal():
 # GET /goals
 @goals_bp.route("", methods=["GET"])
 def read_all_goals():
-    sort_param = request.args.get("sort")
-
-    if sort_param == 'asc':
-        goals = Goal.query.order_by(Goal.title.asc())
-    elif sort_param == 'desc':
-        goals = Goal.query.order_by(Goal.title.desc())
-    else:
-        goals = Goal.query.all()
+    goals = Goal.query.all()
     
     result_list = [goal.to_dict() for goal in goals]
 
@@ -65,10 +57,9 @@ def delete_goal_by_id(id):
 
 # POST /goals/<id>/tasks
 @goals_bp.route("/<id>/tasks", methods=["POST"])
-def post_task_ids_to_goal(id):
-
-    goal = get_record_by_id(Goal, id)
+def post_tasks_to_goal(id):
     request_body = request.get_json()
+    goal = get_record_by_id(Goal, id)
 
     task_ids = request_body["task_ids"]
 
