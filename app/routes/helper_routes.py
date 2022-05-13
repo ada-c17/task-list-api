@@ -13,7 +13,6 @@ def validate_id(cls, id):
             abort(make_response(jsonify(f"{cls.__name__} {id} not found"), 404))
         return instance
 
-
 def validate_request(request, *attributes):
     request_body = request.get_json()
     for attribute in attributes:
@@ -41,9 +40,9 @@ def get_filtered_tasks(request):
         tasks = tasks.filter_by(completed_at=None)
     if sort_param:    
         if sort_param == "asc":
-            tasks = tasks.order_by(Task.title.asc())
+            tasks = tasks.order_by(Task.task_id.asc())
         elif sort_param == "desc":
-            tasks = tasks.order_by(Task.title.desc())
+            tasks = tasks.order_by(Task.task_id.desc())
 
     tasks = tasks.all()
     return tasks
