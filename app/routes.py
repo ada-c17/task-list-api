@@ -71,7 +71,7 @@ def manage_get_tasks():
 def get_task_by_id(id):
     task = get_task(id)
     response_body = dict()
-    response_body["task"] = task.to_dictionary()
+    response_body["task"] = task.to_dictionary_with_goal()
 
     return jsonify(response_body)
 

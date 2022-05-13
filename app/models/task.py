@@ -24,7 +24,24 @@ class Task(db.Model):
             "is_complete" : True if self.completed_at else False
         }
         return response
-
+    
+    def to_dictionary_with_goal(self):
+        if self.goal_id is None:
+            response = {
+                "id" : self.id,
+                "title" : self.title,
+                "description" : self.description,
+                "is_complete" : True if self.completed_at else False
+            }
+        else:
+            response = {
+            "id" : self.id,
+            "title" : self.title,
+            "goal_id" : self.goal_id,
+            "description" : self.description,
+            "is_complete" : True if self.completed_at else False
+        }
+        return response
     # @classmethod
     # def from_dict(cls, data_dict):
     #     return cls(
