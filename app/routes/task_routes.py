@@ -1,29 +1,13 @@
 import requests
 import os
-from flask import Blueprint, jsonify, abort, make_response, request
+from flask import Blueprint, jsonify, request
 from app.models.task import Task
 from app import db
+from app.routes.helper_functions import get_record_by_id, error_message
 
 # Routes for Task
 
 bp = Blueprint("tasks_bp",__name__, url_prefix="/tasks")
-
-# helper functions
-def error_message(message, status_code):
-    abort(make_response(jsonify(dict(details=message)), status_code))
-
-def get_task_record_by_id(id):
-    try: 
-        id = int(id)
-    except ValueError:
-        error_message(f"Invalid task id {id}", 400)
-    
-    task = Task.query.get(id)
-
-    if task:
-        return task
-    
-    error_message(f"No task with id {id} found", 404)
 
 # POST /tasks
 @bp.route("", methods=["POST"])
@@ -58,7 +42,7 @@ def list_tasks():
 # GET /tasks/<task_id>
 @bp.route("/<task_id>", methods=["GET"])
 def get_task_by_id(task_id):
-    task = get_task_record_by_id(task_id)
+    task = get_record_by_id(task_id, Task)
 
     return jsonify({"task": task.make_dict()})
 
@@ -66,7 +50,7 @@ def get_task_by_id(task_id):
 @bp.route("/<task_id>", methods=["PUT"])
 def replace_task_by_id(task_id):
     request_body = request.get_json()
-    task = get_task_record_by_id(task_id)
+    task = get_record_by_id(task_id, Task)
 
     try: 
         task.replace_all_details(request_body)
@@ -80,7 +64,10 @@ def replace_task_by_id(task_id):
 # PATCH  /tasks/<task_id>/mark_complete
 @bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_complete_task_by_id(task_id):
-    task = get_task_record_by_id(task_id)
+    task = get_record_by_id(task_id, Task)
+
+    if task.is_complete:
+        error_message("Task already completed", 418)
 
     task.mark_complete()
 
@@ -89,14 +76,15 @@ def mark_complete_task_by_id(task_id):
     token = os.environ.get("SLACK_TOKEN")
     payload = {"channel":"task-notifications", "text":f"Someone just completed the task {task.title}"}
     header = {"Authorization":f"Bearer {token}"}
-    r = requests.post("https://slack.com/api/chat.postMessage", params=payload, headers=header)
+    
+    requests.post("https://slack.com/api/chat.postMessage", params=payload, headers=header)
 
     return jsonify({"task": task.make_dict()})
 
 # PATCH  /tasks/<task_id>/mark_incomplete
 @bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_incomplete_task_by_id(task_id):
-    task = get_task_record_by_id(task_id)
+    task = get_record_by_id(task_id, Task)
 
     task.mark_incomplete()
 
@@ -107,10 +95,10 @@ def mark_incomplete_task_by_id(task_id):
 # DELETE /tasks/<task_id>
 @bp.route("/<task_id>", methods=["DELETE"])
 def delete_task_by_id(task_id):
-    task = get_task_record_by_id(task_id)
+    task = get_record_by_id(task_id, Task)
 
     db.session.delete(task)
     db.session.commit()
 
-    task = task.make_dict()
-    return jsonify({'details': f'Task {task_id} "{task["title"]}" successfully deleted'})
+    task_dict = task.make_dict()
+    return jsonify({'details': f'Task {task_id} "{task_dict["title"]}" successfully deleted'})

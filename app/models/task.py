@@ -23,13 +23,6 @@ class Task(db.Model):
 
         return data_dict
 
-    # def make_extended_dict(self):
-    #     data_dict = self.make_dict()
-    #     data_dict["goal_id"] = self.goal_id
-
-    #     return data_dict
-
-    
     def replace_all_details(self, data_dict):
         self.title = data_dict["title"]
         self.description = data_dict["description"]

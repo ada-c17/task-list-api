@@ -1,30 +1,14 @@
 import requests
 import os
-from flask import Blueprint, jsonify, abort, make_response, request
+from flask import Blueprint, jsonify, request
 from app.models.goal import Goal
+from app.models.task import Task
 from app import db
-from app.routes.task_routes import get_task_record_by_id
+from app.routes.helper_functions import get_record_by_id, error_message
 
 # Routes for Goal
 
 bp = Blueprint("goals_bp",__name__, url_prefix="/goals")
-
-# helper functions
-def error_message(message, status_code):
-    abort(make_response(jsonify(dict(details=message)), status_code))
-
-def get_goal_record_by_id(id):
-    try: 
-        id = int(id)
-    except ValueError:
-        error_message(f"Invalid goal id {id}", 400)
-    
-    goal = Goal.query.get(id)
-
-    if goal:
-        return goal
-    
-    error_message(f"No goal with id {id} found", 404)
 
 # POST /goals
 @bp.route("", methods=["POST"])
@@ -44,14 +28,18 @@ def create_goal():
 # POST /goals/<goal_id>/tasks
 @bp.route("/<goal_id>/tasks", methods=["POST"])
 def assign_tasks_to_goal(goal_id):
-    goal = get_goal_record_by_id(goal_id)
+    goal = get_record_by_id(goal_id, Goal)
     goal_dict = goal.make_dict()
 
     request_body = request.get_json()
 
-    for task_id in request_body["task_ids"]:
-        task = get_task_record_by_id(task_id)
-        task.goal_id = goal_id
+    tasks = [get_record_by_id(task_id, Task) for task_id in request_body["task_ids"]]
+
+    goal.tasks = tasks
+
+    # for task_id in request_body["task_ids"]:
+    #     task = get_record_by_id(task_id, Task)
+    #     task.goal_id = goal_id
 
     db.session.commit()
 
@@ -62,26 +50,24 @@ def assign_tasks_to_goal(goal_id):
 def list_goals():
 
     goals = Goal.query.all()
-    list_of_goals = [goal.make_dict() for goal in goals]
+    goal_list = [goal.make_dict() for goal in goals]
 
-    return jsonify(list_of_goals)
+    return jsonify(goal_list)
 
 # GET /goals/<goal_id>
 @bp.route("/<goal_id>", methods=["GET"])
 def get_goal_by_id(goal_id):
-    goal = get_goal_record_by_id(goal_id)
+    goal = get_record_by_id(goal_id, Goal)
 
     return jsonify({"goal": goal.make_dict()})
 
 # GET /goals/<goal_id>/tasks
 @bp.route("/<goal_id>/tasks", methods=["GET"]) 
 def get_tasks_of_one_goal(goal_id):
-    goal = get_goal_record_by_id(goal_id)
+    goal = get_record_by_id(goal_id, Goal)
     goal_dict = goal.make_dict()
 
-    task_list = []
-    for task in goal.tasks:
-        task_list.append(task.make_dict())
+    task_list = [task.make_dict() for task in goal.tasks]
 
     return jsonify({"id": goal_dict["id"], "title": goal_dict["title"], "tasks": task_list})
 
@@ -89,7 +75,7 @@ def get_tasks_of_one_goal(goal_id):
 @bp.route("/<goal_id>", methods=["PUT"])
 def replace_task_by_id(goal_id):
     request_body = request.get_json()
-    goal = get_goal_record_by_id(goal_id)
+    goal = get_record_by_id(goal_id, Goal)
 
     try: 
         goal.replace_title(request_body)
@@ -103,10 +89,10 @@ def replace_task_by_id(goal_id):
 # DELETE /goals/<goal_id>
 @bp.route("/<goal_id>", methods=["DELETE"])
 def delete_goal_by_id(goal_id):
-    goal = get_goal_record_by_id(goal_id)
+    goal = get_record_by_id(goal_id, Goal)
 
     db.session.delete(goal)
     db.session.commit()
 
-    goal = goal.make_dict()
-    return jsonify({'details': f'Goal {goal_id} "{goal["title"]}" successfully deleted'})
+    goal_dict = goal.make_dict()
+    return jsonify({'details': f'Goal {goal_id} "{goal_dict["title"]}" successfully deleted'})
