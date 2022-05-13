@@ -98,9 +98,13 @@ Visit https://api.slack.com/methods/chat.postMessage to read about the Slack API
 Answer the following questions. These questions will help you become familiar with the API, and make working with it easier.
 
 - What is the responsibility of this endpoint?
+    - post a message on a channel in slack
 - What is the URL and HTTP method for this endpoint?
+    - https://slack.com/api/chat.postMessage?channel=<channel_name>&text=<message_text>&<otherargs>
 - What are the _two_ _required_ arguments for this endpoint?
+    - token, channel
 - How does this endpoint relate to the Slackbot API key (token) we just created?
+    - I'm assuming we will use this endpoint to send messages about whether or not the tasks have been done
 
 Now, visit https://api.slack.com/methods/chat.postMessage/test.
 
@@ -119,8 +123,42 @@ Press the "Test Method" button!
 Scroll down to see the HTTP response. Answer the following questions:
 
 - Did we get a success message? If so, did we see the message in our actual Slack workspace?
+    - we got ok:True? And yes, we saw a message in our actual slack workspace
 - Did we get an error emssage? If so, why?
+    - No...
 - What is the shape of this JSON? Is it a JSON object or array? What keys and values are there?
+    - {"ok":<boolean>,
+    - "channel":<channel_string>,
+    - "ts": a string of numbers? Is this an IP?,
+    - "message"{
+      - "bot_id": string,
+      - "type": "message",
+      - "text": <textofmessage>,
+      - "user": string,
+      - "ts": same as before under ts?,
+      - "app_id": string of caps and nums,
+      - "team": another string of caps and nums,
+      - "bot_profile":{
+        - "id": same as bot_id,
+        - "app_id":same as app_id before,
+        - "name": <name_of_bot>,
+        - "icons": {
+          - "image_36": url,
+          - "image_48": url,
+          - "image_72": url
+          - },
+        - "deleted": boolean,
+        - "updated": a number,
+        - "team_id": same as team
+        - },
+      - "blocks":[
+        - {"type": "rich_text",
+        - "block_id": "PTh",
+        - "elements": [
+          - {"type":"rich_text_section",
+          - "elements":[
+            - {"type":"text",
+            - "text": text body}]}]}]}}
 
 ### Verify with Postman
 
@@ -138,6 +176,8 @@ Open Postman and make a request that mimics the API call to Slack that we just t
 
 - In "Headers," add this new key-value pair:
   - `Authorization`: `"Bearer xoxb-150..."`, where `xoxb-150...` is your full Slackbot token
+
+--> DO NOT INCLUDE ANY QUOTES <----
 
 ![](assets/postman_test_headers.png)
 
