@@ -86,9 +86,10 @@ def delete_a_goal(goal_id):
 def add_tasks_to_goal(goal_id):
     request_body = request.get_json()
     try:
+        goal = fetch_type("goal", goal_id)
         for task_id in request_body["task_ids"]:
             task = fetch_type("task", task_id)
-            task.goal_id = goal_id 
+            task.goal = goal
     except:
         abort(make_response(jsonify({"details":f"Invalid data"}), 400))
 
@@ -98,7 +99,7 @@ def add_tasks_to_goal(goal_id):
 ####################
 #GET shows all task in a goal
 #route /<goal_id>/tasks
-#returns dictionary of goal info with a tasks key containing a dict with all task infos
+#returns dictionary of goal info with a tasks key containing a dict with all task
 ####################
 @goal_bp.route("/<goal_id>/tasks", methods=["GET"])
 def get_all_tasks_for_goal(goal_id):
