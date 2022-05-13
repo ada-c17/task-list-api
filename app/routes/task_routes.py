@@ -2,7 +2,7 @@ from app import db
 from app.models.task import Task
 from flask import Blueprint, make_response, request, jsonify
 from .helpers import validate_task
-
+import requests, os
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
 # Get all tasks
@@ -83,17 +83,15 @@ def patch_task_to_complete(id):
     task.patch_to_complete()
 
     db.session.commit()
-    #--------------------------------------------------
-    # I commented this since my code sends message to Slack each time when I run my code..
-    # path = "https://slack.com/api/chat.postMessage"
-    # query_params = {
-    #     "channel": "test-channel",
-    #     "text": f"Someone just completed the task {task.title}"
-    #     }
-    # headers = {"Authorization": os.environ.get("SLACK_BOT_API_KEY")}
 
-    # requests.post(path, params=query_params, headers=headers)
-    # print(response_bot)
+    path = "https://slack.com/api/chat.postMessage"
+    query_params = {
+        "channel": "brewing",
+        "text": f"Someone just completed the task {task.title}"
+        }
+    headers = {"Authorization": os.environ.get("SLACK_BOT_API_KEY")}
+
+    requests.post(path, params=query_params, headers=headers)
     # requests.post(path, params=query_params, headers=headers), it might work without response_bot variable
     return jsonify({"task":task.to_json()}), 200
 
