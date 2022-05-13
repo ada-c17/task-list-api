@@ -88,9 +88,26 @@ def mark_complete_on_incomplete_task(id):
     #   incompleted and request to change to completed (assign time value)
     task.completed_at = datetime.utcnow()
     db.session.commit()
-    # return make_response({"task": task.to_json()}), 200
-    return {"task": task.to_json()}, 200
 
+    #add slackbot
+    # message = f"Someone just completed the task {task.title}"
+
+    path = "https://slack.com/api/chat.postMessage"
+
+    headers = {"Authorization":os.environ.get("SLACK_API_KEY")}
+
+    query_params = {
+    # "token": SLACK_TOKEN,
+    "channel": "test-channel",
+    "text": f"Someone just completed the task {task.title}"
+    # "format": "json"
+    }
+
+    requests.post(path, params=query_params, headers= headers)
+
+    # return make_response({"task": task.to_json()}), 200
+    return jsonify({"task": task.to_json()}), 200
+    
 #Patch:mark imcomplete 
 @tasks_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
 def mark_incomplete_on_complete_task(id):
@@ -98,48 +115,6 @@ def mark_incomplete_on_complete_task(id):
     task.completed_at = None
     db.session.commit()
     return {"task": task.to_json()}, 200
-
-
-# def slackbot():
-#     """
-#     client marks complete, slack bot will auto send a message 
-#     task6 My beautiful task
-#     patch: tasks/6/mark_complete
-#     """
-#     #steps
-#     #1. import requests
-#     #2. path = "https://slack.com/api/chat.postMessage"
-#     #3. SLACK_API_KEY 
-#     # #4.query_params = {
-#     # "token": SLACK_API__KEY,
-#     # "channel": "task-notifications",
-#     # "format": "json"
-#     # }
-#     #4. text = "Someone just completed the task My Beautiful Task"
-#     # response = requests.post(path, params = query_params)
-
-#     # print 
-
-
-#     message = "Someone just completed the task My Beautiful Task"
-
-#     path = "https://slack.com/api/chat.postMessage"
-
-#     SLACK_API_KEY = os.environ.get(SLACK_API_KEY)
-
-#     query_params = {
-#     "token": SLACK_API_KEY,
-#     "channel": "task-notifications",
-#     "text": message,
-#     "format": "json"
-#     }
-
-#     response = mark_complete_on_incomplete_task(6)
-#     if response.status_code == 200:
-#         requests.post(path, params=query_params)
-#     response_for_slackbot = requests.post(path, params=query_params)
-#     print(response_for_slackbot.json())
-
 
 
 
