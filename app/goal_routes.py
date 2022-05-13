@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, make_response, abort
 from app import db
 from app.models.goal import Goal
 from app.models.task import Task
-from app.route_helpers import error_message
+from app.route_helpers import error_message, validate_model_instance
 
 goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 
@@ -36,13 +36,13 @@ def get_all_goals():
 # get goal by id
 @goals_bp.route("/<goal_id>", methods=["GET"])
 def get_goal_by_id(goal_id):
-    goal = validate_goal(goal_id)
+    goal = validate_model_instance(Goal, goal_id)
     return {"goal": goal.to_dict()}
 
 # update goal by id
 @goals_bp.route("/<goal_id>", methods=["PUT"])
 def update_goal(goal_id):
-    goal = validate_goal(goal_id)
+    goal = validate_model_instance(Goal, goal_id)
     
     request_body = request.get_json()
     goal.title = request_body["title"]
@@ -53,7 +53,7 @@ def update_goal(goal_id):
 # delete goal by id
 @goals_bp.route("/<goal_id>", methods=["DELETE"])
 def delete_goal(goal_id):
-    goal = validate_goal(goal_id)
+    goal = validate_model_instance(Goal, goal_id)
 
     db.session.delete(goal)
     db.session.commit()
@@ -63,7 +63,7 @@ def delete_goal(goal_id):
 # get tasks by goal id
 @goals_bp.route("/<goal_id>/tasks", methods=["GET"])
 def get_tasks_for_goal(goal_id):
-    goal = validate_goal(goal_id)
+    goal = validate_model_instance(Goal, goal_id)
     task_list = [task.to_dict() for task in goal.tasks]
 
     goal_dict = goal.to_dict()
@@ -74,7 +74,7 @@ def get_tasks_for_goal(goal_id):
 # post tasks to goal by goal id
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
 def post_tasks_to_goal(goal_id):
-    goal = validate_goal(goal_id)
+    goal = validate_model_instance(Goal, goal_id)
     request_body = request.get_json()
 
     for task_id in request_body["task_ids"]:
@@ -88,17 +88,3 @@ def post_tasks_to_goal(goal_id):
         "id": goal.goal_id,
         "task_ids": request_body["task_ids"]
     })
-
-# helper function to validate goal by id
-def validate_goal(goal_id):
-    try:
-        goal_id = int(goal_id)
-    except:
-        error_message(f"Goal #{goal_id} invalid", 400)
-    
-    goal = Goal.query.get(goal_id)
-    
-    if not goal:
-        error_message(f"Goal #{goal_id} not found", 404)
-    
-    return goal
