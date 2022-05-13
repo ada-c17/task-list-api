@@ -86,12 +86,14 @@ def patch_task_to_complete(id):
 
     path = "https://slack.com/api/chat.postMessage"
     query_params = {
-        "channel": "brewing",
-        "text": f"Someone just completed the task {task.title}"
+        "channel": "test-channel",
+        "text": f"Someone just completed the {task.title}"
         }
     headers = {"Authorization": os.environ.get("SLACK_BOT_API_KEY")}
 
-    requests.post(path, params=query_params, headers=headers)
+    response = requests.post(path, params=query_params, headers=headers)
+    print(response.status_code)
+
     # requests.post(path, params=query_params, headers=headers), it might work without response_bot variable
     return jsonify({"task":task.to_json()}), 200
 
