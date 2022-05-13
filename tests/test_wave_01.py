@@ -1,7 +1,6 @@
-import json
-import re
 from app.models.task import Task
 import pytest
+from datetime import datetime, date
 
 
 #pytest.mark.skip(reason="No way to test this feature yet")
@@ -559,31 +558,7 @@ def test_get_tasks_by_id_for_a_goal_sort_with_empty(client, three_tasks_belong_t
         }
     ]
 
-# def test_create_task_with_completed_at(client):
-#     # Act
-#     response = client.post("/tasks", json={
-#         "title": "A Brand New Task",
-#         "description": "Test Description",
-#         "completed_at": "Fri, 13 May 2022 00:00:00 GMT"
-#     })
-#     response_body = response.get_json()
 
-#     # Assert
-#     assert response.status_code == 201
-#     # assert "task" in response_body
-#     # assert response_body == {
-#     #     "task": {
-#     #         "id": 1,
-#     #         "title": "A Brand New Task",
-#     #         "description": "Test Description",
-#     #         "is_complete": False
-#     #     }
-#     # }
-#     new_task = Task.query.get(1)
-#     assert new_task
-#     assert new_task.title == "A Brand New Task"
-#     assert new_task.description == "Test Description"
-#     assert new_task.completed_at == '2022-05-13 00:00:00'
 
 
 
