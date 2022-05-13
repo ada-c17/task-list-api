@@ -12,3 +12,24 @@ class Task(db.Model):
     def is_complete(self):
         return self.completed_at != None
 
+    def to_dict(self):
+        dictionary = dict(
+            id=self.task_id,
+            title=self.title,
+            description=self.description,
+            is_complete=self.is_complete(),
+            goal_id=self.goal_id
+        )
+
+        if self.goal_id == None:
+            del dictionary["goal_id"] 
+
+        return dictionary
+
+    @classmethod
+    def from_dict(cls, data_dict):
+        return cls(
+            title=data_dict["title"],
+            description=data_dict["description"],
+            completed_at=data_dict["completed_at"] if "completed_at" in data_dict else None
+        )
