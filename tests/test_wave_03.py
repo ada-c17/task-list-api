@@ -200,7 +200,7 @@ def test_update_task_with_completed_at_date(client, completed_task):
             "id": 1,
             "title": "Updated Task Title",
             "description": "Updated Test Description",
-            "is_complete": False
+            "is_complete": True
         }
     }
     task = Task.query.get(1)

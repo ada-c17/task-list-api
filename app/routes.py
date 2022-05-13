@@ -35,8 +35,6 @@ def get_one_task(task_id):
 def create_one_response():
     request_body = request.get_json()
     valid_data = validate_data(request_body)
-    # if request_body['completed_at']:
-        
     new_task = Task.create_task(valid_data)
     db.session.add(new_task)
     db.session.commit()
@@ -48,6 +46,7 @@ def update_task(task_id):
     task = validate_id(task_id)
     request_body = request.get_json()
     task.update_task(request_body)
+    
     db.session.commit()
     return jsonify({"task":task.to_json()}), 200
 
