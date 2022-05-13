@@ -20,15 +20,13 @@ def validate_obj(cls,id):
 def sort_filter_get(cls):
     sort_query = request.args.get("sort")
     title_query = request.args.get("title")
-    description_query = request.args.get("description")
+
     if sort_query == "asc":
-        obj = cls.query.order_by(asc(cls.title))
+        obj = cls.query.order_by(cls.title.asc())
     elif sort_query == "desc":
-        obj = cls.query.order_by(desc(cls.title))
-    elif title_query:
-        obj = cls.query.filter_by(cls.title)
-    elif description_query:
-        obj = cls.query.filter_by(cls.description)
+        obj = cls.query.order_by(cls.title.desc())
+    # elif title_query:
+    #     obj = cls.query.filter_by(cls.title)
     else:
         obj = cls.query.all()
     
