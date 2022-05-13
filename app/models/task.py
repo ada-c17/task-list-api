@@ -10,12 +10,15 @@ class Task(db.Model):
     goal=db.relationship("Goal", back_populates = "tasks")
 
     def to_json(self):
-        return { "id": self.task_id,  
+        dict= { "id": self.task_id,  
                 "title": self.title,
                 "description": self.description,
                 "is_complete": True if self.completed_at else False,
-                "goal_id": self.goal_id
+                # "goal_id": self.goal_id if self.goal_id else None
             }
+        if self.goal_id:
+            dict["goal_id"] = self.goal_id
+        return dict
         
 
     def update(self, req_body):

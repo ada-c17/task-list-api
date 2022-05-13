@@ -32,7 +32,7 @@ def validate_goal(goal_id):
 
 
 def call_slack(response_message):
-    title=query_params["title"]
+    
     path = "https://slack.com/api/chat.postMessage"
 
     #Headers = {"Authorization": os.environ.get("SLACK_TOKEN")}
@@ -44,7 +44,7 @@ def call_slack(response_message):
         "text": response_message
     }
     response = requests.post(path, data=query_params, headers=Headers)
-    return response.json()
+    #return response.json()
     # print(f"Someone just completed poppy's task {title}")
 
     # def create_app(test_config=None):
