@@ -9,14 +9,18 @@ goals_bp = Blueprint("goals",__name__,url_prefix="/goals")
 
 @goals_bp.route("",methods=["GET"])
 def get_goals():
-    sort_query = request.args.get("sort")
-    if sort_query:
-        if sort_query.lower() == "asc":
-            goals = Goal.query.order_by(Goal.title)
-        elif sort_query.lower() == "desc":
-            goals = Goal.query.order_by(Goal.title.desc())
-    else:
-        goals = Goal.query.all()
+    goals = Goal.query.all()
+    query_params = request.args
+    print(query_params)
+    if query_params.get("title"):
+        goals = Goal.query.filter_by(title=query_params.get("title"))
+    # default sort is by title in an ascending order
+    if query_params.get("sort"):
+        goal_attribute = Goal.goal_id if query_params.get("sort_by") == "title" else Goal.title
+        if query_params.get("sort") == "desc":
+            goals = Goal.query.order_by(goal_attribute.desc())
+        else:
+            goals = Goal.query.order_by(goal_attribute)
     response = []
     if goals:
         for goal in goals:

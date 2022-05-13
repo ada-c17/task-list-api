@@ -11,14 +11,17 @@ tasks_bp = Blueprint("tasks",__name__,url_prefix="/tasks")
 
 @tasks_bp.route("",methods=["GET"])
 def get_tasks():
-    sort_query = request.args.get("sort")
-    if sort_query:
-        if sort_query.lower() == "asc":
-            tasks = Task.query.order_by(Task.title)
-        elif sort_query.lower() == "desc":
-            tasks = Task.query.order_by(Task.title.desc())
-    else:
-        tasks = Task.query.all()
+    tasks = Task.query.all()
+    query_params = request.args
+    if query_params.get("title"):
+        tasks = Task.query.filter_by(title=query_params.get("title"))
+    # default sort is by title in an ascending order
+    if query_params.get("sort"):
+        task_attribute = Task.task_id if query_params.get("sort_by") == "title" else Task.title
+        if query_params.get("sort") == "desc":
+            tasks = Task.query.order_by(task_attribute.desc())
+        else:
+            tasks = Task.query.order_by(task_attribute)
     response = []
     if tasks:
         for task in tasks:
