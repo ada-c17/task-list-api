@@ -75,7 +75,7 @@ def get_goal_tasks(goal_id):
 
 @goal_bp.route("/<goal_id>/tasks", methods=["POST"])
 def create_goal_with_tasks(goal_id):
-    '''Creates a new Goal record and assigns existing Tasks to it.'''
+    '''Assigns existing tasks to an existing goal.'''
     goal = Goal.validate_goal(goal_id)
     request_body = request.get_json()
     response_body = {
