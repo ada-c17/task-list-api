@@ -10,14 +10,6 @@ import requests
 
 
 
-slack_url = f'https://slack.com/api/chat.postMessage?channel={channel_name}&text={text}' 
-slack_bot_token= os.environ.get("SLACK_BOT_TOKEN")
-
-channel_name = 'test-channel'
-text="Someone just completed the task : {task.title}"
-
-
-
 task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 goal_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
@@ -192,17 +184,23 @@ def tasks_of_goal(id):
     db.session.commit()
     return {"id": goal.id, 
     "task_ids" : request_body['task_ids']}
-        
-        
+
+
+
+
         
 @task_bp.route("/<id>/mark_complete", methods=["PATCH"])
 def mark_complete(id):
     task = validate_task(id)
     task.is_complete = True 
     task.completed_at = datetime.utcnow()
- 
 
+    channel_name = 'test-channel'
+    text="Someone just completed the task : {task.title}"
     headers = {"Authorization": slack_bot_token}
+    slack_bot_token= os.environ.get("SLACK_BOT_TOKEN")
+    slack_url = f'https://slack.com/api/chat.postMessage?channel={channel_name}&text={text}' 
+    
  
     db.session.commit()
 
@@ -218,24 +216,24 @@ def mark_incomplete(id):
     
 
     db.session.commit()
-    response = requests.patch(slack_url, params=query_params)
+    # response = requests.patch(slack_url, params=query_params)
 
-        headers = {
-        "authorization": f"Bearer {slack_bot_token}",
-    }
-    params = {
-        "channel": "test-channel",
-        "text": f"Task {task.title} is not complete",
-    }
+    #     headers = {
+    #     "authorization": f"Bearer {slack_bot_token}",
+    # }
+    # params = {
+    #     "channel": "test-channel",
+    #     "text": f"Task {task.title} is not complete",
+    # }
 
-    }
-    headers = {
-        "authorization": f"Bearer {slack_bot_token}",
-    }
-    params = {
-        "channel": "test-channel",
-        "text": f"Task {task.title} is not complete",
-    }
+    # }
+    # headers = {
+    #     "authorization": f"Bearer {slack_bot_token}",
+    # }
+    # params = {
+    #     "channel": "test-channel",
+    #     "text": f"Task {task.title} is not complete",
+    # }
     return {"task": task.to_dict()}
 
 
