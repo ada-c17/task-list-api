@@ -34,6 +34,8 @@ def get_goals():
             goals = Goal.query.order_by(asc(Goal.title)).all()
         elif sort.lower() == "desc":
             goals = Goal.query.order_by(desc(Goal.title)).all()
+        else:             
+            return {"details": "Invalid sort query - value must be asc or desc"}, 400
     else:    
         goals = Goal.query.all()
 
