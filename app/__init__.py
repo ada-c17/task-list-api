@@ -28,7 +28,12 @@ def create_app(test_config=None):
 
     db.init_app(app)
     migrate.init_app(app, db)
+    # from app.models.task import Task
 
     # Register Blueprints here
+    from .routes.task_routes import tasks_bp
+    app.register_blueprint(tasks_bp)
+    from .routes.goal_routes import goal_bp
+    app.register_blueprint(goal_bp)
 
     return app
