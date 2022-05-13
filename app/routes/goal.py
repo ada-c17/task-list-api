@@ -30,14 +30,14 @@ def get_goals():
     params = request.args 
     if "sort" in params:
         sort = params["sort"]
-        if sort.lower() == "asc":
+        if sort.lower() == "asc": # note default is asc, but included to be more explicit
             goals = Goal.query.order_by(asc(Goal.title)).all()
         elif sort.lower() == "desc":
             goals = Goal.query.order_by(desc(Goal.title)).all()
     else:    
         goals = Goal.query.all()
 
-    # before list comprehension
+    # before refactoring
     # goals_response = []
     # for goal in goals:
     #     goals_response.append(goal.to_json())
@@ -95,7 +95,7 @@ def create_tasks_for_goal(goal_id):
 
     retrieved_tasks = [Task.validate_task(task) for task in tasks if task]
 
-    # before list comprehension
+    # before refactoring
     # retrieved_tasks = []
 
     # for task in tasks:
@@ -117,7 +117,7 @@ def get_tasks_for_goal(goal_id):
     goal = Goal.validate_goal(goal_id)
     tasks = goal.tasks 
 
-    # before list comprehension 
+    # before refactoring
     # tasks_response = []
 
     # for task in tasks:
@@ -129,14 +129,17 @@ def get_tasks_for_goal(goal_id):
     #         "is_complete": task.is_complete()
     #     })
 
-    tasks_response = [task.to_json() for task in tasks]
     # goal.tasks = tasks_response
     
-    return {
-        "id": goal.goal_id,
-        "title": goal.title,
-        "tasks": tasks_response
-    }, 200
+    # return {
+    #     "id": goal.goal_id,
+    #     "title": goal.title,
+    #     "tasks": tasks_response
+    # }, 200
 
-    # return goal.to_json(), 200
+    tasks_response = [task.to_json() for task in tasks]
+
+    goal = goal.to_json()
+    goal["tasks"] = tasks_response
+    return goal, 200
 

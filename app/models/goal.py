@@ -7,6 +7,7 @@ class Goal(db.Model):
     tasks = db.relationship("Task", back_populates="goal", lazy=True) # go to task model and add goal
     # lazy - not going to make instance until you try to use .tasks
 
+    # not sure if I was supposed to pass in self here, couldn't get it to work if I did
     def validate_goal(goal_id):
         try:
             goal_id = int(goal_id)
@@ -20,18 +21,11 @@ class Goal(db.Model):
 
         return goal 
 
-    def to_json(self):
-        # json = {
-        #     "id": self.goal_id,
-        #     "title": self.title
-        # }
-
-        # if self.tasks:
-        #     json["tasks"] = [task.to_json() for task in self.tasks]
-
-        # return json
-            
-        return {
+    def to_json(self):            
+        json = {
             "id": self.goal_id,
             "title": self.title
         }
+
+        return json
+
