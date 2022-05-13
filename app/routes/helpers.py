@@ -18,8 +18,6 @@ def send_slack_completed_message(task):
 
     PATH = "https://slack.com/api/chat.postMessage"
 
-    API_KEY = os.environ.get(
-            "SLACK_API_KEY")
     BEARER_TOKEN = os.environ.get(
             "AUTH_TOKEN_SLACK")
 
@@ -27,16 +25,3 @@ def send_slack_completed_message(task):
     headers = {"authorization" : BEARER_TOKEN}
     
     response_body = requests.get(PATH, params=query_params, headers=headers)
-
-
-# def validate_goal(goal_id):
-#     try:
-#         goal_id = int(goal_id)
-#     except:
-#         abort(make_response({"message":f"goal {goal_id} invalid"}, 400))
-
-#     goal = Goal.query.get(goal_id)    
-#     if not goal: 
-#         return abort(make_response({"message":f"goal {goal_id} not found"}, 404))
-            
-#     return goal
