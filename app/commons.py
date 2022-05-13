@@ -60,9 +60,9 @@ def get_filtered_and_sorted(cls, request_args):
     # make query filters from these 3 params, ignoring any others
     filters = []
     if 'title' in params:
-        filters.append(cls.title.like(f"%{params['title']}%"))
+        filters.append(cls.title.ilike(f"%{params['title']}%"))
     if 'description' in params:
-        filters.append(cls.description.like(f"%{params['description']}%"))
+        filters.append(cls.description.ilike(f"%{params['description']}%"))
     if 'is_complete' in params:
         if params['is_complete'] == 'False':
             filters.append(cls.completed_at == None)
