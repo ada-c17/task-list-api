@@ -37,6 +37,15 @@ class Task(db.Model):
             
         return new_task
 
+    @classmethod
+    def create_completed_at(cls, req_body):
+        return cls(
+            title = req_body["title"],
+            description = req_body["description"],
+            # completed_at = req_body["completed_at"])
+            completed_at = req_body.get("completed_at", None))
+            # I don't know which one would be better between line 45 and 46, both are passing tests.
+    
     def update(self, req_body):
         self.title = req_body["title"]
         self.description = req_body["description"]
@@ -46,12 +55,3 @@ class Task(db.Model):
        
     def patch_to_incomplete(self):
         self.completed_at = None
-
-    @classmethod
-    def create_completed_at(cls, req_body):
-        return cls(
-            title = req_body["title"],
-            description = req_body["description"],
-            # completed_at = req_body["completed_at"])
-            completed_at = req_body.get("completed_at", None))
-            # I don't know which one would be better between line 60 and 61, both are passing tests.
