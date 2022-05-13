@@ -10,10 +10,12 @@ class Task(db.Model):
     # __tablename__ = "tasks" #This is optional for if you want to plurally name your table 
 
     def to_dict(self):
+
         return dict(
             id=self.task_id,
             title=self.title,
             description=self.description,
+            # goal_id=request_body.get("goal_id", None),
             # is_complete=self.completed_at is not None
             # is_complete= True if self.completed_at != None else False
             is_complete= True if self.completed_at else False

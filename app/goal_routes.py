@@ -44,10 +44,10 @@ def create_task_for_goal(goal_id):
 ### Confused about this??? ABOVE
 @goals_bp.route("/<goal_id>/tasks", methods=["GET"])
 def get_tasks_per_goal(goal_id):
-    request_body = request.get_json()
+    # request_body = request.get_json()
 
     goal = validate_goal(goal_id)
-    tasks_info = [task.todict(task) for task in goal.tasks]
+    tasks_info = [task.to_dict() for task in goal.tasks]
 
     # for task_id in request_body["task_ids"]:
     #     tasks_list = []
@@ -128,7 +128,7 @@ def validate_goal(id):
         return goal
 
     elif not goal:
-        abort(make_response(jsonify(dict(message= f"goal {id} not found")), 404))
+        abort(make_response(jsonify("goal not found"), 404))
 
     
 #########   

@@ -5,6 +5,7 @@ from datetime import datetime
 import requests
 import os
 from dotenv import load_dotenv
+from app.models.goal import Goal
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -52,9 +53,19 @@ def read_all_tasks():
 @tasks_bp.route("/<id>", methods=["GET"])
 def get_task_by_id(id):
     task = validate_task(id)
-
+    
     # NOTE: Flask will automatically convert a dictionary into an HTTP response body. 
     # If we don't want to remember this exception, we can call jsonify() with the dictionary as an argument to return the result
+    # if "goal_id" in task:
+    # return jsonify(dict(task= dict(
+    #     id=task.task_id,
+    #     title=task.title,
+    #     description=task.description,
+    #     goal_id=Goal.goal_id,
+    #     is_complete= True if task.completed_at else False)
+    #     )), 200
+
+    # else: 
     return jsonify({"task": task.to_dict()}), 200
     # return make_response(jsonify({"task": task.to_dict()}), 201)
 

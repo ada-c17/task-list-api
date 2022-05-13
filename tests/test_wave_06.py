@@ -42,7 +42,7 @@ def test_post_task_ids_to_goal_already_with_goals(client, one_task_belongs_to_on
     assert len(Goal.query.get(1).tasks) == 2
 
 
-@pytest.mark.skip(reason="No way to test this feature yet")
+# @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_for_specific_goal_no_goal(client):
     # Act
     response = client.get("/goals/1/tasks")
@@ -50,8 +50,8 @@ def test_get_tasks_for_specific_goal_no_goal(client):
 
     # Assert
     assert response.status_code == 404
-
-    raise Exception("Complete test with assertion about response body")
+    assert response_body ==  "goal not found"
+    # raise Exception("Complete test with assertion about response body")
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
