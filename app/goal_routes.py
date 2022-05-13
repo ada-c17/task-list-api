@@ -31,8 +31,18 @@ def get_goal_by_id(goal_id):
     goal = validate_goal(goal_id)
     return {"goal": goal.to_dict()}
 
+# update goal by id
+@goals_bp.route("/<goal_id>", methods=["PUT"])
+def update_goal(goal_id):
+    goal = validate_goal(goal_id)
+    
+    request_body = request.get_json()
+    goal.title = request_body["title"]
+
+    return {"goal": goal.to_dict()}
 
 
+# helper function to validate goal by id
 def validate_goal(goal_id):
     try:
         goal_id = int(goal_id)
