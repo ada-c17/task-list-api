@@ -58,12 +58,6 @@ def get_all_tasks():
     else:
         tasks = Task.query.order_by(Task.title)
 
-    # title_query = request.args.get('title')
-    # if title_query:
-    #     tasks = Task.query.filter_by(title=title_query)
-    # else:
-    #     tasks = Task.query.all()
-
     tasks_response = []
     for task in tasks:
         tasks_response.append(
@@ -79,12 +73,22 @@ def get_all_tasks():
 @tasks_bp.route('/<task_id>',methods = ['GET'])
 def get_one_task(task_id):
     task = validate_input(task_id)
-    response_body = {
-        'id' :task.task_id,
-        'title': task.title,
-        'description': task.description,
-        'is_complete': is_completed(task.completed_at)
-    }
+    if task.goal_id:
+        response_body = {"task":{
+            'id' :task.task_id,
+            'title': task.title,
+            'goal_id':task.goal_id,
+            'description': task.description,
+            'is_complete': is_completed(task.completed_at)
+        }}
+    else:
+        response_body = {
+            'id' :task.task_id,
+            'title': task.title,
+            'description': task.description,
+            'is_complete': is_completed(task.completed_at)
+        }
+
     return jsonify(response_body), 200
 
 @tasks_bp.route('/<task_id>', methods = ['PUT'])

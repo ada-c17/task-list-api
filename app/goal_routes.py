@@ -91,36 +91,67 @@ def delete_goal(goal_id):
     return{'details':f'Goal {chosen_goal.goal_id} "{chosen_goal.title}" successfully deleted'}, 200
 
 
+# @goals_bp.route("/<goal_id>/tasks", methods=['POST'])
+# def create_task(goal_id):
+#     goal =validate_input(goal_id)
+#     request_body = request.get_json()
+#     new_task = Task(
+#         title=request_body['title'],
+#         description=request_body['description'],
+#         completed_at = request_body['completed_at'],
+#         goal = goal
+#     )
+#     db.session.add(new_task)
+#     db.session.commit()
+#     return make_response(jsonify(f"Book {new_task.title} by {new_task.goal.title} successfully created"), 201)
+
 @goals_bp.route("/<goal_id>/tasks", methods=['POST'])
-def create_task(goal_id):
-
-    goal = validate_input(goal_id)
-
+def create_tasks(goal_id):
+    chosen_goal =validate_input(goal_id)
+    tasks = Task.query.all()
     request_body = request.get_json()
-    new_task = Task(
-        itle=request_body['title'],
-        description=request_body['description'],
-        completed_at = request_body['completed_at']
-    )
-    db.session.add(new_task)
+    tasks_ids = request_body["task_ids"]
+    chosen_tasks_ids_list = []
+    
+    for task in tasks:
+        if task.task_id in tasks_ids:
+            chosen_tasks_ids_list.append(task.task_id)
+            task.goal = chosen_goal
+
+    response_body ={ 
+        "id": chosen_goal.goal_id,
+        "task_ids": chosen_tasks_ids_list
+    }
+    
     db.session.commit()
-    return make_response(jsonify(f"Book {new_task.title} by {new_task.goal.title} successfully created"), 201)
+    return jsonify(response_body), 200
+
 
 @goals_bp.route("/<goal_id>/tasks", methods=['GET'])
 def get_tasks(goal_id):
-
-    goal = validate_input(goal_id)
-
-    task_response = []
-    for task in goal.tasks:
-        task_response.append(
-            {
-            "id": task.id,
-            "title": task.title,
-            'is_complete': is_completed(task.completed_at),
-            "goal": goal.title
-            }
-        )
+    chosen_goal =validate_input(goal_id)
     
-    return jsonify(task_response)
+    chosen_goal_task = []
+    for task in chosen_goal.tasks:
+        chosen_goal_task.append(
+            {
+            "id": task.task_id,
+            "goal_id": chosen_goal.goal_id,
+            "title": task.title,
+            "description":task.description,
+            "is_complete": is_completed(task.completed_at)
+            })
+    if len(chosen_goal_task) > 1:
+        response_body= {
+        "id":chosen_goal.goal_id,
+        "title":chosen_goal.title,
+        "task":chosen_goal_task }
+    else: 
+        response_body= {
+            "id":chosen_goal.goal_id,
+            "title":chosen_goal.title,
+            "tasks":chosen_goal_task 
+            }
+
+    return jsonify(response_body), 200
 
