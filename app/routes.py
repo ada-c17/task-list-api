@@ -9,8 +9,12 @@ import requests
 
 
 
-slack_url = "https://slack.com/api/chat.postMessage"
+
+slack_url = f'https://slack.com/api/chat.postMessage?channel={channel_name}&text={text}' 
 slack_bot_token= os.environ.get("SLACK_BOT_TOKEN")
+
+channel_name = 'test-channel'
+text="Someone just completed the task : {task.title}"
 
 
 
@@ -196,15 +200,13 @@ def mark_complete(id):
     task = validate_task(id)
     task.is_complete = True 
     task.completed_at = datetime.utcnow()
+ 
 
+    headers = {"Authorization": slack_bot_token}
+ 
     db.session.commit()
-    headers = {
-        "Authorization": f"Bearer {slack_bot_token}",
-    }
-    data = {
-        "channel": "test-channel",
-        "text": "Task {task.title} has been marked complete",
-    }
+
+    response = requests.post(slack_url, headers=headers)
 
     return {"task": task.to_dict()}
 
@@ -216,10 +218,21 @@ def mark_incomplete(id):
     
 
     db.session.commit()
+    response = requests.patch(slack_url, params=query_params)
+
+        headers = {
+        "authorization": f"Bearer {slack_bot_token}",
+    }
+    params = {
+        "channel": "test-channel",
+        "text": f"Task {task.title} is not complete",
+    }
+
+    }
     headers = {
         "authorization": f"Bearer {slack_bot_token}",
     }
-    data = {
+    params = {
         "channel": "test-channel",
         "text": f"Task {task.title} is not complete",
     }
