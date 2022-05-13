@@ -99,6 +99,24 @@ def test_query_can_both_filter_and_sort(client, three_tasks, completed_task):
         }
     ]
 
+# @pytest.mark.skip(reason="Test not written")
+def test_goals_can_be_sorted_and_filtered(client, three_goals):
+    response = client.get('/goals?sort=asc&title=long')
+    response_body = response.get_json()
+
+    assert response.status_code == 200
+    assert len(response_body) == 2
+    assert response_body == [
+        {
+            'id': 3,
+            'title': "A longing to be realized"
+        },
+        {
+            'id': 1,
+            'title': "Long term desire"
+        }
+    ]
+
 def test_string_timestamp_can_be_converted(client, three_tasks):
     response = client.put('/tasks/2', json={
         'description': 'Inbox zero.',
