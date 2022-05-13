@@ -1,3 +1,4 @@
+# from turtle import title
 from flask import abort, make_response, request
 
 
@@ -17,13 +18,16 @@ def validate_obj(cls,id):
 
 def sort_filter_get(cls):
     sort_query = request.args.get("sort")
-
+    title_query = request.args.get("title")
+    des_query = request.args.get("description")
     if sort_query == "asc":
         obj = cls.query.order_by(cls.title.asc())
     elif sort_query == "desc":
         obj = cls.query.order_by(cls.title.desc())
-    # elif title_query:
-    #     obj = cls.query.filter_by(cls.title.)
+    elif title_query:
+        obj = cls.query.filter_by(title = title_query)
+    elif des_query:
+        obj = cls.query.filter_by(description = des_query)    
     else:
         obj = cls.query.all()
     
