@@ -51,7 +51,7 @@ def validate_datetime(request_body):
     datetime_string = (
         request_body["completed_at"] if request_body.get("completed_at", None) != None else None
     )
-    if not datetime_string:
+    if datetime_string is None:
         return datetime_string
 
     try:

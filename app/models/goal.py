@@ -24,3 +24,8 @@ class Goal(db.Model):
             tasks_list.append(task.to_dict_with_goal_id())
         return tasks_list
         
+    @classmethod
+    def create(cls, request_body):
+        return cls(
+        title=request_body["title"]
+    )

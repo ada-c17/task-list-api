@@ -10,9 +10,7 @@ goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
 @goals_bp.route("", methods=["POST"])
 def create_new_goal():
     request_body = validate_request(request, "title")
-    new_goal = Goal(
-        title=request_body["title"]
-    )
+    new_goal = Goal.create(request_body)
     db.session.add(new_goal)
     db.session.commit()
     return make_response({"goal": new_goal.to_dict()}, 201)
