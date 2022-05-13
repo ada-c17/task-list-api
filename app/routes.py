@@ -105,10 +105,6 @@ def create_goal():
     return {"goal": new_goal.to_dict()}, 201  
 
 
-
-    
-
-
 @task_bp.route("", methods=["POST"])
 def create_task():  
     request_body = request.get_json() 
@@ -121,12 +117,8 @@ def create_task():
     new_task = Task(
         title = request_body.get("title"),
         description = request_body.get("description"),
-        # is_complete=True if "completed_at" in request_body else False 
+        completed_at = request_body.get("completed_at")      
         ) 
-    # if "completed_at" in request_body: 
-    #     new_task.is_complete=request_body['is_complete']
-
-    print("new_task", new_task)
         
     db.session.add(new_task)
     db.session.commit()
@@ -185,6 +177,12 @@ def tasks_of_goal(id):
     return {"id": goal.id, 
     "task_ids" : request_body['task_ids']}
 
+# slack_bot_token= os.environ.put('SLACK_BOT_TOKEN')
+# channel_name = 'test-channel'
+# text=f"Someone just completed the task a task"
+# headers = {"Authorization": slack_bot_token}
+# slack_url = f'https://slack.com/api/chat.postMessage?channel={channel_name}&text={text}' 
+
 
 
 
@@ -192,48 +190,49 @@ def tasks_of_goal(id):
 @task_bp.route("/<id>/mark_complete", methods=["PATCH"])
 def mark_complete(id):
     task = validate_task(id)
-    task.is_complete = True 
+    # task.is_complete = True 
     task.completed_at = datetime.utcnow()
 
-    channel_name = 'test-channel'
-    text="Someone just completed the task : {task.title}"
-    headers = {"Authorization": slack_bot_token}
-    slack_bot_token= os.environ.get("SLACK_BOT_TOKEN")
-    slack_url = f'https://slack.com/api/chat.postMessage?channel={channel_name}&text={text}' 
     
- 
+    db.session.add(task)
     db.session.commit()
 
+    # print("TASK TITLE **", task.title)
+
+    # task_dict = task.to_dict()
+    # print("TASK_DICT TITLE", task_dict.title)
+    
+
+
+    slack_bot_token= os.environ.get('SLACK_BOT_TOKEN')
+    channel_name = 'test-channel'
+    text=f"Someone just completed {task.title}"
+    headers = {"Authorization": slack_bot_token}
+    slack_url = f'https://slack.com/api/chat.postMessage?channel={channel_name}&text={text}' 
+    
     response = requests.post(slack_url, headers=headers)
+
+    
 
     return {"task": task.to_dict()}
 
 @task_bp.route("/<id>/mark_incomplete", methods=["PATCH"])
 def mark_incomplete(id):
     task = validate_task(id)
+   
     task.completed_at = None
-    task.is_complete = False
-    
 
+    db.session.add(task)
     db.session.commit()
-    # response = requests.patch(slack_url, params=query_params)
 
-    #     headers = {
-    #     "authorization": f"Bearer {slack_bot_token}",
-    # }
-    # params = {
-    #     "channel": "test-channel",
-    #     "text": f"Task {task.title} is not complete",
-    # }
+    slack_bot_token= os.environ.get('SLACK_BOT_TOKEN')
+    channel_name = 'test-channel'
+    text=f"Someone still hasn't completed {task.title}"
+    headers = {"Authorization": slack_bot_token}
+    slack_url = f'https://slack.com/api/chat.postMessage?channel={channel_name}&text={text}' 
+    
+    response = requests.post(slack_url, headers=headers)
 
-    # }
-    # headers = {
-    #     "authorization": f"Bearer {slack_bot_token}",
-    # }
-    # params = {
-    #     "channel": "test-channel",
-    #     "text": f"Task {task.title} is not complete",
-    # }
     return {"task": task.to_dict()}
 
 

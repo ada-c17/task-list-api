@@ -7,7 +7,7 @@ class Task(db.Model):
     is_complete = db.Column(db.Boolean, default=False)
     completed_at = db.Column(db.DateTime, default=None)
     goal_id = db.Column(db.Integer, db.ForeignKey('goal.id'))
-    goal = db.relationship ("Goal", backref='tasks')
+    # goal = db.relationship ("Goal", backref='tasks')
 
 
 

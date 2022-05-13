@@ -152,7 +152,7 @@ def test_mark_incomplete_missing_task(client):
 # Let's add this test for creating tasks, now that
 # the completion functionality has been implemented
 # @pytest.mark.skip(reason="No way to test this feature yet")
-# def test_create_task_with_valid_completed_at(client):
+def test_create_task_with_valid_completed_at(client):
     # Act
     response = client.post("/tasks", json={
         "title": "A Brand New Task",
