@@ -9,6 +9,7 @@ from sqlalchemy import desc
 from app import db
 from app.models.goal import Goal
 from app.models.task import Task
+from app.routes import get_task_by_id, update_task_by_id
 from .helper_routes import get_record_by_id
 
 
@@ -78,28 +79,39 @@ def delete_goal_by_id(id):
 
 
 
-# #### FRIENDSHIP ROUTEs
-# @goals_bp.route("/<id>/tasks", methods=["POST"])
-# def post_tasks_for_goal(id):
-#     goal = get_goal(id)
+#### FRIENDSHIP ROUTEs
+@goals_bp.route("/<id>/tasks", methods=["POST"])
+def post_tasks_for_goal(id):
+    goal = get_goal(id)
 
-#     request_body = request.get_json()
-#     task_id = request_body["task_ids"]
-#     new_task = Task(
-#         title=request_body["title"],
-#         description=request_body["description"],
-#         completed_at=request_body["completed_at"]
-#         )
-#     print(new_task)
-#     new_task.goal = goal
+    request_body = request.get_json()
+    # print("~~~RQ_BOD", request_body)
+    task_ids = request_body["task_ids"]
+    
+    for task_id in task_ids:
+        task = get_task_by_id(task_id)
+        task.goal = goal
+        update_task_by_id(task_id)
+    
+    goal.tasks = request_body["task_ids"]
 
-#     db.session.add(new_task)
-#     db.session.commit()
+    # print("req bod:", request_body)
 
-#     return jsonify(new_task.to_dictionary()),201
+    # new_task = Task(
+    #     title=request_body["title"],
+    #     description=request_body["description"],
+    #     completed_at=request_body["completed_at"]
+    #     )
+    # new_task.goal = goal
+    # print("new_task:", new_task)
 
-# no request body
-# response body returns {goal{tasks}}
+    # db.session.add(new_task)
+    db.session.commit()
+    
+    return jsonify(f"{goal.id}: {task_ids}"),201
+
+## no request body ?
+## response body returns {goal{tasks}}
 
 
 

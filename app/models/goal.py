@@ -14,8 +14,11 @@ class Goal(db.Model):
         response = {
             "id" : self.id,
             "title" : self.title
-            # "tasks" : self.tasks
+        #     "tasks" : self.tasks if self.tasks else None
         }
+        if self.tasks:
+            response["tasks"] = self.tasks
+
         return response
 
     @classmethod

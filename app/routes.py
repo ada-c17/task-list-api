@@ -81,9 +81,12 @@ def update_task_by_id(id):
     task = get_task(id)
 
     request_body = request.get_json()
+    task_keys = request_body.keys()
 
-    task.title = request_body["title"]
-    task.description = request_body["description"]
+    if "title" in task_keys:
+        task.title = request_body["title"]
+    if "description" in task_keys:
+        task.description = request_body["description"]
 
     db.session.commit()
 
