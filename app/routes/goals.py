@@ -21,7 +21,8 @@ def get_all_goals():
 @goals_bp.route("/<id>", methods=["GET"])
 def get_goal_by_id(id):
     goal = handle_id_request(id, Goal)
-    return make_response(jsonify({"goal": goal.make_response_dict()}), 200)
+    confirmation_msg = {"goal": goal.make_response_dict()}
+    return make_response(jsonify(confirmation_msg), 200)
 
 
 @goals_bp.route("", methods=["POST"])
@@ -58,9 +59,11 @@ def delete_goal_by_id(id):
 
 @goals_bp.route("/<id>/tasks", methods=["POST"])
 def add_list_of_tasks_to_goal(id):
+    #validate Goal exists; just keep id
     handle_id_request(id, Goal)
     id = int(id)
 
+    #request body format validation
     bad_request_msg = {"msg":"Invalid input. Use {\"task_ids\": [1, 2,...]}. IDs must be int."}
     try:
         task_ids = request.get_json()["task_ids"]
@@ -84,6 +87,7 @@ def add_list_of_tasks_to_goal(id):
     db.session.commit()
 
     confirmation_msg = {"id": id, "task_ids": response_ids}
+    #only include invalid_ids key in response if there are invalid_ids
     if invalid_ids:
         confirmation_msg["invalid_ids"] = invalid_ids
     return make_response(jsonify(confirmation_msg), 200)
