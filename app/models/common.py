@@ -72,3 +72,29 @@ def get_filtered_and_sorted(cls, request_args):
         return cls.query.filter(*filters).all()
     return (cls.query.filter_by(*filters)
                             .order_by(getattr(cls.title,sort_style)()).all())
+
+
+###########################
+# Slack integration methods
+import os
+import requests
+
+def notify(title, event, text=None):
+    if not text and event == 'mark_complete':
+        text = f'Someone just completed the task {title}'
+    elif not text and event == 'mark_incomplete':
+        text = f'Someone just marked the task {title} incomplete!'
+    elif not text:
+        text = f'Something labeled "{event}" just happened.'
+
+    headers = {'Authorization': f'Bearer {os.environ.get("SLACKBOT_OAUTH_TOKEN")}'}
+    params = {
+        'text': text,
+        'channel': 'task-notifications'
+    }
+    r = requests.post(
+        'https://slack.com/api/chat.postMessage', 
+        params = params, 
+        headers = headers
+    )
+    return r.status_code == 200

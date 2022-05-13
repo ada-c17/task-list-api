@@ -4,10 +4,9 @@ from datetime import datetime
 from app.models.task import Task
 from app.models.goal import Goal, TasksGoal
 from app.models.common import (MissingValueError, FormatError, DBLookupError,
-                IDTypeError, validate_and_get_by_id, get_filtered_and_sorted)
+                IDTypeError, validate_and_get_by_id, get_filtered_and_sorted,
+                notify)
 from app.error_responses import make_error_response
-import os
-import requests
 
 
 task_bp = Blueprint('tasks', __name__, url_prefix = '/tasks')
@@ -70,18 +69,7 @@ def mark_task_complete(task_id):
         abort(make_error_response(err, Task, task_id))
     task.completed_at = datetime.utcnow()
     db.session.commit()
-
-    #TODO: refactor slack notification out of routes
-    headers = {'Authorization': f'Bearer {os.environ.get("SLACKBOT_OAUTH_TOKEN")}'}
-    params = {
-        'text': f'Someone just completed the task {task.title}',
-        'channel': 'task-notifications'
-    }
-    r = requests.post(
-        'https://slack.com/api/chat.postMessage', 
-        params = params, 
-        headers = headers
-    )
+    notify(task.title, 'mark_complete') # Slack notification
 
     return jsonify({'task': task}), 200
 
@@ -93,6 +81,7 @@ def mark_task_incomplete(task_id):
         abort(make_error_response(err, Task, task_id))
     task.completed_at = None
     db.session.commit()
+    notify(task.title, 'mark_incomplete') # Slack notification
 
     return jsonify({'task': task}), 200
 
