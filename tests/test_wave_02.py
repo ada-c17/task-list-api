@@ -1,7 +1,7 @@
 import pytest
 
-
-@pytest.mark.skip(reason="No way to test this feature yet")
+# Test 12
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_sorted_asc(client, three_tasks):
     # Act
     response = client.get("/tasks?sort=asc")
@@ -28,8 +28,8 @@ def test_get_tasks_sorted_asc(client, three_tasks):
             "is_complete": False}
     ]
 
-
-@pytest.mark.skip(reason="No way to test this feature yet")
+# Test 13
+#@pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_sorted_desc(client, three_tasks):
     # Act
     response = client.get("/tasks?sort=desc")
