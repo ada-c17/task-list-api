@@ -3,6 +3,7 @@ from app.models.goal import Goal
 from app.models.task import Task
 from app import db
 
+
 goal_bp = Blueprint("goal_bp", __name__, url_prefix="/goals")
 
 def validate_id(id):

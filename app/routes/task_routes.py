@@ -4,9 +4,7 @@ from app import db
 from datetime import datetime
 import requests
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
 
 task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 
