@@ -1,10 +1,7 @@
 from flask import Blueprint, jsonify, abort, make_response, request
-import requests
 from app import db
 from app.models.goal import Goal
 from app.models.task import Task
-from datetime import datetime
-import os 
 from app.routes import is_completed
 
 
@@ -141,17 +138,12 @@ def get_tasks(goal_id):
             "description":task.description,
             "is_complete": is_completed(task.completed_at)
             })
-    if len(chosen_goal_task) > 1:
-        response_body= {
+
+    response_body= {
         "id":chosen_goal.goal_id,
         "title":chosen_goal.title,
-        "task":chosen_goal_task }
-    else: 
-        response_body= {
-            "id":chosen_goal.goal_id,
-            "title":chosen_goal.title,
-            "tasks":chosen_goal_task 
-            }
+        "tasks": chosen_goal_task 
+        }
 
     return jsonify(response_body), 200
 
