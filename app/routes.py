@@ -57,7 +57,7 @@ def get_all_tasks():
             tasks = Task.query.order_by(Task.title.desc())
         else:
             return make_response(jsonify(
-                {"msg": "Please enter 'asc' or 'desc' parameter to 'sort"}),
+                {"msg": "Please enter 'asc' or 'desc' parameter to sorting"}),
                 400)
     else:
         tasks = Task.query.all()

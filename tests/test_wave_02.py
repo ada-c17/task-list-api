@@ -66,5 +66,4 @@ def test_get_error_message_if_sort_has_invalid_parameter(client, three_tasks):
 
     # Assert
     assert response.status_code == 400
-    assert response_body == {
-        "msg": "Please enter 'asc' or 'desc' parameter to 'sort"}
+    assert response_body == {"msg": "Please enter 'asc' or 'desc' parameter to sorting"}
