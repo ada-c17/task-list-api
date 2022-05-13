@@ -7,6 +7,7 @@ from datetime import datetime
 import os
 import requests
 
+
 tasks_bp = Blueprint('tasks_bp', __name__, url_prefix='/tasks')
 
 
@@ -14,29 +15,22 @@ tasks_bp = Blueprint('tasks_bp', __name__, url_prefix='/tasks')
 def create_a_task():
     request_body = request.get_json()
 
-    if "completed_at" in request_body:
-        completed_at = request_body["completed_at"]
+    if 'completed_at' in request_body:
+        completed_at = request_body['completed_at']
     else:
         completed_at = None
 
     try:
-        new_task = Task(title=request_body["title"],
-                        description=request_body["description"],
+        task = Task(title=request_body['title'],
+                        description=request_body['description'],
                         completed_at=completed_at)
     except:
-        return {"details": "Invalid data"}, 400
+        return {'details': 'Invalid data'}, 400
     
-    db.session.add(new_task)
+    db.session.add(task)
     db.session.commit()
     
-    return jsonify({
-        'task': {
-            "id": new_task.task_id,
-            "title": new_task.title,
-            "description": new_task.description,
-            "is_complete": bool(new_task.completed_at)
-        }
-    }), 201
+    return {'task': task.to_dict()}, 201
 
 
 @tasks_bp.route('', methods=['GET'])
@@ -47,15 +41,10 @@ def get_all_tasks():
         tasks = Task.query.order_by(Task.title.desc())
     else:
         tasks = Task.query.all()
-    task_list = []
     
+    task_list = []
     for task in tasks:
-        task_list.append({
-                'id': task.task_id,
-                'title': task.title,
-                'description': task.description,
-                'is_complete': bool(task.completed_at)
-        })
+        task_list.append(task.to_dict())
 
     return jsonify(task_list), 200
 
@@ -79,49 +68,24 @@ def validate_task(task_id):
 def get_one_task(task_id):
     task = validate_task(task_id)
     
-    if task.goal_id:
-        return jsonify({
-            'task': {
-                'id': task.task_id,
-                'goal_id': task.goal_id,
-                'title': task.title,
-                'description': task.description,
-                'is_complete': bool(task.completed_at)
-                }
-            }), 200
-    
-    else:
-            return jsonify({
-        'task': {
-            'id': task.task_id,
-            'title': task.title,
-            'description': task.description,
-            'is_complete': bool(task.completed_at)
-            }
-        }), 200
-
+    return {'task': task.to_dict()}, 200
+        
 
 @tasks_bp.route('/<task_id>', methods=['PUT'])
-def update_task(task_id): #REFACTOR?
+def update_task(task_id):
     task = validate_task(task_id)
     
     request_body = request.get_json()
     try:
-        task.title = request_body["title"]
-        task.description = request_body["description"]
+        task.title = request_body['title']
+        task.description = request_body['description']
+    
     except KeyError:
         return jsonify({'details': 'Request must include both title and description'}), 400
     
     db.session.commit()
 
-    return jsonify({
-        'task': {
-            'id': task.task_id,
-            'title': task.title,
-            'description': task.description,
-            'is_complete': bool(task.completed_at)
-            }
-        }), 200
+    return {'task': task.to_dict()}, 200
 
 
 @tasks_bp.route('/<task_id>/mark_complete', methods=['PATCH'])
@@ -138,14 +102,7 @@ def mark_task_complete(task_id):
 
     requests.post(url, params=params, headers=headers)
 
-    return jsonify({
-        'task': {
-            'id': task.task_id,
-            'title': task.title,
-            'description': task.description,
-            'is_complete': bool(task.completed_at)
-            }
-    }), 200
+    return {'task': task.to_dict()}, 200
 
 
 @tasks_bp.route('/<task_id>/mark_incomplete', methods=['PATCH'])
@@ -155,14 +112,7 @@ def mark_task_incomplete(task_id):
     task.completed_at = None
     db.session.commit()
 
-    return jsonify({
-        'task': {
-            'id': task.task_id,
-            'title': task.title,
-            'description': task.description,
-            'is_complete': bool(task.completed_at)
-            }
-        }), 200
+    return {'task': task.to_dict()}, 200
 
 
 @tasks_bp.route('/<task_id>', methods=['DELETE'])

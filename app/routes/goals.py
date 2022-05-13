@@ -4,6 +4,7 @@ import json
 from flask import Blueprint, request, jsonify, abort, make_response
 from app.routes.tasks import tasks_bp, validate_task
 
+
 goals_bp = Blueprint('goals_bp', __name__, url_prefix='/goals')
 
 
@@ -12,32 +13,24 @@ def create_a_goal():
     request_body = request.get_json()
 
     try:
-        new_goal = Goal(title=request_body["title"])
+        goal = Goal(title=request_body['title'])
     
     except:
-        return {"details": "Invalid data"}, 400
+        return {'details': 'Invalid data'}, 400
 
-    db.session.add(new_goal)
+    db.session.add(goal)
     db.session.commit()
 
-    return jsonify({
-        "goal": {
-            "id": new_goal.goal_id,
-            "title": new_goal.title
-        }
-    }), 201
+    return {'goal': goal.to_dict()}, 201
 
 
 @goals_bp.route('', methods=['GET'])
 def get_all_goals():
     goals = Goal.query.all()
+    
     goal_list = []
-
     for goal in goals:
-        goal_list.append({
-            'id': goal.goal_id,
-            'title': goal.title
-        })
+        goal_list.append(goal.to_dict())
 
     return jsonify(goal_list), 200
 
@@ -60,12 +53,8 @@ def validate_goal(goal_id):
 @goals_bp.route('/<goal_id>', methods=['GET'])
 def get_one_goal(goal_id):
     goal = validate_goal(goal_id)
-    return jsonify({
-        'goal': {
-            'id': goal.goal_id,
-            'title': goal.title
-        }
-    }), 200
+    
+    return {'goal': goal.to_dict()}, 200
 
 
 @goals_bp.route('/<goal_id>', methods=['PUT'])
@@ -75,19 +64,14 @@ def update_goal(goal_id):
     request_body = request.get_json()
 
     try:
-        goal.title = request_body["title"]
+        goal.title = request_body['title']
     
     except KeyError:
         return jsonify({'details': 'Request must include title'}), 400
 
     db.session.commit()
 
-    return jsonify({
-        'goal': {
-            'id': goal.goal_id,
-            'title': goal.title
-        }
-    }), 200
+    return {'goal': goal.to_dict()}, 200
         
 
 @goals_bp.route('/<goal_id>', methods=['DELETE'])
@@ -126,15 +110,7 @@ def get_tasks_for_goal(goal_id):
     task_list = []
 
     for task in goal.tasks:
-        task_list.append(
-            {
-            "id": task.task_id,
-            "goal_id": task.goal_id,
-            "title": task.title,
-            "description": task.description,
-            "is_complete": bool(task.completed_at)
-            }
-        )
+        task_list.append(task.to_dict())
 
     return jsonify({
         'id': goal.goal_id,
