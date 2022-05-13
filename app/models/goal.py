@@ -18,13 +18,3 @@ class Goal(db.Model):
             "id": self.id, 
             "title": self.title
             }
-
-        # tasks_list = []
-        # for task in self.tasks:
-        #     tasks_list.append(task.to_dict_basic())
-
-        # return{
-        #     "id": self.id, 
-        #     "title": self.title, 
-        #     "tasks": tasks_list
-        # }

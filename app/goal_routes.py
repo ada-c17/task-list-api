@@ -15,7 +15,6 @@ def validate_goal_id(goal_id):
     abort(make_response({"msg":f"The goal with id {goal_id} is not found"}, 404))
 
 goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
-# POST new task
 @goals_bp.route("", methods=["POST"])
 def create_goal():
     request_body = request.get_json()

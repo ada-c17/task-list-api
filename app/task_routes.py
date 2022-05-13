@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import requests
 load_dotenv()
 
+##for original slack bot soln
 # import logging
 # logging.basicConfig(level=logging.DEBUG)
 # import ssl
@@ -19,7 +20,6 @@ def validate_task_id(task_id):
         task_id = int(task_id)
     except ValueError:
         abort(make_response({"msg":f"The task with id {task_id} is invalid"}, 400))
-    
     task = Task.query.get(task_id)
     if task:
         return task
@@ -27,7 +27,6 @@ def validate_task_id(task_id):
     abort(make_response({"msg":f"The task with id {task_id} is not found"}, 404))
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
-# POST new task
 @tasks_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
@@ -36,7 +35,6 @@ def create_task():
         "description" not in request_body:
         return make_response({"details": "Invalid data"}), 400
 
-# mark completed HF?
     if "completed_at" in request_body:
         new_task = Task(
             title=request_body["title"], 
@@ -58,7 +56,6 @@ def create_task():
     'is_complete':new_task.is_complete}
     }), 201
 
-# GET all tasks
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
     sort_query = request.args.get("sort")
@@ -73,9 +70,9 @@ def get_all_tasks():
         tasks_response.append(
             task.to_dict_basic()
         )
+
     return jsonify(tasks_response)
 
-# GET one task 
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = validate_task_id(task_id)
@@ -87,10 +84,8 @@ def update_task(task_id):
     request_body = request.get_json()
     task.title = request_body["title"]
     task.description = request_body["description"]
-
     if task.completed_at:
         task.is_complete = True 
-
     db.session.commit()
 
     return jsonify(task.to_dict())
@@ -103,11 +98,9 @@ def delete_task(task_id):
 
     return make_response({"details": f"Task {task_id} \"{task.title}\" successfully deleted"})
 
-# Note - potentially refactor mark_complete and mark_imcomplete routes into one? 
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_task_complete(task_id):
     task = validate_task_id(task_id)
-
     task.completed_at = datetime.datetime.now()
     task.is_complete = True
     db.session.commit()
@@ -146,14 +139,9 @@ def mark_task_complete(task_id):
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_task_incomplete(task_id):
     task = validate_task_id(task_id)
-
-# mark completed HF?
     task.completed_at = None
     task.is_complete = False
-    
     db.session.commit()
+
     return jsonify(task.to_dict())
 
-#PSE review 1-6 for mock interview - str manipulation, nested listed(traversing), mostly algorithm questions, algorithm practice 
-# --> will typically be asked about big O 
-#"functional programming"-recursions/lots of immutable , resource==leet code
