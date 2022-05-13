@@ -127,7 +127,7 @@ def mark_as_complete_one_task(task_id):
         "text" : "Wow, it's almost your birthday!"}
 
     header = {
-        "Authorization" : os.environ.get("API_KEY")}
+        "Authorization" : os.environ.get("SLACK_BOT_TOKEN")}
 
     requests.post(
         url = "https://slack.com/api/chat.postMessage", 
