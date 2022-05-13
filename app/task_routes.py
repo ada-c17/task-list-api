@@ -107,19 +107,16 @@ def mark_task_complete(task_id):
 
 # create requests.post(slack api)
     slack_url = "https://slack.com/api/chat.postMessage"
-    slack_token = os.environ['SLACK_BOT_TOKEN']
     params = {
         "channel": "task-list-api",
         "text": f'Someone just completed the task "{task.title}"'
         }
-    headers = {
-        "Authorization":"Bearer {}".format(slack_token)
-        }
-    r = requests.post(slack_url, headers=headers, params=params)
+    headers = {"Authorization":f"Bearer {os.environ.get('SLACK_BOT_TOKEN')}"}
 
+    requests.post(slack_url, params=params, headers=headers)
     return jsonify(task.to_dict())
 
-## original soln for slack bot below - keeping in case I need to reference it again... or just cry over how much time I spent trying to figure it out... 
+    ## original soln for slack bot below - keeping in case I need to reference it again... or just cry over how much time I spent trying to figure it out... 
     # ssl_context = ssl.create_default_context()
     # ssl_context.check_hostname = False
     # ssl_context.verify_mode = ssl.CERT_NONE
@@ -130,7 +127,7 @@ def mark_task_complete(task_id):
     # try:
     #     response = client.chat_postMessage(
     #         channel="task-list-api", 
-    #         text=f"Someone just completed the task {task_title}"
+    #         text=f"Someone just completed the task {task.title}"
     #     )
     # except SlackApiError as e:
     #     assert e.response["error"]
