@@ -2,19 +2,21 @@ from flask import Blueprint, request, jsonify, make_response, abort
 from app import db
 from app.models.goal import Goal
 from app.models.task import Task
-from app.task_routes import validate_task
+from app.route_helpers import error_message
 
 goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 
 # create a new goal
 @goals_bp.route("", methods=["POST"])
 def create_goal():
+    # check for request body
     if not request.get_json():
         abort(make_response({"details": "Invalid data"}, 400))
     
     request_body = request.get_json()
     new_goal = Goal(title=request_body["title"])
 
+    # update database
     db.session.add(new_goal)
     db.session.commit()
 
@@ -28,7 +30,7 @@ def get_all_goals():
     goals = Goal.query.all()
     goals_response = [goal.to_dict() for goal in goals]
 
-    return jsonify(goals_response)
+    return make_response(jsonify(goals_response))
 
 # get goal by id
 @goals_bp.route("/<goal_id>", methods=["GET"])
@@ -91,11 +93,11 @@ def validate_goal(goal_id):
     try:
         goal_id = int(goal_id)
     except:
-        abort(make_response({"details": f"Goal #{goal_id} invalid"}, 400))
+        error_message(f"Goal #{goal_id} invalid", 400)
     
     goal = Goal.query.get(goal_id)
     
     if not goal:
-        abort(make_response({"details": f"Goal #{goal_id} not found"}, 404))
+        error_message(f"Goal #{goal_id} not found", 404)
     
     return goal
