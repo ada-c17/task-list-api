@@ -114,3 +114,19 @@ def test_get_task_includes_goal_id(client, one_task_belongs_to_one_goal):
             "is_complete": False
         }
     }
+
+# not working yet
+# def test_create_task_with_invalid_date_time(client):
+#     # Act
+#     response = client.post("/tasks", json={
+#         "title": "Updated Task Title",
+#         "description": "Updated Test Description",
+#         "completed_at": "5"
+#     })
+#     response_body = response.get_json()
+
+#     # Assert
+#     assert response.status_code == 400
+#     assert response_body == {
+#         "msg": "Invalid date time 5"
+#     }

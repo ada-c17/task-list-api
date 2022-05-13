@@ -198,3 +198,4 @@ def test_update_task_with_completed_at_date(client, completed_task):
     assert task.title == "Updated Task Title"
     assert task.description == "Updated Test Description"
     assert task.completed_at
+
