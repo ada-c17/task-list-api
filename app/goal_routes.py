@@ -3,6 +3,8 @@ from app.models.task import Task
 from app.models.goal import Goal
 from app import db
 from app.task_routes import validate_task
+from sqlalchemy import desc, asc
+from datetime import datetime 
 
 goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 
@@ -34,9 +36,18 @@ def create_one_goal():
 
 @goals_bp.route("", methods=["GET"])
 def get_all_goals():
-    goals = Goal.query.all()
+    params = request.args
+    if "sort" in params :
+        if params["sort"] == "desc":
+            goals = Goal.query.order_by(desc(Goal.title)).all()
+        else:
+            goals = Goal.query.order_by(asc(Goal.title)).all()
+    else:
+        goals = Goal.query.all()
 
     goals_response = []
+    #goals_response = [goal for goal in goals if goal in goals] ---> no time to fix this broken list comprehension >_< will get back to it
+
     for goal in goals:
         goals_response.append(
             {
