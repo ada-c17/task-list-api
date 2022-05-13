@@ -6,6 +6,7 @@ from app import db
 from flask import Blueprint, jsonify, make_response, request
 from datetime import datetime, timezone
 from app.models.task import Task
+from app.models.goal import Goal
 from app.routes.request_helpers import handle_id_request, check_complete_request_body
 
 load_dotenv()
@@ -27,6 +28,29 @@ def slack_complete(task):
     response = requests.post(url, params=query_params, headers=headers)
     return response
 
+def slack_goal_complete(task):
+    url = "https://slack.com/api/chat.postMessage"
+    goal = task.goal
+    slack_message = f"Goal achieved!\U0001F389 All tasks for '{goal.title}' were completed."
+
+    query_params = {
+        "channel": "task-completion",
+        "text": slack_message
+    }
+    auth_token = os.environ.get("SLACKBOT_API_TOKEN")
+    headers = {
+        "Authorization": f"Bearer {auth_token}"
+    }
+    response = requests.post(url, params=query_params, headers=headers)
+    return response
+
+def last_task_in_goal(task):
+    task_goal = task.goal
+    task_list = task_goal.tasks
+    if all(task.completed_at for task in task_list):
+        return True
+    else:
+        return False
 
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
@@ -161,6 +185,12 @@ def mark_task_complete(id):
     confirmation_msg = {"task": task.make_response_dict()}
 
     slack_complete(task)
+
+    if task.goal:
+        if last_task_in_goal(task):
+            slack_goal_complete(task)
+
+
     #slack_response = slack_complete(task)
     #confirmation_msg["slack-response"] = slack_response.json()
     #for troubleshooting response from Slack API through postman
