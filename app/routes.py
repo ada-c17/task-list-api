@@ -7,8 +7,7 @@ from .helper import validate_task, validate_goal, call_slack
 from datetime import datetime
 
 task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
-slack_bp = Blueprint("slacks", __name__,
-                     url_prefix="/slack.com/api/chat.postMessage")
+
 
 # Create a task
 @task_bp.route("", methods=["POST"])

@@ -43,8 +43,8 @@ def call_slack(response_message):
         "channel": "task-notifications",
         "text": response_message
     }
-    response = requests.post(path, data=query_params, headers=Headers)
-    #return response.json()
+    response = requests.post(path, params=query_params, headers=Headers)
+    return response.json()
     # print(f"Someone just completed poppy's task {title}")
 
     # def create_app(test_config=None):

@@ -36,6 +36,4 @@ def create_app(test_config=None):
     from .routes import goal_bp
     app.register_blueprint(goal_bp)
 
-    from .routes import slack_bp
-    app.register_blueprint(slack_bp)
     return app
