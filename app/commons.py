@@ -1,5 +1,6 @@
-######################################################
-# extension of JSONEncoder class for Task List objects
+########################################################
+# extension of JSONEncoder class for Task List objects #
+
 from flask.json import JSONEncoder
 
 class TaskListJSONEncoder(JSONEncoder):
@@ -29,8 +30,8 @@ class TaskListJSONEncoder(JSONEncoder):
         return JSONEncoder.default(self, obj)
 
 
-#########################################
-# Shared validation and filtering methods
+###########################################
+# Shared validation and filtering methods #
 
 class MissingValueError(Exception): ...
 class FormatError(ValueError): ...
@@ -74,8 +75,8 @@ def get_filtered_and_sorted(cls, request_args):
                             .order_by(getattr(cls.title,sort_style)()).all())
 
 
-###########################
-# Slack integration methods
+#############################
+# Slack integration methods #
 import os
 import requests
 
