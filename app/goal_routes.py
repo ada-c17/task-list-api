@@ -42,7 +42,6 @@ def read_all_goals():
     else:
         goals = Goal.query.all()
 
-    #goals = Goal.query.all()
     goals_response = []
     for goal in goals:
         goals_response.append({

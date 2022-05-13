@@ -148,17 +148,22 @@ def test_get_task_invalid(client):
 
 # Test 40
 #@pytest.mark.skip(reason="No way to test this feature yet")
-def test_app_config_is_false(client):
+def test_get_tasks_filter_by_title(client, three_tasks):
     # Act
-    response = client.get("/tasks/hello")
+    response = client.get("/tasks?title=Water%20the%20garden%20🌷")
     response_body = response.get_json()
 
     # Assert
-    assert response.status_code == 400
+    assert response.status_code == 200
     assert len(response_body) == 1
-    assert response_body == {"message": "task hello invalid"}
-
-
+    assert response_body == [
+        {
+            "id": 1,  
+            "title": "Water the garden 🌷",
+            "description": "",
+            "is_complete": False
+        }
+    ]
 # Test 41
 #@pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_sorted_by_id(client, three_tasks):
@@ -190,7 +195,7 @@ def test_get_tasks_sorted_by_id(client, three_tasks):
 
 # Test 42
 #@pytest.mark.skip(reason="No way to test this feature yet")
-def test_get_goals_filter_by_title(client, three_goals):
+def test_get_goals_sort_by_title(client, three_goals):
     # Act
     response = client.get("/goals?sort=title")
     response_body = response.get_json()
@@ -200,16 +205,16 @@ def test_get_goals_filter_by_title(client, three_goals):
     assert len(response_body) == 3
     assert response_body == [
         {
-            "id": 2,  
-            "title": "Answer forgotten email 📧"
-        },
-        {
-            "id": 3,
-            "title": "Pay my outstanding tickets 😭"
+            "id": 3,  
+            "title": "Drink more water"
         },
         {
             "id": 1,
-            "title": "Water the garden 🌷"
+            "title": "Exercise more"
+        },
+        {
+            "id": 2,
+            "title": "Learn to code"
         }
     ]
 

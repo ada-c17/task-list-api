@@ -47,23 +47,8 @@ def read_all_tasks():
             tasks = Task.query.order_by(asc(Task.title)).all()
         elif task_query["sort"] == "id":
             tasks = Task.query.order_by(cast(Task.task_id, Integer)).all()
-        # elif "title" in task_query:
-        # driver_name = task_query["driver"]
-        # cars = Task.query.filter_by(driver=driver_name)
-        
     else:
         tasks = Task.query.all()
-    # task_query = request.args
-    # if "sort" in task_query:
-    #     if task_query["sort"] == "desc":
-    #         tasks = Task.query.order_by(desc(Task.title)).all()
-    #     else: 
-    #         tasks = Task.query.order_by(asc(Task.title)).all()
-    # elif "sort" in task_query:
-    #     if task_query["sort"] == "id":
-    #         tasks = Task.query.order_by(cast(Task.task_id, Integer)).all()
-    # else:
-    #     tasks = Task.query.all()
     
     tasks_response = []
     for task in tasks:

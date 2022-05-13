@@ -100,10 +100,10 @@ def one_task_belongs_to_one_goal(app, one_goal, one_task):
 def three_goals(app):
     db.session.add_all([
         Goal(
-            title="Water the garden 🌷"),
+            title="Exercise more"),
         Goal(
-            title="Answer forgotten email 📧"),
+            title="Learn to code"),
         Goal(
-            title="Pay my outstanding tickets 😭")
+            title="Drink more water")
     ])
     db.session.commit()
