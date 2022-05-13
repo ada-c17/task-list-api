@@ -1,6 +1,6 @@
 import os
-from slack import WebClient
-from slack.errors import SlackApiError
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
 from app.models.goal import Goal
 from app.models.task import Task
 
