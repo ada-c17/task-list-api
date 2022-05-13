@@ -29,5 +29,5 @@ def validate_goal_id(goal_id):
     return goal
 
 
-def create_message(details_info, status_code):
+def create_message(details_info, status_code=200):
     abort(make_response({"details": details_info}, status_code))
