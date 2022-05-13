@@ -4,6 +4,7 @@ from app import db
 from datetime import datetime
 import logging
 import os
+import slack
 from slack_sdk import WebClient
 from slack_sdk.errors import SlackApiError
 
