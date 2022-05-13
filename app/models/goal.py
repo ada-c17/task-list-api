@@ -12,4 +12,7 @@ class Goal(db.Model):
             "title": self.title
         }
 
+        if self.tasks:
+            goal_dict["tasks"] = []
+
         return goal_dict

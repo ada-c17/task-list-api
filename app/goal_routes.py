@@ -55,6 +55,17 @@ def delete_goal(goal_id):
 
     return make_response({"details": f'Goal {goal_id} \"{goal.title}\" successfully deleted'})
 
+# get tasks by goal id
+@goals_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_tasks_for_goal(goal_id):
+    goal = validate_goal(goal_id)
+    task_list = [task.to_dict() for task in goal.tasks]
+
+    goal_dict = goal.to_dict()
+    goal_dict["tasks"] = task_list
+
+    return jsonify(goal_dict)
+
 # helper function to validate goal by id
 def validate_goal(goal_id):
     try:
