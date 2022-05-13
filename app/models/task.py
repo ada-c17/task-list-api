@@ -17,8 +17,8 @@ class Task(db.Model):
             "description" : self.description,
             "is_complete" : self.completed_at is not None
         }
-        # if self.goal_id:
-            # rsp_json['goal_id'] = self.goal_id
+        if self.goal_id:
+            rsp_json['goal_id'] = self.goal_id
             
         return rsp_json
 
