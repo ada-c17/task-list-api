@@ -3,7 +3,8 @@ from app import db
 from datetime import datetime
 from app.models.task import Task
 from app.models.goal import Goal, TasksGoal
-from app.commons import validate_and_get_by_id, get_filtered_and_sorted, notify
+from app.commons import (validate_and_get_by_id, get_filtered_and_sorted,
+                        notify, make_slackbot_response)
 from app.error_responses import (MissingValueError, FormatError, DBLookupError,
                                 IDTypeError, make_error_response)
 
@@ -179,3 +180,38 @@ def get_all_tasks_of_goal(goal_id):
         abort(make_error_response(err, Goal, goal_id))
     
     return jsonify(TasksGoal(goal)), 200
+
+
+##################
+# Slackbot route #
+##################
+
+import re
+
+slackbot_bp = Blueprint('slackbot', __name__, url_prefix = '/slackbot')
+
+@slackbot_bp.route('', methods = ['POST'])
+def respond_to_bot():
+    data = request.get_json()
+    if 'event' not in data:
+        # Slack API requires challenge response
+        # Some verification should happen here for security, but ...
+        return jsonify({'challenge':data['challenge']})
+    else:
+        text = data['event']['text']
+
+    if 'tasks' in text:
+        resource, title = Task, None
+    elif 'goals' in text:
+        resource, title = Goal, None
+    elif 'finish' in text:
+        p = re.compile(r'.*finish\s')
+        title = p.sub('',text)
+        resource = Goal
+    else:
+        abort(make_error_response(ValueError, None, detail=(' Bot did not rec'
+                                                        'ognize request.')))
+    
+    if title is None:
+        return jsonify(make_slackbot_response(resource))
+    return jsonify(make_slackbot_response(resource, TasksGoal, title))
