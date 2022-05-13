@@ -1,4 +1,3 @@
-from tkinter import TRUE
 from app import db
 
 
