@@ -5,7 +5,7 @@ from flask import Blueprint, jsonify, abort, make_response, request
 import os
 import requests
 from sqlalchemy.sql.functions import now
-from .helper import validate_task, sort_or_get
+from .helper import validate_task, sort_filter_get
 
 task_bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 
@@ -22,7 +22,7 @@ def create_tasks():
 
 @task_bp.route("", methods=["GET"])
 def read_all_tasks():
-    tasks = sort_or_get(Task)
+    tasks = sort_filter_get(Task)
 
     tasks_response = [task.make_json() for task in tasks]        
     

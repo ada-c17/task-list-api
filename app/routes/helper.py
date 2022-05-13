@@ -17,15 +17,20 @@ def validate_task(cls,task_id):
             return abort(make_response({"message":f"task {task_id} not found"}, 404))
     return obj
 
-def sort_or_get(cls):
+def sort_filter_get(cls):
     sort_query = request.args.get("sort")
+    title_query = request.args.get("title")
 
     if sort_query == "asc":
         obj = cls.query.order_by(asc(cls.title))
     elif sort_query == "desc":
         obj = cls.query.order_by(desc(cls.title))
+    elif title_query:
+        obj = cls.query.filter_by(cls.title)
     else:
         obj = cls.query.all()
     
     return obj
+
+    
 

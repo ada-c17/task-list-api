@@ -1,6 +1,5 @@
 from app import db
-from flask import current_app, abort, make_response
-from flask.json import JSONEncoder
+from flask import abort, make_response
 
 class Task(db.Model):
     task_id = db.Column(db.Integer, primary_key=True, autoincrement=True)

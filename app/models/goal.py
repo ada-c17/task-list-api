@@ -12,6 +12,7 @@ class Goal(db.Model):
             "title": self.title,
         }
     
+    
     @classmethod
     def create_goal(cls, request_body):
         try:
