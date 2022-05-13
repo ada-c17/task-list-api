@@ -104,7 +104,12 @@ def get_tasks_for_goal(goal_id):
     return {
         "id": goal.goal_id,
         "title": goal.title,
-        "tasks": [{"id": task.task_id, "title": task.title, "description": task.description, "goal_id": task.goal_id, "is_complete": task.is_complete()} for task in goal.tasks] 
+        "tasks": [{
+            "id": task.task_id, 
+            "title": task.title, 
+            "description": task.description, 
+            "goal_id": task.goal_id, 
+            "is_complete": task.is_complete()} for task in goal.tasks] 
     }
 
 def validate_id(goal_id):
