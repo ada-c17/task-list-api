@@ -88,28 +88,22 @@ def post_tasks_for_goal(id):
     # print("~~~RQ_BOD", request_body)
     task_ids = request_body["task_ids"]
     # print(task_ids)
-    # task_list = []
 
     for task_id in task_ids:
         task = get_task(task_id)
-        # task_list.append(task.id)
         task.goal = goal
-        # task.goal_id = goal.id
-        update_task_by_id(task_id)
-    
-    # {goal.tasks.append(task) for task in task_list if task not in goal.task}
-    # goal.tasks = request_body["tasks"]
+        update_task_by_id(task_id) 
+
     db.session.commit()
     
     return {"id": goal.id, "task_ids": task_ids}
-    # return jsonify(dict("id: {goal.id}: task_ids: {task_ids}")),200
 
 
 @goals_bp.route("/<id>/tasks", methods=["GET"])
 def get_tasks_for_goal(id):
     goal = get_record_by_id(Goal, id)
     tasks = Task.query.filter_by(id=goal.id)
-    print("*******TASKS******",tasks)
+    # print("*******TASKS******",tasks)
     tasks_info = [task.to_dictionary_with_goal() for task in tasks]
     response_body = {
         "id" : goal.id,
@@ -117,15 +111,6 @@ def get_tasks_for_goal(id):
         "tasks" : tasks_info
     }
 
-    # for task_id in goal.tasks:
-    #     task = get_task(task_id)
-    #     # task_list.append(task.id)
-    #     task.goal = goal
-    #     # task.goal_id = goal.id
-
-    # response_body = dict()
-    # response_body["tasks"] = goal.to_dictionary()
-    # request_body = request.get_json()
     return jsonify(response_body)
 
 ## no request body ?

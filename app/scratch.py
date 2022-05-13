@@ -88,7 +88,7 @@
 
 
 #####WAVE_6#########
-
+## POST
     # {goal.tasks.append(task) for task in task_list if task not in goal.task}
     # goal.tasks = request_body["tasks"]
 
@@ -103,6 +103,25 @@
     # print("new_task:", new_task)
 
     # db.session.add(new_task)
+
+        # task_list.append(task.id)
+        # task.goal_id = goal.id
+    # {goal.tasks.append(task) for task in task_list if task not in goal.task}
+    # goal.tasks = request_body["tasks"]
+
+    # task_list = []
+    # return jsonify(dict("id: {goal.id}: task_ids: {task_ids}")),200
+## GET
+
+    # for task_id in goal.tasks:
+    #     task = get_task(task_id)
+    #     # task_list.append(task.id)
+    #     task.goal = goal
+    #     # task.goal_id = goal.id
+
+    # response_body = dict()
+    # response_body["tasks"] = goal.to_dictionary()
+    # request_body = request.get_json()
 ####################
 ####################
 ########END#########
