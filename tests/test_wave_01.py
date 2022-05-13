@@ -50,6 +50,15 @@ def test_get_task(client, one_task):
         }
     }
 
+def test_get_task_w_invalid_id_returns_error(client, one_task):
+    # Act
+    response = client.get("/tasks/one")
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    assert response_body == "one is not a valid id."
+
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_task_not_found(client):
