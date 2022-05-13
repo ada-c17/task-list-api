@@ -60,7 +60,7 @@ def test_get_goal_not_found(client):
     # assertion 2 goes here
     # ---- Complete Test ----
     assert response.status_code == 404
-    assert response_body == {"msg" : "Goal with id #1 is not found"}
+    assert response_body == {"msg" : "Goal with id #1 is not found."}
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_goal(client):
