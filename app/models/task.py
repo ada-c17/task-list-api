@@ -9,7 +9,8 @@ class Task(db.Model):
     title = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=False)
     completed_at = db.Column(db.DateTime, default=None)
-
+    goal_id = db.Column(db.Integer, db.ForeignKey('goal.id'))
+    goal = db.relationship("Goal", back_populates="tasks")
 
     def to_dictionary(self):
         # if self.completed_at:
@@ -23,3 +24,11 @@ class Task(db.Model):
             "is_complete" : True if self.completed_at else False
         }
         return response
+
+    # @classmethod
+    # def from_dict(cls, data_dict):
+    #     return cls(
+    #     title=data_dict["title"],
+    #     description=data_dict["description"],
+    #     completed_at=data_dict["completed_at"]
+    #     )
