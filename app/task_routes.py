@@ -69,6 +69,7 @@ def update_task_complete(task_id, status):
 
     if status == "complete":
         task.completed_at = date.today()
+        slack_post(task.title)
 
 
     elif status == "incomplete":
