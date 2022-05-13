@@ -8,10 +8,10 @@ from app.commons import (MissingValueError, FormatError, DBLookupError,
                 notify)
 from app.error_responses import make_error_response
 
+###############
+# Task routes #
 
 task_bp = Blueprint('tasks', __name__, url_prefix = '/tasks')
-goal_bp = Blueprint('goals', __name__, url_prefix = '/goals')
-
 
 @task_bp.route('', methods = ['GET'])
 def get_tasks():
@@ -37,6 +37,7 @@ def get_task_by_id(task_id):
         task = validate_and_get_by_id(Task, task_id)
     except (IDTypeError, DBLookupError) as err:
         abort(make_error_response(err, Task, task_id))
+    
     return jsonify({'task': task}), 200
 
 @task_bp.route('/<task_id>', methods = ['PUT'])
@@ -46,8 +47,8 @@ def update_task(task_id):
         task.update(request.get_json())
     except (IDTypeError, DBLookupError, FormatError) as err:
         abort(make_error_response(err, Task, task_id))
-    
     db.session.commit()
+
     return jsonify({'task': task}), 200
 
 @task_bp.route('/<task_id>', methods = ['DELETE'])
@@ -59,7 +60,8 @@ def delete_task(task_id):
     db.session.delete(task)
     db.session.commit()
 
-    return jsonify({'details': f'Task {task_id} "{task.title}" successfully deleted'}), 200
+    return jsonify({'details': (f'Task {task_id} "{task.title}" '
+                                f'successfully deleted')}), 200
 
 @task_bp.route('/<task_id>/mark_complete', methods = ['PATCH'])
 def mark_task_complete(task_id):
@@ -67,6 +69,7 @@ def mark_task_complete(task_id):
         task = validate_and_get_by_id(Task, task_id)
     except (IDTypeError, DBLookupError) as err:
         abort(make_error_response(err, Task, task_id))
+    
     task.completed_at = datetime.utcnow()
     db.session.commit()
     notify(task.title, 'mark_complete') # Slack notification
@@ -79,13 +82,17 @@ def mark_task_incomplete(task_id):
         task = validate_and_get_by_id(Task, task_id)
     except (IDTypeError, DBLookupError) as err:
         abort(make_error_response(err, Task, task_id))
+    
     task.completed_at = None
     db.session.commit()
     notify(task.title, 'mark_incomplete') # Slack notification
 
     return jsonify({'task': task}), 200
 
-# ##############################################################  GOAL routes
+###############
+# Goal routes #
+
+goal_bp = Blueprint('goals', __name__, url_prefix = '/goals')
 
 @goal_bp.route('', methods = ['GET'])
 def get_all_goals():
@@ -95,14 +102,11 @@ def get_all_goals():
 
 @goal_bp.route('', methods = ['POST'])
 def create_goal():
+    if 'title' not in request.get_json():
+        abort(make_error_response(MissingValueError, Goal))
+    
     #TODO: refactor create new goal as class method
-    goal_details = request.get_json()
-    
-    if 'title' not in goal_details:
-        abort(make_response(jsonify({"details": "Invalid data"}), 400))
-    
-    new_goal = Goal(title = goal_details['title'])
-    
+    new_goal = Goal(title = request.get_json()['title'])
     db.session.add(new_goal)
     db.session.commit()
 
@@ -143,7 +147,11 @@ def delete_goal(goal_id):
     db.session.delete(goal)
     db.session.commit()
 
-    return jsonify({'details': f'Goal {goal_id} "{goal.title}" successfully deleted'}), 200
+    return jsonify({'details': (f'Goal {goal_id} "{goal.title}" '
+                                f'successfully deleted')}), 200
+
+###################################################
+# Nested routes - Task actions accessed via goals #
 
 @goal_bp.route('/<goal_id>/tasks', methods = ['POST'])
 def assign_tasks_to_goal(goal_id):
@@ -151,13 +159,14 @@ def assign_tasks_to_goal(goal_id):
         goal = validate_and_get_by_id(Goal, goal_id)
     except (IDTypeError, DBLookupError) as err:
         abort(make_error_response(err, Goal, goal_id))
-
+    
     task_ids = request.get_json()['task_ids']
     for task_id in task_ids:
         try:
             task = validate_and_get_by_id(Task, task_id)
         except (IDTypeError, DBLookupError) as err:
-            abort(make_error_response(err, Task, task_id, detail=' No changes were made.'))
+            abort(make_error_response(err, Task, task_id, 
+                                        detail=' No changes were made.'))
         goal.tasks.append(task)
     db.session.commit()
     
