@@ -37,10 +37,6 @@ def assign_tasks_to_goal(goal_id):
 
     goal.tasks = tasks
 
-    # for task_id in request_body["task_ids"]:
-    #     task = get_record_by_id(task_id, Task)
-    #     task.goal_id = goal_id
-
     db.session.commit()
 
     return jsonify({"id": goal_dict["id"], "task_ids": request_body["task_ids"]})
