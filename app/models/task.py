@@ -9,11 +9,20 @@ class Task(db.Model):
     goal_id = db.Column(db.Integer, db.ForeignKey("goal.goal_id"), nullable=True)
     goal = db.relationship("Goal", back_populates="tasks")
 
+    # not sure if it's correct to add an __init__ method but without it I kept getting "TypeError: __init__() takes 1 positional argument but 4 were given"
+    def __init__(self, title, description, completed_at = None):
+        self.title = title 
+        self.description = description
+        self.completed_at = completed_at
+
     def is_complete(self):
-        if not self.completed_at:
-            return False 
-        else:
-            return True 
+        return bool(self.completed_at)
+
+        # before refactoring
+        # if not self.completed_at:
+        #     return False 
+        # else:
+        #     return True 
     
     def to_json(self):
         json = {
@@ -41,12 +50,16 @@ class Task(db.Model):
         
         return task 
 
+
     @classmethod
     def from_json(cls, task_json):
         title = task_json["title"]
         description = task_json["description"]
-        completed_at = task_json["completed_at"]
 
-        task = cls(title, description, completed_at)
+        if "completed_at" in task_json:
+            completed_at = task_json["completed_at"]
+            task = cls(title, description, completed_at)
+        else: 
+            task = cls(title, description)
 
         return task

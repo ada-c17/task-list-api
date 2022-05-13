@@ -17,11 +17,16 @@ def create_task():
     if "description" not in request_body or "title" not in request_body:
         return {"details": "Invalid data"}, 400
 
-    if "completed_at" in request_body:
-        new_task = Task(title=request_body["title"], description=request_body["description"], completed_at=request_body["completed_at"])
-    else:
-        new_task = Task(title=request_body["title"], description=request_body["description"])
+    # before refactoring
+    # if "description" not in request_body or "title" not in request_body:
+    #     return {"details": "Invalid data"}, 400
 
+    # if "completed_at" in request_body:
+    #     new_task = Task(title=request_body["title"], description=request_body["description"], completed_at=request_body["completed_at"])
+    # else:
+    #     new_task = Task(title=request_body["title"], description=request_body["description"])
+
+    new_task = Task.from_json(request_body)
     db.session.add(new_task)
     db.session.commit()
 
@@ -80,9 +85,9 @@ def get_all_tasks():
             tasks = Task.query.order_by(asc(Task.title)).all()
         elif sort.lower() == "desc":
             tasks = Task.query.order_by(desc(Task.title)).all()
-        elif sort == "id-asc":
+        elif sort.lower() == "id-asc":
             tasks = Task.query.order_by(asc(Task.task_id)).all()
-        elif sort == "id-desc":
+        elif sort.lower() == "id-desc":
             tasks = Task.query.order_by(desc(Task.task_id)).all()
     else:    
         tasks = Task.query.all()
@@ -91,7 +96,7 @@ def get_all_tasks():
         title = params["title"]
         tasks = Task.query.filter_by(title=title)
     
-    # before list comprehension 
+    # before refactoring
     # tasks_response = []
 
     # if len(tasks) == 0:
