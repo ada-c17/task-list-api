@@ -1,4 +1,3 @@
-from sqlalchemy import desc
 from app import db
 from flask import make_response, abort
 
