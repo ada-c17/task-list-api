@@ -104,7 +104,7 @@ def send_notification(title):
     message = f'Someone just completed the task {title}'
     query = {"channel": "task-notifications", "text": f'"{message}"'}
     headers = {"Authorization": os.environ.get("SLACK_TOKEN")}
-    requests.get(os.environ.get("SLACK_URL"), headers=headers, params=query)
+    requests.get("https://slack.com/api/chat.postMessage", headers=headers, params=query)
 
 
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
