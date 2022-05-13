@@ -16,9 +16,7 @@ def read_all_tasts():
         - Returning all sorted tasks in json with 200
         - Returning empty list if no task in database
     """
-
     params = request.args
-
     # sort tasks by title
     if "sort" in params:
         if params["sort"].lower() == "desc" or params["sort"].lower() == "descending":
@@ -35,7 +33,6 @@ def read_all_tasts():
     # return empty list when no task in database
     if len(chosen_task) == 0:
         return jsonify([]), 200
-
     # get all tasts
     response_body = [task.task_response_body_dict() for task in chosen_task]
 
@@ -79,7 +76,7 @@ def update_task(task_id):
     # if title and description key not missing then update their values to database
     chosen_task.title = request_task["title"]
     chosen_task.description = request_task["description"]
-   
+
     # if the request include completed_at key then update that value to database
     if "completed_at" in request_task:
         completed_date = datetime.strptime(request_task["completed_at"], "%a, %d %b %Y %H:%M:%S %Z").date()
@@ -113,7 +110,6 @@ def update_to_mark_complete(task_id):
     request_task = request.get_json()
     if chosen_task.completed_at is None:
         chosen_task.completed_at = datetime.utcnow()
-
     db.session.commit()
 
     # post message to slack workspace
@@ -128,7 +124,6 @@ def update_to_mark_complete(task_id):
     header = {
         "Authorization": SLACK_API_TOKEN
     }
-    
     slack_response = requests.post(SLACK_PATH, params=query_params, headers=header)
     
     return jsonify({"task": chosen_task.task_response_body_dict()}), 200
