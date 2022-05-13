@@ -11,6 +11,11 @@ class Goal(db.Model):
         if 'title' not in goal_details:
             raise MissingValueError
         return cls(title = goal_details['title'])
+    
+    def update(self, new_details):
+        for k,v in new_details.items():
+            if k in self.__dict__:
+                setattr(self, k, v)
 
 
 class TasksGoal():

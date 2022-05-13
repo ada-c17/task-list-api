@@ -128,12 +128,7 @@ def update_goal(goal_id):
     except (IDTypeError, DBLookupError) as err:
         abort(make_error_response(err, Goal, goal_id))
     
-    #TODO: refactor update into instance method
-    updated_details = request.get_json()
-    
-    for k,v in updated_details.items():
-        setattr(goal, k, v)
-    
+    goal.update(request.get_json())
     db.session.commit()
 
     return jsonify({'goal': goal}), 200
