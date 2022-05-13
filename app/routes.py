@@ -19,10 +19,10 @@ def create_one_task():
 
     
     else:
-        new_task = Task(title=request_body["title"],
-                    description=request_body["description"])
-                    # completed_at=request_body["completed_at"]
-                    # )
+        new_task = Task(
+            title=request_body["title"], 
+            description=request_body["description"],
+            completed_at=request_body["completed_at"] if "completed_at" in request_body else None)
         
         db.session.add(new_task)
         db.session.commit()
@@ -155,6 +155,10 @@ def mark_complete(task_id):
     task.completed_at = datetime.now()
     db.session.commit()
     
+    SLACK_URL = 'https://slack.com/api/chat/postMessage'
+    post_msg = {"text": f"Someone just completed the task {task.title}", "channel" : "C03FABVBLS0"}
+    auth = os.environ.get('SLACK_BOT_TOKEN')
+    requests.post(SLACK_URL, json=post_msg, headers={'Authorization' : f'Bearer {auth}'})
     rsp = {"task" : task.get_dict()}
     return jsonify(rsp), 200
     
