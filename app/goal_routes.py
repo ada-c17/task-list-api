@@ -59,9 +59,9 @@ def create_goal():
     return (jsonify({"goal": new_goal.to_json()}), 201)
 
 
-@goals_bp.route("/<id>", methods=["PUT"])
-def update_goal(id):
-    found_goal = validate_goal_id(id)
+@goals_bp.route("/<goal_id>", methods=["PUT"])
+def update_goal(goal_id):
+    found_goal = validate_goal_id(goal_id)
 
     request_body = request.get_json()
 
@@ -70,18 +70,18 @@ def update_goal(id):
     db.session.commit()
 
     return jsonify({"goal":
-                    {"id": found_goal.id,
+                    {"id": found_goal.goal_id,
                      "title": found_goal.title}})
 
 
-@goals_bp.route("/<id>", methods=["DELETE"])
-def delete_goal(id):
-    found_goal = validate_goal_id(id)
+@goals_bp.route("/<goal_id>", methods=["DELETE"])
+def delete_goal(goal_id):
+    found_goal = validate_goal_id(goal_id)
 
     db.session.delete(found_goal)
     db.session.commit()
 
-    return make_response(jsonify({"details": f'Goal {found_goal.id} "{found_goal.title}" successfully deleted'}))
+    return make_response(jsonify({"details": f'Goal {found_goal.goal_id} "{found_goal.title}" successfully deleted'}))
 
 
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
@@ -93,10 +93,10 @@ def add_tasks(goal_id):
     for id in task_ids:
         tasks.append(validate_task_id(id))
     for task in tasks:
-        task.goal_id = goal.id
+        task.goal_id = goal.goal_id
 
     db.session.commit()
-    return jsonify({"id": goal.id,
+    return jsonify({"id": goal.goal_id,
                     "task_ids": task_ids})
 
 
@@ -107,13 +107,13 @@ def get_tasks(goal_id):
 
     for task in goal.tasks:
         tasks.append(({
-            "id": task.id,
+            "id": task.task_id,
             "title": task.title,
             "description": task.description,
             "is_complete": bool(task.completed_at)}))
         if task.goal_id:
             tasks[-1]["goal_id"] = task.goal_id
 
-    return jsonify({"id": goal.id,
+    return jsonify({"id": goal.goal_id,
                     "title": goal.title,
                     "tasks": tasks})
