@@ -5,7 +5,7 @@ from app.models.goal import Goal
 from app.models.task import Task
 from datetime import datetime
 import os
-from app.routes import validate_task_id
+from app.tasks_routes import validate_task_id
 
 goals_bp = Blueprint("goal_bp", __name__, url_prefix="/goals")
 
@@ -110,23 +110,16 @@ def add_tasks(goal_id):
 def get_tasks(goal_id):
     goal = validate_goal_id(goal_id)
     tasks = []
-    for id in goal.tasks:
-        tasks.append(validate_task_id(id))
+
+    for task in goal.tasks:
+        tasks.append(({
+            "id": task.id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": bool(task.completed_at)}))
+        if task.goal_id:
+            tasks[-1]["goal_id"] = task.goal_id
 
     return jsonify({"id": goal.id,
                     "title": goal.title,
                     "tasks": tasks})
-
-    # {
-    #     "id": 333,
-    #     "title": "Build a habit of going outside daily",
-    #     "tasks": [
-    #         {
-    #             "id": 999,
-    #             "goal_id": 333,
-    #             "title": "Go on my daily walk 🏞",
-    #             "description": "Notice something new every day",
-    #             "is_complete": false
-    #         }
-    #     ]
-    # }
