@@ -91,6 +91,7 @@ def test_update_goal(client, one_goal):
         "title": "Updated Goal Title"
     })
     response_body = response.get_json()
+    goal = Goal.query.get(1)
 
     # Assert
     # ---- Complete Assertions Here ----
@@ -102,6 +103,7 @@ def test_update_goal(client, one_goal):
             "title": "Updated Goal Title"
         }
     }
+    assert goal.title == "Updated Goal Title"
 
     # ---- Complete Assertions Here ----
 

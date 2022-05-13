@@ -39,7 +39,14 @@ def update_goal(goal_id):
     request_body = request.get_json()
     goal.title = request_body["title"]
 
+    db.session.commit()
     return {"goal": goal.to_dict()}
+
+# delete goal by id
+@goals_bp.route("/<goal_id>", methods=["DELETE"])
+def delete_goal(goal_id):
+    goal = validate_goal(goal_id)
+
 
 
 # helper function to validate goal by id
