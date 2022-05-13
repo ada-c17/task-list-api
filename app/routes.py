@@ -3,13 +3,13 @@ from app import db
 from datetime import datetime
 from app.models.task import Task
 from app.models.goal import Goal, TasksGoal
-from app.commons import (MissingValueError, FormatError, DBLookupError,
-                IDTypeError, validate_and_get_by_id, get_filtered_and_sorted,
-                notify)
-from app.error_responses import make_error_response
+from app.commons import validate_and_get_by_id, get_filtered_and_sorted, notify
+from app.error_responses import (MissingValueError, FormatError, DBLookupError,
+                                IDTypeError, make_error_response)
 
 ###############
 # Task routes #
+###############
 
 task_bp = Blueprint('tasks', __name__, url_prefix = '/tasks')
 
@@ -89,8 +89,10 @@ def mark_task_incomplete(task_id):
 
     return jsonify({'task': task}), 200
 
+
 ###############
 # Goal routes #
+###############
 
 goal_bp = Blueprint('goals', __name__, url_prefix = '/goals')
 
@@ -145,8 +147,10 @@ def delete_goal(goal_id):
     return jsonify({'details': (f'Goal {goal_id} "{goal.title}" '
                                 f'successfully deleted')}), 200
 
+
 ###################################################
 # Nested routes - Task actions accessed via goals #
+###################################################
 
 @goal_bp.route('/<goal_id>/tasks', methods = ['POST'])
 def assign_tasks_to_goal(goal_id):

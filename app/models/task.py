@@ -1,9 +1,7 @@
-from inspect import getargvalues
-from operator import getitem
 from app import db
 from datetime import datetime
 from dateutil import parser
-from app.commons import MissingValueError, FormatError
+from app.error_responses import MissingValueError, FormatError
 
 class Task(db.Model):
     task_id = db.Column(db.Integer, primary_key=True)
@@ -48,4 +46,3 @@ class Task(db.Model):
         for k,v in new_details.items():
             if k in self.__dict__:
                 setattr(self, k, v)
-    

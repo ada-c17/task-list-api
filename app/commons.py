@@ -1,5 +1,6 @@
 ########################################################
 # extension of JSONEncoder class for Task List objects #
+########################################################
 
 from flask.json import JSONEncoder
 
@@ -32,11 +33,10 @@ class TaskListJSONEncoder(JSONEncoder):
 
 ###########################################
 # Shared validation and filtering methods #
+###########################################
 
-class MissingValueError(Exception): ...
-class FormatError(ValueError): ...
-class DBLookupError(LookupError): ...
-class IDTypeError(TypeError): ...
+from app.error_responses import IDTypeError, DBLookupError
+
 
 def validate_and_get_by_id(cls, target_id):
     try:
@@ -78,6 +78,8 @@ def get_filtered_and_sorted(cls, request_args):
 
 #############################
 # Slack integration methods #
+#############################
+
 import os
 import requests
 

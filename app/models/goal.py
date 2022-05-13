@@ -1,5 +1,5 @@
 from app import db
-from app.commons import MissingValueError
+from app.error_responses import MissingValueError
 
 class Goal(db.Model):
     goal_id = db.Column(db.Integer, primary_key=True)

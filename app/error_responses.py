@@ -1,7 +1,12 @@
 from flask import make_response, jsonify
-from app.commons import MissingValueError, IDTypeError, DBLookupError, FormatError
+
+class MissingValueError(Exception): ...
+class FormatError(ValueError): ...
+class DBLookupError(LookupError): ...
+class IDTypeError(TypeError): ...
 
 def make_error_response(err, target_cls, target_id=None, detail=''):
+    ''''''
     if isinstance(err, MissingValueError):
         return make_response(jsonify({"details": "Invalid data"}), 400)
     if isinstance(err, IDTypeError):
@@ -22,4 +27,3 @@ def make_error_response(err, target_cls, target_id=None, detail=''):
     return make_response(jsonify(f"An unexpected error occurred. Error type: "
                                 f"{err}, Error context: {target_cls.__name__}."
                                 f"{detail}"), 500)
-
