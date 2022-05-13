@@ -109,7 +109,7 @@ def slackbot():
     #steps
     #1. import requests
     #2. path = "https://slack.com/api/chat.postMessage"
-    #3. SLACK_API_KEY = "xoxb-2537192884486-3507315931190-KCGCoQUtmuz8t4uY7M83BMko"
+    #3. SLACK_API_KEY 
     # #4.query_params = {
     # "token": SLACK_API__KEY,
     # "channel": "task-notifications",
@@ -139,7 +139,7 @@ def slackbot():
         requests.post(path, params=query_params)
     response_for_slackbot = requests.post(path, params=query_params)
     print(response_for_slackbot.json())
-    
+
 slackbot()
 
 
