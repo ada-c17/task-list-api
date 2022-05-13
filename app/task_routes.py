@@ -1,10 +1,9 @@
-from flask import Blueprint, jsonify, request, make_response, abort
+from flask import Blueprint, jsonify, request
 from app.models.task import Task
 from app import db
-from app.helper import validate_id, error_message
+from app.helper import validate_id, error_message, post_to_slack
 import datetime
-import os
-import requests
+
 
 task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -88,10 +87,3 @@ def mark_incomplete(task_id):
 
     response = {"task": task.to_json()}
     return jsonify(response), 200
-
-def post_to_slack(task):
-    url = "https://slack.com/api/chat.postMessage"
-    headers = {"Authorization": os.environ.get("SLACK_TOKEN")}
-    data = {"text": f"Someone completed the task {task.title}",
-            "channel": "C03F4FJS013"}
-    response = requests.post(url, data=data, headers=headers)

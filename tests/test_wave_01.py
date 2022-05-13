@@ -66,6 +66,16 @@ def test_get_task_not_found(client):
     # *****************************************************************
     assert response_body["details"] == "id 1 not found"
 
+
+def test_get_task_id_not_numeric(client, one_task):
+    #Act
+    response = client.get("/tasks/one")
+    response_body = response.get_json()
+    #Assert
+    assert response.status_code == 400
+    assert response_body["details"] == "invalid id one"
+
+
 #@pytest.mark.skip(reason="No way to test this feature yet")
 def test_create_task(client):
     # Act

@@ -36,15 +36,6 @@ def get_goal(goal_id):
     return jsonify(response), 200
 
 
-@goal_bp.route("/<goal_id>", strict_slashes=False, methods=["PUT"])
-def update_goal(goal_id):
-    request_body = request.get_json()
-    goal = validate_id(Goal,goal_id)
-    goal.title = request_body["title"]
-    response = {"goal":goal.to_json()}
-    return jsonify(response), 200
-
-
 @goal_bp.route("/<goal_id>", strict_slashes=False, methods=["DELETE"])
 def delete_goal(goal_id):
     goal = validate_id(Goal, goal_id)
@@ -54,14 +45,25 @@ def delete_goal(goal_id):
     return jsonify(response), 200
 
 
+@goal_bp.route("/<goal_id>", strict_slashes=False, methods=["PUT"])
+def update_goal(goal_id):
+    request_body = request.get_json()
+    goal = validate_id(Goal,goal_id)
+    goal.title = request_body["title"]
+    response = {"goal":goal.to_json()}
+    return jsonify(response), 200
+
+
 @goal_bp.route("/<goal_id>/tasks", strict_slashes=False,methods=["POST"])
 def add_task_list(goal_id):
     goal = validate_id(Goal, goal_id)
     request_body = request.get_json()
-
-    for task_id in request_body["task_ids"]:
-        task = Task.query.get(task_id)
-        task.goal_id = goal_id
+    try:
+        for task_id in request_body["task_ids"]:
+            task = Task.query.get(task_id)
+            task.goal_id = goal_id
+    except KeyError:
+        error_message("Invalid data", 400)
 
     db.session.commit()
 
