@@ -10,17 +10,17 @@ from app.tasks_routes import validate_task_id
 goals_bp = Blueprint("goal_bp", __name__, url_prefix="/goals")
 
 
-def validate_goal_id(id):
+def validate_goal_id(goal_id):
     try:
-        id = int(id)
+        id = int(goal_id)
     except:
         abort(make_response(
-            {"message": f"goal {id} invalid.  Must be numerical"}, 400))
+            {"message": f"goal {goal_id} invalid.  Must be numerical"}, 400))
 
-    goal = Goal.query.get(id)
+    goal = Goal.query.get(goal_id)
 
     if not goal:
-        abort(make_response({"message": f"Goal {id} not found"}, 404))
+        abort(make_response({"message": f"Goal {goal_id} not found"}, 404))
 
     return goal
 
@@ -39,9 +39,9 @@ def get_goals():
     return jsonify(goal_response)
 
 
-@goals_bp.route("/<id>", methods=["GET"])
-def get_single_goal(id):
-    goal = validate_goal_id(id)
+@goals_bp.route("/<goal_id>", methods=["GET"])
+def get_single_goal(goal_id):
+    goal = validate_goal_id(goal_id)
     return{"goal": goal.to_json()}
 
 
