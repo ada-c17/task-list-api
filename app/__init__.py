@@ -14,7 +14,7 @@ def create_app(test_config=None):
     app = Flask(__name__)
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    if test_config is None:
+    if test_config is None: #pragma no cover 
         app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
             "SQLALCHEMY_DATABASE_URI")
     else:
@@ -30,5 +30,10 @@ def create_app(test_config=None):
     migrate.init_app(app, db)
 
     # Register Blueprints here
+    from .task_routes import tasks_bp
+    app.register_blueprint(tasks_bp)
+
+    from .goal_routes import goals_bp
+    app.register_blueprint(goals_bp)
 
     return app
