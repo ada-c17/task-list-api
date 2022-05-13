@@ -232,20 +232,6 @@ def test_get_tasks_filter_by_title(client, three_tasks):
             "is_complete": False
     }]
 
-def test_get_tasks_filter_by_title(client, three_tasks):
-    # Act
-    data= {"title": "Water the garden 🌷"}
-    response = client.get("/tasks", query_string=data)
-    response_body = response.get_json()
-
-    # Assert 
-    assert response.status_code == 200
-    assert response_body == [{
-            "id": 1,
-            "title": "Water the garden 🌷",
-            "description": "",
-            "is_complete": False
-    }]
         
 
 def test_get_tasks_sort_by_title_desc(client, three_tasks):
@@ -312,7 +298,4 @@ def test_get_tasks_sort_by_title_asc(client, three_tasks):
             "is_complete": False 
         }
     ]
-
-
-
 
