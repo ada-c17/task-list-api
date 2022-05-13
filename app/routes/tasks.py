@@ -1,4 +1,3 @@
-from wsgiref import headers
 from flask import Blueprint, jsonify, abort, make_response, request
 import requests
 from app.models.task import Task
