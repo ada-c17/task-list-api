@@ -62,8 +62,6 @@ def read_saved_tasks():
     tasks_response = []
 
     for task_dict in tasks:
-        # since we use jsonify, i wonder if I omit the dictionary part
-        # if it will still turn it into a dict, but we are in a loop
         tasks_response.append(
             {
                 "id": task_dict.task_id,
@@ -72,8 +70,7 @@ def read_saved_tasks():
                 "is_complete": bool(task_dict.completed_at)
             }
         )
-    return jsonify(tasks_response)   # we turn this Python list into a json collection
-                                    # is it an obj/dict
+    return jsonify(tasks_response)
 
 def validate_task(task_id):
     try:
@@ -92,7 +89,8 @@ def validate_task(task_id):
 def read_one_task(task_id):
     task = validate_task(task_id)
 
-    return make_response(jsonify(task.to_json()), 200)
+    # return make_response(jsonify(task.to_json()), 200)
+    return make_response(jsonify({"task": task.to_json()}), 200)
 
 '''
 PUT ROUTES
@@ -152,7 +150,6 @@ def patch_task_complete(task_id):
 
 # HELPER FUNCTION THAT SENDS A POST REQUEST TO SLACKBOT FOR PATCH METHOD
 def call_slackbot(tasky):
-
     response1 = requests.post(
         "https://slack.com/api/chat.postMessage",
         params={

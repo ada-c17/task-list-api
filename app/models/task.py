@@ -1,32 +1,26 @@
 from app import db
 
-'''
-"task" = {
-    "id": 1,
-    "title": "Fold the laundry",
-    "description": "Do this on a counter",
-    "is_complete": false
-}
-'''
-
-# creating a Task model with columns in SQLalchemy
 class Task(db.Model):
     task_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=False)
     completed_at = db.Column(db.DateTime, nullable=True)
+    goal_id = db.Column(db.Integer, db.ForeignKey("goal.goal_id"), nullable=True)
+    goal = db.relationship("Goal", back_populates="tasks")
 
     def to_json(self):
-        return {
-            "task": {
-                "id": self.task_id,
-                "title": self.title,
-                "description": self.description,
-                "is_complete": bool(self.completed_at)
-             }
+        task = {
+            "id": self.task_id,
+            "title": self.title,
+            "description": self.description,
+            "is_complete": bool(self.completed_at)
         }
 
-    # #no task_id here
+        if self.goal_id:
+            task["goal_id"] = self.goal_id
+
+        return task
+
     # def update(self, request_body):
     #     self.title = request_body["title"]
     #     self.description = request_body["description"]
@@ -34,7 +28,6 @@ class Task(db.Model):
     #     self.completed_at = request_body["completed_at"]
 
 
-    #no task_id here
     # @classmethod
     # def create(cls, request_body):
     #     new_task = cls(
