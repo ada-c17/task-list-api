@@ -29,6 +29,7 @@ def validate_task(id_):
 def create_task():
    
     request_body = request.get_json()
+    print(request_body)
     try:
         new_task = Task.create(request_body)
     # new_task = Task(title=request_body["title"],
