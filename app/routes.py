@@ -33,8 +33,8 @@ def create_one_task():
 def validate_and_return_item(cls, item_id):
     try:
         item_id = int(item_id)
-    except:
-        abort(make_response(jsonify({"details": "Invalid data"}, 400)))
+    except ValueError:
+        abort(make_response(jsonify({"details": "Invalid data"}), 400))
     item = cls.query.get(item_id)
     if item:
         return item
