@@ -1,3 +1,4 @@
+from urllib import response
 from flask import Blueprint, make_response,jsonify, request
 import requests
 from app import db
@@ -28,7 +29,10 @@ def get_tasks():
 @tasks_bp.route("/<id>", methods=["GET"])
 def get_one_task(id):
     task = get_task_record_by_id(id)
-    return jsonify(task=task.self_to_dict())
+    response = task.self_to_dict()
+    if task.goal_id:
+        response["goal_id"]=task.goal_id
+    return jsonify(task=response)
 
 @tasks_bp.route("", methods=["POST",])
 def add_task():

@@ -61,7 +61,11 @@ def get_tasks_by_goal(goal_id):
 
     goal = get_goal_record_by_id(goal_id)
     tasks = Task.query.filter_by(goal_id=goal.goal_id)
-    task_list = [task.self_to_dict() for task in tasks]
+    task_list = []
+    for task in tasks:
+        task_dict = task.self_to_dict()
+        task_dict["goal_id"]=task.goal_id
+        task_list.append(task_dict)
     response = {"id": goal.goal_id,
                 "title": goal.title,
                 "tasks": task_list}
