@@ -1,5 +1,4 @@
 from app import db
-from app.models.task import Task
 
 
 class Goal(db.Model):
