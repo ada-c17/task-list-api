@@ -40,16 +40,7 @@ def read_all_tasks():
     else:
         tasks = Task.query.all()
 
-    for task in tasks:
-        tasks_response.append(
-            {
-                "id": task.task_id,
-                "title": task.title,
-                "description": task.description,
-                "is_complete": task.is_complete()
-            }
-        )
-
+    tasks_response = [task.to_dict() for task in tasks]
     return jsonify(tasks_response)
 
 # GET /tasks/<task_id>
@@ -79,7 +70,7 @@ def update_task_with_id(task_id):
     task.completed_at = datetime.utcnow()
 
     db.session.commit() 
-    print(post_slack_message(task.title))
+    post_slack_message(task.title)
 
     return{"task":task.to_dict()}, 200
 
@@ -104,9 +95,10 @@ def delete_task(task_id):
     return make_response({"details": f'Task {task.task_id} "{task.title}" successfully deleted'})
 
 def post_slack_message(text):
+    SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
     channel = "task-notifications"
     return requests.post('https://slack.com/api/chat.postMessage',
-    headers={"Authorization": os.environ.get("SLACK_BOT_TOKEN")},
+    headers={"Authorization": f"Bearer {SLACK_BOT_TOKEN}"},
     json={
         'channel': channel,
         'text': text
