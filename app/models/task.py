@@ -37,6 +37,7 @@ class Task(db.Model):
 
         return json 
 
+    # not sure if I was supposed to pass in self here, couldn't get it to work if I did
     def validate_task(task_id):
         try:
             task_id = int(task_id)

@@ -89,6 +89,8 @@ def get_all_tasks():
             tasks = Task.query.order_by(asc(Task.task_id)).all()
         elif sort.lower() == "id-desc":
             tasks = Task.query.order_by(desc(Task.task_id)).all()
+        else: 
+            return {"details": "Invalid sort query - value must be asc or desc"}, 400
     else:    
         tasks = Task.query.all()
 
