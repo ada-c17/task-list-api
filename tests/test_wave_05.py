@@ -11,6 +11,7 @@ def test_get_goals_no_saved_goals(client):
     assert response_body == []
 
 
+
 def test_get_goals_one_saved_goal(client, one_goal):
     # Act
     response = client.get("/goals")
@@ -25,6 +26,7 @@ def test_get_goals_one_saved_goal(client, one_goal):
             "title": "Build a habit of going outside daily"
         }
     ]
+
 
 
 def test_get_goal(client, one_goal):
@@ -43,6 +45,7 @@ def test_get_goal(client, one_goal):
     }
 
 
+
 def test_get_goal_not_found(client):
     pass
     # Act
@@ -50,7 +53,8 @@ def test_get_goal_not_found(client):
     response_body = response.get_json()
 
     assert response.status_code == 404
-    assert response_body == {'details': 'This goal id does not exist'}
+    assert response_body == {'details': 'This goal does not exist'}
+
 
 
 def test_create_goal(client):
@@ -71,6 +75,7 @@ def test_create_goal(client):
     }
 
 
+
 def test_update_goal(client, one_goal):
     # Act
     response = client.put("/goals/1", json={
@@ -85,6 +90,7 @@ def test_update_goal(client, one_goal):
             "id": 1,
             "title": "Updated Goal Title"}}
 
+
     
 def test_update_goal_not_found(client):
     # Act
@@ -95,9 +101,10 @@ def test_update_goal_not_found(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {'details': 'This goal id does not exist'}
+    assert response_body == {'details': 'This goal does not exist'}
 
-    
+
+
 def test_delete_goal(client, one_goal):
     # Act
     response = client.delete("/goals/1")
@@ -114,10 +121,7 @@ def test_delete_goal(client, one_goal):
     response = client.get("/goals/1")
     response_body = response.get_json()
     assert response.status_code == 404
-    assert response_body == {'details': 'This goal id does not exist'}
-    # *****************************************************************
-    # **Complete test with assertion about response body***************
-    # *****************************************************************
+    assert response_body == {'details': 'This goal does not exist'}
 
 
 
@@ -128,7 +132,8 @@ def test_delete_goal_not_found(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {'details': 'This goal id does not exist'}
+    assert response_body == {'details': 'This goal does not exist'}
+
 
 
 def test_create_goal_missing_title(client):

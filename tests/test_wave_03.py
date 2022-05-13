@@ -98,6 +98,7 @@ def test_mark_complete_on_completed_task(client, completed_task):
     assert Task.query.get(1).completed_at
 
 
+
 def test_mark_incomplete_on_incomplete_task(client, one_task):
     # Act
     response = client.patch("/tasks/1/mark_incomplete")
@@ -117,6 +118,7 @@ def test_mark_incomplete_on_incomplete_task(client, one_task):
     assert Task.query.get(1).completed_at == None
 
 
+
 def test_mark_complete_missing_task(client):
     # Act
     response = client.patch("/tasks/1/mark_complete")
@@ -124,7 +126,9 @@ def test_mark_complete_missing_task(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {'details':'This task id does not exist'}
+    assert response_body == {
+        'details': 'This task does not exist'
+    }
 
 
 
@@ -135,7 +139,10 @@ def test_mark_incomplete_missing_task(client):
 
     # Assert
     assert response.status_code == 404
-    assert response_body == {'details':'This task id does not exist'}
+    assert response_body == {
+        'details': 'This task does not exist'
+    }
+
 
 
 # Let's add this test for creating tasks, now that
@@ -165,6 +172,7 @@ def test_create_task_with_valid_completed_at(client):
     assert new_task.title == "A Brand New Task"
     assert new_task.description == "Test Description"
     assert new_task.completed_at
+
 
 
 # Let's add this test for updating tasks, now that

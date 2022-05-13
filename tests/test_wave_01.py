@@ -1,6 +1,4 @@
 from app.models.task import Task
-import pytest
-
 
 
 def test_get_tasks_no_saved_tasks(client):
@@ -86,6 +84,7 @@ def test_create_task(client):
     assert new_task.completed_at == None
 
 
+
 def test_update_task(client, one_task):
     # Act
     response = client.put("/tasks/1", json={
@@ -109,6 +108,7 @@ def test_update_task(client, one_task):
     assert task.title == "Updated Task Title"
     assert task.description == "Updated Test Description"
     assert task.completed_at == None
+
 
 
 def test_update_task_not_found(client):
@@ -151,6 +151,7 @@ def test_delete_task_not_found(client):
         'details': 'This task does not exist'
         }
     assert Task.query.all() == []
+
 
 
 def test_create_task_must_contain_title(client):
