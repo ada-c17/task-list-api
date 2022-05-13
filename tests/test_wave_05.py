@@ -193,3 +193,88 @@ def test_goal_id_not_integer(client):
     # Assert
     assert response.status_code == 400
     assert response_body == {"message": f"The goal id one is invalid. The id must be integer."}
+
+
+# Unit test for optional enhancement 
+def test_get_goal_sort_by_title_desc(client, four_goals):
+    # Assert
+    data = {
+        "sort": "desc",
+        "title": "Water the garden 🌷"
+    }
+    response = client.get("/goals", query_string=data)
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert response_body == [
+        {
+            "id": 1,
+            "title": "Water the garden 🌷"
+        },
+        {
+            "id": 4,
+            "title": "Water the garden 🌷"
+        },
+        {
+            "id": 3,
+            "title": "Pay my outstanding tickets 😭"
+        },
+        {
+            "id": 2,
+            "title": "Answer forgotten email 📧"
+        }
+
+    ]
+
+
+def test_get_goal_sort_by_title_asc(client, four_goals):
+    # Assert
+    data = {
+        "sort": "asc",
+        "title": "Water the garden 🌷"
+    }
+    response = client.get("/goals", query_string=data)
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert response_body == [
+        {
+            "id": 2,
+            "title": "Answer forgotten email 📧"
+        },
+        {
+            "id": 3,
+            "title": "Pay my outstanding tickets 😭"
+        },
+        {
+            "id": 1,
+            "title": "Water the garden 🌷"
+        },
+        {
+            "id": 4,
+            "title": "Water the garden 🌷"
+        }
+
+    ]
+
+
+def test_get_goal_filter_by_title(client, four_goals):
+    # Act
+    data= {"title": "Water the garden 🌷"}
+    response = client.get("/goals", query_string=data)
+    response_body = response.get_json()
+
+    # Assert 
+    assert response.status_code == 200
+    assert response_body == [
+        {
+            "id": 1,
+            "title": "Water the garden 🌷",
+        },
+        {
+            "id": 4,
+            "title": "Water the garden 🌷",
+        }
+    ]
