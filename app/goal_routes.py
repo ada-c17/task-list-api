@@ -7,6 +7,9 @@ goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 # create a new goal
 @goals_bp.route("", methods=["POST"])
 def create_goal():
+    if not request.get_json():
+        abort(make_response({"details": "Invalid data"}, 400))
+    
     request_body = request.get_json()
     new_goal = Goal(title=request_body["title"])
 
