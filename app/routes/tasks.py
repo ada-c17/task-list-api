@@ -30,18 +30,40 @@ def slack_complete(task):
 
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
-    query_params = request.args.to_dict()
+    query_params = request.args.to_dict(flat=False)
+    #note that if multiple inputs for one param (e.g. sort=asc&sort=desc),
+    #to_dict will restrict to first input ({"sort":"asc"})
+    #in this case, if subsequent inputs are invalid, no warning will be sent
+    #with response
     if "sort" in query_params:
-        if query_params["sort"] == "asc":
-            task_list = Task.query.order_by(Task.title.asc()).all()
-            query_params.pop("sort")
-        elif query_params["sort"] == "desc":
-            task_list = Task.query.order_by(Task.title.desc()).all()
-            query_params.pop("sort")
+        #to limit time here, could put restriction on length of sorts
+        sorts = query_params["sort"]
+        #in the case of conflicting inputs (e.g. sort=asc&sort=desc)
+        #prefers asc. asc, desc defaults to title with no input but
+        #will do id if id specified
+        if "asc" in sorts:
+            if "id" in sorts:
+                task_list = Task.query.order_by(Task.task_id.asc()).all()
+                sorts.remove("id")
+            else:
+                task_list = Task.query.order_by(Task.title.asc()).all()
+            sorts.remove("asc")
+        elif "desc" in sorts:
+            if "id" in sorts:
+                task_list = Task.query.order_by(Task.task_id.desc()).all()
+                sorts.remove("id")
+            else:
+                task_list = Task.query.order_by(Task.title.desc()).all()
+            sorts.remove("desc")
+        elif "id" in sorts:
+            #defaults to ascending order
+            task_list = Task.query.order_by(Task.task_id).all()
+            sorts.remove("id")
         else: 
             task_list = Task.query.all()
-        #care here -- if something not asc or desc in query_params["sort"]
-        #task_list will not exist
+        if not sorts:
+            query_params.pop("sort")
+
     else: 
         task_list = Task.query.all()
 
@@ -51,14 +73,21 @@ def get_all_tasks():
         task_response.append(task.make_response_dict())
     
     if query_params:
+        #this warning affects the structure of the returned json
+        #without: an array of json objects representing tasks
+        #with: an array where array[0] is a json object of the warning
+        #and array[1] is the array of json objects representing tasks
+        #I think this should be fine since throwing an index error 
+        #in the user's code would cue the user to look at the json 
+        #and then see the warning
         warning = {
             "warning": "Unexpected query parameters in request.",
             "unused_params": query_params
             }
-        #task_response = "\n".join([jsonify(task_response), jsonify(warning)])
         task_response = jsonify(warning, task_response)
     else:
         task_response = jsonify(task_response)
+
     return make_response(task_response, 200)
 
 
