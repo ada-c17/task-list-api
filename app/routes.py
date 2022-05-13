@@ -151,6 +151,7 @@ def delete_task(task_id):
     db.session.commit()
 
     return make_response(jsonify(response), 200)
+    
 
 ## Goal Validation & Routes:
 
@@ -243,3 +244,41 @@ def delete_goal(goal_id):
     db.session.commit()
 
     return make_response(jsonify(response), 200)
+
+
+
+@goals_bp.route("/<goal_id>/tasks", methods=["POST"])
+def assign_tasks_to_goal(goal_id):
+    goal = validate_goals(goal_id)
+    request_body = request.get_json()
+    request_body_keys = request_body.keys()
+    task_ids = []
+    if "task_ids" in request_body_keys:
+        for task_id in request_body["task_ids"]:
+            task_ids.append(validate_tasks(task_id))
+    print(task_ids)
+    goal.tasks = task_ids
+
+    db.session.commit()
+
+    response_body = {
+        "id": goal.goal_id,
+        "task_ids": request_body["task_ids"]
+        }
+    return make_response(response_body, 200)
+
+
+@goals_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_tasks_assigned_to_goal(goal_id):
+    goal = validate_goals(goal_id)
+    # tasks = goal.tasks
+    # print(tasks)
+
+    tasks_response = []
+    for task in goal.tasks:
+        tasks_response.append(Task.to_dict(task))
+    response = goal.dict_with_tasks()
+    response["tasks"] = tasks_response
+
+    return make_response(jsonify(response), 200)
+
