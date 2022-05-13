@@ -9,24 +9,6 @@ class Task(db.Model):
 
     def create_task_dict(self):
         task_dict = {
-                "task": {
-                    "id": self.task_id,
-                    "title": self.title,
-                    "description": self.description
-                }
-            }
-        if self.completed_at is None:
-            task_dict["task"]["is_complete"] = False
-        else:
-            task_dict["task"]["is_complete"] = True
-        
-        if self.goal_id:
-            task_dict["goal_id"] = self.goal_id
-
-        return task_dict
-
-    def create_simple_task_dict(self):
-        task_dict = {
                 "id": self.task_id,
                 "title": self.title,
                 "description": self.description
@@ -35,10 +17,9 @@ class Task(db.Model):
             task_dict["is_complete"] = False
         else:
             task_dict["is_complete"] = True
+
+        if self.goal_id:
+            task_dict["goal_id"] = self.goal_id
+        
         return task_dict
-    
-    # def validate_task(self):
-    #     try:
-    #         task_id = int(self.task_id)
-    #     except ValueError:
-    #         return {"msg":f"Invalid task id: {self.task_id}. ID must be an integer."}, 400
+        

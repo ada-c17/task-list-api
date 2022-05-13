@@ -12,3 +12,4 @@ class Goal(db.Model):
                     "title": self.title,
                 }
         return goal_dict
+        

@@ -8,7 +8,6 @@ import os, requests
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
-
 @tasks_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
@@ -27,7 +26,9 @@ def create_task():
     db.session.add(new_task)
     db.session.commit()
 
-    response = new_task.create_task_dict()
+    response = {
+        "task": new_task.create_task_dict()
+    }
     return response, 201
 
 @tasks_bp.route("", methods=["GET"])
@@ -42,14 +43,16 @@ def get_all_tasks():
 
     response = []
     for task in tasks:
-        response.append(task.create_simple_task_dict())
+        response.append(task.create_task_dict())
 
     return jsonify(response)
 
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
     task = get_one_task_or_abort(task_id)
-    response = task.create_task_dict()
+    response = {
+        "task": task.create_task_dict()
+    }
     return response
 
 def get_one_task_or_abort(task_id):
@@ -75,7 +78,9 @@ def replace_task(task_id):
     task.description = request_body["description"]
 
     db.session.commit()
-    response = task.create_task_dict()
+    response = {
+        "task": task.create_task_dict()
+    }
     return response
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
@@ -92,7 +97,9 @@ def mark_task_complete(task_id):
     task.completed_at = datetime.now()
 
     db.session.commit()
-    response = task.create_task_dict()
+    response = {
+        "task": task.create_task_dict()
+    }
 
     path = "https://slack.com/api/chat.postMessage"
     data = {
@@ -112,7 +119,9 @@ def mark_task_incomplete(task_id):
     task = get_one_task_or_abort(task_id)
     task.completed_at = None
     db.session.commit()
-    response = task.create_task_dict()
+    response = {
+        "task": task.create_task_dict()
+    }
     return response
 
 goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
@@ -129,23 +138,19 @@ def create_goal():
     db.session.add(new_goal)
     db.session.commit()
 
-    goal_dict = {
-                "goal": {
-                    "id": new_goal.goal_id,
-                    "title": new_goal.title
-                }
-            }
-    return goal_dict, 201
+    response = {
+        "goal": new_goal.create_goal_dict()
+    }
+    return response, 201
 
 @goals_bp.route("", methods=["GET"])
 def get_all_goals():
     goals = Goal.query.all()
     response = []
     for goal in goals:
-        response.append({ 
-            "id": goal.goal_id,
-            "title": goal.title
-        })
+        response.append(
+            goal.create_goal_dict()
+        )
 
     return jsonify(response)
 
@@ -153,10 +158,7 @@ def get_all_goals():
 def get_one_goal(goal_id):
     goal = get_one_goal_or_abort(goal_id)
     response = {
-        "goal": {
-            "id": goal.goal_id,
-            "title": goal.title
-        }
+        "goal": goal.create_goal_dict()
     }
     return response
 
@@ -168,8 +170,6 @@ def get_one_goal_or_abort(goal_id):
         abort(make_response(jsonify(response), 400))
     
     requested_goal = Goal.query.get(goal_id)
-    
-    # if requested_goal is None:
     if not requested_goal:
         response = {"msg":f"Could not find goal with id: {goal_id}"}
         abort(make_response(jsonify(response), 404))
@@ -184,10 +184,7 @@ def replace_goal(goal_id):
     goal.title = request_body["title"]
     db.session.commit()
     response = {
-        "goal": {
-            "id": goal.goal_id,
-            "title": goal.title
-        }
+        "goal": goal.create_goal_dict()
     }
     return response
 
