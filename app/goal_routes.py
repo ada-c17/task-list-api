@@ -21,21 +21,20 @@ def create_goal():
     return make_response(jsonify({"goal": goal.to_dict()}), 201)
 
 
-# @bp.route("/<goal_id>/tasks", methods=("POST",))
-# def create_goal_from_tasks(goal_id):
-#     goal = validate_goal_id(goal_id)
-#     request_body = request.get_json()
+@bp.route("/<goal_id>/tasks", methods=("POST",))
+def add_tasks_to_goal(goal_id):
+    goal = validate_goal_id(goal_id)
+    request_body = request.get_json()
 
-#     for task_id in request_body["task_ids"]:
-#         task = validate_task_id(task_id)
-#         task.goal = goal
+    tasks_list = []
+    for task_id in request_body["task_ids"]:
+        task = validate_task_id(task_id)
+        task.goal = goal
+        tasks_list.append(task.task_id)
 
-#     # db.session.add(task)
-#     db.session.commit()
-#     pass
-#     # return make_response(jsonify(task.to_dict()), 200)
+    db.session.commit()
+    return make_response(jsonify({"id": goal.goal_id, "task_ids": tasks_list}))
     
-
 
 @bp.route("/<goal_id>", methods=("GET",))
 def read_goal(goal_id):
@@ -44,7 +43,7 @@ def read_goal(goal_id):
 
 
 @bp.route("", methods=("GET",))
-def real_all_goals():
+def read_all_goals():
     goals = Goal.query.all()
     goals_response = [goal.to_dict() for goal in goals]
     return make_response(jsonify(goals_response), 200)
