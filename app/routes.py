@@ -16,18 +16,22 @@ def send_slack_message(task, message):
     '''
     send slack message with task information - use when marking tasks complete/incomplete
     '''
+    slack_url = "https://slack.com/api/chat.postMessage?channel=task-notifications&text="
     if message == "completed":
         send_message = f"Someone just completed the task {task.title}"
     else: 
         send_message = f"The task {task.title} sent: {message}"
 
-
-    url = os.environ.get("SLACK_POST_URL")+send_message
-    header_authorization = "Bearer "+os.environ.get("SLACK_AUTH_KEY")
-    headers = {'Authorization': header_authorization}
-    requests.post(url, headers=headers)
-    return
-
+    try: 
+        url = slack_url+send_message
+        header_authorization = "Bearer "+os.environ.get("SLACK_AUTH_KEY")
+        headers = {'Authorization': header_authorization}
+        requests.post(url, headers=headers)
+        return
+    except TypeError:
+        return TypeError("Slack Auth Key may be missing or invalid. Check your environment variables.")
+    except:
+        return 
 
 ## Task Validation & Routes
 
