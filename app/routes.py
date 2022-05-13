@@ -54,10 +54,7 @@ def get_tasks_for_goal(id):
     
     for task in goal.tasks: 
         task = validate_task(id)
-        
         task_of_goal.append(task.to_dict())
-
-    print(goal_with_tasks, "MY ANS!!!")
 
     return goal_with_tasks
 
@@ -197,11 +194,6 @@ def mark_complete(id):
     db.session.add(task)
     db.session.commit()
 
-    # print("TASK TITLE **", task.title)
-
-    # task_dict = task.to_dict()
-    # print("TASK_DICT TITLE", task_dict.title)
-    
 
 
     slack_bot_token= os.environ.get('SLACK_BOT_TOKEN')
@@ -210,7 +202,8 @@ def mark_complete(id):
     headers = {"Authorization": slack_bot_token}
     slack_url = f'https://slack.com/api/chat.postMessage?channel={channel_name}&text={text}' 
     
-    response = requests.post(slack_url, headers=headers)
+    ## UNCOMMENT RESPONSE TO POST
+    #response = requests.post(slack_url, headers=headers)
 
     
 
@@ -231,7 +224,7 @@ def mark_incomplete(id):
     headers = {"Authorization": slack_bot_token}
     slack_url = f'https://slack.com/api/chat.postMessage?channel={channel_name}&text={text}' 
     
-    response = requests.post(slack_url, headers=headers)
+   # response = requests.post(slack_url, headers=headers)
 
     return {"task": task.to_dict()}
 
