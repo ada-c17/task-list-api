@@ -2,6 +2,8 @@ from app import db
 from flask import Blueprint, jsonify, make_response, request
 from app.models.task import Task
 from datetime import datetime
+from dotenv import load_dotenv
+import os, requests
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -9,7 +11,8 @@ def validate_task(task_id):
     try:
         task_id = int(task_id)
     except ValueError:
-        return jsonify({"msg":f"Invalid task id: {task_id}. ID must be an integer."}), 400
+        response = {"msg":f"Invalid task id: {task_id}. ID must be an integer."}
+        return response, 400
 
 @tasks_bp.route("", methods=["POST"])
 def create_task():
@@ -30,7 +33,7 @@ def create_task():
     db.session.commit()
 
     response = new_task.create_task_dict()
-    return jsonify(response), 201
+    return response, 201
 
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
@@ -54,10 +57,10 @@ def get_one_task(task_id):
     requested_task = Task.query.get(task_id)
 
     if requested_task is None:
-        return jsonify({"msg":f"Could not find task with id: {task_id}"}), 404
+        return {"msg":f"Could not find task with id: {task_id}"}, 404
     
     response = requested_task.create_task_dict()
-    return jsonify(response)
+    return response
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def replace_task(task_id):
@@ -66,7 +69,7 @@ def replace_task(task_id):
 
     requested_task = Task.query.get(task_id)
     if requested_task is None:
-        return jsonify({"msg":f"Could not find task with id: {task_id}"}), 404
+        return {"msg":f"Could not find task with id: {task_id}"}, 404
 
     requested_task.title = request_body["title"]
     requested_task.description = request_body["description"]
@@ -74,7 +77,7 @@ def replace_task(task_id):
     db.session.commit()
 
     response = requested_task.create_task_dict()
-    return jsonify(response)
+    return response
 
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
@@ -82,12 +85,15 @@ def delete_task(task_id):
 
     requested_task = Task.query.get(task_id)
     if requested_task is None:
-        return jsonify({"msg":f"Could not find task with id: {task_id}"}), 404
+        response = {"msg":f"Could not find task with id: {task_id}"}
+        return response, 404
 
     db.session.delete(requested_task)
     db.session.commit()
 
-    return jsonify({"details": f'Task {requested_task.task_id} "{requested_task.title}" successfully deleted'})
+    response = {"details": f'Task {requested_task.task_id} "{requested_task.title}" successfully deleted'}
+
+    return response
 
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def mark_task_complete(task_id):
@@ -95,27 +101,41 @@ def mark_task_complete(task_id):
 
     requested_task = Task.query.get(task_id)
     if requested_task is None:
-        return jsonify({"msg":f"Could not find task with id: {task_id}"}), 404
+        response = {"msg":f"Could not find task with id: {task_id}"}
+        return response, 404
     
     requested_task.completed_at = datetime.now()
 
     db.session.commit()
 
     response = requested_task.create_task_dict()
-    return jsonify(response)
+
+    path = "https://slack.com/api/chat.postMessage"
+    data = {
+        "channel": "task-notifications",
+        "text": f"Someone just completed the task {requested_task.title}"
+    }
+    headers = {
+        "authorization": "Bearer " + os.environ.get("SLACKBOT_API_KEY")
+    }
+
+    post_message = requests.post(path, data=data, headers=headers)
+    
+    return response
 
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def mark_task_incomplete(task_id):
     task = validate_task(task_id)
-    
+
     requested_task = Task.query.get(task_id)
     if requested_task is None:
-        return jsonify({"msg":f"Could not find task with id: {task_id}"}), 404
+        response = {"msg":f"Could not find task with id: {task_id}"}
+        return response, 404
     
     requested_task.completed_at = None
-    requested_task.is_complete = False
+
 
     db.session.commit()
 
     response = requested_task.create_task_dict()
-    return jsonify(response)
+    return response
