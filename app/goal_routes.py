@@ -1,6 +1,5 @@
 from app import db
 from app.models.goal import Goal
-from app.models.task import Task 
 from .routes import validate_task
 from flask import Blueprint, request, jsonify, make_response, abort
 from datetime import datetime
@@ -39,30 +38,20 @@ def create_task_for_goal(goal_id):
     db.session.commit()
 
     return make_response(jsonify(dict(id=goal.goal_id, task_ids=tasks_list))), 200
-
     # return make_response(jsonify(f"id: {task.title} for Goal: {task.goal.title} successfully created"), 200)
-### Confused about this??? ABOVE
+
 @goals_bp.route("/<goal_id>/tasks", methods=["GET"])
 def get_tasks_per_goal(goal_id):
-    # request_body = request.get_json()
 
     goal = validate_goal(goal_id)
     tasks_info = [task.to_dict() for task in goal.tasks]
 
-    # for task_id in request_body["task_ids"]:
-    #     tasks_list = []
-    #     task = validate_task(task_id)
-    #     # task.goal = goal 
-    #     tasks_list.append(task)
-
-    # goal = get_goal_by_id(Goal, goal_id)
-    # tasks_info = [Task.to_dict(task) for task in goal.tasks]
     db.session.commit()
 
     return jsonify(dict(id=goal.goal_id, title=goal.title, tasks=tasks_info)), 200
 
 
-    # GET ALL goalS aka READ at endpoint /goals
+# GET ALL goalS aka READ at endpoint /goals
 @goals_bp.route("", methods=["GET"])
 def read_all_goals():
     goals_response = []

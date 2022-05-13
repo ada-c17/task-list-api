@@ -5,7 +5,6 @@ from datetime import datetime
 import requests
 import os
 from dotenv import load_dotenv
-from app.models.goal import Goal
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -56,16 +55,7 @@ def get_task_by_id(id):
     
     # NOTE: Flask will automatically convert a dictionary into an HTTP response body. 
     # If we don't want to remember this exception, we can call jsonify() with the dictionary as an argument to return the result
-    # if "goal_id" in task:
-    # return jsonify(dict(task= dict(
-    #     id=task.task_id,
-    #     title=task.title,
-    #     description=task.description,
-    #     goal_id=Goal.goal_id,
-    #     is_complete= True if task.completed_at else False)
-    #     )), 200
 
-    # else: 
     return jsonify({"task": task.to_dict()}), 200
     # return make_response(jsonify({"task": task.to_dict()}), 201)
 
@@ -94,8 +84,6 @@ def delete_one_task(id):
     # return make_response(f"Task #{task.task_id} successfully deleted"), 200  #Do I need to jsonify this?
     # return jsonify(dict(details= f"Task {id} {task.to_dict()["title"]})), 200
     return jsonify({'details': f'Task {id} "{task.title}" successfully deleted'}), 200
-
-
 
 #QUALITY CONTROL HELPER FUNCTION
 def validate_task(id):

@@ -10,17 +10,22 @@ class Task(db.Model):
     # __tablename__ = "tasks" #This is optional for if you want to plurally name your table 
 
     def to_dict(self):
+        if self.goal_id is None:
+            return dict(
+                id=self.task_id,
+                title=self.title,
+                description=self.description,
+                is_complete= True if self.completed_at else False
+                )
+        else:
+            return dict(
+                id=self.task_id,
+                title=self.title,
+                description=self.description,
+                goal_id=self.goal_id,
+                is_complete= True if self.completed_at else False
+                ) 
 
-        return dict(
-            id=self.task_id,
-            title=self.title,
-            description=self.description,
-            # goal_id=request_body.get("goal_id", None),
-            # is_complete=self.completed_at is not None
-            # is_complete= True if self.completed_at != None else False
-            is_complete= True if self.completed_at else False
-            # is_complete= self.completed_at != None
-            )
 
     def update(self,request_body):
         self.title = request_body["title"]
@@ -31,7 +36,6 @@ class Task(db.Model):
         return cls(
             title=request_body["title"],
             description=request_body["description"],
-            # completed_at = request_body["completed_at"] if "completed at" in request_body else None
             completed_at=request_body.get("completed_at", None) 
             #This value returns None if there is no argument
             # .get is a dictionary method. 
