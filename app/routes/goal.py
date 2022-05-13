@@ -2,7 +2,7 @@ from flask import Blueprint,jsonify, request, make_response, abort
 from app.models.goal import Goal
 from app.models.task import Task
 from app import db
-
+from .helper import validate_goal
 
 goals_bp = Blueprint("goal", __name__,url_prefix="/goals")
 
@@ -20,12 +20,6 @@ def create_one_goal():
     db.session.add(new_goal)
     db.session.commit()
 
-    # response = {
-    #     "goal":{
-    #     "id":new_goal.goal_id,
-    #     "title":new_goal.title }
-    # }
-    # return jsonify(response), 201
     return jsonify(new_goal.to_dict()), 201
 
 # get all goals
@@ -64,13 +58,6 @@ def get_one_goal(goal_id):
     chosen_goal = validate_goal(goal_id)
 
     request_body = request.get_json()
-
-    # response = {
-    #     "goal":{
-    #     "id":chosen_goal.goal_id,
-    #     "title":chosen_goal.title }
-    # }
-    # return jsonify(response), 200
     return jsonify(chosen_goal.to_dict()), 200
 
 
@@ -90,13 +77,6 @@ def update_one_goal(goal_id):
         },404
 
     db.session.commit()
-
-    # response = {
-    #     "goal":{
-    #     "id":chosen_goal.goal_id,
-    #     "title":chosen_goal.title }
-    # }
-    # return jsonify(response), 200
 
     return jsonify(chosen_goal.to_dict()), 200
 

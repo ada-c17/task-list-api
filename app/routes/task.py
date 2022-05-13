@@ -5,6 +5,7 @@ from sqlalchemy import asc, desc
 from datetime import datetime
 import requests
 import os
+from .helper import validate_task
 
 tasks_bp = Blueprint("task", __name__,url_prefix="/tasks")
 
@@ -47,26 +48,12 @@ def get_all_tasks():
             'is_complete': bool(task.completed_at)
         })
     return jsonify(task_response),200
-
-
-def get_task_or_abort(task_id):
-    try:
-        task_id = int (task_id)
-    except ValueError:
-        rsp =  {"msg": f"Invalid id:{task_id}"}
-        abort( make_response (jsonify(rsp), 400))
-        
-    chosen_task = Task.query.get(task_id)
-
-    if chosen_task is None:
-        abort( make_response({"massage": f" task {task_id} not found"}, 404))
     
-    return chosen_task
 
 # get one task
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def get_one_task(task_id):
-    chosen_task = get_task_or_abort(task_id)
+    chosen_task = validate_task(task_id)
 
     request_body = request.get_json()
     return jsonify(chosen_task.to_dict()), 200
@@ -75,7 +62,7 @@ def get_one_task(task_id):
 # update chosen task
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_one_task(task_id):
-    chosen_task = get_task_or_abort(task_id)
+    chosen_task = validate_task(task_id)
 
     request_body = request.get_json()
 
@@ -96,7 +83,7 @@ def update_one_task(task_id):
 # delete chosen task
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_one_task(task_id):
-    chosen_task = get_task_or_abort(task_id)
+    chosen_task = validate_task(task_id)
 
     db.session.delete(chosen_task)
     db.session.commit()
@@ -111,7 +98,7 @@ def delete_one_task(task_id):
 # update chosen task is completed
 @tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
 def update_task_is_complete(task_id):
-    chosen_task = get_task_or_abort(task_id)
+    chosen_task = validate_task(task_id)
 
     chosen_task.completed_at = datetime.utcnow()
     db.session.commit()
@@ -134,7 +121,7 @@ def update_task_is_complete(task_id):
 # update chosen task is Incompleted
 @tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
 def update_task_is_incomplete(task_id):
-    chosen_task = get_task_or_abort(task_id)
+    chosen_task = validate_task(task_id)
 
     chosen_task.completed_at = None
 
