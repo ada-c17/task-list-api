@@ -232,14 +232,10 @@ def test_get_tasks_filter_by_title(client, three_tasks):
             "is_complete": False
     }]
 
-        
 
 def test_get_tasks_sort_by_title_desc(client, three_tasks):
     # Act
-    data= {
-        "sort": "desc",
-        "title": "Water the garden 🌷"
-    }
+    data= {"sort": "desc"}
     response = client.get("/tasks", query_string=data)
     response_body = response.get_json()
 
@@ -267,12 +263,9 @@ def test_get_tasks_sort_by_title_desc(client, three_tasks):
     ]
 
 
-def test_get_tasks_sort_by_title_descending(client, three_tasks):
+def test_get_tasks_sort_by_title_sensitive_case_descending(client, three_tasks):
     # Act
-    data= {
-        "sort": "Descending",
-        "title": "Water the garden 🌷"
-    }
+    data= {"sort": "Descending"}
     response = client.get("/tasks", query_string=data)
     response_body = response.get_json()
 
@@ -302,10 +295,7 @@ def test_get_tasks_sort_by_title_descending(client, three_tasks):
 
 def test_get_tasks_sort_by_title_asc(client, three_tasks):
     # Act
-    data= {
-        "sort": "asc",
-        "title": "Water the garden 🌷"
-    }
+    data= {"sort": "asc"}
     response = client.get("/tasks", query_string=data)
     response_body = response.get_json()
 
@@ -333,37 +323,268 @@ def test_get_tasks_sort_by_title_asc(client, three_tasks):
     ]
 
 
-def test_get_tasks_sort_by_title_ascending(client, three_tasks):
+def test_get_tasks_sort_by_title_no_sort_type(client, three_tasks):
+    # Act
+    data= {"sort": ""}
+    response = client.get("/tasks", query_string=data)
+    response_body = response.get_json()
+
+    # Assert 
+    assert response.status_code == 200
+    assert response_body == [
+        {
+            "id": 2,
+            "title": "Answer forgotten email 📧",
+            "description": "",
+            "is_complete": False 
+        },
+        {
+            "id": 3,
+            "title": "Pay my outstanding tickets 😭",
+            "description": "",
+            "is_complete": False 
+        },
+        {
+            "id": 1,
+            "title": "Water the garden 🌷",
+            "description": "",
+            "is_complete": False 
+        }
+    ]
+
+
+def test_get_tasks_by_id_for_a_goal_sort_asc(client, three_tasks_belong_to_one_goal):
     # Act
     data= {
-        "sort": "ASCENDING",
-        "title": "Water the garden 🌷"
+        "sort": "asc",
+        "goal_id": 1
     }
     response = client.get("/tasks", query_string=data)
     response_body = response.get_json()
 
-    # Assert 
+    # Assert
     assert response.status_code == 200
     assert response_body == [
         {
+            "id": 1,
+            "title": "Water the garden 🌷",
+            "goal_id": 1,
+            "description": "",
+            "is_complete": False 
+        },
+        {
             "id": 2,
             "title": "Answer forgotten email 📧",
+            "goal_id": 1,
             "description": "",
             "is_complete": False 
         },
         {
             "id": 3,
             "title": "Pay my outstanding tickets 😭",
+            "goal_id": 1,
+            "description": "",
+            "is_complete": False 
+        }
+    ]
+
+def test_get_tasks_by_id_for_a_goal_sort_desc(client, three_tasks_belong_to_one_goal):
+    # Act
+    data= {
+        "sort": "desc",
+        "goal_id": 1
+    }
+    response = client.get("/tasks", query_string=data)
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert response_body == [
+        {
+            "id": 3,
+            "title": "Pay my outstanding tickets 😭",
+            "goal_id": 1,
+            "description": "",
+            "is_complete": False 
+        },
+        {
+            "id": 2,
+            "title": "Answer forgotten email 📧",
+            "goal_id": 1,
             "description": "",
             "is_complete": False 
         },
         {
             "id": 1,
             "title": "Water the garden 🌷",
+            "goal_id": 1,
             "description": "",
             "is_complete": False 
         }
     ]
+
+
+def test_get_tasks_by_id_for_a_goal_sort_sensitive_case_asc(client, three_tasks_belong_to_one_goal):
+    # Act
+    data= {
+        "sort": "Ascending",
+        "goal_id": 1
+    }
+    response = client.get("/tasks", query_string=data)
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert response_body == [
+        {
+            "id": 1,
+            "title": "Water the garden 🌷",
+            "goal_id": 1,
+            "description": "",
+            "is_complete": False 
+        },
+        {
+            "id": 2,
+            "title": "Answer forgotten email 📧",
+            "goal_id": 1,
+            "description": "",
+            "is_complete": False 
+        },
+        {
+            "id": 3,
+            "title": "Pay my outstanding tickets 😭",
+            "goal_id": 1,
+            "description": "",
+            "is_complete": False 
+        }
+    ]
+    
+
+def test_get_tasks_by_id_for_a_goal_sort_sensitive_case_desc(client, three_tasks_belong_to_one_goal):
+    # Act
+    data= {
+        "sort": "DESCENDING",
+        "goal_id": 1
+    }
+    response = client.get("/tasks", query_string=data)
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert response_body == [
+        {
+            "id": 3,
+            "title": "Pay my outstanding tickets 😭",
+            "goal_id": 1,
+            "description": "",
+            "is_complete": False 
+        },
+        {
+            "id": 2,
+            "title": "Answer forgotten email 📧",
+            "goal_id": 1,
+            "description": "",
+            "is_complete": False 
+        },
+        {
+            "id": 1,
+            "title": "Water the garden 🌷",
+            "goal_id": 1,
+            "description": "",
+            "is_complete": False 
+        }
+    ]
+
+
+def test_get_tasks_by_id_for_invalid_goal_sort_desc(client, three_tasks_belong_to_one_goal):
+    # Act
+    data= {
+        "sort": "desc",
+        "goal_id": "one"
+    }
+    response = client.get("/tasks", query_string=data)
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 400
+    assert response_body == {"message": "The goal id one is invalid. The id must be integer."}
+
+
+def test_get_tasks_by_id_for_none_exist_goal_sort_asc(client, three_tasks_belong_to_one_goal):
+    # Act
+    data= {
+        "sort": "asc",
+        "goal_id": 2
+    }
+    response = client.get("/tasks", query_string=data)
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 404
+    assert response_body == {"message": "The goal id 2 is not found"}
+
+
+def test_get_tasks_by_id_for_a_goal_sort_with_empty(client, three_tasks_belong_to_one_goal):
+    # Act
+    data= {
+        "sort": "",
+        "goal_id": 1
+    }
+    response = client.get("/tasks", query_string=data)
+    response_body = response.get_json()
+
+    # Assert
+    assert response.status_code == 200
+    assert response_body == [
+        {
+            "id": 1,
+            "title": "Water the garden 🌷",
+            "goal_id": 1,
+            "description": "",
+            "is_complete": False 
+        },
+        {
+            "id": 2,
+            "title": "Answer forgotten email 📧",
+            "goal_id": 1,
+            "description": "",
+            "is_complete": False 
+        },
+        {
+            "id": 3,
+            "title": "Pay my outstanding tickets 😭",
+            "goal_id": 1,
+            "description": "",
+            "is_complete": False 
+        }
+    ]
+
+# def test_create_task_with_completed_at(client):
+#     # Act
+#     response = client.post("/tasks", json={
+#         "title": "A Brand New Task",
+#         "description": "Test Description",
+#         "completed_at": "Fri, 13 May 2022 00:00:00 GMT"
+#     })
+#     response_body = response.get_json()
+
+#     # Assert
+#     assert response.status_code == 201
+#     # assert "task" in response_body
+#     # assert response_body == {
+#     #     "task": {
+#     #         "id": 1,
+#     #         "title": "A Brand New Task",
+#     #         "description": "Test Description",
+#     #         "is_complete": False
+#     #     }
+#     # }
+#     new_task = Task.query.get(1)
+#     assert new_task
+#     assert new_task.title == "A Brand New Task"
+#     assert new_task.description == "Test Description"
+#     assert new_task.completed_at == '2022-05-13 00:00:00'
+
 
 
 
