@@ -14,7 +14,7 @@ def create_app(test_config=None):
     app = Flask(__name__)
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    if test_config is None:
+    if not test_config:
         app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
             "SQLALCHEMY_DATABASE_URI")
     else:
@@ -22,13 +22,16 @@ def create_app(test_config=None):
         app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
             "SQLALCHEMY_TEST_DATABASE_URI")
 
-    # Import models here for Alembic setup
     from app.models.task import Task
     from app.models.goal import Goal
 
     db.init_app(app)
     migrate.init_app(app, db)
 
-    # Register Blueprints here
+    from .tasks import tasks_bp
+    app.register_blueprint(tasks_bp)
+
+    from .goals import goals_bp
+    app.register_blueprint(goals_bp)
 
     return app
