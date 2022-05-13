@@ -94,7 +94,7 @@ def update_task_complete_status(task_id, complete_status):
         # WAVE 4
         SLACKBOT_TOKEN = os.environ.get("SLACKBOT_TOKEN")
         slackbot_url = "https://slack.com/api/chat.postMessage"
-        slackbot_headers =  {"Authorization": "Bearer " + SLACKBOT_TOKEN}
+        slackbot_headers =  {"Authorization": f"Bearer {SLACKBOT_TOKEN}"}
         slackbot_msg = {
                 "channel": "task-notifications", 
                 "text": f"Someone just completed the task {chosen_task.title}"
