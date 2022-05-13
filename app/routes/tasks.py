@@ -4,9 +4,8 @@ from app import db
 from datetime import datetime
 import logging
 import os
-import slack
-from slack import WebClient
-from slack.errors import SlackApiError
+from slack_sdk import WebClient
+from slack_sdk.errors import SlackApiError
 
 logger = logging.getLogger(__name__)
 client = WebClient(token=os.environ.get('SLACK_BOT_TOKEN'))
