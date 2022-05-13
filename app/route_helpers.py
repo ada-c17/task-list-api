@@ -8,6 +8,11 @@ import os
 load_dotenv()
 
 def fetch_type(type, id):
+    '''
+    fetch_type 
+    takes type(as 'goal' or 'task') and id(id to be fetched)
+    returns the goal or task class object of the requested id
+    '''
     try:
         id = int(id)
     except:
@@ -23,7 +28,11 @@ def fetch_type(type, id):
     return got_type
 
 def slack_post(name):
-    
+    '''
+    slack_post
+    takes name of task to print in slack
+    returns none
+    '''
     url_location = "https://slack.com/api/chat.postMessage"
     data_dict = {"channel": "C03ERAGUTR8", 
                 "text": f"Someone just completed the task {name}"}

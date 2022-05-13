@@ -6,7 +6,11 @@ from sqlalchemy import asc, desc
 from datetime import date
 
 task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
-
+####################
+#POST creates a task
+#json:title, decription, completed_at(if already complete)
+#returns created task
+####################
 @task_bp.route("", methods=["POST"])
 def create_task():
     request_body = request.get_json()
@@ -21,6 +25,10 @@ def create_task():
         abort(make_response(jsonify({"details":f"Invalid data"}), 400))
     return make_response(jsonify({"task": new_task.to_json()}), 201)
 
+####################
+#GET gets all tasks with optional sort ascending or descending
+#returns list of all tasks
+####################
 @task_bp.route("", methods=["GET"])
 def fetch_all_tasks():
 
@@ -35,11 +43,22 @@ def fetch_all_tasks():
     task_response = [task.to_json() for task in tasks]
     return make_response(jsonify(task_response),200)
 
+####################
+#GET gets a task
+#route /task_id
+#returns created task
+####################
 @task_bp.route("/<task_id>", methods=["GET"])
 def fetch_a_task(task_id):
     task = fetch_type("task", task_id)
     return make_response(jsonify({"task": task.to_json()}), 200)
 
+####################
+#PUT updates a task
+#route /<task_id>
+#json: title, description, completed_at(optional)
+#returns created task
+####################
 @task_bp.route("/<task_id>", methods=["PUT"])
 def update_a_task(task_id):
     
@@ -55,6 +74,11 @@ def update_a_task(task_id):
         abort(make_response(jsonify({"details":f"Invalid data"}), 400))
     return make_response(jsonify({"task": task.to_json()}),200)
 
+####################
+#DELETE deletes a task
+#route /<task_id>
+#returns message that task was deleted
+####################
 @task_bp.route("/<task_id>", methods=["DELETE"])
 def delete_a_task(task_id):
     task = fetch_type("task", task_id)
@@ -62,6 +86,11 @@ def delete_a_task(task_id):
     db.session.commit()
     return make_response(jsonify({"details": f"Task {task.task_id} \"{task.title}\" successfully deleted"}), 200)
 
+####################
+#PATCH updates a task as complete or incomplete
+#route /<task_id>/mark_incomplete or /<task_id>/mark_complete
+#returns updated task info
+####################
 @task_bp.route("/<task_id>/mark_<status>", methods=["PATCH"])
 def update_task_complete(task_id, status):
     
