@@ -23,10 +23,10 @@ def create_goal():
     db.session.commit()
 
     response = {
-        "goal": new_goal.to_json()
+        "goal": new_goal.to_dict()
     }
 
-    return make_response(jsonify(response), 201)
+    return make_response(response, 201)
 
 
 #Get all goals or no saved goals
@@ -36,7 +36,7 @@ def get_goals():
 
     goals_response = []
     for goal in goals:
-        goals_response.append(goal.to_json())
+        goals_response.append(goal.to_dict())
 
     return make_response(jsonify(goals_response), 200)
 
@@ -49,10 +49,10 @@ def read_one_goal(goal_id):
         return abort(make_response({"message": f"Goal {goal_id} is not found"}, 404))
 
     response = {
-        "goal": goal.to_json()
+        "goal": goal.to_dict()
     }
 
-    return jsonify(response)
+    return response
 
 #Update one goal
 @goal_bp.route("/<goal_id>", methods = ["PUT"])
@@ -68,7 +68,7 @@ def update_one_goals(goal_id):
 
     db.session.commit()
 
-    return make_response(jsonify({"goal": goal.to_json()}), 200)
+    return make_response({"goal": goal.to_dict()}, 200)
 
 #Delete Goal: Deleting a Goal
 @goal_bp.route("/<goal_id>", methods = ["DELETE"])
@@ -106,7 +106,7 @@ def add_tasks(goal_id):
         "task_ids": task_ids
     }
 
-    return make_response(jsonify(response_body), 200)
+    return make_response(response_body, 200)
 
 @goal_bp.route("/<goal_id>/tasks", methods=["GET"])
 def read_tasks(goal_id):
@@ -118,7 +118,7 @@ def read_tasks(goal_id):
 
     tasks = []
     for task in goal.tasks:
-        tasks.append(task.to_json())
+        tasks.append(task.to_dict())
 
     response_body = {
         "id": int(goal_id),
@@ -126,4 +126,4 @@ def read_tasks(goal_id):
         "tasks": tasks
     }
 
-    return make_response(jsonify(response_body), 200)
+    return make_response(response_body, 200)

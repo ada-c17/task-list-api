@@ -27,26 +27,28 @@ def create_task():
     db.session.commit()
 
     response = {
-        "task": new_task.to_json()
+        "task": new_task.to_dict()
     }
 
-    return make_response(jsonify(response), 201)
+    return make_response(response, 201)
 
 
 #Get all tasks or no saved tasks
 @task_bp.route("", methods=["GET"])
 def get_tasks():
-    tasks = Task.query.all()
-    
+
     sort_query = request.args.get("sort") 
     if sort_query == "asc":
-        tasks = sorted(tasks, key=lambda task: task.title)
+        tasks = Task.query.order_by(Task.title.asc()).all()
     elif sort_query == "desc":
-        tasks = sorted(tasks, key=lambda task: task.title, reverse=True)
+        tasks = Task.query.order_by(Task.title.desc()).all()
+    else:
+        tasks = Task.query.all() 
+
 
     tasks_response = []
     for task in tasks:
-        tasks_response.append(task.to_json())
+        tasks_response.append(task.to_dict())
 
     return make_response(jsonify(tasks_response), 200)
 
@@ -59,10 +61,10 @@ def read_one_task(task_id):
         return abort(make_response({"message": f"Task {task_id} is not found"}, 404))
 
     response = {
-        "task": task.to_json()
+        "task": task.to_dict()
     }
 
-    return jsonify(response)
+    return response
 
 #Update one task
 @task_bp.route("/<task_id>", methods = ["PUT"])
@@ -82,7 +84,7 @@ def update_one_tasks(task_id):
 
     db.session.commit()
 
-    return make_response(jsonify({"task": task.to_json()}), 200)
+    return make_response({"task": task.to_dict()}, 200)
 
 #Delete Task: Deleting a Task
 @task_bp.route("/<task_id>", methods = ["DELETE"])
@@ -113,9 +115,9 @@ def mark_complete(task_id):
 
     slack.notify_completed(task.title)
 
-    return make_response(jsonify({
-        "task": task.to_json()
-    }), 200)
+    return make_response({
+        "task": task.to_dict()
+    }, 200)
 
 @task_bp.route("/<task_id>/mark_incomplete", methods = ["PATCH"])
 def mark_incomplete(task_id):
@@ -127,6 +129,6 @@ def mark_incomplete(task_id):
     task.completed_at = None
     db.session.commit()
 
-    return make_response(jsonify({
-        "task": task.to_json()
-    }), 200)
+    return make_response({
+        "task": task.to_dict()
+    }, 200)
