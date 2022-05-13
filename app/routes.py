@@ -3,7 +3,7 @@ from app import db
 from datetime import datetime
 from app.models.task import Task
 from app.models.goal import Goal, TasksGoal
-from app.models.common import (MissingValueError, FormatError, DBLookupError,
+from app.commons import (MissingValueError, FormatError, DBLookupError,
                 IDTypeError, validate_and_get_by_id, get_filtered_and_sorted,
                 notify)
 from app.error_responses import make_error_response

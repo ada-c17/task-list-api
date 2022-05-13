@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import os
 from dotenv import load_dotenv
-from app.models.common import TaskListJSONEncoder
+from app.commons import TaskListJSONEncoder
 
 
 db = SQLAlchemy()
