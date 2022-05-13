@@ -143,9 +143,19 @@ def mark_task_incomplete(task_id):
 
 goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
+def validate_goal(goal_id):
+    try:
+        goal_id = int(goal_id)
+    except ValueError:
+        response = {"msg":f"Invalid goal id: {goal_id}. ID must be an integer."}
+        return response, 400
+
 @goals_bp.route("", methods=["POST"])
 def create_goal():
     request_body = request.get_json()
+    
+    if "title" not in request_body:
+        return {"details": "Invalid data"}, 400
 
     new_goal = Goal(title=request_body["title"])
 
@@ -159,3 +169,74 @@ def create_goal():
                 }
             }
     return goal_dict, 201
+
+@goals_bp.route("", methods=["GET"])
+def get_all_goals():
+    goals = Goal.query.all()
+    response = []
+    for goal in goals:
+        response.append({ 
+            "id": goal.goal_id,
+            "title": goal.title
+        })
+
+    return jsonify(response)
+
+@goals_bp.route("/<goal_id>", methods=["GET"])
+def get_one_goal(goal_id):
+    goal = validate_goal(goal_id)
+    requested_goal = Goal.query.get(goal_id)
+
+    if requested_goal is None:
+        return {"msg":f"Could not find goal with id: {goal_id}"}, 404
+    
+    try:
+        goal_id = int(goal_id)
+    except ValueError:
+        response = {"msg":f"Invalid task id: {goal_id}. ID must be an integer."}
+        return response, 400
+
+    response = {
+        "goal": {
+            "id": requested_goal.goal_id,
+            "title": requested_goal.title
+        }
+    }
+    return response
+
+@goals_bp.route("/<goal_id>", methods=["PUT"])
+def replace_goal(goal_id):
+    goal = validate_goal(goal_id)
+    request_body = request.get_json()
+
+    requested_goal = Goal.query.get(goal_id)
+    if requested_goal is None:
+        return {"msg":f"Could not find goal with id: {goal_id}"}, 404
+
+    requested_goal.title = request_body["title"]
+
+    db.session.commit()
+
+    response = {
+        "goal": {
+            "id": requested_goal.goal_id,
+            "title": requested_goal.title
+        }
+    }
+    return response
+
+@goals_bp.route("/<goal_id>", methods=["DELETE"])
+def delete_goal(goal_id):
+    goal = validate_goal(goal_id)
+
+    requested_goal = Goal.query.get(goal_id)
+    if requested_goal is None:
+        response = {"msg":f"Could not find goal with id: {goal_id}"}
+        return response, 404
+
+    db.session.delete(requested_goal)
+    db.session.commit()
+
+    response = {"details": f'Goal {requested_goal.goal_id} "{requested_goal.title}" successfully deleted'}
+
+    return response
