@@ -2,28 +2,28 @@ from app import db
 from datetime import datetime
 
 class Task(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(db.Integer, primary_key=True,    )
     title = db.Column(db.String)
     description = db.Column(db.String)
     completed_at = db.Column(db.DateTime, default = None)
-    #(- Nullable=True is default)
-    # is_complete = db.Column(db.Datetime, default=False)
+    # (- Nullable=True is default)
+    goal_id = db.Column(db.Integer, db.ForeignKey("goal.goal_id"))
+    goal = db.relationship("Goal", back_populates="tasks")
+
+
 
     def to_json(self):
-        if not self.completed_at:
-            return {
+
+            to_json_dict = {
                 "id": self.id,
                 "title": self.title,
                 "description": self.description,
-                "is_complete": False
+                "is_complete": True if self.completed_at else False
             }
-        else:
-            return {
-                "id": self.id,
-                "title": self.title,
-                "description": self.description,
-                "is_complete": True
-            }
+            if self.goal_id:
+                to_json_dict["goal_id"] =self.goal_id
+
+            return to_json_dict
         
     @classmethod
     def create(cls, req_body):
