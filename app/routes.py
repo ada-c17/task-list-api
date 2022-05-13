@@ -17,7 +17,7 @@ slack_bot_token= os.environ.get("SLACK_BOT_TOKEN")
 task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 goal_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
-### NEW ROUTE!! ## 
+
 
 
 
@@ -45,6 +45,41 @@ def get_all_tasks():
 
     response_body = [task.to_dict() for task in tasks]
     return jsonify(response_body)
+
+@goal_bp.route("/<id>/tasks", methods=["GET"])
+def get_tasks_for_goal(id):
+    goal = validate_goal(id)
+
+    task_of_goal = []
+
+    goal_with_tasks = {"id": goal.id,
+    "title": goal.title,
+    "tasks": task_of_goal}
+
+    # if not goal.tasks:
+    #     error_message(f'No tasks associated with this goal', 404)
+
+    
+    for task in goal.tasks: 
+        task = validate_task(id)
+        
+        task_of_goal.append(task.to_dict())
+
+    print(goal_with_tasks, "MY ANS!!!")
+
+    return goal_with_tasks
+
+  
+
+    
+
+   
+
+    # task_list = [task.to_dict() for task in task_list]
+
+    # return {goal.to_dict(), "tasks": [task_list]}
+        
+
     
 
 def validate_task(id):
@@ -159,40 +194,31 @@ def update_goal_by_id(id):
     db.session.add(goal)
     db.session.commit()
     return {"goal": goal.to_dict()}
-
+    
 @goal_bp.route("/<id>/tasks", methods=["POST"])
-def make_tasks_of_a_goal(id):
+def tasks_of_goal(id): 
     goal = validate_goal(id)
+    request_body = request.get_json()
 
-    request_body= request.get_json() 
-    if "task_ids" not in request_body:
-        return {'details': 'Invalid data'}, 400
-
-    goal.tasks = [Task.query.get(id) for task in "task_ids"]
-
-    # goal_tasks= {
-    #     "id": goal.id,
-    #     "task_ids" : request_body["task_ids"]
-    # }
-
-    # for id in request_body["task_ids"]: 
-    #     task = Task.query.get(id)
-    #     goal.tasks.append(task)
+    # if "task_ids" not in request_body:
+    #     return {'details': 'Invalid data'}, 404
         
+
+    # goal_task = {"id" : goal.id,
+    # "task_ids": request_body['task_ids']}
+
+    # print(request_body['task_ids'], "SHOULD BE A LIST OF NUMBERS **")
+
+    for id in request_body['task_ids']: 
+        new_task = validate_task(id)
+        goal.tasks.append(new_task)
+
     db.session.commit()
-    return {"task_ids": {goal.tasks}}
+    return {"id": goal.id, 
+    "task_ids" : request_body['task_ids']}
         
         
-
-
-
-
-    
-    
-
-
-
-
+        
 @task_bp.route("/<id>/mark_complete", methods=["PATCH"])
 def mark_complete(id):
     task = validate_task(id)
