@@ -13,6 +13,10 @@ class Goal(db.Model):
     }
 
     # Instance Methods
+
+    # I wanted to find a way to combine these two, but I couldn't get it to differentiate between when there was no self.tasks at all
+    # and when self.tasks was already set to an empty list. So if you have any ideas I'd love to hear them!
+    
     def self_to_dict_no_tasks(self):
         instance_dict = dict(
             id=self.goal_id,
@@ -21,7 +25,7 @@ class Goal(db.Model):
         return instance_dict
 
     def self_to_dict_with_tasks(self):
-        task_list = [task.self_to_dict_with_goal() for task in self.tasks]
+        task_list = [task.self_to_dict() for task in self.tasks]
         instance_dict = dict(
             id=self.goal_id,
             title=self.title,

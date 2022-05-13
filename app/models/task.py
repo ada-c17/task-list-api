@@ -21,30 +21,21 @@ class Task(db.Model):
         }
 
     # Instance Methods
-    def self_to_dict_no_goal(self):
+    def self_to_dict(self):
         instance_dict = dict(
             id=self.task_id,
             title=self.title,
             description=self.description
         )
+        if self.goal:
+            instance_dict["goal_id"] = self.goal_id
+        
         if self.completed_at:
             instance_dict["is_complete"] = True
         else:
             instance_dict["is_complete"] = False
         return instance_dict
     
-    def self_to_dict_with_goal(self):
-        instance_dict = dict(
-            id=self.task_id,
-            title=self.title,
-            description=self.description,
-            goal_id=self.goal_id
-        )
-        if self.completed_at:
-            instance_dict["is_complete"] = True
-        else:
-            instance_dict["is_complete"] = False
-        return instance_dict
 
     def update_self(self, data_dict):
         dict_key_errors = []
