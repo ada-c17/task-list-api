@@ -1,4 +1,5 @@
 from app.models.task import Task
+
 import pytest
 
 
@@ -171,8 +172,6 @@ def test_delete_task_not_found(client):
     # *****************************************************************
     # **Complete test with assertion about response body***************
     # *****************************************************************
-
-    
 
 
 #@pytest.mark.skip(reason="No way to test this feature yet")

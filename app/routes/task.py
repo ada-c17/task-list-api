@@ -1,9 +1,7 @@
-from flask import Blueprint, jsonify, make_response, request, abort
-from app import db
+from flask import Blueprint,jsonify, request, make_response, abort
 from app.models.task import Task
-from app.models.goal import Goal
+from app import db
 from sqlalchemy import asc, desc
-import json
 from datetime import datetime
 import requests
 import os
@@ -11,7 +9,7 @@ import os
 
 
 task_bp = Blueprint("tasks", __name__, url_prefix = "/tasks")
-goal_bp = Blueprint("goals", __name__, url_prefix = "/goals")
+
 
 # creating task with using POST in our route decorator
 @task_bp.route("", methods = ["POST"])
@@ -49,7 +47,18 @@ def get_all_tasks():
 @task_bp.route("/<task_id>", methods = ["GET"])
 def get_one_task(task_id):
     task = validate_task(task_id)
-    return jsonify({"task":task.to_dict()}), 200
+    if task.goal_id:
+        response = {"task": {
+            "id": task.task_id,
+            "goal_id": task.goal_id,
+            "title": task.title,
+            "description": task.description,
+            "is_complete": bool(task.completed_at)
+        }
+    }
+    else:
+        response = {"task":task.to_dict()}   
+    return jsonify(response), 200
 
 
 #updating task by using PUT in route decorater
@@ -93,61 +102,6 @@ def task_mark_incomplete(task_id):
     return jsonify({"task":task.to_dict()}), 200
 
 
-
-
-#***********************************************************
-#**************  writing code for Goal modele ***************
-#***********************************************************
-
-
-@goal_bp.route("", methods = ["POST"])
-def create_goal():
-    request_body = request.get_json()
-    if "title" not in request_body :
-        return jsonify({"details": "Invalid data"}), 400
-    
-    new_goal = Goal(title= request_body["title"])
-            
-    db.session.add(new_goal)
-    db.session.commit()
-    return make_response(jsonify({"goal":new_goal.to_dict_goal()})), 201
-
-
-@goal_bp.route("", methods = ["GET"])
-def get_all_goals():
-    goals = Goal.query.all()
-    return jsonify([goal.to_dict_goal() for goal in goals]), 200
-
-
-@goal_bp.route("/<goal_id>", methods = ["GET"])
-def get_one_goal(goal_id):
-    goal = validate_goal(goal_id)
-    return jsonify({"goal":goal.to_dict_goal()}), 200
-
-
-@goal_bp.route("/<goal_id>", methods = ["PUT"])
-def replace_one_goal(goal_id):
-    request_body = request.get_json()
-    goal = validate_goal(goal_id)
-    goal.title = request_body["title"] 
-    db.session.commit()
-    return jsonify({"goal":goal.to_dict_goal()}), 200
-
-
-@goal_bp.route("/<goal_id>", methods = ["DELETE"])
-def delete_one_goal(goal_id):
-    chosen_goal = validate_goal(goal_id)
-    db.session.delete(chosen_goal)
-    db.session.commit()
-    response_body = {"details": f"Goal {goal_id} \"Build a habit of going outside daily\" successfully deleted"}
-    return jsonify(response_body), 200
-
-
-#******************************************************************
-#**************  validating functions and slack Bot ***************
-#******************************************************************
-
-
 #validating task and using as a helper function in other functions
 def validate_task(task_id):
     try:
@@ -158,19 +112,6 @@ def validate_task(task_id):
     if not chosen_task:
         abort(make_response(jsonify({'details': f"Could not find task"}), 404))  
     return chosen_task
-
-
-#validateing goal and using as a helper function 
-def validate_goal(goal_id):
-    try:
-        goal_id = int(goal_id)
-    except ValueError:
-        abort(make_response(jsonify({"details": "Invalid data"}), 400))
-    chosen_goal = Goal.query.get(goal_id)
-    if not chosen_goal:
-        abort(make_response(jsonify({'details': f"Could not find goal"}), 404))  
-    return chosen_goal
-
 
 # creating slack Bot in wave 4 and using it in mark complete function
 def vida_slack_bot(task_title):
