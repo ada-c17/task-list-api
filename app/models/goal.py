@@ -1,3 +1,4 @@
+from __future__ import annotations
 from app import db
 from app.error_responses import MissingValueError
 
@@ -18,14 +19,14 @@ class Goal(db.Model):
     tasks = db.relationship('Task', back_populates='goal')
 
     @classmethod
-    def create(cls, goal_details: dict):
+    def create(cls, goal_details: dict) -> Goal:
         '''Creates and returns a new Goal instance from input dict.'''
 
         if 'title' not in goal_details:
             raise MissingValueError
         return cls(title = goal_details['title'])
     
-    def update(self, new_details: dict):
+    def update(self, new_details: dict) -> None:
         '''Updates the attributes of an existing Goal instance.'''
 
         for k,v in new_details.items():
@@ -36,5 +37,5 @@ class Goal(db.Model):
 class TasksGoal():
     '''Wraps a Goal instance in order to modify JSONification.'''
 
-    def __init__(self, goal: Goal):
+    def __init__(self, goal: Goal) -> TasksGoal:
         self._ = goal

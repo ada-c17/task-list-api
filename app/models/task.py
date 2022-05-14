@@ -1,3 +1,4 @@
+from __future__ import annotations
 from app import db
 from datetime import datetime
 from dateutil import parser
@@ -26,7 +27,7 @@ class Task(db.Model):
     goal = db.relationship('Goal', back_populates='tasks')
     
     @staticmethod
-    def interpret_timestamp(timestamp: str):
+    def interpret_timestamp(timestamp: str) -> datetime:
         '''Converts string input to datetime object using dateutil parser.'''
 
         if type(timestamp) != str:
@@ -38,7 +39,7 @@ class Task(db.Model):
         return interpreted_time
 
     @classmethod
-    def create(cls, task_details: dict):
+    def create(cls, task_details: dict) -> Task:
         '''Creates and returns a new Task instance from input dict.'''
 
         # Validate and process input before creation
@@ -56,7 +57,7 @@ class Task(db.Model):
             completed_at = task_details['completed_at']
         )
     
-    def update(self, new_details: dict):
+    def update(self, new_details: dict) -> None:
         '''Updates the attributes of an existing Task instance.'''
 
         if ((time := new_details.get('completed_at')) # Value is not None
