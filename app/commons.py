@@ -2,11 +2,24 @@
 # extension of JSONEncoder class for Task List objects #
 ########################################################
 
+from typing import Any, Mapping, Union
 from flask.json import JSONEncoder
 
-class TaskListJSONEncoder(JSONEncoder):
 
-    def default(self, obj):
+class TaskListJSONEncoder(JSONEncoder):
+    '''A JSONEncoder subclass for serializing Task and Goal objects.
+    
+    Extends the default encoder so that flask.jsonify can process objects of
+    type Task and Goal. All other types are passed to the base JSONEncoder
+    class.
+
+    Also recognizes a TasksGoal type used for alternate representation of Goal 
+    objects with their associated Task objects.
+    '''
+
+    def default(self, obj: Any):
+        '''Specifies how Task and Goal types should be represented in JSON.'''
+        
         if type(obj).__name__ == 'Task':
             details = {
                 'id': obj.task_id,
@@ -38,7 +51,9 @@ class TaskListJSONEncoder(JSONEncoder):
 from app.error_responses import IDTypeError, DBLookupError
 
 
-def validate_and_get_by_id(cls, target_id):
+def validate_and_get_by_id(cls, target_id: Union[str, int]):
+    '''Validates search id and returns result of database query.'''
+
     try:
         target_id = int(target_id)
     except:
@@ -49,8 +64,10 @@ def validate_and_get_by_id(cls, target_id):
     return target
 
 
-def get_filtered_and_sorted(cls, request_args):
-    params = dict(request_args)  # Conversion to make args object mutable
+def get_filtered_and_sorted(cls, request_args: Mapping):
+    '''Builds SQL query from request params. Returns the result of DB query.'''
+
+    params = dict(request_args)  # Conversion to make request.args mutable
     sort_style = params.pop('sort', None)
     if sort_style not in {None, 'asc', 'desc'}:
         sort_style = None
@@ -71,7 +88,7 @@ def get_filtered_and_sorted(cls, request_args):
     filters = tuple(filters)
     
     if not sort_style:
-        return cls.query.filter(*filters).all()
+        return cls.query.filter(*filters).all() # just filter
     return (cls.query.filter(*filters)
                             .order_by(getattr(cls.title,sort_style)()).all())
 
@@ -83,8 +100,11 @@ def get_filtered_and_sorted(cls, request_args):
 import os
 import requests
 from flask import jsonify
+from app.models.goal import TasksGoal
 
-def notify(title, event, text=None):
+def notify(title: str, event: str, text: str=None):
+    '''Posts a message to Slack when a task is marked complete or incomplete.'''
+
     if not text and event == 'mark_complete':
         text = f'Someone just completed the task {title}'
     elif not text and event == 'mark_incomplete':
@@ -92,7 +112,9 @@ def notify(title, event, text=None):
     elif not text:
         text = f'Something labeled "{event}" just happened.'
 
-    headers = {'Authorization': f'Bearer {os.environ.get("SLACKBOT_OAUTH_TOKEN")}'}
+    headers = {
+        'Authorization': f'Bearer {os.environ.get("SLACKBOT_OAUTH_TOKEN")}'
+    }
     params = {
         'text': text,
         'channel': 'task-notifications'
@@ -104,17 +126,26 @@ def notify(title, event, text=None):
     )
     return r.status_code == 200
 
-def make_slackbot_response(cls, goal_wrapper=None, goal_title=None):
+def make_slackbot_response(cls, goal_title: str=None):
+    '''Posts a message to Slack in response to a specific query to the bot.
+    
+    (This doesn't work yet, but I don't think it's the code's fault ;) I think
+    I just don't have the app permissions set right in Slack. The route that
+    calls this function works as expected when triggered from Postman.)
+    '''
+
     if not goal_title:
         items = cls.query.all()
     else:
         goals = cls.query.filter(cls.title.ilike(f"%{goal_title}%")).all()
-        items = [goal_wrapper(goal) for goal in goals]
+        items = [TasksGoal(goal) for goal in goals]
     
-    # TODO: Just raw JSON currently, make pretty
+    # TODO: Just raw JSON currently, make pretty for Slack message
     text = str(jsonify(items).get_json())
 
-    headers = {'Authorization': f'Bearer {os.environ.get("SLACKBOT_OAUTH_TOKEN")}'}
+    headers = {
+        'Authorization': f'Bearer {os.environ.get("SLACKBOT_OAUTH_TOKEN")}'
+    }
     params = {
         'text': text,
         'channel': 'task-notifications'
