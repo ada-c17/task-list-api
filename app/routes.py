@@ -10,6 +10,8 @@ from app.error_responses import (MissingValueError, FormatError, DBLookupError,
                                 IDTypeError, make_error_response)
 import re
 
+QueryParam = str  # for type annotations
+
 ###############
 # Task routes #
 ###############
@@ -42,7 +44,7 @@ def create_task() -> tuple[Response, Literal[201]]:
     return jsonify({'task': new_task}), 201
 
 @task_bp.route('/<task_id>', methods = ['GET'])
-def get_task_by_id(task_id: str) -> tuple[Response, Literal[200]]:
+def get_task_by_id(task_id: QueryParam) -> tuple[Response, Literal[200]]:
     '''Queries DB for specified Task and returns details as JSON data.'''
 
     try:
@@ -53,7 +55,7 @@ def get_task_by_id(task_id: str) -> tuple[Response, Literal[200]]:
     return jsonify({'task': task}), 200
 
 @task_bp.route('/<task_id>', methods = ['PUT'])
-def update_task(task_id: str) -> tuple[Response, Literal[200]]:
+def update_task(task_id: QueryParam) -> tuple[Response, Literal[200]]:
     '''Passes request JSON data to Task.update() and saves result to DB.
     
     Returns details of updated Task instance as JSON data.
@@ -69,7 +71,7 @@ def update_task(task_id: str) -> tuple[Response, Literal[200]]:
     return jsonify({'task': task}), 200
 
 @task_bp.route('/<task_id>', methods = ['DELETE'])
-def delete_task(task_id: str) -> tuple[Response, Literal[200]]:
+def delete_task(task_id: QueryParam) -> tuple[Response, Literal[200]]:
     '''Queries DB for specified Task instance and deletes it if found.'''
 
     try:
@@ -83,7 +85,7 @@ def delete_task(task_id: str) -> tuple[Response, Literal[200]]:
                                 f'successfully deleted')}), 200
 
 @task_bp.route('/<task_id>/mark_complete', methods = ['PATCH'])
-def mark_task_complete(task_id: str) -> tuple[Response, Literal[200]]:
+def mark_task_complete(task_id: QueryParam) -> tuple[Response, Literal[200]]:
     '''Sets value of completed_at attribute on specified Task instance.
     
     Returns details of updated Task instance as JSON data.
@@ -101,7 +103,7 @@ def mark_task_complete(task_id: str) -> tuple[Response, Literal[200]]:
     return jsonify({'task': task}), 200
 
 @task_bp.route('/<task_id>/mark_incomplete', methods = ['PATCH'])
-def mark_task_incomplete(task_id: str) -> tuple[Response, Literal[200]]:
+def mark_task_incomplete(task_id: QueryParam) -> tuple[Response, Literal[200]]:
     '''Unsets value of completed_at attribute on specified Task instance.
     
     Returns details of updated Task instance as JSON data.
@@ -150,7 +152,7 @@ def create_goal() -> tuple[Response, Literal[201]]:
     return jsonify({'goal': new_goal}), 201
 
 @goal_bp.route('/<goal_id>', methods = ['GET'])
-def get_goal_by_id(goal_id: str) -> tuple[Response, Literal[200]]:
+def get_goal_by_id(goal_id: QueryParam) -> tuple[Response, Literal[200]]:
     '''Queries DB for specified Goal and returns basic info as JSON data.'''
 
     try:
@@ -161,7 +163,7 @@ def get_goal_by_id(goal_id: str) -> tuple[Response, Literal[200]]:
     return jsonify({'goal': goal}), 200
 
 @goal_bp.route('/<goal_id>', methods = ['PUT'])
-def update_goal(goal_id: str) -> tuple[Response, Literal[200]]:
+def update_goal(goal_id: QueryParam) -> tuple[Response, Literal[200]]:
     '''Passes request JSON data to Goal.update() and saves result to DB.
     
     Returns details of updated Goal instance as JSON data.
@@ -178,7 +180,7 @@ def update_goal(goal_id: str) -> tuple[Response, Literal[200]]:
     return jsonify({'goal': goal}), 200
 
 @goal_bp.route('/<goal_id>', methods = ['DELETE'])
-def delete_goal(goal_id: str) -> tuple[Response, Literal[200]]:
+def delete_goal(goal_id: QueryParam) -> tuple[Response, Literal[200]]:
     '''Queries DB for specified Goal instance and deletes it if found.'''
 
     try:
@@ -197,7 +199,7 @@ def delete_goal(goal_id: str) -> tuple[Response, Literal[200]]:
 ###################################################
 
 @goal_bp.route('/<goal_id>/tasks', methods = ['POST'])
-def assign_tasks_to_goal(goal_id: str) -> tuple[Response, Literal[200]]:
+def assign_tasks_to_goal(goal_id: QueryParam) -> tuple[Response, Literal[200]]:
     '''Assigns one or more Tasks to the specified Goal.
     
     A list of Task IDs is expected as JSON data in the request body. If any
@@ -223,7 +225,7 @@ def assign_tasks_to_goal(goal_id: str) -> tuple[Response, Literal[200]]:
     return jsonify({'id': int(goal_id), 'task_ids': task_ids}), 200
 
 @goal_bp.route('/<goal_id>/tasks', methods = ['GET'])
-def get_all_tasks_of_goal(goal_id: str) -> tuple[Response, Literal[200]]:
+def get_all_tasks_of_goal(goal_id: QueryParam) -> tuple[Response, Literal[200]]:
     '''Queries DB for specified Goal and returns full details as JSON data.'''
 
     try:
