@@ -33,10 +33,10 @@ def create_app(test_config=None):
     db.init_app(app)
     migrate.init_app(app, db)  
     
-    from .routes import task_bp, goal_bp, main_bp
+    from .routes import task_bp, goal_bp
     app.register_blueprint(task_bp)
     app.register_blueprint(goal_bp)
-    app.register_blueprint(main_bp)
+    # app.register_blueprint(main_bp)
 
 
 

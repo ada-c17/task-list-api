@@ -12,7 +12,7 @@ import requests
 
 task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 goal_bp = Blueprint("goals", __name__, url_prefix="/goals")
-main_bp = Blueprint("/", __name__)
+# main_bp = Blueprint("/", __name__)
 
 # @main_bp.route("", method=["GET"])
 # def main_page(): 
