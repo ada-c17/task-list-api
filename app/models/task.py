@@ -4,6 +4,20 @@ from dateutil import parser
 from app.error_responses import MissingValueError, FormatError
 
 class Task(db.Model):
+    '''A SQLAlchemy.Model subclass representing task entries in the database.
+    
+    Tasks can optionally be associated with a Goal instance which collects
+    related sets of tasks.
+
+    Attributes:
+        task_id: int
+        title: str
+        description: str
+        completed_at: datetime | None
+        goal_id: int | None
+        goal: Goal | None
+    '''
+
     task_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=False)
@@ -12,7 +26,9 @@ class Task(db.Model):
     goal = db.relationship('Goal', back_populates='tasks')
     
     @staticmethod
-    def interpret_timestamp(timestamp):
+    def interpret_timestamp(timestamp: str):
+        '''Converts string input to datetime object using dateutil parser.'''
+
         if type(timestamp) != str:
             raise FormatError
         try:
@@ -22,14 +38,16 @@ class Task(db.Model):
         return interpreted_time
 
     @classmethod
-    def create(cls, task_details):
+    def create(cls, task_details: dict):
+        '''Creates and returns a new Task instance from input dict.'''
+
         # Validate and process input before creation
         if 'title' not in task_details or 'description' not in task_details:
             raise MissingValueError
         if 'completed_at' not in task_details:
             task_details['completed_at'] = None
-        elif ((time := task_details.get('completed_at'))
-                and not isinstance(time, datetime)):
+        elif ((time := task_details.get('completed_at')) # Value is not None
+                and not isinstance(time, datetime)):     # and not a datetime
             task_details['completed_at'] = Task.interpret_timestamp(time)
         
         return cls(
@@ -38,9 +56,11 @@ class Task(db.Model):
             completed_at = task_details['completed_at']
         )
     
-    def update(self, new_details):
-        if ((time := new_details.get('completed_at'))
-                and not isinstance(time, datetime)):
+    def update(self, new_details: dict):
+        '''Updates the attributes of an existing Task instance.'''
+
+        if ((time := new_details.get('completed_at')) # Value is not None
+                and not isinstance(time, datetime)):  # and not a datetime
             new_details['completed_at'] = Task.interpret_timestamp(time)
         
         for k,v in new_details.items():
