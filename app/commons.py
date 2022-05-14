@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Mapping
+from typing import Any, Mapping, Optional
 
 ########################################################
 # extension of JSONEncoder class for Task List objects #
@@ -51,7 +51,8 @@ class TaskListJSONEncoder(JSONEncoder):
 ###########################################
 
 from app.error_responses import IDTypeError, DBLookupError
-
+from app.models.goal import Goal
+from app.models.task import Task
 
 def validate_and_get_by_id(cls, target_id: str | int) -> Task | Goal:
     '''Validates search id and returns result of database query.'''
@@ -102,7 +103,6 @@ def get_filtered_and_sorted(cls, request_args: Mapping) -> list[Task | Goal]:
 import os
 import requests
 from flask import jsonify
-from app.models.goal import TasksGoal
 
 def notify(title: str, event: str, text: str = None) -> bool:
     '''Posts a message to Slack when a task is marked complete or incomplete.'''
@@ -128,7 +128,7 @@ def notify(title: str, event: str, text: str = None) -> bool:
     )
     return r.status_code == 200
 
-def make_slackbot_response(cls, goal_title: str = None) -> bool:
+def make_slackbot_response(cls, goal_wrapper: Optional[Any] = None, goal_title: str = None) -> bool:
     '''Posts a message to Slack in response to a specific query to the bot.
     
     (This doesn't work yet, but I don't think it's the code's fault ;) I think
@@ -140,7 +140,7 @@ def make_slackbot_response(cls, goal_title: str = None) -> bool:
         items = cls.query.all()
     else:
         goals = cls.query.filter(cls.title.ilike(f"%{goal_title}%")).all()
-        items = [TasksGoal(goal) for goal in goals]
+        items = [goal_wrapper(goal) for goal in goals]
     
     # TODO: Just raw JSON currently, make pretty for Slack message
     text = str(jsonify(items).get_json())
