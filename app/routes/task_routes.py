@@ -150,7 +150,9 @@ def patch_task_complete(task_id):
 
 # HELPER FUNCTION THAT SENDS A POST REQUEST TO SLACKBOT FOR PATCH METHOD
 def call_slackbot(tasky):
-    response1 = requests.post(
+    # does not need to return anything
+
+    requests.post(
         "https://slack.com/api/chat.postMessage",
         params={
             "channel": "task-notifications",
@@ -162,7 +164,7 @@ def call_slackbot(tasky):
     )
 
     # return response1
-    return response1.json()
+    # return response1.json()
 
 # PATCH ONE TASK - MARK INCOMPLETE
 @task_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
