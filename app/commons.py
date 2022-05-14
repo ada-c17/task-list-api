@@ -1,8 +1,10 @@
+from __future__ import annotations
+from typing import Any, Mapping
+
 ########################################################
 # extension of JSONEncoder class for Task List objects #
 ########################################################
 
-from typing import Any, Mapping, Union
 from flask.json import JSONEncoder
 
 
@@ -17,7 +19,7 @@ class TaskListJSONEncoder(JSONEncoder):
     objects with their associated Task objects.
     '''
 
-    def default(self, obj: Any):
+    def default(self, obj: Any) -> dict[str, Any] | str | Any:
         '''Specifies how Task and Goal types should be represented in JSON.'''
         
         if type(obj).__name__ == 'Task':
@@ -51,7 +53,7 @@ class TaskListJSONEncoder(JSONEncoder):
 from app.error_responses import IDTypeError, DBLookupError
 
 
-def validate_and_get_by_id(cls, target_id: Union[str, int]):
+def validate_and_get_by_id(cls, target_id: str | int) -> Task | Goal:
     '''Validates search id and returns result of database query.'''
 
     try:
@@ -64,7 +66,7 @@ def validate_and_get_by_id(cls, target_id: Union[str, int]):
     return target
 
 
-def get_filtered_and_sorted(cls, request_args: Mapping):
+def get_filtered_and_sorted(cls, request_args: Mapping) -> list[Task | Goal]:
     '''Builds SQL query from request params. Returns the result of DB query.'''
 
     params = dict(request_args)  # Conversion to make request.args mutable
@@ -102,7 +104,7 @@ import requests
 from flask import jsonify
 from app.models.goal import TasksGoal
 
-def notify(title: str, event: str, text: str=None):
+def notify(title: str, event: str, text: str = None) -> bool:
     '''Posts a message to Slack when a task is marked complete or incomplete.'''
 
     if not text and event == 'mark_complete':
@@ -126,12 +128,12 @@ def notify(title: str, event: str, text: str=None):
     )
     return r.status_code == 200
 
-def make_slackbot_response(cls, goal_title: str=None):
+def make_slackbot_response(cls, goal_title: str = None) -> bool:
     '''Posts a message to Slack in response to a specific query to the bot.
     
     (This doesn't work yet, but I don't think it's the code's fault ;) I think
-    I just don't have the app permissions set right in Slack. The route that
-    calls this function works as expected when triggered from Postman.)
+    I just don't have app permissions set right in Slack. The route that calls
+    this function works as expected when triggered from Postman.)
     '''
 
     if not goal_title:

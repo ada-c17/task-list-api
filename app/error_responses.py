@@ -1,5 +1,6 @@
-from typing import Any, Optional, Union
-from flask import make_response, jsonify
+from __future__ import annotations
+from typing import Any, Optional
+from flask import make_response, jsonify, Response
 
 # Error classes used to trigger specific error responses
 class MissingValueError(Exception): ...
@@ -7,8 +8,9 @@ class FormatError(ValueError): ...
 class DBLookupError(LookupError): ...
 class IDTypeError(TypeError): ...
 
-def make_error_response(err: Exception, target_cls: Any, 
-                target_id: Optional[Union[str, int]] = None, detail: str = ''):
+def make_error_response(err: Exception, target_cls: Task | Goal | Any, 
+                        target_id: Optional[str | int] = None, 
+                        detail: str = '') -> Response:
     '''Constructs error response based on Exception type.
     
     If supplied, 'detail' string is appended to the body of the response.
