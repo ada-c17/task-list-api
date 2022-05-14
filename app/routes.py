@@ -12,7 +12,7 @@ import os
 task_db = Blueprint("tasks",__name__, url_prefix = "/tasks")
 goal_db = Blueprint("goals", __name__, url_prefix = "/goals")
 
-
+# guard clause for invalid sort request 
 @task_db.route("", methods = ["GET"])
 def get_all_tasks():
     task_response = []
@@ -62,14 +62,14 @@ def delete_task(task_id):
     return {
         "details": f'Task {task_id} \"{task_title.title}\" successfully deleted'}, 200 
 
-@task_db.route("/<task_id>/mark_complete", methods = ["PATCH"])
-def mark_task_complete(task_id):
-    task = validate_id(task_id)
+# @task_db.route("/<task_id>/mark_complete", methods = ["PATCH"])
+# def mark_task_complete(task_id):
+#     task = validate_id(task_id)
     
-    task.completed_at = datetime.now()
+#     task.completed_at = datetime.now()
 
-    db.session.commit()
-    return jsonify({"task":task.to_json()}), 200
+#     db.session.commit()
+#     return jsonify({"task":task.to_json()}), 200
 
 @task_db.route("/<task_id>/mark_incomplete", methods = ["PATCH"])
 def mark_task_incomplete(task_id):
@@ -80,23 +80,23 @@ def mark_task_incomplete(task_id):
     db.session.commit()
     return jsonify({"task":task.to_json()}), 200
 
-# TOKEN = os.environ["SLACK_TOKEN"]
-# SLACK_URL = os.environ["SLACK_URL"]
-# @task_db.route("/<task_id>/mark_complete", methods = ["PATCH"])
-# def mark_task_complete_by_slack_bot(task_id):
-#     task = validate_id(task_id)
-#     validated_task = task.query.get(task_id)
-#     task.completed_at = datetime.now()
+TOKEN = os.environ.get["SLACK_TOKEN"]
+SLACK_URL = os.environ.get["SLACK_URL"]
+@task_db.route("/<task_id>/mark_complete", methods = ["PATCH"])
+def mark_task_complete_by_slack_bot(task_id):
+    task = validate_id(task_id)
+    validated_task = task.query.get(task_id)
+    task.completed_at = datetime.now()
 
-#     authorize = {"Authorization":f"Bearer {TOKEN}"}
-#     data = {
-#         "channel":"task-notifications",
-#         "text": f"Someone just completed the {task.title}."
-#     }
-#     req = requests.post(SLACK_URL, authorize=authorize, data=data)
+    authorize = {"Authorization":f"Bearer {TOKEN}"}
+    data = {
+        "channel":"task-notifications",
+        "text": f"Someone just completed the {task.title}."
+    }
+    res = requests.post(SLACK_URL, authorize=authorize, data=data)
 
-#     db.session.commit()
-#     return jsonify({"task":task.to_json()}), 200
+    db.session.commit()
+    return jsonify({"task":task.to_json()}), 200
 
 
 @goal_db.route("/<goal_id>", methods = ["GET"])
