@@ -2,7 +2,7 @@ from app import db
 from flask import make_response
 from sqlalchemy import asc
 from datetime import datetime
-from app.models.goal import Goal
+# from app.models.goal import Goal
 
 
 class Task(db.Model):
@@ -12,7 +12,6 @@ class Task(db.Model):
     completed_at = db.Column(db.DateTime, nullable = True, default = None)
     goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'))
     goal = db.relationship("goal", back_populates="tasks")
-
 
     def to_json(self):
         json_response = {
@@ -24,6 +23,10 @@ class Task(db.Model):
             json_response["is_complete"] = True
         else:
             json_response["is_complete"] = False
+
+        if self.goal_id:
+            json_response["goal_id"] =self.goal_id
+
         return json_response
 
     def update_task(self, request_body):
