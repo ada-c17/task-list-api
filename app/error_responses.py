@@ -1,12 +1,19 @@
+from typing import Any, Optional, Union
 from flask import make_response, jsonify
 
+# Error classes used to trigger specific error responses
 class MissingValueError(Exception): ...
 class FormatError(ValueError): ...
 class DBLookupError(LookupError): ...
 class IDTypeError(TypeError): ...
 
-def make_error_response(err, target_cls, target_id=None, detail=''):
-    ''''''
+def make_error_response(err: Exception, target_cls: Any, 
+                target_id: Optional[Union[str, int]] = None, detail: str = ''):
+    '''Constructs error response based on Exception type.
+    
+    If supplied, 'detail' string is appended to the body of the response.
+    '''
+
     if isinstance(err, MissingValueError):
         return make_response(jsonify({"details": "Invalid data"}), 400)
     if isinstance(err, IDTypeError):
