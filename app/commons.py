@@ -7,7 +7,6 @@ from typing import Any, Mapping, Optional
 
 from flask.json import JSONEncoder
 
-
 class TaskListJSONEncoder(JSONEncoder):
     '''A JSONEncoder subclass for serializing Task and Goal objects.
     
@@ -51,8 +50,8 @@ class TaskListJSONEncoder(JSONEncoder):
 ###########################################
 
 from app.error_responses import IDTypeError, DBLookupError
-from app.models.goal import Goal
-from app.models.task import Task
+from app.models.goal import Goal # Goal and Task imports here
+from app.models.task import Task # only for type annotations
 
 def validate_and_get_by_id(cls, target_id: str | int) -> Task | Goal:
     '''Validates search id and returns result of database query.'''

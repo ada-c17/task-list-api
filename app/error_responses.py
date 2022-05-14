@@ -32,7 +32,7 @@ def make_error_response(err: Exception, target_cls: Any,
         return make_response(jsonify(f"Input value for attribute of "
                                 f"{target_cls.__name__.lower()} was "
                                 f"invalid:{detail}"), 400)
-    # Currently this last return statement should never run, incl. for future
+    # Currently this last return statement should never run: for future use
     return make_response(jsonify(f"An unexpected error occurred. Error type: "
                                 f"{err}, Error context: {target_cls.__name__}."
                                 f"{detail}"), 500)
