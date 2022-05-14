@@ -272,4 +272,4 @@ def respond_to_bot() -> tuple[Response, Literal[200]]:
     
     if title is None:
         return jsonify(make_slackbot_response(resource)), 200
-    return jsonify(make_slackbot_response(resource, title)), 200
+    return jsonify(make_slackbot_response(resource, TasksGoal, title)), 200
