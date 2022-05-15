@@ -42,7 +42,21 @@ def create_task():
 # get all saved tasks
 @tasks_bp.route("", methods=["GET"])
 def get_all_tasks():
-    tasks = Task.query.all()
+    title_query  = request.args.get("title")
+    description_query = request.args.get("description")
+    sort_query = request.args.get("sort")
+
+    if sort_query == "desc":
+        tasks = Task.query.order_by(Task.title.desc())
+    elif sort_query == "asc":
+        tasks = Task.query.order_by(Task.title.asc())
+    elif title_query:
+        tasks = Task.query.filter_by(title=title_query)
+    elif description_query:
+        tasks = Task.query.filter_by(description=description_query)
+    else:
+        tasks = Task.query.all()
+
     response_body = [task.make_dict() for task in tasks]
     return make_response(jsonify(response_body), 200)
 
@@ -71,7 +85,7 @@ def update_task(task_id):
     }
     return make_response(jsonify(response_body), 200)
 
-# # delete a task
+# delete a task
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
 def delete_task(task_id):
     task = validate_task(task_id)
