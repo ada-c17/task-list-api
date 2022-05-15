@@ -4,8 +4,8 @@ from app import db
 from datetime import datetime
 from app.models.task import Task
 from app.models.goal import Goal, TasksGoal
-from app.commons import (validate_and_get_by_id, get_filtered_and_sorted,
-                        notify, make_slackbot_response)
+from app.commons import validate_and_get_by_id, get_filtered_and_sorted
+from app.slack_interaction import notify, make_slackbot_response
 from app.error_responses import (MissingValueError, FormatError, DBLookupError,
                                 IDTypeError, make_error_response)
 import re
