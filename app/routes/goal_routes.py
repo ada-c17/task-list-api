@@ -10,7 +10,7 @@ goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
 def get_all_goals():
 	title_query = request.args.get("title")
 
-	goals = Goal.query.filter_by(length_of_year=title_query) if title_query else Goal.query.all()
+	goals = Goal.query.filter_by(title=title_query) if title_query else Goal.query.all()
 
 	goals_response = [goal.to_json() for goal in goals]
 
