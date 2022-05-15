@@ -54,3 +54,31 @@ def get_one_task(task_id):
     response_body = {
         "task": task.make_dict()}
     return make_response(jsonify(response_body), 200)
+
+
+# update a task
+@tasks_bp.route("/<task_id>", methods=["PUT"])
+def update_task(task_id):
+    task = validate_task(task_id)
+    request_body = request.get_json()
+    task.title = request_body["title"]
+    task.description = request_body["description"]
+
+    db.session.commit()
+
+    response_body = {
+        "task": task.make_dict()
+    }
+    return make_response(jsonify(response_body), 200)
+
+# # delete a task
+@tasks_bp.route("/<task_id>", methods=["DELETE"])
+def delete_task(task_id):
+    task = validate_task(task_id)
+
+    db.session.delete(task)
+    db.session.commit()
+
+    response_body = {
+        "details":f'Task {task.task_id} "{task.title}" successfully deleted'}
+    return make_response(jsonify(response_body), 200)
