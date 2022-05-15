@@ -192,7 +192,7 @@ def get_all_tasks():
 @task_bp.route("/<task_identity>", methods=["GET"])
 def get_one_task_by_id(task_identity):
     task = validate_task(task_identity)
-    if task.goal_key:
+    if task.goal_value:
         return jsonify(task.dict()), 200
     
     else:

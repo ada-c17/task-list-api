@@ -5,7 +5,7 @@ class Task(db.Model):
     title = db.Column(db.String, nullable=False)
     description = db.Column(db.String, nullable=False)
     completed_at = db.Column(db.DateTime, nullable=True)
-    goal_key = db.Column(db.Integer, db.ForeignKey('goal.goal_id'), nullable=True)
+    goal_value = db.Column(db.Integer, db.ForeignKey('goal.goal_id'), nullable=True)
     
     def dict(self):
         return (dict(task={
@@ -13,7 +13,8 @@ class Task(db.Model):
             "title": self.title,
             "description" : self.description,
             "is_complete" : bool(self.completed_at),
-            "goal_id" : self.goal_key
+            "goal_id" : self.goal_value
+    
         }))
 
     def to_dict(self):
