@@ -8,7 +8,7 @@ from app.commons import validate_and_get_by_id, get_filtered_and_sorted
 from app.slack_interaction import notify, make_slackbot_response
 from app.error_responses import (MissingValueError, FormatError, DBLookupError,
                                 IDTypeError, make_error_response)
-import re
+from threading import Thread
 
 QueryParam = str  # for type annotations
 
@@ -244,32 +244,29 @@ slackbot_bp = Blueprint('slackbot', __name__, url_prefix = '/slackbot')
 
 @slackbot_bp.route('', methods = ['POST'])
 def respond_to_bot() -> tuple[Response, Literal[200]]:
-    '''Evaluates request JSON and returns DB query result for display in Slack.
+    '''Evaluates request body and returns DB query result for display in Slack.
     
-    Expects a query for all tasks, all goals, or all tasks that are part of a
-    specified goal.
+    Expects a query for incomplete tasks, all goals, or all tasks that are part
+    of a specified goal.
     '''
     
-    data = request.get_json()
-    if 'event' not in data:
+    if request.mimetype == 'application/json' and 'challenge' in request.json:
         # Slack API requires challenge response
-        # Some verification should happen here for security, but ...
-        return jsonify({'challenge':data['challenge']}), 200
+        return jsonify({'challenge':request.json['challenge']}), 200
     else:
-        text = data['event']['text']
-
-    if 'tasks' in text:
-        resource, title = Task, None
-    elif 'goals' in text:
-        resource, title = Goal, None
-    elif 'finish' in text:
-        p = re.compile(r'.*finish\s')
-        title = p.sub('',text)
-        resource = Goal
-    else:
+        data = request.form
+    
+    if (not (command := data.get('command', None)) or 
+            command not in ('/tasks', '/goals', '/finish', '/addtask')):
         abort(make_error_response(ValueError, None, detail=(' Bot did not '
                                                     'recognize request.')))
+    text = data['text'] if command in ('/finish', '/addtask') else ''
+    resource = Task if command in ('/tasks', '/addtask') else Goal
     
-    if title is None:
-        return jsonify(make_slackbot_response(resource)), 200
-    return jsonify(make_slackbot_response(resource, TasksGoal, title)), 200
+    message_response = Thread(
+        target = make_slackbot_response, 
+        args = (resource, text, data['response_url'])
+        )
+    message_response.start()
+
+    return jsonify({"response_type": "ephemeral", "text": "One moment.."}), 200

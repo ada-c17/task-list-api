@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Any, Optional
+from typing import Any, Type
+Url = str
 
 #############################
 # Slack integration methods #
@@ -7,7 +8,9 @@ from typing import Any, Optional
 
 import os
 import requests
-from flask import jsonify
+import json
+from app.models.task import Task
+from app.models.goal import Goal, TasksGoal
 
 def notify(title: str, event: str, text: str = None) -> bool:
     '''Posts a message to Slack when a task is marked complete or incomplete.'''
@@ -33,33 +36,53 @@ def notify(title: str, event: str, text: str = None) -> bool:
     )
     return r.status_code == 200
 
-def make_slackbot_response(cls, goal_wrapper: Optional[Any] = None, goal_title: str = None) -> bool:
+def format_block(item: Task | Goal) -> dict:
+    block = dict()
+    block['type'] = 'section'
+    block['text'] = dict()
+    block['text']['type'] = 'mrkdwn'
+    block['text']['text'] = f"*{item.title}* _ {item.description}_"
+    return block
+
+def make_slackbot_response(cls: Type[Task | Goal], goal_title: str, 
+                            response_url: Url) -> bool:
     '''Posts a message to Slack in response to a specific query to the bot.
     
     (This doesn't work yet, but I don't think it's the code's fault ;) I think
     I just don't have app permissions set right in Slack. The route that calls
     this function works as expected when triggered from Postman.)
     '''
-
+    
     if not goal_title:
         items = cls.query.all()
     else:
-        goals = cls.query.filter(cls.title.ilike(f"%{goal_title}%")).all()
-        items = [goal_wrapper(goal) for goal in goals]
+        items = cls.query.filter(cls.title.ilike(f"%{goal_title}%")).all()
     
-    # TODO: Just raw JSON currently, make pretty for Slack message
-    text = str(jsonify(items).get_json())
+    item_blocks = [format_block(item) for item in items]
+    header_blocks = [
+		{
+			"type": "header",
+			"text": {
+				"type": "plain_text",
+				"text": ":pencil:  Task List  :pencil:"
+			}
+		},
+		{
+			"type": "divider"
+		}
+    ]
 
     headers = {
         'Authorization': f'Bearer {os.environ.get("SLACKBOT_OAUTH_TOKEN")}'
     }
-    params = {
-        'text': text,
-        'channel': 'task-notifications'
-    }
+    message = {
+        "text": "Here's your task list.", 
+        "response_type": "ephemeral",
+        "blocks": header_blocks.extend(item_blocks)
+        }
     r = requests.post(
-        'https://slack.com/api/chat.postMessage', 
-        params = params, 
-        headers = headers
+        response_url, 
+        headers = headers,
+        json = json.dumps(message)
     )
     return r.status_code == 200
