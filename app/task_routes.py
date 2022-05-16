@@ -2,6 +2,9 @@ from flask import Blueprint, jsonify, abort, make_response, request
 from app import db
 from app.models.task import Task
 from datetime import datetime
+import requests
+import os
+from dotenv import load_dotenv
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -13,11 +16,19 @@ def validate_task(task_id):
         abort(make_response({"error": f"Task id invalid"}, 400))
 
     task = Task.query.get(task_id)
-
     if not task:
         abort(make_response({"error":f"Task not found"}, 404))
-
     return task
+
+def slack_bot(task):
+    load_dotenv()
+    message = f"Someone just completed the task {task.title}"
+    slack_url = "https://slack.com/api/chat.postMessage"
+    header = {'Authorization': os.environ.get("SLACK_API_TOKEN")}
+    param = {"channel": "task-notifications", 
+        "text": message}
+
+    return requests.post(slack_url, headers=header, data=param)
 
 # creates new task to the database
 @tasks_bp.route("", methods=["POST"])
@@ -112,6 +123,10 @@ def mark_task_as_complete(task_id):
     task.completed_at = datetime.utcnow()
 
     db.session.commit()
+    slack_bot(task.title)
+
+    requests.post(slack_url, headers=header, params=param)
+
     response_body = {
         "task": task.make_dict()}
     return make_response(jsonify(response_body), 200)
@@ -124,6 +139,7 @@ def mark_task_as_incomplete(task_id):
     task.completed_at = None
 
     db.session.commit()
+
     response_body = {
         "task": task.make_dict()}
     return make_response(jsonify(response_body), 200)
