@@ -36,15 +36,12 @@ def read_goals():
         }
     )
     
-    db.session.commit()
     return jsonify(goals_response)
 
 # GET /goals/<goal_id>
 @goals_bp.route("/<goal_id>", methods=['GET'])
 def read_one_goal(goal_id):
     goal = validate_id(goal_id)
-
-    db.session.commit()
 
     return {"goal": {
             "id": goal.goal_id,
@@ -98,8 +95,6 @@ def send_task_ids_to_goal(goal_id):
 @goals_bp.route("<goal_id>/tasks", methods=['GET'])
 def get_tasks_for_goal(goal_id):
     goal = validate_id(goal_id)
-        
-    db.session.commit()
 
     return {
         "id": goal.goal_id,
