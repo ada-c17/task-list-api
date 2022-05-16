@@ -181,7 +181,7 @@ def patch_completed_task_by_id(id):
     
     db.session.commit()
 
-    send_slack_message(task.title)
+    # send_slack_message(task.title)
 
     task_dict={}
     task_dict['id'] = task.id
