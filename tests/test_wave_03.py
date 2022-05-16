@@ -140,10 +140,10 @@ def test_mark_incomplete_missing_task(client):
     # Act
     response = client.patch("/tasks/1/mark_incomplete")
     response_body = response.get_json()
-
+    
     # Assert
     assert response.status_code == 404
-
+    assert response_body == "Task 1 not found"
     # raise Exception("Complete test with assertion about response body")
     # *****************************************************************
     # **Complete test with assertion about response body***************
