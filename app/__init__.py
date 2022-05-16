@@ -9,7 +9,6 @@ db = SQLAlchemy()
 migrate = Migrate()
 load_dotenv()
 
-
 def create_app(test_config=None):
     app = Flask(__name__)
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -28,7 +27,13 @@ def create_app(test_config=None):
 
     db.init_app(app)
     migrate.init_app(app, db)
+    from app.models.task import Task
+    from app.models.goal import Goal
 
     # Register Blueprints here
+    from .routes import task_db
+    from .routes import goal_db
+    app.register_blueprint(task_db)
+    app.register_blueprint(goal_db)
 
     return app
