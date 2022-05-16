@@ -17,13 +17,11 @@ class Goal(db.Model):
         return tasks_id_list
 
     def get_tasks(self):
-        tasks_list = []
-        for task in self.tasks:
-            tasks_list.append(task.to_dict_with_goal_id())
+        tasks_list = [task.to_dict() for task in self.tasks]
         return tasks_list
         
     @classmethod
-    def create(cls, request_body):
+    def create(cls, data_dict):
         return cls(
-        title=request_body["title"]
+        title=data_dict["title"]
     )

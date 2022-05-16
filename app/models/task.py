@@ -12,30 +12,14 @@ class Task(db.Model):
 
     def to_dict(self):
         status = True if self.completed_at is not None else False
-        return {
-                "id": self.task_id,
-                "title": self.title,
-                "description": self.description,
-                "is_complete": status
-                }
-
-    def to_dict_with_goal_id(self):
-        status = True if self.completed_at is not None else False
-        if self.goal_id == None:
-            result = {
-                "id": self.task_id,
-                "title": self.title,
-                "description": self.description,
-                "is_complete": status
-                }
-        else:
-            result = {
-                "id": self.task_id,
-                "goal_id": self.goal_id,
-                "title": self.title,
-                "description": self.description,
-                "is_complete": status
-                }
+        result = {
+            "id": self.task_id,
+            "title": self.title,
+            "description": self.description,
+            "is_complete": status
+            }
+        if self.goal_id != None:
+            result["goal_id"] = self.goal_id
         return result
 
     def update(self, request_body):

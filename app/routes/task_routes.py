@@ -24,7 +24,8 @@ def read_all_tasks():
 @tasks_bp.route("/<task_id>", methods=["GET"])
 def read_one_task(task_id):
     task = validate_id(Task, task_id)
-    return {"task": task.to_dict_with_goal_id()}
+    return {"task": task.to_dict()}
+# might need to add back to_dict_with_goal_id
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
