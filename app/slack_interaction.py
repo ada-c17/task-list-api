@@ -45,7 +45,7 @@ def format_block(item: Task | Goal) -> dict:
         s = "~" if type(item.completed_at).__name__ == 'datetime' else ''
         block['text']['text'] = f"*{s}{item.title}{s}* _ {item.description}_"
     else:
-        block['text']['text'] = f"*{item.title}* :"
+        block['text']['text'] = f"*{item.title}*"
     return block
 
 def make_slackbot_response(cls: Type[Task | Goal], goal_title: str, 
