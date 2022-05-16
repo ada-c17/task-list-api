@@ -8,7 +8,6 @@ from app.commons import validate_and_get_by_id, get_filtered_and_sorted
 from app.slack_interaction import notify, make_slackbot_response
 from app.error_responses import (MissingValueError, FormatError, DBLookupError,
                                 IDTypeError, make_error_response)
-from threading import Thread
 
 QueryParam = str  # for type annotations
 
@@ -261,13 +260,19 @@ def respond_to_bot() -> tuple[Response, Literal[200]]:
         abort(make_error_response(ValueError, None, detail=(' Bot did not '
                                                     'recognize request.')))
     text = data['text'] if command in ('/finish', '/addtask') else ''
-    resource = Task if command in ('/tasks', '/addtask') else Goal
+    resource = Goal if command == '/goals' else Task
+
+    if command == '/addtask':
+        details = text.split(',')
+        details_dict = {
+            "title": details[0],
+            "description": details[1].strip() if len(details) > 1 else None
+        }
+        new_task = Task.create(details_dict)
+        db.session.add(new_task)
+        db.session.commit()
+        text = ''
     
-    # message_response = Thread(
-    #     target = make_slackbot_response, 
-    #     args = (resource, text, data['response_url'])
-    #     )
-    # message_response.start()
     if make_slackbot_response(resource, text, data['response_url']):
         return jsonify({"response_type": "ephemeral", "text": "One moment.."}), 200
     else:
