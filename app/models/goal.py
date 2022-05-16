@@ -3,7 +3,7 @@ from app import db
 
 class Goal(db.Model):
     goal_id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String)
+    title = db.Column(db.String, nullable=False)
     tasks = db.relationship("Task", back_populates="goal", lazy=True)
 
     def to_dict(self):
@@ -13,9 +13,7 @@ class Goal(db.Model):
                 }
 
     def get_task_ids(self):
-        tasks_id_list = []
-        for task in self.tasks:
-            tasks_id_list.append(task.task_id)
+        tasks_id_list = [task.task_id for task in self.tasks]
         return tasks_id_list
 
     def get_tasks(self):

@@ -48,9 +48,8 @@ def get_filtered_tasks(request):
     return tasks
 
 def validate_datetime(request_body):
-    datetime_string = (
-        request_body["completed_at"] if request_body.get("completed_at", None) != None else None
-    )
+    datetime_string = request_body.get("completed_at")
+    
     if datetime_string is None:
         return datetime_string
 
