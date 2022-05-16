@@ -34,33 +34,6 @@ def create_app(test_config=None):
 
     return app
 
-# from flask import Flask
-# from flask_sqlalchemy import SQLAlchemy
-# from flask_migrate import Migrate
 
-# # Get SQLAlchemy and Migrate ready to run
-# db = SQLAlchemy()
-# migrate = Migrate()
-
-# def create_app(test_config=None):
-#     app = Flask(__name__)
-
-#     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-#     if test_config:
-#         app.config["TESTING"] = True
-#     app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql+psycopg2://postgres:postgres@localhost:5432/task_list_api_test"
-
-#     # Import models here for Alembic setup
-#     from app.models.task import Task
-
-#     # Connect SQLAlchemy, Migrate, and Flask
-#     db.init_app(app)
-#     migrate.init_app(app, db)
-
-#     # Register Blueprints here
-#     from .routes import tasks_bp
-#     app.register_blueprint(tasks_bp)
-
-#     return app
 
     

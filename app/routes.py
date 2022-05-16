@@ -2,7 +2,11 @@ from app.models.task import *
 from app.models.goal import *
 from flask import Blueprint, jsonify, abort, make_response, request
 from datetime import date
-
+import requests
+import os
+from dotenv import load_dotenv
+load_dotenv()
+slack_token = os.environ.get("SLACK_TOKEN")
 
 # This is the BluePrint object that helps to "connect" my functions to
 # endpoints and HTTP methods for tasks.
@@ -61,10 +65,6 @@ def get_all_tasks():
         task_db = Task.query.order_by(Task.title.desc()).all()
     else:
         task_db = Task.query.all()
-
-    
-    # Alchemy converts all rows into list of instances and assigns to task_db
-    # task_db = list of all instances
     
     tasks_response = []
     for task in task_db:
@@ -105,6 +105,8 @@ def get_task_by_id(id):
     task_dict['title'] = task.title
     task_dict['description'] = task.description
     task_dict['is_complete'] = is_complete
+    if not (task.goal_id == None):
+        task_dict['goal_id'] = task.goal_id
     return_dict = {"task": task_dict}
     return jsonify(return_dict), 200
 
@@ -119,7 +121,7 @@ def remove_task_by_id(id):
     db.session.delete(task)
     db.session.commit()
     return make_response({"details":f"Task {id} \"{task.title}\" successfully deleted"},200)
-    # return make_response((f"Task #{task.id} successfully deleted"), 200)
+    
 
 #------------PUT Method - update task by id---------
 @tasks_bp.route("/<id>", methods=["PUT"])
@@ -162,6 +164,11 @@ def update_task_by_id(id):
     return jsonify(return_dict), 200
 
 #------------PUT Method - update task by id - Mark_complete---------
+def send_slack_message(task_title):
+    params = {"channel":"task-notifications","text":task_title}
+    headers = {"Authorization":"Bearer " + slack_token}
+    requests.post("https://slack.com/api/chat.postMessage", params=params, headers=headers)
+
 @tasks_bp.route("/<id>/mark_complete", methods=["PATCH"])
 def patch_completed_task_by_id(id):
     task = Task.query.get(id)
@@ -173,6 +180,8 @@ def patch_completed_task_by_id(id):
     task.completed_at = date.today()
     
     db.session.commit()
+
+    send_slack_message(task.title)
 
     task_dict={}
     task_dict['id'] = task.id
@@ -236,8 +245,6 @@ def get_all_goals():
     
     goal_db = Goal.query.all()
 
-    # Alchemy converts all rows into list of instances and assigns to goal_db
-    # goal_db = list of all instances
     
     goal_dict = {}
     goals_response = [] 
@@ -300,57 +307,48 @@ def remove_goal_by_id(id):
 #------------------------------------------------
 #----------------WAVE 6-------------------------
 #---------------------------------------------------
-#app/goal_routes.py
+
 @goals_bp.route("/<goal_id>/tasks", methods=["POST"])
-def create_task(goal_id):
-    db.session.add(task)
-    db.session.commit()
-
-    return make_response(jsonify(f"Task {task.title} by {task.goal.title} successfully created"), 201)
-#--------------
-#app/goal_routes.py
-def validate_goal(goal_id):
-    try:
-        goal_id = int(goal_id)
-    except:
-        abort(make_response({"message":f"goal {goal_id} invalid"}, 400))
-
+def associate_tasks_with_goal(goal_id):
     goal = Goal.query.get(goal_id)
+    task_ids_dict = request.get_json()
+    task_ids = task_ids_dict['task_ids']
+    for id in task_ids:
+        task = Task.query.get(id)
+        task.goal = goal
+        db.session.commit()
+    
+    response_dict = {
+        "id": int(goal_id),
+        "task_ids": task_ids
+    }
+    return jsonify(response_dict), 200
 
-    if not goal:
-        abort(make_response({"message":f"goal {goal_id} not found"}, 404))
-
-    return goal
-
-@goals_bp.route("/<goal_id>/books", methods=["POST"])
-def create_task(goal_id):
-
-    goal = validate_goal(goal_id)
-
-    request_body = request.get_json()
-    new_task = Task(
-        title=request_body["title"],
-        description=request_body["description"],
-        is_complete = request_body["is_complete"]
-        goal=goal
-    )
-    db.session.add(new_task)
-    db.session.commit()
-    return make_response(jsonify(f"Task {new_task.title} by {new_task.goal.title} successfully created"), 201)
-
-#-----------------
 @goals_bp.route("/<goal_id>/tasks", methods=["GET"])
-def get_tasks(goal_id):
-
-    goal = validate_goal(goal_id)
-
-    tasks_response = []
-    for task in goal.tasks:
-        tasks_response.append(
-            {
+def get_tasks_associated_with_goal(goal_id):
+    goal = Goal.query.get(goal_id)
+    if goal == None:
+        abort(make_response({"message":f"goal {goal_id} not found"}, 404))
+    
+    tasks = goal.tasks # list of all task instances associated with the goal_id
+    task_dicts = []
+    for task in tasks:
+        if task.completed_at == None:
+            is_complete = False
+        else:
+            is_complete = True
+        task_dict = {
             "id": task.id,
+            "goal_id": goal.id,
             "title": task.title,
-            "description": task.description
-            }
-        )
-    return jsonify(tasks_response)    
+            "description": task.description,
+            "is_complete": is_complete
+        }
+        task_dicts.append(task_dict)
+
+    response_dict = {
+        "id": goal.id,
+        "title": goal.title,
+        "tasks": task_dicts
+    }
+    return jsonify(response_dict), 200
