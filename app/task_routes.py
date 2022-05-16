@@ -30,6 +30,8 @@ def slack_bot(task):
 
     return requests.post(url=slack_url, params=param, headers=header)
 
+
+# ----------------- END POINTS -------------------
 # creates new task to the database
 @tasks_bp.route("", methods=["POST"])
 def create_task():
@@ -50,10 +52,7 @@ def create_task():
 
     db.session.add(new_task)
     db.session.commit()
-
-    response_body = {
-        "task": new_task.make_dict()
-    }
+    response_body = {"task": new_task.make_dict()}
     return make_response(jsonify(response_body), 201)
 
 
@@ -97,10 +96,7 @@ def update_task(task_id):
     task.description = request_body["description"]
 
     db.session.commit()
-
-    response_body = {
-        "task": task.make_dict()
-    }
+    response_body = {"task": task.make_dict()}
     return make_response(jsonify(response_body), 200)
 
 # delete a task
@@ -124,9 +120,7 @@ def mark_task_as_complete(task_id):
 
     db.session.commit()
     slack_bot(task)
-
-    response_body = {
-        "task": task.make_dict()}
+    response_body = {"task": task.make_dict()}
     return make_response(jsonify(response_body), 200)
 
 
@@ -137,7 +131,5 @@ def mark_task_as_incomplete(task_id):
     task.completed_at = None
 
     db.session.commit()
-
-    response_body = {
-        "task": task.make_dict()}
+    response_body = {"task": task.make_dict()}
     return make_response(jsonify(response_body), 200)
