@@ -1,11 +1,16 @@
+import os
 from os import abort
 from app import db
 from app.models.task import Task
 from flask import Blueprint, jsonify, abort, make_response, request
-from sqlalchemy import desc
+# from sqlalchemy import desc
+import requests
 
-import time
-from datetime import date, datetime
+# import time
+from datetime import date
+
+from dotenv import load_dotenv
+load_dotenv()
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -19,7 +24,7 @@ def validate_task(task_id):
 
     if not task:
         abort(make_response({"message":f"task {task_id} not found"}, 404))
-
+    
     return task
 
 
@@ -116,12 +121,12 @@ def read_one_task(task_id):
     return {
         "task": {
             "id": task.task_id,
+            "goal_id": task.goal_id,
             "title": task.title,
             "description": task.description,
             "is_complete": task.is_complete
         }
     }
-
 
 
 @tasks_bp.route("/<task_id>", methods=["PUT"])
@@ -164,10 +169,19 @@ def update_is_complete(task_id):
     task = validate_task(task_id)
 
     task.is_complete = True
-    task.completed_at = date.today()
+    task.completed_at = date.today() 
     
-    db.session.add(task)
     db.session.commit()
+
+    path = "https://slack.com/api/chat.postMessage"
+    API_KEY = os.environ.get("SLACK_API_KEY")
+    header = {"Authorization": API_KEY}
+    query_params = {
+        "channel": "task-notifications",
+        "text": "Someone just completed the task"
+    }
+
+    requests.post(path, headers=header, params=query_params)
 
     return {
         "task": {
@@ -186,7 +200,7 @@ def update_is_incomplete(task_id):
 
     task.completed_at = None 
 
-    db.session.add(task)
+    # db.session.add(task)
     db.session.commit()
 
     return {

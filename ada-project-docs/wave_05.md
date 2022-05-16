@@ -42,7 +42,7 @@ Goals should contain these attributes. Feel free to change the name of the `goal
 ## CRUD for Goals
 
 The following are required routes for wave 5. Feel free to implement the routes in any order within this wave.
-
+<!-- 
 ### Create a Goal: Valid Goal
 
 As a client, I want to be able to make a `POST` request to `/goals` with the following HTTP request body
@@ -66,9 +66,9 @@ and get this response:
 }
 ```
 
-so that I know I successfully created a goal that is saved in the database.
+so that I know I successfully created a goal that is saved in the database. -->
 
-### Get Goals: Getting Saved Goals
+<!-- ### Get Goals: Getting Saved Goals
 
 As a client, I want to be able to make a `GET` request to `/goals` when there is at least one saved goal and get this response:
 
@@ -85,9 +85,9 @@ As a client, I want to be able to make a `GET` request to `/goals` when there is
     "title": "Example Goal Title 2"
   }
 ]
-```
+``` -->
 
-### Get Goals: No Saved Goals
+<!-- ### Get Goals: No Saved Goals
 
 As a client, I want to be able to make a `GET` request to `/goals` when there are zero saved goals and get this response:
 
@@ -95,9 +95,9 @@ As a client, I want to be able to make a `GET` request to `/goals` when there ar
 
 ```json
 []
-```
+``` -->
 
-### Get One Goal: One Saved Goal
+<!-- ### Get One Goal: One Saved Goal
 
 As a client, I want to be able to make a `GET` request to `/goals/1` when there is at least one saved goal and get this response:
 
@@ -110,10 +110,10 @@ As a client, I want to be able to make a `GET` request to `/goals/1` when there 
     "title": "Build a habit of going outside daily"
   }
 }
-```
+``` -->
 
 
-### Update Goal
+<!-- ### Update Goal
 
 As a client, I want to be able to make a `PUT` request to `/goals/1` when there is at least one saved goal with this request body:
 
@@ -134,7 +134,7 @@ and get this response:
     "title": "Updated Goal Title"
   }
 }
-```
+``` -->
 
 ### Delete Goal: Deleting a Goal
 
