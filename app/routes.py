@@ -263,10 +263,12 @@ def respond_to_bot() -> tuple[Response, Literal[200]]:
     text = data['text'] if command in ('/finish', '/addtask') else ''
     resource = Task if command in ('/tasks', '/addtask') else Goal
     
-    message_response = Thread(
-        target = make_slackbot_response, 
-        args = (resource, text, data['response_url'])
-        )
-    message_response.start()
-
-    return jsonify({"response_type": "ephemeral", "text": "One moment.."}), 200
+    # message_response = Thread(
+    #     target = make_slackbot_response, 
+    #     args = (resource, text, data['response_url'])
+    #     )
+    # message_response.start()
+    if make_slackbot_response(resource, text, data['response_url']):
+        return jsonify({"response_type": "ephemeral", "text": "One moment.."}), 200
+    else:
+        return jsonify("Didn't"), 400

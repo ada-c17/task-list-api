@@ -37,11 +37,14 @@ def notify(title: str, event: str, text: str = None) -> bool:
     return r.status_code == 200
 
 def format_block(item: Task | Goal) -> dict:
+    md = ""
+    if type(item) == Task and type(item.completed_at).__name__ == 'datetime':
+        md = "~"
     block = dict()
     block['type'] = 'section'
     block['text'] = dict()
     block['text']['type'] = 'mrkdwn'
-    block['text']['text'] = f"*{item.title}* _ {item.description}_"
+    block['text']['text'] = f"*{md}{item.title}{md}* _ {item.description}_"
     return block
 
 def make_slackbot_response(cls: Type[Task | Goal], goal_title: str, 
@@ -58,8 +61,7 @@ def make_slackbot_response(cls: Type[Task | Goal], goal_title: str,
     else:
         items = cls.query.filter(cls.title.ilike(f"%{goal_title}%")).all()
     
-    item_blocks = [format_block(item) for item in items]
-    header_blocks = [
+    blocks = [
 		{
 			"type": "header",
 			"text": {
@@ -71,18 +73,20 @@ def make_slackbot_response(cls: Type[Task | Goal], goal_title: str,
 			"type": "divider"
 		}
     ]
-
+    for item in items:
+        blocks.append(format_block(item))
+    
     headers = {
         'Authorization': f'Bearer {os.environ.get("SLACKBOT_OAUTH_TOKEN")}'
     }
     message = {
         "text": "Here's your task list.", 
         "response_type": "ephemeral",
-        "blocks": header_blocks.extend(item_blocks)
+        "blocks": blocks
         }
     r = requests.post(
         response_url, 
         headers = headers,
-        json = json.dumps(message)
+        json = message
     )
     return r.status_code == 200
