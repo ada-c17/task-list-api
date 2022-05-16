@@ -24,11 +24,11 @@ def slack_bot(task):
     load_dotenv()
     message = f"Someone just completed the task {task.title}"
     slack_url = "https://slack.com/api/chat.postMessage"
-    header = {'Authorization': os.environ.get("SLACK_API_TOKEN")}
+    header = {'Authorization': f'Bearer {os.environ.get("SLACK_API_TOKEN")}'}
     param = {"channel": "task-notifications", 
         "text": message}
 
-    return requests.post(slack_url, headers=header, data=param)
+    return requests.post(url=slack_url, params=param, headers=header)
 
 # creates new task to the database
 @tasks_bp.route("", methods=["POST"])
@@ -123,9 +123,7 @@ def mark_task_as_complete(task_id):
     task.completed_at = datetime.utcnow()
 
     db.session.commit()
-    slack_bot(task.title)
-
-    requests.post(slack_url, headers=header, params=param)
+    slack_bot(task)
 
     response_body = {
         "task": task.make_dict()}
