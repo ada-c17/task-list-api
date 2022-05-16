@@ -166,7 +166,7 @@ def update_task_by_id(id):
 #------------PUT Method - update task by id - Mark_complete---------
 def send_slack_message(task_title):
     params = {"channel":"task-notifications","text":task_title}
-    headers = {"Authorization":"Bearer " + slack_token}
+    headers = {"Authorization":slack_token}
     requests.post("https://slack.com/api/chat.postMessage", params=params, headers=headers)
 
 @tasks_bp.route("/<id>/mark_complete", methods=["PATCH"])
@@ -181,7 +181,7 @@ def patch_completed_task_by_id(id):
     
     db.session.commit()
 
-    # send_slack_message(task.title)
+    send_slack_message(task.title)
 
     task_dict={}
     task_dict['id'] = task.id
