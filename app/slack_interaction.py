@@ -37,14 +37,15 @@ def notify(title: str, event: str, text: str = None) -> bool:
     return r.status_code == 200
 
 def format_block(item: Task | Goal) -> dict:
-    md = ""
-    if type(item) == Task and type(item.completed_at).__name__ == 'datetime':
-        md = "~"
     block = dict()
     block['type'] = 'section'
     block['text'] = dict()
     block['text']['type'] = 'mrkdwn'
-    block['text']['text'] = f"*{md}{item.title}{md}* _ {item.description}_"
+    if type(item) == Task:
+        s = "~" if type(item.completed_at).__name__ == 'datetime' else ''
+        block['text']['text'] = f"*{s}{item.title}{s}* _ {item.description}_"
+    else:
+        block['text']['text'] = f"*{item.title}*:"
     return block
 
 def make_slackbot_response(cls: Type[Task | Goal], goal_title: str, 
@@ -75,6 +76,12 @@ def make_slackbot_response(cls: Type[Task | Goal], goal_title: str,
     ]
     for item in items:
         blocks.append(format_block(item))
+        if type(item) == Goal:
+            try:
+                for task in item.tasks:
+                    blocks.append(format_block(task))
+            except:
+                blocks.append({"type":"divider"})
     
     headers = {
         'Authorization': f'Bearer {os.environ.get("SLACKBOT_OAUTH_TOKEN")}'
