@@ -92,7 +92,7 @@ def read_all_tasks():
     sort_request = request.args.get("sort")
     title_query = request.args.get("title")
 
-    tasks = Task.query.order_by(Task.title.asc()).all()
+    tasks = Task.query.all()
 
     if sort_request == "asc":
         tasks = Task.query.order_by(Task.title.asc()).all()
