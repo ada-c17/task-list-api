@@ -99,46 +99,77 @@ def mark_task_complete_by_slack_bot(task_id):
     return jsonify({"task":task.to_json()}), 200
 
 
+@goal_db.route("/<goal_id>", methods = ["GET"])
+def get_one_goal(goal_id):
+    goal_response = []
+    goal = validate_goal_id(goal_id)
+    return jsonify({"goal": goal.goal_to_json()}), 200
+
+@goal_db.route("", methods = ["GET"])
+def get_all_goals():
+    goal_response = []
+    goals = Goal.query.all()
+    for goal in goals:
+        goal_response.append(goal.goal_to_json())
+
+    return jsonify(goal_response), 200
+
+@goal_db.route("", methods = ["POST"])
+def create_goals():
+    request_body = request.get_json()
+    is_valid = validate_goal(request_body)
+    new_goal = Goal.create_goal(is_valid)
+
+    db.session.add(new_goal)
+    db.session.commit()
+
+    return jsonify({"goal":new_goal.goal_to_json()}), 201
+
+@goal_db.route("/<goal_id>", methods = ["DELETE"])
+def delete_task(goal_id):
+    goal = validate_goal_id(goal_id)
+    goal_title = Goal.query.get(goal_id)
+    db.session.delete(goal_title)
+    db.session.commit()
+    return {
+        "details": f'Goal {goal_id} \"{goal_title.title}\" successfully deleted'}, 200 
+
+@goal_db.route("/<goal_id>", methods = ["PUT"])
+def update_task(goal_id):
+    goal = validate_goal_id(goal_id)
+    request_body = request.get_json()
+    goal.update_goal(request_body)
+    
+    db.session.commit()
+    return jsonify({"Goal":goal.goal_to_json()}), 200
+
+
+
 @goal_db.route("/<goal_id>/tasks", methods = ["GET"])
-def get_all_goals(goal_id):
-    valid_goal = validate_goal(goal_id)
-    goal = Goal.query.get(goal.valid_goal)
+def get_all_goals_and_tasks(goal_id):
+    valid_goal = validate_goal_id(goal_id)
+    
     task_response = []
-    for task in goal.tasks:
+    for task in valid_goal.tasks:
         task_response.append(task.to_json())
 
 
-    result = {"id": goal.goal_id,
-    "title":goal.title,
+    result = {"id": valid_goal.goal_id,
+    "title":valid_goal.title,
     "tasks": task_response}
 
     return result, 200
 
-# @goal_db.route("", methods = ["POST"])
-# def create_one_goals():
-#     request_body = request.get_json()
-#     is_valid = validate_goal(request_body)
-#     new_goal = Goal.create_goal(is_valid)
+@goal_db.route("/<goal_id>/tasks", methods = ["POST"])
+def create_one_goal(goal_id):
+    valid_goal = validate_goal_id(goal_id)
+    request_body = request.get_json()
 
-#     db.session.add(new_goal)
-#     db.session.commit()
 
-#     return jsonify({"goal":new_goal.goal_to_json()}), 201
+    for task_id in request_body["task_ids"]:
+        validate_id(task_id)
+        task = Task.query.get(task_id)
+        valid_goal.tasks.append(task)
+    db.session.commit()
 
-# @goal_db.route("/<goal_id>", methods = ["DELETE"])
-# def delete_task(goal_id):
-#     goal = validate_goal_id(goal_id)
-#     goal_title = Goal.query.get(goal_id)
-#     db.session.delete(goal_title)
-#     db.session.commit()
-#     return {
-#         "details": f'Goal {goal_id} \"{goal_title.title}\" successfully deleted'}, 200 
-
-# @goal_db.route("/<goal_id>", methods = ["PUT"])
-# def update_task(goal_id):
-#     goal = validate_goal_id(goal_id)
-#     request_body = request.get_json()
-#     goal.update_goal(request_body)
-    
-#     db.session.commit()
-#     return jsonify({"Goal":goal.goal_to_json()}), 200
+    return {"id":valid_goal.goal_id,"task_ids":request_body["task_ids"]}, 200
