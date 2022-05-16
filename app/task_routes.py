@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, abort, make_response, request
 from app import db
 from app.models.task import Task
+from datetime import datetime
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
@@ -25,10 +26,16 @@ def create_task():
 
     if "title" not in request_body or "description" not in request_body:
         return make_response(jsonify({"details": "Invalid data"}), 400)
-        
-    new_task = Task(
-        title=request_body["title"],
-        description=request_body["description"])
+    
+    if "completed_at" in request_body:
+        new_task = Task(
+            title=request_body["title"],
+            description=request_body["description"],
+            completed_at=request_body["completed_at"])
+    else:
+        new_task = Task(
+            title=request_body["title"],
+            description=request_body["description"])
 
     db.session.add(new_task)
     db.session.commit()
@@ -95,4 +102,28 @@ def delete_task(task_id):
 
     response_body = {
         "details":f'Task {task.task_id} "{task.title}" successfully deleted'}
+    return make_response(jsonify(response_body), 200)
+
+
+# patches a task to mark as complete
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def mark_task_as_complete(task_id):
+    task = validate_task(task_id)
+    task.completed_at = datetime.utcnow()
+
+    db.session.commit()
+    response_body = {
+        "task": task.make_dict()}
+    return make_response(jsonify(response_body), 200)
+
+
+# patches a task to mark as incomplete
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def mark_task_as_incomplete(task_id):
+    task = validate_task(task_id)
+    task.completed_at = None
+
+    db.session.commit()
+    response_body = {
+        "task": task.make_dict()}
     return make_response(jsonify(response_body), 200)
