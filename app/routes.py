@@ -255,10 +255,14 @@ def respond_to_bot() -> tuple[Response, Literal[200]]:
     else:
         data = request.form
     
+    valid_commands = {'/tasks', '/goals', '/finish', 
+                    '/addtask', 'alltasks', '/addtogoal'}
+
     if (not (command := data.get('command', None)) or 
-            command not in ('/tasks', '/goals', '/finish', '/addtask')):
-        abort(make_error_response(ValueError, None, detail=(' Bot did not '
-                                                    'recognize request.')))
+            command not in valid_commands):
+        abort(make_error_response(ValueError, None, detail=(f' Bot did not '
+                                                f'recognize request: {command}'
+                                                    f' provided as command.')))
     text = data['text'] if command in ('/finish', '/addtask', '/addtogoal') else ''
     resource = Goal if command in ('/goals', '/finish', '/addtogoal') else Task
     

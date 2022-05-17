@@ -8,7 +8,7 @@ class FormatError(ValueError): ...
 class DBLookupError(LookupError): ...
 class IDTypeError(TypeError): ...
 
-def make_error_response(err: Exception, target_cls: Any, 
+def make_error_response(err: Exception, target_cls: Any | None, 
                         target_id: Optional[str | int] = None, 
                         detail: str = '') -> Response:
     '''Constructs error response based on Exception type.
@@ -34,5 +34,5 @@ def make_error_response(err: Exception, target_cls: Any,
                                 f"invalid:{detail}"), 400)
     # Currently this last return statement should never run: for future use
     return make_response(jsonify(f"An unexpected error occurred. Error type: "
-                                f"{err}, Error context: {target_cls.__name__}."
+                                f"{err}, Error context: {target_cls}."
                                 f"{detail}"), 500)
