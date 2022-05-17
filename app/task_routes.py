@@ -2,8 +2,7 @@ from flask import Blueprint, jsonify, abort, make_response, request
 from app import db
 from app.models.task import Task
 from datetime import datetime
-import requests
-import os
+import requests, os
 from dotenv import load_dotenv
 
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
@@ -32,6 +31,7 @@ def slack_bot(task):
 
 
 # ----------------- END POINTS -------------------
+
 # creates new task to the database
 @tasks_bp.route("", methods=["POST"])
 def create_task():
