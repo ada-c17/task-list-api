@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Type
+from typing import Optional, Type
 Url = str
 
 #############################
@@ -37,25 +37,22 @@ def notify(title: str, event: str, text: str = None) -> bool:
     return r.status_code == 200
 
 def format_block(item: Task | Goal) -> dict:
+    '''Formats details of input intp a markdown block for a Slack message.'''
+
     block = dict()
     block['type'] = 'section'
     block['text'] = dict()
     block['text']['type'] = 'mrkdwn'
     if type(item) == Task:
-        s = "~" if type(item.completed_at).__name__ == 'datetime' else ''
+        s = "~" if item.completed_at != None else ''
         block['text']['text'] = f"*{s}{item.title}{s}* _ {item.description}_"
     else:
-        block['text']['text'] = f"*{item.title}*"
+        block['text']['text'] = f"*{item.title}* "
     return block
 
 def make_slackbot_response(cls: Type[Task | Goal], goal_title: str, 
-                            response_url: Url) -> bool:
-    '''Posts a message to Slack in response to a specific query to the bot.
-    
-    (This doesn't work yet, but I don't think it's the code's fault ;) I think
-    I just don't have app permissions set right in Slack. The route that calls
-    this function works as expected when triggered from Postman.)
-    '''
+                            response_url: Url, include_complete: Optional[bool] = False) -> bool:
+    '''Posts a message to Slack in response to a specific query to the bot.'''
     
     if not goal_title:
         items = cls.query.all()
@@ -75,11 +72,13 @@ def make_slackbot_response(cls: Type[Task | Goal], goal_title: str,
 		}
     ]
     for item in items:
-        blocks.append(format_block(item))
+        if item.completed_at == None or include_complete:
+            blocks.append(format_block(item))
         if type(item) == Goal:
             try:
                 for task in item.tasks:
-                    blocks.append(format_block(task))
+                    if task.completed_at == None or include_complete:
+                        blocks.append(format_block(task))
             except:
                 blocks.append({"type":"divider"})
     

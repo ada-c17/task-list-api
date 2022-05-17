@@ -259,9 +259,9 @@ def respond_to_bot() -> tuple[Response, Literal[200]]:
             command not in ('/tasks', '/goals', '/finish', '/addtask')):
         abort(make_error_response(ValueError, None, detail=(' Bot did not '
                                                     'recognize request.')))
-    text = data['text'] if command in ('/finish', '/addtask') else ''
-    resource = Goal if command == '/goals' else Task
-
+    text = data['text'] if command in ('/finish', '/addtask', '/addtogoal') else ''
+    resource = Goal if command in ('/goals', '/finish', '/addtogoal') else Task
+    
     if command == '/addtask':
         details = text.split(',')
         details_dict = {
@@ -272,8 +272,14 @@ def respond_to_bot() -> tuple[Response, Literal[200]]:
         db.session.add(new_task)
         db.session.commit()
         text = ''
-    
-    if make_slackbot_response(resource, text, data['response_url']):
-        return jsonify({"response_type": "ephemeral", "text": "One moment.."}), 200
+    if command == '/addtogoal':
+        details = text.split(',')
+        task = get_filtered_and_sorted(Task,{'title':details[0]})[0]
+        goal = get_filtered_and_sorted(Goal, {'title': details[1].strip()})[0]
+        goal.tasks.append(task)
+        db.session.commit()
+        text = details[1].strip()
+    if make_slackbot_response(resource, text, data['response_url'], command == '/alltasks'):
+        return jsonify({"response_type": "ephemeral", "text": "There you go"}), 200
     else:
         return jsonify("Didn't"), 400
