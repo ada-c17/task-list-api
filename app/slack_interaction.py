@@ -10,7 +10,7 @@ import os
 import requests
 import json
 from app.models.task import Task
-from app.models.goal import Goal, TasksGoal
+from app.models.goal import Goal
 
 def notify(title: str, event: str, text: str = None) -> bool:
     '''Posts a message to Slack when a task is marked complete or incomplete.'''

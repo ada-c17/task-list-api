@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Mapping
+from typing import Mapping, Type
 
 ###########################################
 # Shared validation and filtering methods #
@@ -9,7 +9,7 @@ from app.error_responses import IDTypeError, DBLookupError
 from app.models.goal import Goal # Goal and Task imports here
 from app.models.task import Task # only for type annotations
 
-def validate_and_get_by_id(cls, target_id: str | int) -> Task | Goal:
+def validate_and_get_by_id(cls: Type[Task | Goal], target_id: str | int) -> Task | Goal:
     '''Validates search id and returns result of database query.'''
 
     try:
@@ -22,7 +22,7 @@ def validate_and_get_by_id(cls, target_id: str | int) -> Task | Goal:
     return target
 
 
-def get_filtered_and_sorted(cls, request_args: Mapping) -> list[Task | Goal]:
+def get_filtered_and_sorted(cls: Type[Task | Goal], request_args: Mapping) -> list[Task | Goal]:
     '''Builds SQL query from request params. Returns the result of DB query.'''
 
     params = dict(request_args)  # Conversion to make request.args mutable
