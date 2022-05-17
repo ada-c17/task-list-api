@@ -72,7 +72,7 @@ def make_slackbot_response(cls: Type[Task | Goal], goal_title: str,
 		}
     ]
     for item in items:
-        if item.completed_at == None or include_complete:
+        if type(item) == Goal or item.completed_at == None or include_complete:
             blocks.append(format_block(item))
         if type(item) == Goal:
             try:
