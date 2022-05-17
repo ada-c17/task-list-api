@@ -15,20 +15,14 @@ def create_task():
     request_body = request.get_json()
     
     try:
-        if 'completed_at' in request_body:
-            new_task = Task.create_complete(request_body)
-        else:
-            new_task = Task.create_incomplete(request_body)
+        new_task = Task.create_complete(request_body)
     except KeyError:
         return abort(make_response(jsonify({"details":"Invalid data"}), 400))
 
     db.session.add(new_task)
     db.session.commit()
 
-    response_body = {}
-    response_body['task'] = new_task.to_json()
-
-    return jsonify(response_body), 201
+    return jsonify({'task': new_task.to_json()}), 201
 
 
 # GET ALL tasks
@@ -66,10 +60,7 @@ def update_task(task_id):
 
     db.session.commit()
 
-    response_body = {}
-    response_body['task'] = task.to_json()
-
-    return jsonify(response_body), 200
+    return jsonify({'task': task.to_json()}), 200
     
 
 # DELETE one task
@@ -91,10 +82,7 @@ def mark_complete(task_id):
 
     send_message_to_slack(task)
 
-    response_body = {}
-    response_body['task'] = task.to_json()
-
-    return jsonify(response_body), 200
+    return jsonify({'task': task.to_json()}), 200
 
 
 # Mark task as incomplete
@@ -106,10 +94,7 @@ def mark_incomplete(task_id):
 
     db.session.commit()
 
-    response_body = {}
-    response_body['task'] = task.to_json()
-
-    return jsonify(response_body), 200
+    return jsonify({'task': task.to_json()}), 200
 
     
 
