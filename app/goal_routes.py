@@ -4,22 +4,23 @@ from app.models.goal import Goal
 from flask import Blueprint, jsonify, abort, make_response, request
 
 from app.models.task import Task
+from .helpers import validate_goal
 
 goals_bp = Blueprint("goals_bp", __name__, url_prefix="/goals")
 
 
-def validate_goal(goal_id):
-    try:
-        goal_id = int(goal_id)
-    except:
-        abort(make_response({"message":f"goal {goal_id} invalid"}, 400))
+# def validate_goal(goal_id):
+#     try:
+#         goal_id = int(goal_id)
+#     except:
+#         abort(make_response({"message":f"goal {goal_id} invalid"}, 400))
 
-    goal = Goal.query.get(goal_id)
+#     goal = Goal.query.get(goal_id)
 
-    if not goal:
-        abort(make_response({"message":f"goal {goal_id} not found"}, 404))
+#     if not goal:
+#         abort(make_response({"message":f"goal {goal_id} not found"}, 404))
 
-    return goal
+#     return goal
 
 
 
@@ -38,13 +39,12 @@ def create_goal():
     db.session.commit()
 
     response_body = {}
-    response_body["goal"] = {
-                            "id": new_goal.goal_id, 
-                            "title": new_goal.title
-                            }
-    
-    # db.session.add(new_goal)
-    # db.session.commit()
+    # response_body["goal"] = {
+    #                         "id": new_goal.goal_id, 
+    #                         "title": new_goal.title
+    #                         }
+
+    response_body["goal"] = new_goal.to_json()
 
     return response_body, 201
 
@@ -56,10 +56,12 @@ def read_all_goals():
     goals_response = []
 
     for goal in goals:
-        goals_response.append({
-            "id":goal.goal_id,
-            "title": goal.title
-        })
+        # goals_response.append({
+        #     "id":goal.goal_id,
+        #     "title": goal.title
+        # })
+
+        goals_response.append(goal.to_json())
     
     return jsonify(goals_response)
 
@@ -69,10 +71,11 @@ def read_one_goal(goal_id):
     goal = validate_goal(goal_id)
 
     response_body = {}
-    response_body["goal"] = {
-            "id": goal.goal_id,
-            "title": goal.title
-        }
+    # response_body["goal"] = {
+    #         "id": goal.goal_id,
+    #         "title": goal.title
+    #     }
+    response_body["goal"] = goal.to_json()
 
     return response_body
 
@@ -88,11 +91,11 @@ def update_goal(goal_id):
     db.session.commit()
 
     response_body = {}
-    response_body["goal"] = {
-        "id": goal.goal_id,
-        "title": goal.title
-    }
-
+    # response_body["goal"] = {
+    #     "id": goal.goal_id,
+    #     "title": goal.title
+    # }
+    response_body["goal"] = goal.to_json()
     return response_body
 
 
@@ -122,7 +125,7 @@ def create_goal_many_tasks(goal_id):
         "id": goal.goal_id,
         "task_ids": request_body["task_ids"]
     }
-    
+
     return response_body, 200
 
 

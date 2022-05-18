@@ -7,22 +7,26 @@ class Task(db.Model):
     description = db.Column(db.String)
     completed_at = db.Column(db.DateTime)
     is_complete = db.Column(db.Boolean, default = False)
+
     goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'))
     goal = db.relationship("Goal", back_populates="tasks")
 
-    #i'm confused by what this does, what does the output look like
-    @classmethod
-    def create_complete(cls, request_body):
-        new_task = cls(
-            title=request_body["title"],
-            description=request_body["description"],
-            completed_at=request_body["completed_at"]
-        )
+    
+    """
+    --unused
+    """
+    # @classmethod
+    # def create_complete(cls, request_body):
+    #     new_task = cls(
+    #         title=request_body["title"],
+    #         description=request_body["description"],
+    #         completed_at=request_body["completed_at"]
+    #     )
 
-        return new_task
+    #     return new_task
     
     @classmethod
-    def create_not_complete(cls, request_body):
+    def create(cls, request_body):
         new_task = cls(
             title=request_body["title"],
             description=request_body["description"],
