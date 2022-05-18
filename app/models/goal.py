@@ -14,23 +14,15 @@ class Goal(db.Model):
 
     # Instance Methods
 
-    # I wanted to find a way to combine these two, but I couldn't get it to differentiate between when there was no self.tasks at all
-    # and when self.tasks was already set to an empty list. So if you have any ideas I'd love to hear them!
-    
-    def self_to_dict_no_tasks(self):
+    def self_to_dict(self, show_tasks=False):
         instance_dict = dict(
             id=self.goal_id,
             title=self.title
         )
-        return instance_dict
-
-    def self_to_dict_with_tasks(self):
-        task_list = [task.self_to_dict() for task in self.tasks]
-        instance_dict = dict(
-            id=self.goal_id,
-            title=self.title,
-            tasks=task_list if task_list else []
-        )
+        if show_tasks:
+            task_list = [task.self_to_dict() for task in self.tasks] if self.tasks else []
+            instance_dict["tasks"] = task_list
+        
         return instance_dict
 
     def update_self(self, data_dict):

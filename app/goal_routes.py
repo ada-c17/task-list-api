@@ -18,14 +18,14 @@ def create_new_goal():
     db.session.add(new_goal)
     db.session.commit()
 
-    return success_message(dict(goal=new_goal.self_to_dict_no_tasks()), 201)
+    return success_message(dict(goal=new_goal.self_to_dict()), 201)
 
 
 @goal_bp.route("", methods=["GET"])
 def get_all_goals():
     sort_param = request.args.get("sort")
     goals = Goal.query.all()
-    all_goals = [goal.self_to_dict_no_tasks() for goal in goals]
+    all_goals = [goal.self_to_dict() for goal in goals]
 
     if not sort_param:
         return return_database_info_list(all_goals)
@@ -41,7 +41,7 @@ def get_all_goals():
 def get_one_goal(goal_id):
     goal = get_record_by_id(Goal, goal_id)
 
-    return return_database_info_dict("goal", goal.self_to_dict_no_tasks())
+    return return_database_info_dict("goal", goal.self_to_dict())
 
 
 @goal_bp.route("/<goal_id>", methods=["PUT", "PATCH"])
@@ -53,7 +53,7 @@ def update_goal_by_id(goal_id):
 
     db.session.commit()
 
-    return return_database_info_dict("goal", goal.self_to_dict_no_tasks())
+    return return_database_info_dict("goal", goal.self_to_dict())
 
 
 @goal_bp.route("/<goal_id>", methods=["DELETE"])
@@ -87,5 +87,5 @@ def add_tasks_to_goal(goal_id):
 def get_goal_with_tasks(goal_id):
     goal = get_record_by_id(Goal, goal_id)
 
-    return return_database_info_list(goal.self_to_dict_with_tasks())
+    return return_database_info_list(goal.self_to_dict(True))
 
