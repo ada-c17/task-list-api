@@ -105,15 +105,7 @@ As a client, I want to be able to make a `GET` request to `/tasks` when there is
 ]
 ```
 
-### Get Tasks: No Saved Tasks
 
-As a client, I want to be able to make a `GET` request to `/tasks` when there are zero saved tasks and get this response:
-
-`200 OK`
-
-```json
-[]
-```
 
 ### Get One Task: One Saved Task
 
