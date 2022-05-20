@@ -48,7 +48,7 @@ The following are required routes for wave 1. Feel free to implement the routes 
 - You may feel that there are missing tests and missing edge cases considered in this wave. This is intentional.
   - You have fulfilled wave 1 requirements if all of the wave 1 tests pass.
   - You are free to add additional features, as long as the wave 1 tests still pass. However, we recommend that you consider the future waves, first.
-- Some tests use a fixture named `one_task` that is defined in `tests/conftest.py`. This fixture saves a specific task to the test database.
+- Some tests use a fixture named `one_task` that is defined in `tests/conftest.py`. This fixture saves a spcific task to the test database.
 
 ### CLI
 
@@ -80,7 +80,7 @@ and get this response:
 }
 ```
 
-so that I know I successfully created a Task that is saved in the database.
+so that I know I successfully created a Task that is saved in the database.e
 
 ### Get Tasks: Getting Saved Tasks
 
