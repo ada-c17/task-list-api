@@ -136,7 +136,7 @@ As a client, I want to be able to make a `GET` request to `/tasks/1` when there 
 
 As a client, I want to be able to make a `PUT` request to `/tasks/1` when there is at least one saved task with this request body:
 
-```json
+```jso
 {
   "title": "Updated Task Title",
   "description": "Updated Test Description",
