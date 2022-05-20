@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, make_response, request
 from app.models.task import Task
-from .routes_helper import validate_task_id, create_message
+from .routes_helper import abort_message, get_record_by_id, create_message
 from app import db
 from datetime import datetime
 import requests, os
@@ -13,7 +13,7 @@ bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 def create_task():
     request_body = request.get_json()
     if "title" not in request_body or "description" not in request_body:
-        create_message("Invalid data", 400)
+        create_message("Title or description missing", 400)
     task = Task.from_dict(request_body)
     db.session.add(task)
     db.session.commit()
@@ -23,7 +23,7 @@ def create_task():
 
 @bp.route("/<task_id>", methods=("GET",))
 def read_one_task(task_id):
-    task = validate_task_id(task_id)
+    task = get_record_by_id(task_id)
     return make_response(jsonify({"task": task.to_dict()}))
 
 
@@ -45,8 +45,13 @@ def read_all_tasks():
 
 @bp.route("/<task_id>", methods=("PUT",))
 def replace_task(task_id):
-    task = validate_task_id(task_id)
+    task = get_record_by_id(task_id)
     request_body = request.get_json()
+    if "title" not in request_body:
+        abort_message("Title missing", 404)
+    if "description" not in request_body:
+        abort_message("Description missing", 404)
+
     task.override_task(request_body)
     db.session.commit()
 
@@ -55,7 +60,7 @@ def replace_task(task_id):
 
 @bp.route("/<task_id>", methods=("DELETE",))
 def delete_task(task_id):
-    task = validate_task_id(task_id)
+    task = get_record_by_id(task_id)
     db.session.delete(task)
     db.session.commit()
 
@@ -64,7 +69,7 @@ def delete_task(task_id):
 
 @bp.route("/<task_id>/mark_complete", methods=("PATCH",))
 def mark_task_complete(task_id):
-    task = validate_task_id(task_id)
+    task = get_record_by_id(task_id)
     task.completed_at = datetime.utcnow()
     db.session.commit()
 
@@ -82,7 +87,7 @@ def mark_task_complete(task_id):
 
 @bp.route("/<task_id>/mark_incomplete", methods=("PATCH",))
 def mark_task_incomplete(task_id):
-    task = validate_task_id(task_id)
+    task = get_record_by_id(task_id)
     task.completed_at = None
     db.session.commit()
     return jsonify({"task": task.to_dict()})

@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, make_response, request
 from app.models.task import Task
 from app.models.goal import Goal
-from .routes_helper import validate_goal_id, create_message, validate_task_id
+from .routes_helper import get_record_by_id, abort_message
 from app import db
 
 
@@ -12,7 +12,7 @@ bp = Blueprint("goals", __name__, url_prefix="/goals")
 def create_goal():
     request_body = request.get_json()
     if "title" not in request_body:
-        create_message("Invalid data", 400)
+        abort_message("Missing title", 400)
 
     goal = Goal.from_dict(request_body)
     db.session.add(goal)
@@ -23,12 +23,12 @@ def create_goal():
 
 @bp.route("/<goal_id>/tasks", methods=("POST",))
 def add_tasks_to_goal(goal_id):
-    goal = validate_goal_id(goal_id)
+    goal = get_record_by_id(goal_id)
     request_body = request.get_json()
 
     tasks_list = []
     for task_id in request_body["task_ids"]:
-        task = validate_task_id(task_id)
+        task = get_record_by_id(task_id)
         task.goal = goal
         tasks_list.append(task.task_id)
 
@@ -39,7 +39,7 @@ def add_tasks_to_goal(goal_id):
 
 @bp.route("/<goal_id>", methods=("GET",))
 def read_goal(goal_id):
-    goal = validate_goal_id(goal_id)
+    goal = get_record_by_id(goal_id)
     return make_response(jsonify({"goal": goal.to_dict()}))
 
 
@@ -52,19 +52,23 @@ def read_all_goals():
 
 @bp.route("/<goal_id>/tasks", methods=("GET",))
 def read_specific_goal_tasks(goal_id):
-    goal = validate_goal_id(goal_id)
+    goal = get_record_by_id(goal_id)
     
     goal_tasks = [Task.to_dict(task) for task in goal.tasks]
 
-    return make_response(jsonify({"id": goal.goal_id, 
-        "title": goal.title, "tasks": goal_tasks}))
+    return make_response(jsonify({
+        "id": goal.goal_id, 
+        "title": goal.title, 
+        "tasks": goal_tasks})
+    )
     
-
 
 @bp.route("/<goal_id>", methods=("PUT",))
 def replace_goal(goal_id):
-    goal = validate_goal_id(goal_id)
+    goal = get_record_by_id(Goal, goal_id)
     request_body = request.get_json()
+    if "title" not in request_body:
+        abort_message("Title not found", 404)
     goal.override_goal(request_body)
     db.session.commit()
 
@@ -73,8 +77,8 @@ def replace_goal(goal_id):
 
 @bp.route("/<goal_id>", methods=("DELETE",))
 def delete_goal(goal_id):
-    goal = validate_goal_id(goal_id)
+    goal = get_record_by_id(goal_id)
     db.session.delete(goal)
     db.session.commit()
 
-    create_message(f'Goal {goal_id} "{goal.title}" successfully deleted')
+    abort_message(f'Goal {goal_id} "{goal.title}" successfully deleted')

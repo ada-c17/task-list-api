@@ -1,4 +1,3 @@
-from requests import request
 from app import db
 
 
@@ -12,23 +11,19 @@ class Task(db.Model):
 
 
     def to_dict(self):
-        if self.goal_id is None:
-            return dict(
+        response_dict = dict(
                 id=self.task_id,
                 title=self.title,
                 description=self.description,
                 is_complete=self.completed_at is not None
             )
-        else:
-            return dict(
-                id=self.task_id,
-                title=self.title,
-                description=self.description,
-                goal_id=self.goal_id,
-                is_complete=self.completed_at is not None
-            )
 
+        if self.goal_id:
+            response_dict["goal_id"] = self.goal_id
 
+        return response_dict
+
+    # create similar functions for task and goal, class for creation
     @classmethod
     def from_dict(cls, data_dict):
         return cls(
@@ -37,7 +32,6 @@ class Task(db.Model):
                 completed_at = data_dict.get("completed_at", None)
             )
         
-
     def override_task(self, data_dict):
         self.title = data_dict["title"]
         self.description = data_dict["description"]
