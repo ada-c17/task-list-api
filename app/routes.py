@@ -4,7 +4,7 @@ from app import db
 from datetime import datetime, date, time, timezone
 import requests
 import os
-
+# import app.models.goal import Goal
 
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/tasks")	
@@ -34,10 +34,13 @@ def create_task():
             title=request_body["title"],					
             description=request_body["description"])
 
+        if "completed_at" in request_body:
+            new_task.completed_at = request_body["completed_at"]
+
     except KeyError:
         abort(make_response(jsonify(dict(details="Invalid data")), 400))
            
-
+    
     db.session.add(new_task)  
     db.session.commit() 
 
@@ -68,7 +71,8 @@ def get_task_by_id(task_id):
         return []
     response_body = { "task":
         {   
-        "id": task.task_id,       
+        "id": task.task_id,   
+        "goal_id":task.goal_id,    
         "title": task.title,   
         "description": task.description,     
         "is_complete": True if task.completed_at else False 					
@@ -120,7 +124,10 @@ def update_task_by_id(task_id):
 
     # task.task_id = request_body["task_id"]    
     task.title = request_body["title"]   
-    task.description = request_body["description"]   
+    task.description = request_body["description"] 
+
+    if request_body["completed_at"]:  
+           task.completed_at = datetime.utcnow()
     # task.completed_at = request_body["completed_at"]
 
 
@@ -129,11 +136,11 @@ def update_task_by_id(task_id):
         "id": task.task_id,       
         "title": task.title,   
         "description": task.description,     
-        "is_complete":task.completed_at
+        "is_complete":True if task.completed_at else False
         }
     }
-    if task.completed_at == None:	
-        response_body["task"]["is_complete"]= False
+    
+     
     
     db.session.commit()
 
@@ -231,8 +238,7 @@ def delete_task_by_id(task_id):
     }
 
     return response_body
-    # { "details": "Task {task_id} \ {descrtiption}\" successfully deleted"
-    # }
+ 
 
 
     
