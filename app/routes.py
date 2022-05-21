@@ -221,7 +221,7 @@ def assign_tasks_to_goal(goal_id: QueryParam) -> tuple[Response, Literal[200]]:
         goal.tasks.append(task)
     db.session.commit()
     
-    return jsonify({'id': int(goal_id), 'task_ids': task_ids}), 200
+    return jsonify({'id': int(goal_id), 'task_ids': [task.task_id for task in goal.tasks]}), 200
 
 @goal_bp.route('/<goal_id>/tasks', methods = ['GET'])
 def get_all_tasks_of_goal(goal_id: QueryParam) -> tuple[Response, Literal[200]]:
