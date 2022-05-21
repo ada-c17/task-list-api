@@ -44,20 +44,29 @@ def format_block(item: Task | Goal) -> dict:
     block['text'] = dict()
     block['text']['type'] = 'mrkdwn'
     block['text']['emoji'] = True
+    goal_title = ''
     if type(item) == Task:
-        s = "~" if item.completed_at != None else ''
+        if item.completed_at != None:
+            s, btn_text, btn_action = '~', 'Mark Incomplete', 'mark-incomplete'
+        else:
+            s, btn_text, btn_action = '', 'Mark Complete', 'mark-complete'
+        if goal_title != '':
+            command = '/finish'
+        else:
+            command = '/alltasks'
+
         block['text']['text'] = f"-   *{s}{item.title}{s}* _ {item.description}_"
         block['accessory'] = dict()
         block['accessory']['type'] = 'button'
         block['accessory']['text'] = dict()
         block['accessory']['text']['type'] = 'plain text'
-        block['accessory']['text']['text'] = ('Mark Complete' if not 
-                                    item.completed_at else 'Mark Incomplete')
+        block['accessory']['text']['text'] = btn_text
         block['accessory']['value'] = item.task_id
-        block['accessory']['action_id'] = ('mark-complete' if not 
-                                    item.completed_at else 'mark-incomplete')
+        block['accessory']['action_id'] = f'{btn_action} {command} {goal_title}'
     else:
         block['text']['text'] = f"*{item.title}:* "
+        goal_title = item.title
+
     return block
 
 def make_slackbot_response(cls: Type[Task | Goal], goal_title: str, 
