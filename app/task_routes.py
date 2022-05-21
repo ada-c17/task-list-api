@@ -22,8 +22,6 @@ def create_new_task():
 
     return success_message_info_as_list(dict(task=new_task.self_to_dict()), 201)
 
-
-
 # Query helper functions
 
 def sort_tasks(all_tasks, sort_param):
@@ -42,7 +40,6 @@ def filter_tasks_by_param(all_tasks, task_attribute, filter_param):
             return filtered_tasks
     else:
         return error_message(f"Search parameter '{filter_param}' not found in any tasks.", 404)
-
 
 
 @task_bp.route("", methods=["GET"])

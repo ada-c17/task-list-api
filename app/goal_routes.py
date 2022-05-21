@@ -24,17 +24,15 @@ def create_new_goal():
 @goal_bp.route("", methods=["GET"])
 def get_all_goals():
     sort_param = request.args.get("sort")
-    goals = Goal.query.all()
-    all_goals = [goal.self_to_dict() for goal in goals]
 
-    if not sort_param:
-        return success_message_info_as_list(all_goals)
     if sort_param == "asc":
-        sorted_goals_asc = sorted(all_goals, key = lambda i : i["title"])
-        return success_message_info_as_list(sorted_goals_asc)
-    if sort_param == "desc":
-        sorted_goals_desc = sorted(all_goals, key = lambda i : i["title"], reverse=True)
-        return success_message_info_as_list(sorted_goals_desc)
+        goals = Goal.query.order_by(Goal.title.asc())
+    elif sort_param == "desc":
+        goals = Goal.query.order_by(Goal.title.desc())
+    else:
+        goals = Goal.query.all()
+    all_goals = [goal.self_to_dict() for goal in goals]
+    return success_message_info_as_list(all_goals)
 
 
 @goal_bp.route("/<goal_id>", methods=["GET"])
