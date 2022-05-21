@@ -263,7 +263,7 @@ def respond_to_bot() -> tuple[Response, Literal[200]]:
     if data.get('payload', None):
         payload = json.loads(data['payload'])
         try:
-            task_id = payload['value']
+            task_id = payload['actions'][0]['value']
         except:
             abort(make_error_response(KeyError, None, detail=(f' payload = {payload}')))
         action = payload['action_id'].split()
