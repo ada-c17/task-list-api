@@ -259,7 +259,7 @@ def respond_to_bot() -> tuple[Response, Literal[200]]:
         data = request.form
     
     valid_commands = {'/tasks', '/goals', '/finish', 
-                    '/addtask', 'alltasks', '/addtogoal'}
+                    '/addtask', '/alltasks', '/addtogoal'}
     if data.get('payload', None):
         payload = json.loads(data['payload'])
         task_id = payload['value']
@@ -303,7 +303,8 @@ def respond_to_bot() -> tuple[Response, Literal[200]]:
         text = details[1].strip()
     
     include_complete = command in ('/alltasks', '/finish') 
-    if make_slackbot_response(resource, text, url, include_complete):
-        return jsonify({"response_type": "ephemeral", "text": "There you go"}), 200
+    r = make_slackbot_response(resource, text, url, include_complete)
+    if r.status_code == 200:
+        return jsonify({"response_type": "ephemeral", "text": "There you go", "slack_response": r.text}), 200
     else:
-        return jsonify("Didn't"), 400
+        return jsonify(r.text), 400

@@ -108,11 +108,12 @@ def make_slackbot_response(cls: Type[Task | Goal], goal_title: str,
     message = {
         "text": "Here's your task list.", 
         "response_type": "ephemeral",
-        "blocks": blocks
+        "blocks": json.dumps(blocks)
         }
+    # print(json.dumps(blocks))
     r = requests.post(
         response_url, 
         headers = headers,
         json = message
     )
-    return r.status_code == 200
+    return r
