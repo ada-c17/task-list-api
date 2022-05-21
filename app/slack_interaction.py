@@ -43,7 +43,6 @@ def format_block(item: Task | Goal) -> dict:
     block['type'] = 'section'
     block['text'] = dict()
     block['text']['type'] = 'mrkdwn'
-    block['text']['emoji'] = True
     goal_title = ''
     if type(item) == Task:
         if item.completed_at != None:
@@ -59,9 +58,9 @@ def format_block(item: Task | Goal) -> dict:
         block['accessory'] = dict()
         block['accessory']['type'] = 'button'
         block['accessory']['text'] = dict()
-        block['accessory']['text']['type'] = 'plain text'
+        block['accessory']['text']['type'] = 'plain_text'
         block['accessory']['text']['text'] = btn_text
-        block['accessory']['value'] = item.task_id
+        block['accessory']['value'] = str(item.task_id)
         block['accessory']['action_id'] = f'{btn_action} {command} {goal_title}'
     else:
         block['text']['text'] = f"*{item.title}:* "
@@ -108,6 +107,7 @@ def make_slackbot_response(cls: Type[Task | Goal], goal_title: str,
     message = {
         "text": "Here's your task list.", 
         "response_type": "ephemeral",
+        'channel': 'task-notifications',
         "blocks": json.dumps(blocks)
         }
     # print(json.dumps(blocks))
