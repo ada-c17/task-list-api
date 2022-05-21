@@ -262,7 +262,10 @@ def respond_to_bot() -> tuple[Response, Literal[200]]:
                     '/addtask', '/alltasks', '/addtogoal'}
     if data.get('payload', None):
         payload = json.loads(data['payload'])
-        task_id = payload['value']
+        try:
+            task_id = payload['value']
+        except:
+            abort(make_error_response(KeyError, None, detail=(f' payload = {payload}')))
         action = payload['action_id'].split()
         try:
             task = validate_and_get_by_id(Task, task_id)
