@@ -8,6 +8,7 @@ from app.commons import validate_and_get_by_id, get_filtered_and_sorted
 from app.slack_interaction import notify, make_slackbot_response
 from app.error_responses import (MissingValueError, FormatError, DBLookupError,
                                 IDTypeError, make_error_response)
+import json
 
 QueryParam = str  # for type annotations
 
@@ -245,8 +246,10 @@ slackbot_bp = Blueprint('slackbot', __name__, url_prefix = '/slackbot')
 def respond_to_bot() -> tuple[Response, Literal[200]]:
     '''Evaluates request body and returns DB query result for display in Slack.
     
-    Expects a query for incomplete tasks, all goals, or all tasks that are part
-    of a specified goal.
+    Expects a query for incomplete tasks, all tasks, all goals, all tasks that
+    are part of a specified goal, task creation, and task assignment to goal.
+
+    Also handles requests to update a task's completion status.
     '''
     
     if request.mimetype == 'application/json' and 'challenge' in request.json:
@@ -257,13 +260,28 @@ def respond_to_bot() -> tuple[Response, Literal[200]]:
     
     valid_commands = {'/tasks', '/goals', '/finish', 
                     '/addtask', 'alltasks', '/addtogoal'}
-
-    if (not (command := data.get('command', None)) or 
+    if data.get('payload', None):
+        payload = json.loads(data['payload'])
+        task_id = payload['value']
+        action = payload['action_id'].split()
+        try:
+            task = validate_and_get_by_id(Task, task_id)
+        except (IDTypeError, DBLookupError) as err:
+            abort(make_error_response(err, Task, task_id))
+        
+        task.completed_at = datetime.utcnow() if action[0] == 'mark-complete' else None
+        db.session.commit()
+        command = action[1]
+        text = action[2] if command == '/finish' else ''
+        url = payload['response_url']
+    elif (not (command := data.get('command', None)) or 
             command not in valid_commands):
         abort(make_error_response(ValueError, None, detail=(f' Bot did not '
                                                 f'recognize request: {command}'
                                                     f' provided as command.')))
-    text = data['text'] if command in ('/finish', '/addtask', '/addtogoal') else ''
+    else:
+        text = data['text'] if command in ('/finish', '/addtask', '/addtogoal') else ''
+        url = data['response_url']
     resource = Goal if command in ('/goals', '/finish', '/addtogoal') else Task
     
     if command == '/addtask':
@@ -283,7 +301,6 @@ def respond_to_bot() -> tuple[Response, Literal[200]]:
         goal.tasks.append(task)
         db.session.commit()
         text = details[1].strip()
-    if make_slackbot_response(resource, text, data['response_url'], command == '/alltasks'):
-        return jsonify({"response_type": "ephemeral", "text": "There you go"}), 200
-    else:
-        return jsonify("Didn't"), 400
+    
+    include_complete = command in ('/alltasks', '/finish') 
+    return make_slackbot_response(resource, text, url, include_complete)

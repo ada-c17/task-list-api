@@ -43,11 +43,21 @@ def format_block(item: Task | Goal) -> dict:
     block['type'] = 'section'
     block['text'] = dict()
     block['text']['type'] = 'mrkdwn'
+    block['text']['emoji'] = True
     if type(item) == Task:
         s = "~" if item.completed_at != None else ''
-        block['text']['text'] = f"*{s}{item.title}{s}* _ {item.description}_"
+        block['text']['text'] = f"-   *{s}{item.title}{s}* _ {item.description}_"
+        block['accessory'] = dict()
+        block['accessory']['type'] = 'button'
+        block['accessory']['text'] = dict()
+        block['accessory']['text']['type'] = 'plain text'
+        block['accessory']['text']['text'] = ('Mark Complete' if not 
+                                    item.completed_at else 'Mark Incomplete')
+        block['accessory']['value'] = item.task_id
+        block['accessory']['action_id'] = ('mark-complete' if not 
+                                    item.completed_at else 'mark-incomplete')
     else:
-        block['text']['text'] = f"*{item.title}* "
+        block['text']['text'] = f"*{item.title}:* "
     return block
 
 def make_slackbot_response(cls: Type[Task | Goal], goal_title: str, 
@@ -64,7 +74,8 @@ def make_slackbot_response(cls: Type[Task | Goal], goal_title: str,
 			"type": "header",
 			"text": {
 				"type": "plain_text",
-				"text": ":pencil:  Task List  :pencil:"
+				"text": "Task :relieved: :star: :ok: :star: :relieved: :star: :ok: :star: :relieved: List",
+				"emoji": True
 			}
 		},
 		{
