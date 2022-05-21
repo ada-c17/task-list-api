@@ -5,11 +5,10 @@ from app.helper_functions import get_record_by_id
 class Goal(db.Model):
     goal_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
-    tasks = db.relationship("Task", back_populates="goal", lazy=True)
+    tasks = db.relationship("Task", back_populates="goal")
 
     required_attributes = {
         "title" : True
-        # "tasks" : False
     }
 
     # Instance Methods
@@ -69,4 +68,4 @@ class Goal(db.Model):
     
     @classmethod
     def return_class_name(cls):
-        return "Goal"
+        return cls.__name__

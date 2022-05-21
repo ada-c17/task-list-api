@@ -30,10 +30,8 @@ class Task(db.Model):
         if self.goal:
             instance_dict["goal_id"] = self.goal_id
         
-        if self.completed_at:
-            instance_dict["is_complete"] = True
-        else:
-            instance_dict["is_complete"] = False
+        instance_dict["is_complete"] = True if self.completed_at else False
+
         return instance_dict
     
 
@@ -57,8 +55,8 @@ class Task(db.Model):
             data_dict["completed_at"] = None
         if data_dict.keys() == cls.required_attributes.keys():
             return cls(title=data_dict["title"],
-                    description = data_dict["description"],
-                    completed_at = data_dict["completed_at"]
+                description = data_dict["description"],
+                completed_at = data_dict["completed_at"]
             )
         
         else:
@@ -68,4 +66,4 @@ class Task(db.Model):
 
     @classmethod
     def return_class_name(cls):
-        return "Task"
+        return cls.__name__

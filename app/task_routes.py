@@ -20,7 +20,7 @@ def create_new_task():
     db.session.add(new_task)
     db.session.commit()
 
-    return success_message(dict(task=new_task.self_to_dict()), 201)
+    return success_message_info_as_list(dict(task=new_task.self_to_dict()), 201)
 
 
 
@@ -68,7 +68,7 @@ def get_all_tasks():
         else:
             all_tasks = sort_tasks(all_tasks, sort_param)
     
-    return return_database_info_list(all_tasks)
+    return success_message_info_as_list(all_tasks)
     
 
 @task_bp.route("/<task_id>", methods=["GET"])
@@ -76,8 +76,6 @@ def get_one_task(task_id):
     task = get_record_by_id(Task, task_id)
 
     return return_database_info_dict("task", task.self_to_dict())
-    # else:
-    #     return return_database_info_dict("task", task.self_to_dict_no_goal())
 
 
 @task_bp.route("/<task_id>", methods=["PUT", "PATCH"])
@@ -121,4 +119,4 @@ def delete_task(task_id):
     db.session.delete(task)
     db.session.commit()
 
-    return success_message(dict(details=f'Task {task.task_id} "{task.title}" successfully deleted'))
+    return success_message_info_as_list(dict(details=f'Task {task.task_id} "{task.title}" successfully deleted'))

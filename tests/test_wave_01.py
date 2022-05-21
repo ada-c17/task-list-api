@@ -60,6 +60,7 @@ def test_get_task_not_found(client):
     # Assert
     assert response.status_code == 404
     assert response_body == {'details' : 'Task id: 1 not found'}
+    assert Task.query.get(1) == None
 
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
@@ -148,7 +149,6 @@ def test_update_task_description_only(client, one_task):
 
     # Assert
     assert response.status_code == 200
-    assert "task" in response_body
     assert response_body == {
         "task": {
             "id": 1,
@@ -175,6 +175,7 @@ def test_update_task_not_found(client):
     # Assert
     assert response.status_code == 404
     assert response_body == {'details' : 'Task id: 1 not found'}
+
 
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
