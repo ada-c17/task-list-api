@@ -303,4 +303,7 @@ def respond_to_bot() -> tuple[Response, Literal[200]]:
         text = details[1].strip()
     
     include_complete = command in ('/alltasks', '/finish') 
-    return make_slackbot_response(resource, text, url, include_complete)
+    if make_slackbot_response(resource, text, url, include_complete):
+        return jsonify({"response_type": "ephemeral", "text": "There you go"}), 200
+    else:
+        return jsonify("Didn't"), 400
