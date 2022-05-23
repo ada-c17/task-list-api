@@ -7,10 +7,13 @@ class Task(db.Model):
     description = db.Column(db.String)
     completed_at = db.Column(db.DateTime, nullable = True)
     goal_id = db.Column(db.Integer, db.ForeignKey('goal.goal_id'), nullable=True)
+    
     def __repr__(self) -> str:
         return str(self)
+    
     def __str__(self) -> str:
         return f'Task ID {self.task_id}, Title {self.title}, Completed At{self.completed_at}'
+    
     def to_dict(self):
         return dict(
             id=self.task_id,

@@ -77,6 +77,7 @@ def replace_goal_safely(goal, data_dict):
         goal.replace_details(data_dict)
     except KeyError as err:
         error_message(f"Invalid data",400)
+
 # Input: {'task_ids': [1, 2, 3]}
 # Output: List of tasks
 def get_task_from_dict(request_body):

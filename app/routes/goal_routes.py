@@ -92,7 +92,6 @@ def update_goal_with_tasks(goal_id):
 
     new_task = get_task_from_dict(request_body)
 
-    # task_ids = (request_body['task_ids'])
     for task_id in request_body['task_ids']:
         task = get_task_record_by_id(task_id)
         task.goal_id = goal.goal_id
@@ -122,6 +121,7 @@ def get_tasks_for_goal(goal_id):
             "id": goal.goal_id,
             "title": goal.title,
             "tasks":tasks}
+            # Alternate Results with List Comprehension to try later
             # "tasks":[
             # {
             #     "id": task.id,
