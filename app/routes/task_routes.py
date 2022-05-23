@@ -66,7 +66,6 @@ def delete_task_by_id(task_id):
 
     result={"details":f"Task {task.task_id} \"{task.title}\" successfully deleted"}
     return make_response(jsonify(result), 200)
-    # return make_response(f"Task with id {task_id} successfully deleted!")
 
 #PATCH /tasks/<task_id>
 @bp.route("/<task_id>",methods=["PATCH"])

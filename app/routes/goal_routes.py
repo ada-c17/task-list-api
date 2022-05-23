@@ -108,28 +108,29 @@ def get_tasks_for_goal(goal_id):
     goal = get_goal_record_by_id(goal_id)
     request_body = request.get_json()
     tasks = []
-    for task in goal.tasks:
-        print(task.goal_id)
-        tasks.append({
-                "id": task.goal_id,
-                "goal_id": task.task_id,
-                "title": task.title,
-                "description": task.description,
-                "is_complete": task.completed_at is not None
-            } )
+    # for task in goal.tasks:
+    #     print(task.goal_id)
+    #     tasks.append({
+    #             "id": task.task_id,
+    #             "goal_id": task.goal_id,
+    #             "title": task.title,
+    #             "description": task.description,
+    #             "is_complete": task.completed_at is not None
+            # } )
+    print(tasks)
     result={
             "id": goal.goal_id,
             "title": goal.title,
-            "tasks":tasks}
+            # "tasks":tasks}
             # Alternate Results with List Comprehension to try later
-            # "tasks":[
-            # {
-            #     "id": task.id,
-            #     "goal_id": task.goal_id,
-            #     "title": task.title,
-            #     "description": task.description,
-            #     "is_complete": task.is_complete
-            # } for task in goal.tasks
-            # ]}
+            "tasks":[
+            {
+                "id": task.task_id,
+                "goal_id": task.goal_id,
+                "title": task.title,
+                "description": task.description,
+                "is_complete": task.completed_at is not None
+            } for task in goal.tasks
+            ]}
     return (jsonify(result)), 200
 

@@ -15,13 +15,23 @@ class Task(db.Model):
         return f'Task ID {self.task_id}, Title {self.title}, Completed At{self.completed_at}'
     
     def to_dict(self):
-        return dict(
-            id=self.task_id,
-            title=self.title,
-            description=self.description,
-            is_complete=self.completed_at is not None
-        
-    )
+        goal_id = self.goal_id
+        if goal_id is not None:
+            return dict(
+                id=self.task_id,
+                title=self.title,
+                description=self.description,
+                is_complete=self.completed_at is not None, 
+                goal_id = self.goal_id)
+        else:
+            return dict(
+                id=self.task_id,
+                title=self.title,
+                description=self.description,
+                is_complete=self.completed_at is not None 
+
+            )        
+
 
     @classmethod
     def from_dict(cls, data_dict):

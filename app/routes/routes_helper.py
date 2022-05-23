@@ -34,7 +34,6 @@ def make_task_safely(data_dict):
     try:
         return Task.from_dict(data_dict)
     except KeyError as err:
-        # error_message(f"Missing key: {err}", 400)
         error_message(f'Invalid data',400)
         
 def replace_task_safely(task, data_dict):
@@ -50,7 +49,6 @@ def make_goal_safely(data_dict):
     try:
         return Goal.from_dict(data_dict)
     except KeyError as err:
-        # error_message(f"Missing key: {err}", 400)
         error_message(f'Invalid data',400)
 
 def get_goal_record_by_id(id):
@@ -69,7 +67,6 @@ def make_goal_safely(data_dict):
     try:
         return Goal.from_dict(data_dict)
     except KeyError as err:
-        # error_message(f"Missing key: {err}", 400)
         error_message(f'Invalid data',400)
         
 def replace_goal_safely(goal, data_dict):

@@ -17,15 +17,11 @@ class Goal(db.Model):
         return dict(
             id=self.goal_id,
             title=self.title,
-            # tasks=tasks_info
     )
 
     @classmethod
     def from_dict(cls, data_dict):
         return Goal(title=data_dict["title"]) 
-        # cls(
-            # title=data_dict['title'],
-        # )
 
     def replace_details(self, data_dict):
         self.title=data_dict['title']
