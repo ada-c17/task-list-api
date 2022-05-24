@@ -57,6 +57,22 @@ def three_tasks(app):
     ])
     db.session.commit()
 
+@pytest.fixture
+def five_tasks_with_description(app):
+    db.session.add_all([
+        Task(
+            title="Water the garden 🌷", description="Make sure the flowers grow!", completed_at=None),
+        Task(
+            title="Feed cats AM", description="Give cats wet and dry food", completed_at=None),
+        Task(
+            title="Feed cats PM", description="Give cats wet food and pills", completed_at=None),
+        Task(
+            title="Study anki flashcards", description="Review important info", completed_at=None),
+        Task(
+            title="Make dinner", description="Make sure to eat food!", completed_at=None)
+    ])
+    db.session.commit()
+
 
 # This fixture gets called in every test that
 # references "completed_task"
@@ -77,6 +93,16 @@ def completed_task(app):
 def one_goal(app):
     new_goal = Goal(title="Build a habit of going outside daily")
     db.session.add(new_goal)
+    db.session.commit()
+
+
+@pytest.fixture
+def three_goals(app):
+    db.session.add_all([
+        Goal(title="Build a habit of going outside daily"),
+        Goal(title="Do morning stretches five times a week"),
+        Goal(title="Learn to knit")
+    ])
     db.session.commit()
 
 
