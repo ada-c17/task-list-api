@@ -13,14 +13,20 @@ class Goal(db.Model):
 
     # Instance Methods
 
-    def self_to_dict(self, show_tasks=False):
+    def self_to_dict(self, show_title=True, show_tasks=False, show_task_ids=False):
         instance_dict = dict(
             id=self.goal_id,
-            title=self.title
         )
+        if show_title:
+                instance_dict["title"] = self.title
+        
         if show_tasks:
             task_list = [task.self_to_dict() for task in self.tasks] if self.tasks else []
             instance_dict["tasks"] = task_list
+        
+        if show_task_ids:
+            task_ids = [task.task_id for task in self.tasks]
+            instance_dict["task_ids"] = task_ids
         
         return instance_dict
 
@@ -34,14 +40,14 @@ class Goal(db.Model):
         if dict_key_errors:
             raise ValueError(dict_key_errors)
     
-    def return_id_and_task_ids_only(self):
-        task_ids = [task.task_id for task in self.tasks]
+    # def return_id_and_task_ids_only(self):
+    #     task_ids = [task.task_id for task in self.tasks]
 
-        id_and_tasks_dict = dict(
-            id=self.goal_id,
-            task_ids = task_ids
-        )
-        return id_and_tasks_dict
+    #     id_and_tasks_dict = dict(
+    #         id=self.goal_id,
+    #         task_ids = task_ids
+    #     )
+    #     return id_and_tasks_dict
 
 
     # Class Methods

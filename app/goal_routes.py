@@ -78,12 +78,12 @@ def add_tasks_to_goal(goal_id):
 
     db.session.commit()
 
-    return success_message_info_as_list(goal.return_id_and_task_ids_only())
+    return success_message_info_as_list(goal.self_to_dict(show_title=False, show_task_ids=True))
 
 
 @goal_bp.route("/<goal_id>/tasks", methods=["GET"])
 def get_goal_with_tasks(goal_id):
     goal = get_record_by_id(Goal, goal_id)
 
-    return success_message_info_as_list(goal.self_to_dict(True))
+    return success_message_info_as_list(goal.self_to_dict(show_tasks=True))
 
