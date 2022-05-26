@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, make_response, request
 from .models.task import Task
 from .routes_helper_functions import *
 from app import db
+from datetime import datetime
 
 task_bp = Blueprint("tasks", __name__, url_prefix="/tasks")
 
@@ -64,3 +65,21 @@ def delete_one_task(task_id):
     db.session.commit()
 
     return make_response(jsonify(dict(details=f'Task {task.task_id} "{task.title}" successfully deleted'))), 200
+
+@task_bp.route("/<task_id>/mark_complete", methods=("PATCH",))
+def patch_one_task_as_complete(task_id):
+    task = validate_task(task_id)
+    task.completed_at = datetime.utcnow()
+
+    db.session.commit()
+
+    return jsonify(task.one_task_to_dict()), 200
+
+@task_bp.route("/<task_id>/mark_incomplete", methods=("PATCH",))
+def patch_one_task_as_incomplete(task_id):
+    task = validate_task(task_id)
+    task.completed_at = None
+
+    db.session.commit()
+
+    return jsonify(task.one_task_to_dict()), 200
