@@ -15,14 +15,13 @@ class Task(db.Model):
             is_complete = True
 
         return {
-                "id": self.id,
+                "id": self.task_id,
                 "title": self.title,
                 "description": self.description,
-                "is_complete": self.is_complete != None
+                "is_complete": is_complete
         }
 
     @classmethod
-
     def validate(cls, task_id):
         try:
             task_id = int(task_id)
@@ -32,3 +31,17 @@ class Task(db.Model):
         if task:
             return task
         abort(make_response(jsonify(f"Task with id of {task_id} was not found"),404))
+
+    @classmethod
+    def create(cls,request_body):
+        new_task = cls(
+        title = request_body['title'],
+        description = request_body['description'],
+        completed_at = request_body.get('completed_at', None)
+        
+    )
+        return new_task
+
+    def update(self,request_body):
+        self.title = request_body["title"]
+        self.description = request_body["description"]
