@@ -72,6 +72,7 @@ def patch_one_task_as_complete(task_id):
     task.completed_at = datetime.utcnow()
 
     db.session.commit()
+    post_completion_message_in_slack(task_id)
 
     return jsonify(task.one_task_to_dict()), 200
 
