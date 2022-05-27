@@ -1,5 +1,6 @@
 from flask import jsonify, abort, make_response
 from .models.task import Task
+from .models.goal import Goal
 import requests, os
 
 def error_message(message, status_code):
@@ -31,3 +32,16 @@ def post_completion_message_in_slack(task_id):
     }
 
     requests.post(SLACK_PATH, headers=request_headers, json=request_body)
+
+def validate_goal(goal_id):
+    try:
+        goal_id = int(goal_id)
+    except:
+        error_message(f"goal {goal_id} invalid", 400)
+
+    goal = Goal.query.get(goal_id)
+
+    if not goal:
+        error_message(f"goal {goal_id} not found", 404)
+
+    return goal
