@@ -94,10 +94,11 @@ def update_task1(task_id, mark):
 
     if mark =="mark_complete":
         task.completed_at =datetime.utcnow() 
-        slack_headers =  {"Authorization" : "Bearer "+SLACK_API_KEY}
-        myobj={"channel" :"task-notifications",
-               "text":f"Someone just completed the task {task.title}"}
-        requests.post(path,data = myobj, headers=slack_headers)
+        if SLACK_API_KEY:
+            slack_headers =  {"Authorization" : "Bearer "+SLACK_API_KEY}
+            myobj={"channel" :"task-notifications",
+                   "text":f"Someone just completed the task {task.title}"}
+            requests.post(path,data = myobj, headers=slack_headers)
 
     elif mark =="mark_incomplete": 
         task.completed_at =None
