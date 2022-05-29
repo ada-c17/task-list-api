@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super()}}  
+<form method ="POST" class="task-post">
+    <div><label>Id: <input type="text" name="id"></label></div>
+    <div><label>Title: <input type="text" name="title"></label></div>
+    <div><label>Description: <input type="text" name="description"></label></div>
+    <input type="submit" value="Submit">
+</form>    
+{% endblock %}

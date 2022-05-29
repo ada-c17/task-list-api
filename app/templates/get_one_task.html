@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super()}}    
+    <table class="tasks">
+        <th>id</th>
+        <th>title</th>
+        <th>description</th>
+        <tr>
+            <td>{{task.task_id}}</td>
+            <td> {{task.title}}</td> 
+            <td>{{task.description}}</td>
+            </tr>
+            
+        </table>
+        
+{% endblock %}

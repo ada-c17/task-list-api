@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ super()}}  
+<form method ="POST" class="task-post">
+    <div><label>Id: <input type="text" name="task_id"></label></div>
+    <input type="submit" value="Submit">
+    {%for n in range(tasks|length)%}
+    <option value={{tasks.task_id}}>{{tasks.task_id}}</option>
+    {%endfor%}
+
+
+</form>    
+{% endblock %}
