@@ -7,6 +7,8 @@ class Task(db.Model):
     title = db.Column(db.String, nullable = False)
     description = db.Column(db.String)
     completed_at = db.Column(db.DateTime)
+    goal_id = db.Column (db.Integer, db.ForeignKey('goal.goal_id'), nullable=True)
+    goal = db.relationship("Goal", back_populates="tasks")
 
     def to_json(self):
         if not self.completed_at:
@@ -14,12 +16,19 @@ class Task(db.Model):
         else:
             is_complete = True
 
-        return {
+        task_dict = {
                 "id": self.task_id,
                 "title": self.title,
                 "description": self.description,
                 "is_complete": is_complete
         }
+
+        if self.goal_id:
+            task_dict["goal_id"] = self.goal_id
+
+        return task_dict
+
+
 
     @classmethod
     def validate(cls, task_id):
