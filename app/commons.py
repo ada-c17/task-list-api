@@ -10,16 +10,16 @@ from app.error_responses import IDTypeError, DBLookupError, make_error_response
 from app.models.goal import Goal # Goal and Task imports here
 from app.models.task import Task # only for type annotations
 
-def validate_and_get_by_id(cls: Type[Task | Goal], target_id: str | int, errmsg_detail: str = '') -> Task | Goal:
+def validate_and_get_by_id(cls: Type[Task | Goal], target_id: str | int, errmsg: str = '') -> Task | Goal:
     '''Validates search id and returns result of database query.'''
 
     try:
         target_id = int(target_id)
     except:
-        abort(make_error_response(IDTypeError(), cls, target_id, errmsg_detail))
+        abort(make_error_response(IDTypeError(target_id, errmsg)))
     target = cls.query.get(target_id)
     if not target:
-        abort(make_error_response(DBLookupError(), cls, target_id, errmsg_detail))
+        abort(make_error_response(DBLookupError(cls, target_id, errmsg)))
     return target
 
 

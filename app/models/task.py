@@ -43,7 +43,7 @@ class Task(db.Model):
 
         # Validate and process input before creation
         if 'title' not in task_details or 'description' not in task_details:
-            abort(make_error_response(MissingValueError(), cls))
+            abort(make_error_response(MissingValueError()))
         if 'completed_at' not in task_details:
             task_details['completed_at'] = None
         elif ((time := task_details.get('completed_at')) # Value is not None

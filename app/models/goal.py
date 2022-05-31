@@ -24,7 +24,7 @@ class Goal(db.Model):
         '''Creates and returns a new Goal instance from input dict.'''
 
         if 'title' not in goal_details:
-            abort(make_error_response(MissingValueError(), cls))
+            abort(make_error_response(MissingValueError()))
         return cls(title = goal_details['title'])
     
     def update(self, new_details: dict) -> None:
