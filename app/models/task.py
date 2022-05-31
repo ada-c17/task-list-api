@@ -2,7 +2,8 @@ from __future__ import annotations
 from app import db
 from datetime import datetime
 from dateutil import parser
-from app.error_responses import MissingValueError, FormatError
+from flask import abort
+from app.error_responses import MissingValueError, FormatError, make_error_response
 
 class Task(db.Model):
     '''A SQLAlchemy.Model subclass representing task entries in the database.
@@ -30,12 +31,10 @@ class Task(db.Model):
     def interpret_timestamp(timestamp: str) -> datetime:
         '''Converts string input to datetime object using dateutil parser.'''
 
-        if type(timestamp) != str:
-            raise FormatError
         try:
             interpreted_time = parser.parse(timestr=timestamp)
         except:
-            raise FormatError
+            abort(make_error_response(FormatError()))
         return interpreted_time
 
     @classmethod
@@ -44,12 +43,12 @@ class Task(db.Model):
 
         # Validate and process input before creation
         if 'title' not in task_details or 'description' not in task_details:
-            raise MissingValueError
+            abort(make_error_response(MissingValueError(), cls))
         if 'completed_at' not in task_details:
             task_details['completed_at'] = None
         elif ((time := task_details.get('completed_at')) # Value is not None
                 and not isinstance(time, datetime)):     # and not a datetime
-            task_details['completed_at'] = Task.interpret_timestamp(time)
+            task_details['completed_at'] = Task.interpret_timestamp(str(time))
         
         return cls(
             title = task_details['title'],

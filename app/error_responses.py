@@ -8,7 +8,7 @@ class FormatError(ValueError): ...
 class DBLookupError(LookupError): ...
 class IDTypeError(TypeError): ...
 
-def make_error_response(err: Exception, target_cls: Any | None, 
+def make_error_response(err: Exception, target_cls: Optional[Any] = None, 
                         target_id: Optional[str | int] = None, 
                         detail: str = '') -> Response:
     '''Constructs error response based on Exception type.
@@ -30,9 +30,8 @@ def make_error_response(err: Exception, target_cls: Any | None,
                 " provided as a string, the timestamp must be in a standard"
                 " date and time format.")
         return make_response(jsonify(f"Input value for attribute of "
-                                f"{target_cls.__name__.lower()} was "
-                                f"invalid:{detail}"), 400)
-    # Currently this last return statement should never run: for future use
+                                f"task was invalid:{detail}"), 400)
+    # This last return statement in use by slackbot interaction and unknown errs
     print(detail)
     return make_response(jsonify(f"An unexpected error occurred. Error type: "
                                 f"{err}, Error context: {target_cls}."

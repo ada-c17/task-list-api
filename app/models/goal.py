@@ -1,6 +1,7 @@
 from __future__ import annotations
+from flask import abort
 from app import db
-from app.error_responses import MissingValueError
+from app.error_responses import MissingValueError, make_error_response
 
 class Goal(db.Model):
     '''A SQLAlchemy.Model subclass representing goal entries in the database.
@@ -23,7 +24,7 @@ class Goal(db.Model):
         '''Creates and returns a new Goal instance from input dict.'''
 
         if 'title' not in goal_details:
-            raise MissingValueError
+            abort(make_error_response(MissingValueError(), cls))
         return cls(title = goal_details['title'])
     
     def update(self, new_details: dict) -> None:
