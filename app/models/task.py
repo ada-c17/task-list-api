@@ -59,10 +59,12 @@ class Task(db.Model):
     def update(self, new_details: dict) -> None:
         '''Updates the attributes of an existing Task instance.'''
 
+        if 'title' not in new_details or 'description' not in new_details:
+            abort(make_error_response(MissingValueError()))
         if ((time := new_details.get('completed_at')) # Value is not None
                 and not isinstance(time, datetime)):  # and not a datetime
             new_details['completed_at'] = Task.interpret_timestamp(time)
-        
+
         for k,v in new_details.items():
             if k in self.__dict__:
                 setattr(self, k, v)

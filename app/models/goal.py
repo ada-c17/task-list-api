@@ -31,6 +31,7 @@ class Goal(db.Model):
     def update(self, new_details: dict) -> None:
         '''Updates the attributes of an existing Goal instance.'''
 
-        for k,v in new_details.items():
-            if k in self.__dict__:
-                setattr(self, k, v)
+        try:
+            self.title = new_details['title']
+        except KeyError:
+            abort(make_error_response(MissingValueError()))

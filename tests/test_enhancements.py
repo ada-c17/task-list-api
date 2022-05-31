@@ -119,6 +119,7 @@ def test_goals_can_be_sorted_and_filtered(client, three_goals):
 
 def test_string_timestamp_can_be_converted(client, three_tasks):
     response = client.put('/tasks/2', json={
+        'title': "Answer forgotten email 📧",
         'description': 'Inbox zero.',
         'completed_at': 'Monday, May 9, 2022'
         })
@@ -137,6 +138,7 @@ def test_string_timestamp_can_be_converted(client, three_tasks):
 
 def test_invalid_string_timestamp_returns_error(client, three_tasks):
     response = client.put('/tasks/2', json={
+        'title': "Answer forgotten email 📧",
         'description': 'Inbox zero.',
         'completed_at': 'The other day'
         })
