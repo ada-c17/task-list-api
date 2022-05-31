@@ -3,7 +3,7 @@ from flask import Blueprint, Response, jsonify, request, abort
 from app import db
 from datetime import datetime
 from app.models.task import Task
-from app.models.goal import Goal, TasksGoal
+from app.models.goal import Goal
 from app.commons import validate_and_get_by_id, get_filtered_and_sorted
 from app.slack_interaction import notify, make_slackbot_response
 from app.error_responses import make_error_response
@@ -172,7 +172,7 @@ def assign_tasks_to_goal(goal_id: QueryParam) -> tuple[Response, Literal[200]]:
     task_ids = request.get_json()['task_ids']
     
     for task_id in task_ids:
-        task = validate_and_get_by_id(Task, task_id, errmsg_detail=' No changes were made.')
+        task = validate_and_get_by_id(Task, task_id, errmsg=' No changes were made.')
         goal.tasks.append(task)
     db.session.commit()
     
@@ -183,8 +183,9 @@ def get_all_tasks_of_goal(goal_id: QueryParam) -> tuple[Response, Literal[200]]:
     '''Queries DB for specified Goal and returns full details as JSON data.'''
 
     goal = validate_and_get_by_id(Goal, goal_id)
-    
-    return jsonify(TasksGoal(goal)), 200
+    goal.display_full = True
+
+    return jsonify(goal), 200
 
 
 ##################

@@ -13,33 +13,28 @@ class TaskListJSONEncoder(JSONEncoder):
     Extends the default encoder so that flask.jsonify can process objects of
     type Task and Goal. All other types are passed to the base JSONEncoder
     class.
-
-    Also recognizes a TasksGoal type used for alternate representation of Goal 
-    objects with their associated Task objects.
     '''
 
     def default(self, obj: Any) -> dict[str, Any] | str | Any:
         '''Specifies how Task and Goal types should be represented in JSON.'''
         
         if type(obj).__name__ == 'Task':
-            details = {
+            task = {
                 'id': obj.task_id,
                 'title': obj.title,
                 'description': obj.description,
                 'is_complete': obj.completed_at != None
             }
             if obj.goal_id:
-                details['goal_id'] = obj.goal_id
-            return details
+                task['goal_id'] = obj.goal_id
+            return task
         elif type(obj).__name__ == 'Goal':
-            return {
+            goal = {
                 'id': obj.goal_id,
                 'title': obj.title
             }
-        elif type(obj).__name__ == 'TasksGoal':
-            return {
-                'id': obj._.goal_id,
-                'title': obj._.title,
-                'tasks': obj._.tasks
-            }
+            if obj.display_full:
+                goal['tasks'] = obj.tasks
+                obj.display_full = False
+            return goal
         return JSONEncoder.default(self, obj)

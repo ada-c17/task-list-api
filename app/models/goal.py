@@ -18,6 +18,7 @@ class Goal(db.Model):
     goal_id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
     tasks = db.relationship('Task', back_populates='goal')
+    display_full = False
 
     @classmethod
     def create(cls, goal_details: dict) -> Goal:
@@ -33,10 +34,3 @@ class Goal(db.Model):
         for k,v in new_details.items():
             if k in self.__dict__:
                 setattr(self, k, v)
-
-
-class TasksGoal():
-    '''Wraps a Goal instance in order to modify JSONification.'''
-
-    def __init__(self, goal: Goal) -> TasksGoal:
-        self._ = goal
