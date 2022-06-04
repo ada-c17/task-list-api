@@ -4,32 +4,27 @@ from app.models.goal import Goal
 import os
 import requests
 
-def validate_task(task_id):
+def validate_task(cls, id):
     try:
-        task_id = int(task_id)
+        task_id = int(id)
     except:
         abort(make_response({"details": "Invalid data"}, 400))
 
-    task = Task.query.get(task_id)
+    obj = cls.query.get(id)
 
-    if not task:
-        abort(make_response({"message": f"task {task_id} not found"}, 404))
+    if not obj:
+        abort(make_response({"message": f"{cls.__name__} not found"}, 404))
 
-    return task
-
-def validate_goal(goal_id):
-    try:
-        goal_id = int(goal_id)
-    except:
-        abort(make_response({"details": "Invalid data"}, 400))
-
-    goal = Goal.query.get(goal_id)
-
-    if not goal:
-        abort(make_response({"message": f"goal {goal_id} not found"}, 404))
-
-    return goal
-
+    return obj
+def get_sorted_obj(cls):
+    sorting_query = request.args.get('sort')
+    if sorting_query == "asc":
+        obj = cls.query.order_by(cls.title).all()
+    elif sorting_query == "desc":
+        obj = cls.query.order_by(cls.title.desc()).all()
+    else:
+        obj = cls.query.all()
+    return obj
 
 def call_slack(response_message):
     
@@ -45,26 +40,3 @@ def call_slack(response_message):
     }
     response = requests.post(path, params=query_params, headers=Headers)
     return response.json()
-    # print(f"Someone just completed poppy's task {title}")
-
-    # def create_app(test_config=None):
-    #      app = Flask(__name__)
-
-    #      app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    #      if not test_config:
-    #      app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-    #     "SQLALCHEMY_DATABASE_URI")
-    #      else:
-    #      app.config["TESTING"] = True
-    #      app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-    #     "SQLALCHEMY_TEST_DATABASE_URI")
-
-    #      db.init_app(app)
-    #      migrate.init_app(app, db)
-
-    #      from app.models.planet import Planet
-
-    #      from .routes import solar_bp
-    #      app.register_blueprint(solar_bp)
-
-    #      return app

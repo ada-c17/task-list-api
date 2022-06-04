@@ -65,16 +65,3 @@
 #     assert response.status_code == 404
 #     assert response_body == {"message": "task 1 not found"}
 
-
-# def test_create_one_planet(client):
-#     # Act
-#     response = client.post("/tasks", json={
-#         "name": "Mars",
-#         "description": "Is Bruno Mars counted as Mars?",
-#         "color": "orange"
-#     })
-#     response_body = response.get_json()
-
-#     # Assert
-#     assert response.status_code == 201
-#     assert response_body == "Planet Mars successfully created"
