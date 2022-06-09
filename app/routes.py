@@ -1,3 +1,5 @@
+from typing import OrderedDict
+from urllib.request import OpenerDirector
 from flask import Blueprint, jsonify, request, make_response, abort
 from app import db
 from app.models.task import Task
@@ -23,10 +25,19 @@ def handle_tasks():
 
 # Get Tasks: Getting Saved Tasks (RESTful Endpoint: Read)
 @tasks_bp.route("", methods = ["GET"])
-def task_data():
-    tasks = Task.query.all()
+def get_tasks():
+    sort = request.args.get("sort")
+    #Sort by assending (is default?)
+    if sort == "asc":
+        tasks =Task.query.order_by(Task.title)
+    #Sort by decending
+    elif sort == "desc":
+        tasks =Task.query.order_by(Task.title.desc())
+    #No Sort
+    else:
+        tasks = Task.query.all()
+    
     tasks_response = []
-
     for task in tasks:
         tasks_response.append(task.to_dictionary())
         # If No Saved Tasks wil stil return 200
