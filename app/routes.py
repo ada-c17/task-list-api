@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import OrderedDict
 from urllib.request import OpenerDirector
 from flask import Blueprint, jsonify, request, make_response, abort
@@ -8,12 +9,13 @@ from app.models.task import Task
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
 @tasks_bp.route("", methods = ["POST"])
-def handle_tasks():
+def create_tasks():
     request_body = request.get_json()
     if "title" in request_body and "description" in request_body:
         new_task = Task( 
             title = request_body["title"],
-            description = request_body["description"]
+            description = request_body["description"],
+            completed_at = datetime.utcnow()
             )
     else:
         return jsonify({"details":"Invalid data"}), 400
@@ -65,6 +67,29 @@ def update_task(task_id):
 
     task_response = {"task": task.to_dictionary()}
     return (jsonify(task_response), 200)
+
+# Task Complete
+@tasks_bp.route("/<task_id>/mark_complete", methods=["PATCH"])
+def task_complete(task_id):
+    task = validate_task(task_id)
+    task.completed_at = datetime.utcnow()
+    
+    db.session.commit()
+    task_response = {"task": task.to_dictionary()}
+    return (jsonify(task_response), 200)
+
+# Task Incomplete
+@tasks_bp.route("/<task_id>/mark_incomplete", methods=["PATCH"])
+def task_incomplete(task_id):
+    task = validate_task(task_id)
+    task.completed_at = None
+    db.session.commit()
+    task_response = {"task": task.to_dictionary()}
+    return (jsonify(task_response), 200)
+
+
+
+
 
 # Delete Task: Deleting a Task
 @tasks_bp.route("/<task_id>", methods=["DELETE"])
