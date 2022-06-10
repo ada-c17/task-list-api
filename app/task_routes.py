@@ -5,7 +5,7 @@ from flask import Blueprint, jsonify, request, make_response, abort
 from app import db
 from app.models.task import Task
 
-# Create a Task:
+### Create a Task:
 tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 
 @tasks_bp.route("", methods = ["POST"])
@@ -25,7 +25,8 @@ def create_tasks():
     task_response = {"task": new_task.to_dictionary()}
     return (jsonify(task_response), 201)
 
-# Get Tasks: Getting Saved Tasks (RESTful Endpoint: Read)
+
+### Get Tasks
 @tasks_bp.route("", methods = ["GET"])
 def get_tasks():
     sort = request.args.get("sort")
@@ -46,14 +47,15 @@ def get_tasks():
     return (jsonify(tasks_response), 200)
 
 
-# Get One Task: One Saved Task
+### Get One Task: One Saved Task
 @tasks_bp.route("/<task_id>", methods=["GET"])
-def handle_task(task_id):
+def get_one_task(task_id):
     task = validate_task(task_id)
     task_response = {"task": task.to_dictionary()}
     return (jsonify(task_response), 200)
 
-# Update Task
+
+### Update Task
 @tasks_bp.route("/<task_id>", methods=["PUT"])
 def update_task(task_id):
     task = validate_task(task_id)
@@ -86,9 +88,6 @@ def task_incomplete(task_id):
     db.session.commit()
     task_response = {"task": task.to_dictionary()}
     return (jsonify(task_response), 200)
-
-
-
 
 
 # Delete Task: Deleting a Task
