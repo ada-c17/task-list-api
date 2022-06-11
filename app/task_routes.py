@@ -11,11 +11,17 @@ tasks_bp = Blueprint("tasks_bp", __name__, url_prefix="/tasks")
 @tasks_bp.route("", methods = ["POST"])
 def create_tasks():
     request_body = request.get_json()
-    if "title" in request_body and "description" in request_body:
+    if "title" in request_body and "description" in request_body and "completed_at" in request_body:
         new_task = Task( 
             title = request_body["title"],
             description = request_body["description"],
-            completed_at = datetime.utcnow()
+            completed_at = request_body["completed_at"]
+            )
+    elif "title" in request_body and "description" in request_body:
+        new_task = Task( 
+            title = request_body["title"],
+            description = request_body["description"],
+            # completed_at = request_body["completed_at"]
             )
     else:
         return jsonify({"details":"Invalid data"}), 400

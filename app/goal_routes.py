@@ -4,6 +4,7 @@ from urllib.request import OpenerDirector
 from flask import Blueprint, jsonify, request, make_response, abort
 from app import db
 from app.models.goal import Goal
+from app.task_routes import validate_task
 
 ### Create a Goal:
 goal_bp = Blueprint("goal_bp", __name__, url_prefix="/goals")
@@ -113,5 +114,21 @@ def validate_goal(goal_id):
     if not goal:
         abort(make_response({"message": f"Goal {goal_id} not found"}, 404))
     return goal
+
+
+@goal_bp.route("/<goal_id>/tasks", methods=["POST"])
+def post_task_ids_to_goal(goal_id):
+    goal = validate_goal(goal_id)
+
+    request_body = request.get_json()
+
+    for task_id in request_body["task_ids"]:
+        task = validate_task(task_id)
+        task.goal_id = goal.goal_id
+    
+    db.session.commit()
+
+    return jsonify({"id":goal.goal_id, "task_ids": request_body["task_ids"]}), 200
+
 
 
