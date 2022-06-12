@@ -1,9 +1,11 @@
+from urllib import response
 from datetime import datetime
 from typing import OrderedDict
 from urllib.request import OpenerDirector
 from flask import Blueprint, jsonify, request, make_response, abort
 from app import db
 from app.models.goal import Goal
+from app.models.task import Task
 from app.task_routes import validate_task
 
 ### Create a Goal:
@@ -123,12 +125,22 @@ def post_task_ids_to_goal(goal_id):
     request_body = request.get_json()
 
     for task_id in request_body["task_ids"]:
-        task = validate_task(task_id)
-        task.goal_id = goal.goal_id
-    
+        task = Task.query.get(task_id)
+        task.goal_id = goal_id
+        task.goal = goal
+
     db.session.commit()
 
     return jsonify({"id":goal.goal_id, "task_ids": request_body["task_ids"]}), 200
 
+@goal_bp.route("/<goal_id>/tasks", methods=["GET"])
+def get_tasks_for_goal(goal_id):
+    goal = validate_goal(goal_id)
+    task_list = [task.to_dictionary() for task in goal.tasks]
+
+    goal_dict = goal.to_dictionary()
+    goal_dict["tasks"] = task_list
+
+    return jsonify(goal_dict)
 
 

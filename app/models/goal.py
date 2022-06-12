@@ -7,7 +7,12 @@ class Goal(db.Model):
     tasks = db.relationship("Task", back_populates="goals", lazy = True)
 
     def to_dictionary(self):
-        return dict(
-            id=self.goal_id,
-            title=self.title
-        )
+        goal_dict = {
+            "id": self.goal_id,
+            "title": self.title
+        }
+
+        if self.tasks:
+            goal_dict["tasks"] = [task.task_id for task in self.tasks]
+
+        return goal_dict

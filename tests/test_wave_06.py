@@ -67,14 +67,15 @@ def test_get_tasks_for_specific_goal_no_tasks(client, one_goal):
         "id": 1,
         "title": "Build a habit of going outside daily",
         "tasks": []
-    }
+    }    
+    response_body = response.get_json()
+
 
 
 # @pytest.mark.skip(reason="No way to test this feature yet")
 def test_get_tasks_for_specific_goal(client, one_task_belongs_to_one_goal):
     # Act
     response = client.get("/goals/1/tasks")
-    response_body = response.get_json()
 
     # Assert
     assert response.status_code == 200
