@@ -4,7 +4,6 @@ from app.models.task import Task
 from flask import Blueprint, jsonify, make_response, request
 from .helpers import validate
 
-
 goals_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
 # POST ROUTES
