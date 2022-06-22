@@ -4,6 +4,7 @@ from flask_migrate import Migrate
 import os
 from dotenv import load_dotenv
 from app.TLjson import TaskListJSONEncoder
+from flask_cors import CORS
 
 
 db = SQLAlchemy()
@@ -39,4 +40,5 @@ def create_app(test_config=None):
     app.register_blueprint(goal_bp)
     app.register_blueprint(slackbot_bp)
 
+    CORS(app)
     return app
