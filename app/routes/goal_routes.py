@@ -88,8 +88,10 @@ def create_tasks(goal_id):
     for id in request_body["task_ids"]:
         task = validate_task(id)
         task.goal_id = goal_id
-        # or 
+        # or   -  add a list of tasks to goal
         # goal.tasks.append(task)
+        # or   -  assign goal to task.goal
+        # task.goal = goal
 
     db.session.commit()
 
