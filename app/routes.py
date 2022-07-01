@@ -20,11 +20,6 @@ goal_bp = Blueprint("goals", __name__, url_prefix="/goals")
 
 
 
-
-
-
-
-
 @goal_bp.route("", methods=["GET"])
 def get_all_goals():
     goals = Goal.query.all()
@@ -204,11 +199,11 @@ def mark_complete(id):
 
 
 
-    slack_bot_token= os.environ.get('SLACK_BOT_TOKEN')
-    channel_name = 'test-channel'
-    text=f"Someone just completed {task.title}"
-    headers = {"Authorization": slack_bot_token}
-    slack_url = f'https://slack.com/api/chat.postMessage?channel={channel_name}&text={text}' 
+    # slack_bot_token= os.environ.get('SLACK_BOT_TOKEN')
+    # channel_name = 'test-channel'
+    # text=f"Someone just completed {task.title}"
+    # headers = {"Authorization": slack_bot_token}
+    # slack_url = f'https://slack.com/api/chat.postMessage?channel={channel_name}&text={text}' 
     
     ## UNCOMMENT RESPONSE TO POST
     #response = requests.post(slack_url, headers=headers)
@@ -226,11 +221,11 @@ def mark_incomplete(id):
     db.session.add(task)
     db.session.commit()
 
-    slack_bot_token= os.environ.get('SLACK_BOT_TOKEN')
-    channel_name = 'test-channel'
-    text=f"Someone still hasn't completed {task.title}"
-    headers = {"Authorization": slack_bot_token}
-    slack_url = f'https://slack.com/api/chat.postMessage?channel={channel_name}&text={text}' 
+    # slack_bot_token= os.environ.get('SLACK_BOT_TOKEN')
+    # channel_name = 'test-channel'
+    # text=f"Someone still hasn't completed {task.title}"
+    # headers = {"Authorization": slack_bot_token}
+    # slack_url = f'https://slack.com/api/chat.postMessage?channel={channel_name}&text={text}' 
     
    # response = requests.post(slack_url, headers=headers)
 
