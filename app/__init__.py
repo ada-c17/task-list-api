@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import os
 from dotenv import load_dotenv
+import sqlalchemy as sa
 
 
 db = SQLAlchemy()
@@ -35,5 +36,16 @@ def create_app(test_config=None):
 
     from app.routes.goal_routes import goals_bp
     app.register_blueprint(goals_bp)
+
+    # Check if the database needs to be initialized
+    engine = sa.create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+    inspector = sa.inspect(engine)
+    if not inspector.has_table("users"):
+        with app.app_context():
+            db.drop_all()
+            db.create_all()
+            app.logger.info('Initialized the database!')
+    else:
+        app.logger.info('Database already contains the users table.')
 
     return app
